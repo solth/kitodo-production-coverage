@@ -1,0 +1,252 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Converter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.workflow.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Converter (org.kitodo.production.workflow.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Converter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,2%
+  </span>
+  <span class="absValue">
+    (52/57)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.workflow.model;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.camunda.bpm.model.bpmn.instance.ScriptTask;
+&nbsp;import org.camunda.bpm.model.bpmn.instance.Task;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.beans.WorkflowCondition;
+&nbsp;import org.kitodo.data.database.enums.TaskEditType;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.exceptions.WorkflowException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.workflow.model.beans.KitodoScriptTask;
+&nbsp;import org.kitodo.production.workflow.model.beans.KitodoTask;
+&nbsp;import org.kitodo.production.workflow.model.beans.TaskInfo;
+&nbsp;
+&nbsp;public class Converter {
+&nbsp;
+&nbsp;    private final Reader reader;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor with diagram name as parameter. It sets up reader for xml file
+&nbsp;     * with given name.
+&nbsp;     *
+&nbsp;     * @param diagramName
+&nbsp;     *            as String
+&nbsp;     * @throws IOException
+&nbsp;     *             in case if file for given name doesn&#39;t exist
+&nbsp;     */
+<b class="fc">&nbsp;    public Converter(String diagramName) throws IOException {</b>
+<b class="fc">&nbsp;        reader = new Reader(diagramName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor with diagram name as parameter. It sets up reader for xml with
+&nbsp;     * given content.
+&nbsp;     *
+&nbsp;     * @param diagramXmlContent
+&nbsp;     *            as InputStream
+&nbsp;     * @throws IOException
+&nbsp;     *             in case if input stream contains incorrect data
+&nbsp;     */
+<b class="nc">&nbsp;    public Converter(InputStream diagramXmlContent) throws IOException {</b>
+<b class="nc">&nbsp;        reader = new Reader(diagramXmlContent);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert BPMN process (workflow) to template stored in database.
+&nbsp;     */
+&nbsp;    public void convertWorkflowToTemplate(Template template) throws DAOException, WorkflowException {
+<b class="fc">&nbsp;        List&lt;org.kitodo.data.database.beans.Task&gt; validatedTasks = validateWorkflowTaskList();</b>
+&nbsp;
+<b class="fc">&nbsp;        for (org.kitodo.data.database.beans.Task validatedTask : validatedTasks) {</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(validatedTask.getWorkflowCondition())) {</b>
+<b class="fc">&nbsp;                ServiceManager.getWorkflowConditionService().saveToDatabase(validatedTask.getWorkflowCondition());</b>
+&nbsp;            }
+<b class="fc">&nbsp;            validatedTask.setTemplate(template);</b>
+<b class="fc">&nbsp;            template.getTasks().add(validatedTask);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Validate BPMN process (workflow) list of Task beans.
+&nbsp;     *
+&nbsp;     * @return list of Task objects
+&nbsp;     */
+&nbsp;    public List&lt;org.kitodo.data.database.beans.Task&gt; validateWorkflowTaskList() throws WorkflowException {
+<b class="fc">&nbsp;        reader.readWorkflowTasks();</b>
+&nbsp;
+<b class="fc">&nbsp;        Map&lt;Task, TaskInfo&gt; tasks = reader.getTasks();</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;org.kitodo.data.database.beans.Task&gt; taskBeans = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Map.Entry&lt;Task, TaskInfo&gt; entry : tasks.entrySet()) {</b>
+<b class="fc">&nbsp;            taskBeans.add(getTask(entry.getKey(), entry.getValue()));</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return taskBeans;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private org.kitodo.data.database.beans.Task getTask(Task workflowTask, TaskInfo taskInfo)
+&nbsp;            throws WorkflowException {
+<b class="fc">&nbsp;        org.kitodo.data.database.beans.Task task = new org.kitodo.data.database.beans.Task();</b>
+<b class="fc">&nbsp;        KitodoTask kitodoTask = new KitodoTask(workflowTask);</b>
+<b class="fc">&nbsp;        task.setWorkflowId(kitodoTask.getWorkflowId());</b>
+<b class="fc">&nbsp;        task.setTitle(kitodoTask.getTitle());</b>
+<b class="fc">&nbsp;        task.setOrdering(taskInfo.getOrdering());</b>
+<b class="fc">&nbsp;        task.setEditType(TaskEditType.getTypeFromValue(kitodoTask.getEditType()));</b>
+<b class="fc">&nbsp;        task.setProcessingStatus(TaskStatus.getStatusFromValue(kitodoTask.getProcessingStatus()));</b>
+<b class="fc">&nbsp;        task.setConcurrent(kitodoTask.isConcurrent());</b>
+<b class="fc">&nbsp;        task.setLast(taskInfo.isLast());</b>
+<b class="fc">&nbsp;        task.setBatchStep(kitodoTask.isBatchStep());</b>
+<b class="fc">&nbsp;        task.setRepeatOnCorrection(kitodoTask.isRepeatOnCorrection());</b>
+<b class="fc">&nbsp;        task.setTypeMetadata(kitodoTask.isTypeMetadata());</b>
+<b class="fc">&nbsp;        task.setTypeAutomatic(kitodoTask.isTypeAutomatic());</b>
+<b class="fc">&nbsp;        task.setTypeImagesRead(kitodoTask.isTypeImagesRead());</b>
+<b class="fc">&nbsp;        task.setTypeImagesWrite(kitodoTask.isTypeImagesWrite());</b>
+<b class="fc">&nbsp;        task.setTypeGenerateImages(kitodoTask.isTypeGenerateImages());</b>
+<b class="fc">&nbsp;        task.setTypeValidateImages(kitodoTask.isTypeValidateImages());</b>
+<b class="fc">&nbsp;        task.setTypeExportDMS(kitodoTask.isTypeExportDms());</b>
+<b class="fc">&nbsp;        task.setTypeAcceptClose(kitodoTask.isTypeAcceptClose());</b>
+<b class="fc">&nbsp;        task.setTypeCloseVerify(kitodoTask.isTypeCloseVerify());</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.nonNull(kitodoTask.getConditionType()) &amp;&amp; Objects.nonNull(kitodoTask.getConditionValue())) {</b>
+<b class="fc">&nbsp;            task.setWorkflowCondition(new WorkflowCondition(kitodoTask.getConditionType(), kitodoTask.getConditionValue()));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            String[] userRoleIds = kitodoTask.getUserRoles().split(&quot;,&quot;);</b>
+<b class="fc">&nbsp;            for (String userRoleString : userRoleIds) {</b>
+<b class="fc">&nbsp;                int userRoleId = Integer.parseInt(userRoleString.trim());</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    task.getRoles().add(ServiceManager.getRoleService().getById(userRoleId));</b>
+<b class="nc">&nbsp;                } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                    throw new WorkflowException(Helper.getTranslation(&quot;workflowExceptionRoleNotFound&quot;,</b>
+<b class="nc">&nbsp;                        task.getTitle()));</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (NullPointerException e) {</b>
+<b class="fc">&nbsp;            throw new WorkflowException(Helper.getTranslation(&quot;workflowExceptionMissingRoleAssignment&quot;,</b>
+<b class="fc">&nbsp;                task.getTitle()));</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        if (workflowTask instanceof ScriptTask) {</b>
+<b class="fc">&nbsp;            KitodoScriptTask kitodoScriptTask = new KitodoScriptTask((ScriptTask) workflowTask);</b>
+<b class="fc">&nbsp;            task.setScriptName(kitodoScriptTask.getScriptName());</b>
+<b class="fc">&nbsp;            task.setScriptPath(kitodoScriptTask.getScriptPath());</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return task;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

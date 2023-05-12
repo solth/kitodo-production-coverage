@@ -1,0 +1,605 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Folder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: Folder (org.kitodo.data.database.beans)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Folder</td>
+<td class="coverageStat">
+  <span class="percent">
+    75,8%
+  </span>
+  <span class="absValue">
+    (25/33)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (39/52)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Folder$HibernateProxy$qoGkTqfm</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    75,8%
+  </span>
+  <span class="absValue">
+    (25/33)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (39/52)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.beans;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.TreeSet;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.EnumType;
+&nbsp;import javax.persistence.Enumerated;
+&nbsp;import javax.persistence.ForeignKey;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;import javax.persistence.Transient;
+&nbsp;
+&nbsp;import org.kitodo.api.imagemanagement.ImageManagementInterface;
+&nbsp;import org.kitodo.config.ConfigMain;
+&nbsp;import org.kitodo.data.database.enums.LinkingMode;
+&nbsp;import org.kitodo.forms.FolderGenerator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Stores configuration settings regarding a type of sub-folder in the process
+&nbsp; * directories of processes in a project.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * Typically, a folder has a corresponding sub-directory in the process
+&nbsp; * directory of each process and a {@code &lt;fileGrp&gt;} structure in the produced
+&nbsp; * METS file. The assumption is, that each folder contains the same number of
+&nbsp; * files with the same names, except for the file extension, which can vary.
+&nbsp; * This structure is used to represent different versions of the same object (a
+&nbsp; * small low quality JPEG thumbnail, a high quality JPEG, an OCR-processed PDF,
+&nbsp; * etc.) Each version is represented by one {@code Folder} object.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * The sub-directory can be located by appending the value of {@link #path} to
+&nbsp; * the path to the process directory. The {@code &lt;fileGrp&gt;} structure has the
+&nbsp; * {@code USE} attribute set to the value of {@link #fileGroup}. It contains
+&nbsp; * links to the files contained in the directory. The links are formed by
+&nbsp; * concatenating the {@link #urlStructure} with the simple name of the file.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * However, a {@code Folder} can also only exist on the drive without being
+&nbsp; * exported to METS. Or, it can exist only virtually without correspondence on a
+&nbsp; * drive, just to produce the METS {@code &lt;fileGrp&gt;} structure.
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;folder&quot;)
+<b class="fc">&nbsp;public class Folder extends BaseBean {</b>
+&nbsp;    /**
+&nbsp;     * Default {@code fileGrp}s supported by the DFG viewer. The list is used to
+&nbsp;     * populate a combo box in the edit dialog.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.zvdd.de/fileadmin/AGSDD-Redaktion/METS_Anwendungsprofil_2.0.pdf#page=12&quot;
+&nbsp;     */
+<b class="fc">&nbsp;    private static final List&lt;String&gt; DFG_VIEWER_FILEGRPS = Arrays.asList(ConfigMain.getStringArrayParameter(&quot;filegroups&quot;));</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the folder is copied to the hotfolder during DMS import.
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;copyFolder&quot;)</b>
+&nbsp;    private boolean copyFolder = true;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the folder is created empty when a new process is created.
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;createFolder&quot;)</b>
+&nbsp;    private boolean createFolder = true;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If not null, images in this folder can be generated by the function
+&nbsp;     * {@link ImageManagementInterface#createDerivative(java.net.URI, double,
+&nbsp;     * java.net.URI, org.kitodo.api.imagemanagement.ImageFileFormat)}.
+&nbsp;     * The value is the factor of scaling for the derivative, a value of 1.0
+&nbsp;     * indicates the original size.
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;derivative&quot;)</b>
+&nbsp;    private Double derivative = null;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If not null, images in this folder can be generated by the function
+&nbsp;     * {@link ImageManagementInterface#changeDpi(java.net.URI, int)}. The value
+&nbsp;     * is the new DPI for the images.
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;dpi&quot;)</b>
+&nbsp;    private Integer dpi = null;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@code USE} identifier keyword for the METS {@code &lt;fileGrp&gt;} in which
+&nbsp;     * contents of this folder will be linked.
+&nbsp;     */
+&nbsp;    @Column(name = &quot;fileGroup&quot;)
+&nbsp;    private String fileGroup;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If not null, images in this folder can be generated by the function
+&nbsp;     * {@link ImageManagementInterface#getScaledWebImage(java.net.URI, double)}.
+&nbsp;     * The value is the factor of scaling for the derivative, a value of 1.0
+&nbsp;     * indicates the original size.
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;imageScale&quot;)</b>
+&nbsp;    private Double imageScale = null;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If not null, images in this folder can be generated by the function
+&nbsp;     * {@link ImageManagementInterface#getSizedWebImage(java.net.URI, int)}. The
+&nbsp;     * value is the new the new width in pixels.
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;imageSize&quot;)</b>
+&nbsp;    private Integer imageSize = null;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Indicates whether a METS {@code &lt;fileGrp&gt;} section is created, and how it
+&nbsp;     * is populated.
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;linkingMode&quot;)</b>
+&nbsp;    @Enumerated(EnumType.STRING)
+&nbsp;    private LinkingMode linkingMode = LinkingMode.ALL;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The Internet MIME type of the files contained in this folder. The MIME
+&nbsp;     * type is used to derive depending settings, such as the file extension, or
+&nbsp;     * which content processors can be employed.
+&nbsp;     *
+&nbsp;     * @see org.kitodo.config.xml.fileformats.FileFormatsConfig
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;mimeType&quot;)</b>
+&nbsp;    private String mimeType = &quot;image/jpeg&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The path to the folder in the process directory of each processes.
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;path&quot;)</b>
+&nbsp;    private String path = &quot;&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The project this folder is configured in.
+&nbsp;     */
+<b class="fc">&nbsp;    @ManyToOne</b>
+&nbsp;    @JoinColumn(name = &quot;project_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_folder_project_id&quot;))
+&nbsp;    private Project project = null;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * URL path where the contents of the linked METS {@code &lt;fileGrp&gt;} will be
+&nbsp;     * published on a web server. The path may contain variables that must be
+&nbsp;     * replaced before concatenation.
+&nbsp;     */
+&nbsp;    @Column(name = &quot;urlStructure&quot;)
+&nbsp;    private String urlStructure;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the scale factor to create the contents of the folder as
+&nbsp;     * derivative form the content of another folder, if any. If absent, the
+&nbsp;     * function is disabled.
+&nbsp;     *
+&nbsp;     * @return the scale factor. A value of 1.0 refers to the original size.
+&nbsp;     */
+&nbsp;    public Optional&lt;Double&gt; getDerivative() {
+<b class="fc">&nbsp;        return Optional.ofNullable(derivative);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the folder is included in validation.
+&nbsp;     */
+<b class="fc">&nbsp;    @Column(name = &quot;validateFolder&quot;)</b>
+&nbsp;    private boolean validateFolder = true;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the number of DPI to change the resolution of the contents of the
+&nbsp;     * folder form the content of another folder, if any. If absent, the
+&nbsp;     * function is disabled.
+&nbsp;     *
+&nbsp;     * @return the resolution
+&nbsp;     */
+&nbsp;    public Optional&lt;Integer&gt; getDpi() {
+<b class="fc">&nbsp;        return Optional.ofNullable(dpi);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the file group of the folder.
+&nbsp;     *
+&nbsp;     * @return the file group
+&nbsp;     */
+&nbsp;    public String getFileGroup() {
+<b class="fc">&nbsp;        return this.fileGroup;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the pre-defined entries for the combo box to select the METS use
+&nbsp;     * in {@code projectEditMetsPopup.xhtml}.
+&nbsp;     *
+&nbsp;     * @return the pre-defined entries for the combo box
+&nbsp;     */
+&nbsp;    public Collection&lt;String&gt; getFileGroups() {
+<b class="nc">&nbsp;        Collection&lt;String&gt; fileGroups = new TreeSet&lt;&gt;(DFG_VIEWER_FILEGRPS);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(fileGroup)) {</b>
+<b class="nc">&nbsp;            fileGroups.add(this.fileGroup);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return fileGroups;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the scale factor to get the contents of the folder as scaled web
+&nbsp;     * images form the content of another folder, if any. If absent, the
+&nbsp;     * function is disabled.
+&nbsp;     *
+&nbsp;     * @return the scale factor. A value of 1.0 refers to the original size.
+&nbsp;     */
+&nbsp;    public Optional&lt;Double&gt; getImageScale() {
+<b class="fc">&nbsp;        return Optional.ofNullable(imageScale);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the pixel width to get the contents of the folder as sized web
+&nbsp;     * images form the content of another folder, if any. If absent, the
+&nbsp;     * function is disabled.
+&nbsp;     *
+&nbsp;     * @return the pixel width
+&nbsp;     */
+&nbsp;    public Optional&lt;Integer&gt; getImageSize() {
+<b class="fc">&nbsp;        return Optional.ofNullable(imageSize);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the linking mode of the folder.
+&nbsp;     *
+&nbsp;     * @return the linking mode
+&nbsp;     */
+&nbsp;    public LinkingMode getLinkingMode() {
+<b class="nc">&nbsp;        return linkingMode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the MIME type of the folder.
+&nbsp;     *
+&nbsp;     * @return the MIME type
+&nbsp;     */
+&nbsp;    public String getMimeType() {
+<b class="fc">&nbsp;        return this.mimeType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the path pattern, containing the path to the folder relative to
+&nbsp;     * the process directory, and maybe an extra file name pattern.
+&nbsp;     *
+&nbsp;     * @return path with optional filename pattern
+&nbsp;     *
+&nbsp;     * @deprecated This getter is here to be used by Hibernate and JSF to access the
+&nbsp;     *             field value, but should not be used for other purpose, unless you
+&nbsp;     *             know what you are doing. Use {@link #getRelativePath()}.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    public String getPath() {
+<b class="fc">&nbsp;        return this.path;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the project of the folder.
+&nbsp;     *
+&nbsp;     * @return the project
+&nbsp;     */
+&nbsp;    public Project getProject() {
+<b class="fc">&nbsp;        return this.project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the path to the folder.
+&nbsp;     *
+&nbsp;     * @return the path
+&nbsp;     */
+&nbsp;    @Transient
+&nbsp;    public String getRelativePath() {
+<b class="fc">&nbsp;        int lastDelimiter = path.lastIndexOf(File.separatorChar);</b>
+<b class="fc">&nbsp;        if (path.indexOf(&#39;*&#39;, lastDelimiter + 1) &gt; -1) {</b>
+<b class="nc">&nbsp;            return lastDelimiter &gt;= 0 ? path.substring(0, lastDelimiter) : &quot;&quot;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return path;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the URL structure of the folder.
+&nbsp;     *
+&nbsp;     * @return the URL structure
+&nbsp;     */
+&nbsp;    public String getUrlStructure() {
+<b class="fc">&nbsp;        return this.urlStructure;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the folder is copy folder.
+&nbsp;     *
+&nbsp;     * @return whether the folder is copy folder
+&nbsp;     */
+&nbsp;    public boolean isCopyFolder() {
+<b class="fc">&nbsp;        return copyFolder;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the folder is created on process creation.
+&nbsp;     *
+&nbsp;     * @return whether the folder is created on process creation
+&nbsp;     */
+&nbsp;    public boolean isCreateFolder() {
+<b class="fc">&nbsp;        return createFolder;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the folder is validate folder.
+&nbsp;     *
+&nbsp;     * @return whether the folder is validate folder
+&nbsp;     */
+&nbsp;    public boolean isValidateFolder() {
+<b class="nc">&nbsp;        return validateFolder;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets whether the folder is copied on DMS import.
+&nbsp;     *
+&nbsp;     * @param copyFolder
+&nbsp;     *            whether the folder is copied on DMS import
+&nbsp;     */
+&nbsp;    public void setCopyFolder(boolean copyFolder) {
+<b class="fc">&nbsp;        this.copyFolder = copyFolder;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets whether the folder is created on process creation.
+&nbsp;     *
+&nbsp;     * @param createFolder
+&nbsp;     *            whether the folder is created on process creation
+&nbsp;     */
+&nbsp;    public void setCreateFolder(boolean createFolder) {
+<b class="fc">&nbsp;        this.createFolder = createFolder;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the scale factor to create the contents of the folder as derivative
+&nbsp;     * form the content of another folder. Can be set to {@code null} to disable
+&nbsp;     * the function.
+&nbsp;     *
+&nbsp;     * @param derivative
+&nbsp;     *            the scale factor. A value of 1.0 refers to the original size.
+&nbsp;     */
+&nbsp;    public void setDerivative(Double derivative) {
+<b class="fc">&nbsp;        this.derivative = derivative;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the number of DPI to change the resolution of the contents of the
+&nbsp;     * folder form the content of another folder. Can be set to {@code null} to
+&nbsp;     * disable the function.
+&nbsp;     *
+&nbsp;     * @param dpi
+&nbsp;     *            resolution to set
+&nbsp;     */
+&nbsp;    public void setDpi(Integer dpi) {
+<b class="nc">&nbsp;        this.dpi = dpi;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the file group of the folder. The file group is the business key of
+&nbsp;     * the folder and should therefore only be set if the object is not yet
+&nbsp;     * persisted.
+&nbsp;     *
+&nbsp;     * @param fileGroup
+&nbsp;     *            file group to set
+&nbsp;     */
+&nbsp;    public void setFileGroup(String fileGroup) {
+<b class="fc">&nbsp;        this.fileGroup = fileGroup;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the scale factor to get the contents of the folder as scaled web
+&nbsp;     * images form the content of another folder. Can be set to {@code null} to
+&nbsp;     * disable the function.
+&nbsp;     *
+&nbsp;     * @param imageScale
+&nbsp;     *            the scale factor. A value of 1.0 refers to the original size.
+&nbsp;     */
+&nbsp;    public void setImageScale(Double imageScale) {
+<b class="nc">&nbsp;        this.imageScale = imageScale;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the pixel width to get the contents of the folder as sized web
+&nbsp;     * images form the content of another folder, if any. If absent, the
+&nbsp;     * function is disabled.
+&nbsp;     *
+&nbsp;     * @param imageSize
+&nbsp;     *            the pixel width
+&nbsp;     */
+&nbsp;    public void setImageSize(Integer imageSize) {
+<b class="fc">&nbsp;        this.imageSize = imageSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the linking mode of the folder.
+&nbsp;     *
+&nbsp;     * @param linkingMode
+&nbsp;     *            linking mode to set
+&nbsp;     */
+&nbsp;    public void setLinkingMode(LinkingMode linkingMode) {
+<b class="fc">&nbsp;        this.linkingMode = linkingMode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the MIME type of the folder.
+&nbsp;     *
+&nbsp;     * @param mimeType
+&nbsp;     *            MIME type to set
+&nbsp;     */
+&nbsp;    public void setMimeType(String mimeType) {
+<b class="fc">&nbsp;        this.mimeType = mimeType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the path pattern, containing the path to the folder relative to the
+&nbsp;     * process directory, and maybe an extra file name pattern.
+&nbsp;     *
+&nbsp;     * @param path
+&nbsp;     *            pat to set
+&nbsp;     */
+&nbsp;    public void setPath(String path) {
+<b class="fc">&nbsp;        this.path = path;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the project of the folder.
+&nbsp;     *
+&nbsp;     * @param project
+&nbsp;     *            project to set
+&nbsp;     */
+&nbsp;    public void setProject(Project project) {
+<b class="fc">&nbsp;        this.project = project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the URL structure of the folder.
+&nbsp;     *
+&nbsp;     * @param urlStructure
+&nbsp;     *            URL structure to set
+&nbsp;     */
+&nbsp;    public void setUrlStructure(String urlStructure) {
+<b class="fc">&nbsp;        this.urlStructure = urlStructure;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets whether the folder is included in validation.
+&nbsp;     *
+&nbsp;     * @param validateFolder
+&nbsp;     *            whether the folder is included in validation
+&nbsp;     */
+&nbsp;    public void setValidateFolder(boolean validateFolder) {
+<b class="nc">&nbsp;        this.validateFolder = validateFolder;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object object) {
+<b class="fc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return object instanceof Folder ? Objects.equals(this.fileGroup, ((Folder) object).fileGroup) : false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a hash code value for the object.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="nc">&nbsp;        return fileGroup.hashCode();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return path + (path.isEmpty() || fileGroup.isEmpty() ? &quot;&quot; : &quot;, &quot;) + fileGroup;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

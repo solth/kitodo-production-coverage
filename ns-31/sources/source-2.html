@@ -1,0 +1,329 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FutureDerivative</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.imagemanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: FutureDerivative (org.kitodo.imagemanagement)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FutureDerivative</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,4%
+  </span>
+  <span class="absValue">
+    (22/42)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">FutureDerivative$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    53,5%
+  </span>
+  <span class="absValue">
+    (23/43)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.imagemanagement;
+&nbsp;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.im4java.core.IMOperation;
+&nbsp;import org.kitodo.api.imagemanagement.ImageFileFormat;
+&nbsp;
+&nbsp;/**
+&nbsp; * One image derivative to be created. Multiple result images with different
+&nbsp; * properties can be created from one source image. This is done in one single
+&nbsp; * ImageMagick call, reading and decoding the source image only once.
+&nbsp; */
+&nbsp;class FutureDerivative {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick file type prefix to request the bitmap file format.
+&nbsp;     */
+&nbsp;    private static final String FORMAT_BITMAP_PREFIX = &quot;bmp:&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick file type prefix to request the gif file format.
+&nbsp;     */
+&nbsp;    private static final String FORMAT_GIF_PREFIX = &quot;gif:&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick file type prefix to request the jpeg file format.
+&nbsp;     */
+&nbsp;    private static final String FORMAT_JPEG_PREFIX = &quot;jpeg:&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick file type prefix to request the jpeg-2000 file format.
+&nbsp;     */
+&nbsp;    private static final String FORMAT_JPEG2000_PREFIX = &quot;jp2:&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick file type prefix to request the PNG file format.
+&nbsp;     */
+&nbsp;    private static final String FORMAT_PNG_PREFIX = &quot;png:&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick file type prefix to request the tiff file format.
+&nbsp;     */
+&nbsp;    private static final String FORMAT_TIFF_PREFIX = &quot;tiff:&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick file type prefix to request the pdf file format.
+&nbsp;     */
+&nbsp;    private static final String FORMAT_PDF_PREFIX = &quot;pdf:&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick operation {@code -resample}. Resizes an image to a given
+&nbsp;     * resolution.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.imagemagick.org/script/command-line-options.php?#resample&quot;
+&nbsp;     */
+&nbsp;    private static final String OPTION_RESAMPLE = &quot;-resample&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick option {@code -resize}. Resizes an image in various ways.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.imagemagick.org/script/command-line-options.php?#resize&quot;
+&nbsp;     */
+&nbsp;    private static final String OPTION_RESIZE = &quot;-resize&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * List of image operations to apply when creating the derivative.
+&nbsp;     */
+<b class="fc">&nbsp;    private final List&lt;Pair&lt;String, String&gt;&gt; operations = new LinkedList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Path to write the image file to.
+&nbsp;     */
+&nbsp;    private String outputFile;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new conversion result.
+&nbsp;     *
+&nbsp;     * @param outputFile
+&nbsp;     *            path to write the result to
+&nbsp;     */
+<b class="fc">&nbsp;    FutureDerivative(String outputFile) {</b>
+<b class="fc">&nbsp;        this.outputFile = outputFile;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new conversion result.
+&nbsp;     *
+&nbsp;     * @param outputFile
+&nbsp;     *            path to write the result to
+&nbsp;     * @param outputFormat
+&nbsp;     *            image file format to create
+&nbsp;     */
+<b class="fc">&nbsp;    FutureDerivative(String outputFile, ImageFileFormat outputFormat) {</b>
+<b class="fc">&nbsp;        switch (outputFormat) {</b>
+&nbsp;            case BMP:
+<b class="nc">&nbsp;                this.outputFile = FORMAT_BITMAP_PREFIX.concat(outputFile);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case GIF:
+<b class="nc">&nbsp;                this.outputFile = FORMAT_GIF_PREFIX.concat(outputFile);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case JPEG:
+<b class="fc">&nbsp;                this.outputFile = FORMAT_JPEG_PREFIX.concat(outputFile);</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            case JPEG2000:
+<b class="nc">&nbsp;                this.outputFile = FORMAT_JPEG2000_PREFIX.concat(outputFile);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case PNG:
+<b class="nc">&nbsp;                this.outputFile = FORMAT_PNG_PREFIX.concat(outputFile);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case TIFF:
+<b class="nc">&nbsp;                this.outputFile = FORMAT_TIFF_PREFIX.concat(outputFile);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case PDF:
+<b class="nc">&nbsp;                this.outputFile = FORMAT_PDF_PREFIX.concat(outputFile);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                this.outputFile = outputFile;</b>
+&nbsp;                break;
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add the parameters to create this result to the ImageMagick command line.
+&nbsp;     *
+&nbsp;     * @param commandLine
+&nbsp;     *            ImageMagick command line object to add the parameters to
+&nbsp;     */
+&nbsp;    void addToCommandLine(IMOperation commandLine) {
+<b class="fc">&nbsp;        commandLine.openOperation();</b>
+<b class="fc">&nbsp;        commandLine.p_clone();</b>
+<b class="fc">&nbsp;        operations.forEach(operation -&gt; commandLine.addRawArgs(operation.getKey(), operation.getValue()));</b>
+<b class="fc">&nbsp;        commandLine.write();</b>
+<b class="fc">&nbsp;        commandLine.addImage(outputFile);</b>
+<b class="fc">&nbsp;        commandLine.p_delete();</b>
+<b class="fc">&nbsp;        commandLine.closeOperation();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Defines a resize operation to create this result.
+&nbsp;     *
+&nbsp;     * @param percent
+&nbsp;     *            percentage to scale the image
+&nbsp;     * @return this, for method chaining
+&nbsp;     */
+&nbsp;    FutureDerivative resize(double percent) {
+<b class="fc">&nbsp;        if (Double.isNaN(percent)) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;percent must be a number, but was &quot; + percent);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (percent &lt;= 0.0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;percent must be &gt; 0.0, but was &quot; + percent);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String percentValue = Double.toString(100 * percent).concat(&quot;%&quot;);</b>
+<b class="fc">&nbsp;        operations.add(Pair.of(OPTION_RESIZE, percentValue));</b>
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Defines an output DPI value to create this result.
+&nbsp;     *
+&nbsp;     * @param dpi
+&nbsp;     *            new image resolution in DPI
+&nbsp;     * @return this, for method chaining
+&nbsp;     */
+&nbsp;    FutureDerivative resizeToDpi(int dpi) {
+<b class="nc">&nbsp;        if (dpi &lt;= 0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;dpi must be &gt; 0, but was &quot; + dpi);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        operations.add(Pair.of(OPTION_RESAMPLE, Integer.toString(dpi)));</b>
+<b class="nc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Defines a resize operation to create this result.
+&nbsp;     *
+&nbsp;     * @param pixelWidth
+&nbsp;     *            with of created image in pixels
+&nbsp;     * @return this, for method chaining
+&nbsp;     */
+&nbsp;    FutureDerivative resizeToWidth(int pixelWidth) {
+<b class="fc">&nbsp;        if (pixelWidth &lt;= 0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;pixelWidth must be &gt; 0, but was &quot; + pixelWidth);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        operations.add(Pair.of(OPTION_RESIZE, Integer.toString(pixelWidth)));</b>
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1071 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TaskService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskService (org.kitodo.production.services.data)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    39,7%
+  </span>
+  <span class="absValue">
+    (25/63)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    35,3%
+  </span>
+  <span class="absValue">
+    (100/283)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.stream.Stream;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.elasticsearch.index.query.BoolQueryBuilder;
+&nbsp;import org.elasticsearch.index.query.QueryBuilder;
+&nbsp;import org.elasticsearch.index.query.QueryBuilders;
+&nbsp;import org.kitodo.api.command.CommandResult;
+&nbsp;import org.kitodo.data.database.beans.Folder;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Role;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.enums.IndexAction;
+&nbsp;import org.kitodo.data.database.enums.TaskEditType;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.database.persistence.BaseDAO;
+&nbsp;import org.kitodo.data.database.persistence.TaskDAO;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.data.elasticsearch.index.Indexer;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.TaskType;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.TaskTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.search.Searcher;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.InvalidImagesException;
+&nbsp;import org.kitodo.exceptions.MediaNotFoundException;
+&nbsp;import org.kitodo.export.ExportDms;
+&nbsp;import org.kitodo.production.dto.ProjectDTO;
+&nbsp;import org.kitodo.production.dto.TaskDTO;
+&nbsp;import org.kitodo.production.dto.UserDTO;
+&nbsp;import org.kitodo.production.enums.GenerationMode;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.SearchResultGeneration;
+&nbsp;import org.kitodo.production.helper.VariableReplacer;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyMetsModsDigitalDocumentHelper;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyPrefsHelper;
+&nbsp;import org.kitodo.production.helper.tasks.EmptyTask;
+&nbsp;import org.kitodo.production.model.Subfolder;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.command.CommandService;
+&nbsp;import org.kitodo.production.services.command.KitodoScriptService;
+&nbsp;import org.kitodo.production.services.data.base.ProjectSearchService;
+&nbsp;import org.kitodo.production.services.file.SubfolderFactoryService;
+&nbsp;import org.kitodo.production.services.image.ImageGenerator;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class provides a service for tasks. The service can be used to perform
+&nbsp; * functions on the task because the task itself is a database bean and
+&nbsp; * therefore may not include functionality.
+&nbsp; */
+&nbsp;public class TaskService extends ProjectSearchService&lt;Task, TaskDTO, TaskDAO&gt; {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(TaskService.class);</b>
+<b class="fc">&nbsp;    private static volatile TaskService instance = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor with Searcher and Indexer assigning.
+&nbsp;     */
+&nbsp;    private TaskService() {
+<b class="fc">&nbsp;        super(new TaskDAO(), new TaskType(), new Indexer&lt;&gt;(Task.class), new Searcher(Task.class),</b>
+<b class="fc">&nbsp;                TaskTypeField.CLIENT_ID.getKey(), TaskTypeField.RELATED_PROJECT_IDS.getKey());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return singleton variable of type TaskService.
+&nbsp;     *
+&nbsp;     * @return unique instance of TaskService
+&nbsp;     */
+&nbsp;    public static TaskService getInstance() {
+<b class="fc">&nbsp;        TaskService localReference = instance;</b>
+<b class="fc">&nbsp;        if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;            synchronized (TaskService.class) {</b>
+<b class="fc">&nbsp;                localReference = instance;</b>
+<b class="fc">&nbsp;                if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;                    localReference = new TaskService();</b>
+<b class="fc">&nbsp;                    instance = localReference;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return localReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates and returns a query to retrieve tasks for which the currently
+&nbsp;     * logged in user is eligible.
+&nbsp;     *
+&nbsp;     * @return query to retrieve tasks for which the user eligible.
+&nbsp;     */
+&nbsp;    private BoolQueryBuilder createUserTaskQuery(String filter, boolean onlyOwnTasks, boolean hideCorrectionTasks,
+&nbsp;                                                 boolean showAutomaticTasks, List&lt;TaskStatus&gt; taskStatusRestrictions) {
+<b class="nc">&nbsp;        User user = ServiceManager.getUserService().getAuthenticatedUser();</b>
+&nbsp;
+<b class="nc">&nbsp;        BoolQueryBuilder query = new BoolQueryBuilder();</b>
+<b class="nc">&nbsp;        query.must(getQueryForTemplate(0));</b>
+<b class="nc">&nbsp;        if (Objects.isNull(filter)) {</b>
+<b class="nc">&nbsp;            filter = &quot;&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        SearchResultGeneration searchResultGeneration = new SearchResultGeneration(filter, true, true);</b>
+<b class="nc">&nbsp;        query.must(searchResultGeneration.getQueryForFilter(ObjectType.TASK));</b>
+&nbsp;
+<b class="nc">&nbsp;        query.must(getQueryForProcessingStatuses(taskStatusRestrictions.stream()</b>
+<b class="nc">&nbsp;                .map(TaskStatus::getValue).collect(Collectors.toSet())));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (onlyOwnTasks) {</b>
+<b class="nc">&nbsp;            query.must(getQueryForProcessingUser(user.getId()));</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            BoolQueryBuilder subQuery = new BoolQueryBuilder();</b>
+<b class="nc">&nbsp;            subQuery.should(getQueryForProcessingUser(user.getId()));</b>
+<b class="nc">&nbsp;            for (Role role : user.getRoles()) {</b>
+<b class="nc">&nbsp;                subQuery.should(createSimpleQuery(TaskTypeField.ROLES + &quot;.id&quot;, role.getId(), true));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            query.must(subQuery);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (hideCorrectionTasks) {</b>
+<b class="nc">&nbsp;            query.must(createSimpleQuery(TaskTypeField.CORRECTION.getKey(), false, true));</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (!showAutomaticTasks) {</b>
+<b class="nc">&nbsp;            query.must(getQueryForTypeAutomatic(false));</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return query;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countDatabaseRows() throws DAOException {
+<b class="fc">&nbsp;        return countDatabaseRows(&quot;SELECT COUNT(*) FROM Task WHERE &quot; + BaseDAO.getDateFilter(&quot;processingBegin&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countNotIndexedDatabaseRows() throws DAOException {
+<b class="nc">&nbsp;        return countDatabaseRows(&quot;SELECT COUNT(*) FROM Task WHERE &quot; + BaseDAO.getDateFilter(&quot;processingBegin&quot;)</b>
+&nbsp;                + &quot; AND (indexAction = &#39;INDEX&#39; OR indexAction IS NULL)&quot;);
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countResults(Map filters) throws DataException {
+<b class="nc">&nbsp;        return countResults(new HashMap&lt;String, String&gt;(filters), false, false, false, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Long countResults(HashMap&lt;String, String&gt; filters, boolean onlyOwnTasks, boolean hideCorrectionTasks,
+&nbsp;                             boolean showAutomaticTasks, List&lt;TaskStatus&gt; taskStatus)
+&nbsp;            throws DataException {
+<b class="nc">&nbsp;        return countDocuments(createUserTaskQuery(ServiceManager.getFilterService().parseFilterString(filters),</b>
+&nbsp;                onlyOwnTasks, hideCorrectionTasks, showAutomaticTasks, taskStatus));
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Task&gt; getAllNotIndexed() {
+<b class="nc">&nbsp;        return getByQuery(&quot;FROM Task WHERE &quot; + BaseDAO.getDateFilter(&quot;processingBegin&quot;)</b>
+&nbsp;                + &quot; AND (indexAction = &#39;INDEX&#39; OR indexAction IS NULL)&quot;);
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Task&gt; getAllForSelectedClient() {
+<b class="nc">&nbsp;        throw new UnsupportedOperationException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;TaskDTO&gt; loadData(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters)
+&nbsp;            throws DataException {
+<b class="nc">&nbsp;        return loadData(first, pageSize, sortField, sortOrder, filters, false, false, false,</b>
+<b class="nc">&nbsp;                Arrays.asList(TaskStatus.OPEN, TaskStatus.INWORK));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load tasks with given parameters.
+&nbsp;     * @param first index of first task to load
+&nbsp;     * @param pageSize number of tasks to load
+&nbsp;     * @param sortField name of field by which tasks are sorted
+&nbsp;     * @param sortOrder SortOrder by which tasks are sorted - either ascending or descending
+&nbsp;     * @param filters filter map
+&nbsp;     * @param onlyOwnTasks boolean controlling whether to load only tasks assigned to current user or not
+&nbsp;     * @param hideCorrectionTasks boolean controlling whether to load correction tasks or not
+&nbsp;     * @param showAutomaticTasks boolean controlling whether to load automatic tasks or not
+&nbsp;     * @param taskStatus list of TaskStatus by which tasks are filtered
+&nbsp;     * @return List of loaded tasks
+&nbsp;     * @throws DataException if tasks cannot be loaded from search index
+&nbsp;     */
+&nbsp;    public List&lt;TaskDTO&gt; loadData(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters,
+&nbsp;                                  boolean onlyOwnTasks, boolean hideCorrectionTasks, boolean showAutomaticTasks,
+&nbsp;                                  List&lt;TaskStatus&gt; taskStatus)
+&nbsp;            throws DataException {
+<b class="nc">&nbsp;        if (&quot;process.creationDate&quot;.equals(sortField)) {</b>
+<b class="nc">&nbsp;            sortField = &quot;processForTask.creationDate&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        String filter = ServiceManager.getFilterService().parseFilterString(filters);</b>
+<b class="nc">&nbsp;        return findByQuery(createUserTaskQuery(filter, onlyOwnTasks, hideCorrectionTasks, showAutomaticTasks,</b>
+<b class="nc">&nbsp;                taskStatus), getSortBuilder(sortField, sortOrder), first, pageSize, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method saves or removes dependencies with process, users and user&#39;s
+&nbsp;     * groups related to modified task.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    protected void manageDependenciesForIndex(Task task) throws CustomResponseException, DataException, IOException {
+<b class="fc">&nbsp;        if (Objects.nonNull(task.getProcess())) {</b>
+<b class="fc">&nbsp;            manageProcessDependenciesForIndex(task);</b>
+<b class="fc">&nbsp;        } else if (Objects.nonNull(task.getTemplate())) {</b>
+<b class="nc">&nbsp;            manageTemplateDependenciesForIndex(task);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void manageProcessDependenciesForIndex(Task task)
+&nbsp;            throws CustomResponseException, DataException, IOException {
+<b class="fc">&nbsp;        Process process = task.getProcess();</b>
+<b class="fc">&nbsp;        if (task.getIndexAction() == IndexAction.DELETE) {</b>
+<b class="nc">&nbsp;            process.getTasks().remove(task);</b>
+<b class="nc">&nbsp;            ServiceManager.getProcessService().saveToIndex(process, false);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            ServiceManager.getProcessService().saveToIndex(process, false);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void manageTemplateDependenciesForIndex(Task task)
+&nbsp;            throws CustomResponseException, DataException, IOException {
+<b class="nc">&nbsp;        Template template = task.getTemplate();</b>
+<b class="nc">&nbsp;        if (task.getIndexAction().equals(IndexAction.DELETE)) {</b>
+<b class="nc">&nbsp;            template.getTasks().remove(task);</b>
+<b class="nc">&nbsp;            ServiceManager.getTemplateService().saveToIndex(template, false);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            ServiceManager.getTemplateService().saveToIndex(template, false);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Replace processing user for given task. Handles add/remove from list of
+&nbsp;     * processing tasks.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            for which user will be assigned as processing user
+&nbsp;     * @param user
+&nbsp;     *            which will process given task
+&nbsp;     */
+&nbsp;    public void replaceProcessingUser(Task task, User user) {
+<b class="fc">&nbsp;        User currentProcessingUser = task.getProcessingUser();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.isNull(user) &amp;&amp; Objects.isNull(currentProcessingUser)) {</b>
+<b class="nc">&nbsp;            logger.info(&quot;do nothing - there is neither a new nor an old user&quot;);</b>
+<b class="fc">&nbsp;        } else if (Objects.isNull(user)) {</b>
+<b class="fc">&nbsp;            currentProcessingUser.getProcessingTasks().remove(task);</b>
+<b class="fc">&nbsp;            task.setProcessingUser(null);</b>
+<b class="fc">&nbsp;        } else if (Objects.isNull(currentProcessingUser)) {</b>
+<b class="fc">&nbsp;            user.getProcessingTasks().add(task);</b>
+<b class="fc">&nbsp;            task.setProcessingUser(user);</b>
+<b class="fc">&nbsp;        } else if (Objects.equals(currentProcessingUser.getId(), user.getId())) {</b>
+<b class="fc">&nbsp;            logger.info(&quot;do nothing - both are the same&quot;);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            currentProcessingUser.getProcessingTasks().remove(task);</b>
+<b class="fc">&nbsp;            user.getProcessingTasks().add(task);</b>
+<b class="fc">&nbsp;            task.setProcessingUser(user);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find the distinct task titles.
+&nbsp;     *
+&nbsp;     * @return a list of titles
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; findTaskTitlesDistinct() throws DataException, DAOException {
+<b class="fc">&nbsp;        return findDistinctValues(QueryBuilders.matchAllQuery(), &quot;title.keyword&quot;, true, countDatabaseRows());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public TaskDTO convertJSONObjectToDTO(Map&lt;String, Object&gt; jsonObject, boolean related) throws DataException {
+<b class="fc">&nbsp;        TaskDTO taskDTO = new TaskDTO();</b>
+<b class="fc">&nbsp;        taskDTO.setId(getIdFromJSONObject(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setTitle(TaskTypeField.TITLE.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setLocalizedTitle(getLocalizedTitle(taskDTO.getTitle()));</b>
+<b class="fc">&nbsp;        taskDTO.setOrdering(TaskTypeField.ORDERING.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;        int taskStatus = TaskTypeField.PROCESSING_STATUS.getIntValue(jsonObject);</b>
+<b class="fc">&nbsp;        taskDTO.setProcessingStatus(TaskStatus.getStatusFromValue(taskStatus));</b>
+<b class="fc">&nbsp;        taskDTO.setProcessingStatusTitle(Helper.getTranslation(taskDTO.getProcessingStatus().getTitle()));</b>
+<b class="fc">&nbsp;        int editType = TaskTypeField.EDIT_TYPE.getIntValue(jsonObject);</b>
+<b class="fc">&nbsp;        taskDTO.setEditType(TaskEditType.getTypeFromValue(editType));</b>
+<b class="fc">&nbsp;        taskDTO.setEditTypeTitle(Helper.getTranslation(taskDTO.getEditType().getTitle()));</b>
+<b class="fc">&nbsp;        taskDTO.setProcessingTime(TaskTypeField.PROCESSING_TIME.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setProcessingBegin(TaskTypeField.PROCESSING_BEGIN.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setProcessingEnd(TaskTypeField.PROCESSING_END.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setCorrection(TaskTypeField.CORRECTION.getBooleanValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setTypeAutomatic(TaskTypeField.TYPE_AUTOMATIC.getBooleanValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setTypeMetadata(TaskTypeField.TYPE_METADATA.getBooleanValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setTypeImagesWrite(TaskTypeField.TYPE_IMAGES_WRITE.getBooleanValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setTypeImagesRead(TaskTypeField.TYPE_IMAGES_READ.getBooleanValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setBatchStep(TaskTypeField.BATCH_STEP.getBooleanValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setRoleIds(convertJSONValuesToList(TaskTypeField.ROLES.getJsonArray(jsonObject)));</b>
+<b class="fc">&nbsp;        taskDTO.setRolesSize(TaskTypeField.ROLES.getSizeOfProperty(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setCorrectionCommentStatus(TaskTypeField.CORRECTION_COMMENT_STATUS.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;        convertTaskProjectFromJsonObjectToDTO(jsonObject, taskDTO);</b>
+&nbsp;
+&nbsp;        /*
+&nbsp;         * We read the list of the process but not the list of templates, because only process tasks
+&nbsp;         * are displayed in the task list and reading the template list would result in
+&nbsp;         * never-ending loops as the list of templates reads the list of tasks.
+&nbsp;         */
+<b class="fc">&nbsp;        int process = TaskTypeField.PROCESS_ID.getIntValue(jsonObject);</b>
+<b class="fc">&nbsp;        if (process &gt; 0 &amp;&amp; !related) {</b>
+<b class="fc">&nbsp;            taskDTO.setProcess(ServiceManager.getProcessService().findById(process, true));</b>
+<b class="fc">&nbsp;            taskDTO.setBatchAvailable(ServiceManager.getProcessService()</b>
+<b class="fc">&nbsp;                    .isProcessAssignedToOnlyOneBatch(taskDTO.getProcess().getBatches()));</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        int processingUser = TaskTypeField.PROCESSING_USER_ID.getIntValue(jsonObject);</b>
+<b class="fc">&nbsp;        if (processingUser &gt; 0) {</b>
+<b class="fc">&nbsp;            UserDTO userDTO = new UserDTO();</b>
+<b class="fc">&nbsp;            userDTO.setId(processingUser);</b>
+<b class="fc">&nbsp;            userDTO.setLogin(TaskTypeField.PROCESSING_USER_LOGIN.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            userDTO.setName(TaskTypeField.PROCESSING_USER_NAME.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            userDTO.setSurname(TaskTypeField.PROCESSING_USER_SURNAME.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            userDTO.setFullName(TaskTypeField.PROCESSING_USER_FULLNAME.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            taskDTO.setProcessingUser(userDTO);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return taskDTO;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parses and adds properties related to the project of a task to the taskDTO.
+&nbsp;     * 
+&nbsp;     * @param jsonObject the jsonObject retrieved from the ElasticSearch index for a task
+&nbsp;     * @param taskDTO the taskDTO
+&nbsp;     */
+&nbsp;    private void convertTaskProjectFromJsonObjectToDTO(Map&lt;String, Object&gt; jsonObject, TaskDTO taskDTO) throws DataException {
+<b class="fc">&nbsp;        ProjectDTO projectDTO = new ProjectDTO();</b>
+<b class="fc">&nbsp;        projectDTO.setId(TaskTypeField.PROJECT_ID.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;        projectDTO.setTitle(TaskTypeField.PROJECT_TITLE.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;        taskDTO.setProject(projectDTO);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Integer&gt; convertJSONValuesToList(List&lt;Map&lt;String, Object&gt;&gt; jsonObject) {
+<b class="fc">&nbsp;        return jsonObject.stream()</b>
+<b class="fc">&nbsp;                .flatMap(map -&gt; map.values().stream())</b>
+<b class="fc">&nbsp;                .filter(o -&gt; StringUtils.isNumeric(o.toString()))</b>
+<b class="fc">&nbsp;                .map(o -&gt; (Integer) o)</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert date of processing begin to formatted String.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     * @return formatted date string
+&nbsp;     */
+&nbsp;    public String getProcessingBeginAsFormattedString(Task task) {
+<b class="fc">&nbsp;        return Helper.getDateAsFormattedString(task.getProcessingBegin());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert date of processing end to formatted String.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     * @return formatted date string
+&nbsp;     */
+&nbsp;    public String getProcessingEndAsFormattedString(Task task) {
+<b class="fc">&nbsp;        return Helper.getDateAsFormattedString(task.getProcessingEnd());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert date of processing day to formatted String.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     * @return formatted date string
+&nbsp;     */
+&nbsp;    public String getProcessingTimeAsFormattedString(Task task) {
+<b class="fc">&nbsp;        return Helper.getDateAsFormattedString(task.getProcessingTime());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get localized (translated) title of task.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            as String
+&nbsp;     * @return localized title
+&nbsp;     */
+&nbsp;    public String getLocalizedTitle(String title) {
+<b class="fc">&nbsp;        return Helper.getTranslation(title);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get project(s). If the task belongs to a template, the projects are in
+&nbsp;     * the template. If the task belongs to a process, the project is in the
+&nbsp;     * process.
+&nbsp;     *
+&nbsp;     * @return value of project(s)
+&nbsp;     */
+&nbsp;    public static List&lt;Project&gt; getProjects(Task task) {
+<b class="nc">&nbsp;        Process process = task.getProcess();</b>
+<b class="nc">&nbsp;        Template template = task.getTemplate();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(process)) {</b>
+<b class="nc">&nbsp;            return Collections.singletonList(process.getProject());</b>
+<b class="nc">&nbsp;        } else if (Objects.nonNull(template)) {</b>
+<b class="nc">&nbsp;            return template.getProjects();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get roles list size.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     * @return size of roles assigned to task
+&nbsp;     */
+&nbsp;    public int getRolesSize(Task task) {
+<b class="fc">&nbsp;        return task.getRoles().size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get title with user.
+&nbsp;     *
+&nbsp;     * @return des Schritttitels sowie (sofern vorhanden) den Benutzer mit
+&nbsp;     *         vollständigem Namen
+&nbsp;     */
+&nbsp;    public String getTitleWithUserName(Task task) {
+<b class="fc">&nbsp;        String titleWithUserName = task.getTitle();</b>
+<b class="fc">&nbsp;        User user = task.getProcessingUser();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(user) &amp;&amp; Objects.nonNull(user.getId())) {</b>
+<b class="fc">&nbsp;            titleWithUserName += &quot; (&quot; + ServiceManager.getUserService().getFullName(user) + &quot;)&quot;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return titleWithUserName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get script path.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     * @return script path as String
+&nbsp;     */
+&nbsp;    public String getScriptPath(Task task) {
+<b class="nc">&nbsp;        if (Objects.nonNull(task.getScriptPath()) &amp;&amp; !task.getScriptPath().isEmpty()) {</b>
+<b class="nc">&nbsp;            return task.getScriptPath();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Execute script for task.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     * @param script
+&nbsp;     *            String
+&nbsp;     * @param automatic
+&nbsp;     *            boolean
+&nbsp;     * @return int
+&nbsp;     */
+&nbsp;    public boolean executeScript(Task task, String script, boolean automatic) throws DataException {
+<b class="nc">&nbsp;        if (Objects.isNull(script) || script.isEmpty()) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        script = script.replace(&quot;{&quot;, &quot;(&quot;).replace(&quot;}&quot;, &quot;)&quot;);</b>
+<b class="nc">&nbsp;        LegacyMetsModsDigitalDocumentHelper dd = null;</b>
+<b class="nc">&nbsp;        Process po = task.getProcess();</b>
+&nbsp;
+<b class="nc">&nbsp;        LegacyPrefsHelper prefs = ServiceManager.getRulesetService().getPreferences(po.getRuleset());</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            dd = ServiceManager.getProcessService()</b>
+<b class="nc">&nbsp;                    .readMetadataFile(ServiceManager.getFileService().getMetadataFilePath(po), prefs)</b>
+<b class="nc">&nbsp;                    .getDigitalDocument();</b>
+<b class="nc">&nbsp;        } catch (IOException e2) {</b>
+<b class="nc">&nbsp;            logger.error(e2);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        VariableReplacer replacer = new VariableReplacer(dd.getWorkpiece(), po, task);</b>
+&nbsp;
+<b class="nc">&nbsp;        script = replacer.replace(script);</b>
+<b class="nc">&nbsp;        boolean executedSuccessful = false;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (script.startsWith(&quot;action:&quot;)) {</b>
+<b class="nc">&nbsp;                logger.info(&quot;Calling KitodoScript interpreter: {}&quot;, script);</b>
+&nbsp;
+<b class="nc">&nbsp;                KitodoScriptService kitodoScriptService = ServiceManager.getKitodoScriptService();</b>
+<b class="nc">&nbsp;                kitodoScriptService.execute(Arrays.asList(task.getProcess()), script);</b>
+<b class="nc">&nbsp;                executedSuccessful = true;</b>
+<b class="nc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                logger.info(&quot;Calling the shell: {}&quot;, script);</b>
+&nbsp;
+<b class="nc">&nbsp;                CommandService commandService = ServiceManager.getCommandService();</b>
+<b class="nc">&nbsp;                CommandResult commandResult = commandService.runCommand(script);</b>
+<b class="nc">&nbsp;                executedSuccessful = commandResult.isSuccessful();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            finishOrReturnAutomaticTask(task, automatic, executedSuccessful);</b>
+<b class="nc">&nbsp;        } catch (IOException | DAOException | InvalidImagesException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        } catch (MediaNotFoundException e) {</b>
+<b class="nc">&nbsp;            Helper.setWarnMessage(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return executedSuccessful;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Execute all scripts for step.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            StepObject
+&nbsp;     * @param automatic
+&nbsp;     *            boolean
+&nbsp;     */
+&nbsp;    public void executeScript(Task task, boolean automatic) throws DataException {
+<b class="nc">&nbsp;        String script = task.getScriptPath();</b>
+<b class="nc">&nbsp;        boolean scriptFinishedSuccessful = true;</b>
+<b class="nc">&nbsp;        logger.debug(&quot;starting script {}&quot;, script);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(script) &amp;&amp; !script.trim().isEmpty()) {</b>
+<b class="nc">&nbsp;            scriptFinishedSuccessful = executeScript(task, script, automatic);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!scriptFinishedSuccessful) {</b>
+<b class="nc">&nbsp;            abortTask(task);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Make the necessary changes when performing an automatic task.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            ongoing task
+&nbsp;     * @param automatic
+&nbsp;     *            if it is an automatic task
+&nbsp;     * @param successful
+&nbsp;     *            if the processing was successful
+&nbsp;     * @throws DataException
+&nbsp;     *             if the task cannot be saved
+&nbsp;     * @throws IOException
+&nbsp;     *             if the task cannot be closed
+&nbsp;     */
+&nbsp;    private void finishOrReturnAutomaticTask(Task task, boolean automatic, boolean successful)
+&nbsp;            throws DataException, IOException, DAOException {
+<b class="nc">&nbsp;        if (automatic) {</b>
+<b class="nc">&nbsp;            task.setEditType(TaskEditType.AUTOMATIC);</b>
+<b class="nc">&nbsp;            if (successful) {</b>
+<b class="nc">&nbsp;                task.setProcessingStatus(TaskStatus.DONE);</b>
+<b class="nc">&nbsp;                new WorkflowControllerService().close(task);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                task.setProcessingStatus(TaskStatus.OPEN);</b>
+<b class="nc">&nbsp;                save(task);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void abortTask(Task task) throws DataException {
+<b class="nc">&nbsp;        task.setProcessingStatus(TaskStatus.OPEN);</b>
+<b class="nc">&nbsp;        task.setEditType(TaskEditType.AUTOMATIC);</b>
+<b class="nc">&nbsp;        save(task);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Performs creating images when this happens automatically in a task.
+&nbsp;     *
+&nbsp;     * @param executingThread
+&nbsp;     *            Executing thread (displayed in the taskmanager)
+&nbsp;     * @param task
+&nbsp;     *            Task that generates images
+&nbsp;     * @param automatic
+&nbsp;     *            Whether it is an automatic task
+&nbsp;     * @throws DataException
+&nbsp;     *             if the task cannot be saved
+&nbsp;     */
+&nbsp;    public void generateImages(EmptyTask executingThread, Task task, boolean automatic) throws DataException {
+&nbsp;        try {
+<b class="nc">&nbsp;            Process process = task.getProcess();</b>
+<b class="nc">&nbsp;            Subfolder sourceFolder = new Subfolder(process, process.getProject().getGeneratorSource());</b>
+<b class="nc">&nbsp;            List&lt;Subfolder&gt; foldersToGenerate = SubfolderFactoryService.createAll(process, task.getContentFolders());</b>
+<b class="nc">&nbsp;            ImageGenerator generator = new ImageGenerator(sourceFolder, GenerationMode.ALL, foldersToGenerate);</b>
+<b class="nc">&nbsp;            generator.setSupervisor(executingThread);</b>
+<b class="nc">&nbsp;            generator.run();</b>
+<b class="nc">&nbsp;            finishOrReturnAutomaticTask(task, automatic, Objects.isNull(executingThread.getException()));</b>
+<b class="nc">&nbsp;        } catch (IOException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Execute DMS export.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            as Task object
+&nbsp;     */
+&nbsp;    public void executeDmsExport(Task task) throws DataException, IOException, DAOException {
+<b class="nc">&nbsp;        new ExportDms(task).startExport(task);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current tasks with exact title for batch with exact id.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            of task as String
+&nbsp;     * @param batchId
+&nbsp;     *            id of batch as Integer
+&nbsp;     * @return list of Task objects
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getCurrentTasksOfBatch(String title, Integer batchId) {
+<b class="fc">&nbsp;        return dao.getCurrentTasksOfBatch(title, batchId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all tasks between two given ordering of tasks for given process id.
+&nbsp;     *
+&nbsp;     * @param orderingMax
+&nbsp;     *            as Integer
+&nbsp;     * @param orderingMin
+&nbsp;     *            as Integer
+&nbsp;     * @param processId
+&nbsp;     *            id of process for which tasks are searched as Integer
+&nbsp;     * @return list of Task objects
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getAllTasksInBetween(Integer orderingMax, Integer orderingMin, Integer processId) {
+<b class="fc">&nbsp;        return dao.getAllTasksInBetween(orderingMax, orderingMin, processId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get next tasks for problem solution for given process id.
+&nbsp;     *
+&nbsp;     * @param ordering
+&nbsp;     *            of Task for which it searches next ones as Integer
+&nbsp;     * @param processId
+&nbsp;     *            id of process for which tasks are searched as Integer
+&nbsp;     * @return list of Task objects
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getNextTasksForProblemSolution(Integer ordering, Integer processId) {
+<b class="fc">&nbsp;        return dao.getNextTasksForProblemSolution(ordering, processId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get previous tasks for problem solution for given process id.
+&nbsp;     *
+&nbsp;     * @param ordering
+&nbsp;     *            of Task for which it searches previous ones as Integer
+&nbsp;     * @param processId
+&nbsp;     *            id of process for which tasks are searched as Integer
+&nbsp;     * @return list of Task objects
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getPreviousTasksForProblemReporting(Integer ordering, Integer processId) {
+<b class="fc">&nbsp;        return dao.getPreviousTasksForProblemReporting(ordering, processId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find tasks by id of process.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of process
+&nbsp;     * @return list of JSON objects with tasks for specific process id
+&nbsp;     */
+&nbsp;    List&lt;Map&lt;String, Object&gt;&gt; findByProcessId(Integer id) throws DataException {
+<b class="fc">&nbsp;        return findDocuments(getQueryForProcess(id));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find tasks by id of template.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of template
+&nbsp;     * @return list of JSON objects with tasks for specific template id
+&nbsp;     */
+&nbsp;    List&lt;Map&lt;String, Object&gt;&gt; findByTemplateId(Integer id) throws DataException {
+<b class="fc">&nbsp;        return findDocuments(getQueryForTemplate(id));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for automatic type of task.
+&nbsp;     *
+&nbsp;     * @param typeAutomatic
+&nbsp;     *            automatic type of task as boolean
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    private QueryBuilder getQueryForTypeAutomatic(boolean typeAutomatic) {
+<b class="nc">&nbsp;        return createSimpleQuery(TaskTypeField.TYPE_AUTOMATIC.getKey(), typeAutomatic, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for process.
+&nbsp;     *
+&nbsp;     * @param processId
+&nbsp;     *            process id as int
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    private QueryBuilder getQueryForProcess(int processId) {
+<b class="fc">&nbsp;        return createSimpleQuery(TaskTypeField.PROCESS_ID.getKey(), processId, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for processing user.
+&nbsp;     *
+&nbsp;     * @param processingUserId
+&nbsp;     *            processing user id as int
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    private QueryBuilder getQueryForProcessingUser(int processingUserId) {
+<b class="nc">&nbsp;        return createSimpleQuery(TaskTypeField.PROCESSING_USER_ID.getKey(), processingUserId, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for processing status.
+&nbsp;     *
+&nbsp;     * @param processingStatus
+&nbsp;     *            processing status as int
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    private QueryBuilder getQueryForProcessingStatus(int processingStatus) {
+<b class="nc">&nbsp;        return createSimpleQuery(TaskTypeField.PROCESSING_STATUS.getKey(), processingStatus, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for processing statuses.
+&nbsp;     *
+&nbsp;     * @param processingStatus
+&nbsp;     *            set of processing statuses as Integer
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    private QueryBuilder getQueryForProcessingStatuses(Set&lt;Integer&gt; processingStatus) {
+<b class="nc">&nbsp;        return createSetQuery(TaskTypeField.PROCESSING_STATUS.getKey(), processingStatus, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for template.
+&nbsp;     *
+&nbsp;     * @param templateId
+&nbsp;     *            template id as int
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    private QueryBuilder getQueryForTemplate(int templateId) {
+<b class="fc">&nbsp;        return createSimpleQuery(TaskTypeField.TEMPLATE_ID.getKey(), templateId, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The function determines, from projects, the folders whose contents can be
+&nbsp;     * generated automatically.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This feature is needed once by the task in the template to determine
+&nbsp;     * which folders show buttons in the interface to turn content creation on
+&nbsp;     * or off. In addition, the function of the task in the process is required
+&nbsp;     * to determine if there is at least one folder to be created in the task,
+&nbsp;     * because then action links for generating are displayed, and not
+&nbsp;     * otherwise.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * To create content automatically, a folder must be defined as the template
+&nbsp;     * folder in the project. The templates serve to create the contents in the
+&nbsp;     * other folders to be created. Under no circumstances should the contents
+&nbsp;     * of the template folder be automatically generated, even if, for example,
+&nbsp;     * after a reconfiguration, this is still set as otherwise they would
+&nbsp;     * overwrite themselves. Also, contents cannot be created in folders where
+&nbsp;     * nothing is configured. The folders that are left over can be created.
+&nbsp;     *
+&nbsp;     * @param projects
+&nbsp;     *            an object stream of projects that may have folders defined
+&nbsp;     *            whose contents can be auto-generated
+&nbsp;     * @return an object stream of generable folders
+&nbsp;     */
+&nbsp;    public static Stream&lt;Folder&gt; generatableFoldersFromProjects(Stream&lt;Project&gt; projects) {
+<b class="nc">&nbsp;        Stream&lt;Project&gt; projectsWithSourceFolder = skipProjectsWithoutSourceFolder(projects);</b>
+<b class="nc">&nbsp;        Stream&lt;Folder&gt; allowedFolders = dropOwnSourceFolders(projectsWithSourceFolder);</b>
+<b class="nc">&nbsp;        return removeFoldersThatCannotBeGenerated(allowedFolders);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Only lets projects pass where a source folder is selected.
+&nbsp;     *
+&nbsp;     * @param projects
+&nbsp;     *            the unpurified stream of projects
+&nbsp;     * @return a stream only of projects that define a source to generate images
+&nbsp;     */
+&nbsp;    private static Stream&lt;Project&gt; skipProjectsWithoutSourceFolder(Stream&lt;Project&gt; projects) {
+<b class="nc">&nbsp;        return projects.filter(project -&gt; Objects.nonNull(project.getGeneratorSource()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Drops all folders to generate if they are their own source folder.
+&nbsp;     *
+&nbsp;     * @param projects
+&nbsp;     *            projects whose folders allowed to be generated are to be
+&nbsp;     *            determined
+&nbsp;     * @return a stream of folders that are allowed to be generated
+&nbsp;     */
+&nbsp;    private static Stream&lt;Folder&gt; dropOwnSourceFolders(Stream&lt;Project&gt; projects) {
+<b class="nc">&nbsp;        Stream&lt;Pair&lt;Folder, Folder&gt;&gt; withSources = projects.flatMap(</b>
+<b class="nc">&nbsp;            project -&gt; project.getFolders().stream().map(folder -&gt; Pair.of(folder, project.getGeneratorSource())));</b>
+<b class="nc">&nbsp;        Stream&lt;Pair&lt;Folder, Folder&gt;&gt; filteredWithSources = withSources.filter(</b>
+<b class="nc">&nbsp;            destinationAndSource -&gt; !destinationAndSource.getLeft().equals(destinationAndSource.getRight()));</b>
+<b class="nc">&nbsp;        return filteredWithSources.map(Pair::getLeft);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes all folders to generate which do not have anything to generate
+&nbsp;     * configured.
+&nbsp;     *
+&nbsp;     * @param folders
+&nbsp;     *            a stream of folders
+&nbsp;     * @return a stream only of those folders where an image generation module
+&nbsp;     *         has been selected
+&nbsp;     */
+&nbsp;    private static Stream&lt;Folder&gt; removeFoldersThatCannotBeGenerated(Stream&lt;Folder&gt; folders) {
+<b class="nc">&nbsp;        return folders.filter(folder -&gt; folder.getDerivative().isPresent() || folder.getDpi().isPresent()</b>
+<b class="nc">&nbsp;                || folder.getImageScale().isPresent() || folder.getImageSize().isPresent());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the duration of a task in days.
+&nbsp;     * @param task the task to get the duration for
+&nbsp;     * @return the duration in days
+&nbsp;     */
+&nbsp;    public long getDurationInDays(Task task) {
+&nbsp;
+<b class="nc">&nbsp;        Date end = task.getProcessingEnd();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(end)) {</b>
+<b class="nc">&nbsp;            end = new Date();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Date begin = task.getProcessingBegin();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(begin)) {</b>
+<b class="nc">&nbsp;            begin = task.getProcessingTime();</b>
+<b class="nc">&nbsp;            if (Objects.isNull(begin)) {</b>
+<b class="nc">&nbsp;                begin = new Date();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        long differenceTime = end.getTime() - begin.getTime();</b>
+<b class="nc">&nbsp;        return differenceTime / (1000 * 60 * 60 * 24);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Compute and return list of tasks that are open or in work in the given Process &#39;process&#39; and are concurrent but
+&nbsp;     * not equal not the to given Task &#39;task&#39;, if &#39;task&#39; is not null.
+&nbsp;     * @param process Process whose tasks are returned
+&nbsp;     * @param task task to filter from returned list, if not null
+&nbsp;     * @return List of concurrent open or inwork tasks
+&nbsp;     */
+&nbsp;    public static List&lt;Task&gt; getConcurrentTasksOpenOrInWork(Process process, Task task) {
+<b class="nc">&nbsp;        List&lt;Task&gt; tasks = process.getTasks().stream()</b>
+<b class="nc">&nbsp;                .filter(t -&gt; TaskStatus.INWORK.equals(t.getProcessingStatus())</b>
+<b class="nc">&nbsp;                        || TaskStatus.OPEN.equals(t.getProcessingStatus()))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(task) &amp;&amp; task.isConcurrent()) {</b>
+<b class="nc">&nbsp;            return tasks.stream()</b>
+<b class="nc">&nbsp;                    .filter(t -&gt; !t.getId().equals(task.getId()))</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toList());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return tasks;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filter and return current list of tasks for those in work by other users.
+&nbsp;     * @param tasks list of tasks
+&nbsp;     * @return list of tasks in work by other users
+&nbsp;     */
+&nbsp;    public static List&lt;Task&gt; getTasksInWorkByOtherUsers(List&lt;Task&gt; tasks) {
+<b class="nc">&nbsp;        int authenticatedUserId = ServiceManager.getUserService().getAuthenticatedUser().getId();</b>
+<b class="nc">&nbsp;        return tasks.stream()</b>
+<b class="nc">&nbsp;                .filter(t -&gt; Objects.nonNull(t.getProcessingUser())</b>
+<b class="nc">&nbsp;                        &amp;&amp; authenticatedUserId != t.getProcessingUser().getId())</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Compute and return list of tasks that are eligible as &#39;currentTask&#39; for a new correction comment.
+&nbsp;     *
+&nbsp;     * @return list of current task options for new correction comment
+&nbsp;     */
+&nbsp;    public static List&lt;Task&gt; getCurrentTaskOptions(Process process) {
+<b class="nc">&nbsp;        int authenticatedUserId = ServiceManager.getUserService().getAuthenticatedUser().getId();</b>
+&nbsp;        // NOTE: checking for &#39;INWORK&#39; tasks that do not have a &#39;processingUser&#39; shouldn&#39;t be necessary, but the current
+&nbsp;        // version of Kitodo.Production allows setting tasks to &#39;INWORK&#39; without explicitly assigning a user to it via a
+&nbsp;        // process&#39; task list (e.g. administrative action)
+<b class="nc">&nbsp;        return process.getTasks().stream()</b>
+<b class="nc">&nbsp;                .filter(t -&gt; (TaskStatus.INWORK.equals(t.getProcessingStatus())</b>
+<b class="nc">&nbsp;                        &amp;&amp; ((Objects.nonNull(t.getProcessingUser()) &amp;&amp; authenticatedUserId == t.getProcessingUser().getId())</b>
+<b class="nc">&nbsp;                        || Objects.isNull(t.getProcessingUser())))</b>
+<b class="nc">&nbsp;                        || TaskStatus.OPEN.equals(t.getProcessingStatus()))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return a tooltip for the correction message switch using the give Process and Task.
+&nbsp;     * @param process Process for which tooltip is created
+&nbsp;     * @param task Task for which tooltip is created
+&nbsp;     * @return tooltip for correction message switch
+&nbsp;     */
+&nbsp;    public static String getCorrectionMessageSwitchTooltip(Process process, Task task) {
+<b class="nc">&nbsp;        if (isCorrectionWorkflow(process)) {</b>
+<b class="nc">&nbsp;            return Helper.getTranslation(&quot;dataEditor.comment.correctionWorkflowAlreadyActive&quot;);</b>
+<b class="nc">&nbsp;        } else if (Objects.nonNull(task) &amp;&amp; task.getOrdering() == 1) {</b>
+<b class="nc">&nbsp;            return Helper.getTranslation(&quot;dataEditor.comment.firstTaskInWorkflow&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            List&lt;Task&gt; concurrentTasks = TaskService.getConcurrentTasksOpenOrInWork(process, task);</b>
+<b class="nc">&nbsp;            if (concurrentTasks.isEmpty()) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;Invalid process state: no &#39;inwork&#39; or &#39;open&#39; task found!&quot;);</b>
+<b class="nc">&nbsp;                return &quot;&quot;;</b>
+<b class="nc">&nbsp;            } else if (concurrentTasks.get(0).getOrdering() == 1) {</b>
+<b class="nc">&nbsp;                return Helper.getTranslation(&quot;dataEditor.comment.firstTaskInWorkflow&quot;);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                List&lt;Task&gt; tasksInWorkByOtherUsers = TaskService.getTasksInWorkByOtherUsers(concurrentTasks);</b>
+<b class="nc">&nbsp;                if (tasksInWorkByOtherUsers.isEmpty()) {</b>
+<b class="nc">&nbsp;                    return &quot;&quot;;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    return MessageFormat.format(Helper.getTranslation(&quot;dataEditor.comment.parallelTaskInWorkText&quot;),</b>
+<b class="nc">&nbsp;                            tasksInWorkByOtherUsers.get(0).getTitle(),</b>
+<b class="nc">&nbsp;                            tasksInWorkByOtherUsers.get(0).getProcessingUser().getFullName());</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether &#39;correction&#39; flag is set to true for any task of the current process,
+&nbsp;     * e.g. if process is currently in a correction workflow.
+&nbsp;     *
+&nbsp;     * @return whether process is in correction workflow or not
+&nbsp;     */
+&nbsp;    public static boolean isCorrectionWorkflow(Process process) {
+<b class="nc">&nbsp;        return process.getTasks().stream().anyMatch(Task::isCorrection);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the id of the template task corresponding to the given task.
+&nbsp;     * The corresponding template task was the blueprint when creating the given task.
+&nbsp;     * @param task task to find the corresponding template task for
+&nbsp;     * @return id of the template task or -1 if no matching task could be found
+&nbsp;     */
+&nbsp;    public static int getCorrespondingTemplateTaskId(Task task) {
+<b class="nc">&nbsp;        List&lt;Task&gt; templateTasks = task.getProcess().getTemplate().getTasks().stream()</b>
+<b class="nc">&nbsp;                .filter(t -&gt; t.getOrdering().equals(task.getOrdering()))</b>
+<b class="nc">&nbsp;                .filter(t -&gt; t.getTitle().equals(task.getTitle()))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        if (templateTasks.size() == 1) {</b>
+<b class="nc">&nbsp;            return templateTasks.get(0).getId();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return -1;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

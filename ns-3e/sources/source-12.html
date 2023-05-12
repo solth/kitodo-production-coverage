@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SelectTemplateDialogView</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: SelectTemplateDialogView (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SelectTemplateDialogView</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.faces.view.ViewScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.kitodo.production.dto.ProjectDTO;
+&nbsp;import org.kitodo.production.dto.TemplateDTO;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;
+&nbsp;@ViewScoped
+&nbsp;@Named(&quot;SelectTemplateDialogView&quot;)
+<b class="nc">&nbsp;public class SelectTemplateDialogView implements Serializable {</b>
+&nbsp;
+<b class="nc">&nbsp;    private int selectedTemplateId = 0;</b>
+&nbsp;    private ProjectDTO project;
+&nbsp;    protected static final String ERROR_LOADING_ONE = &quot;errorLoadingOne&quot;;
+&nbsp;    private static final String CREATE_PROCESS_PATH = &quot;/pages/processFromTemplate.jsf?faces-redirect=true&quot;;
+&nbsp;    private static final String MASSIMPORT_PATH = &quot;/pages/massImport.jsf?faces-redirect=true&quot;;
+&nbsp;    private String redirectPath;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get project.
+&nbsp;     *
+&nbsp;     * @return value of project
+&nbsp;     */
+&nbsp;    public ProjectDTO getProject() {
+<b class="nc">&nbsp;        return project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set project.
+&nbsp;     *
+&nbsp;     * @param project as org.kitodo.production.dto.ProjectDTO
+&nbsp;     */
+&nbsp;    public void setProject(ProjectDTO project) {
+<b class="nc">&nbsp;        this.project = project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selectedTemplateId.
+&nbsp;     *
+&nbsp;     * @return value of selectedTemplateId
+&nbsp;     */
+&nbsp;    public int getSelectedTemplateId() {
+<b class="nc">&nbsp;        return selectedTemplateId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selectedTemplateId.
+&nbsp;     *
+&nbsp;     * @param selectedTemplateId as org.kitodo.production.dto.TemplateDTO
+&nbsp;     */
+&nbsp;    public void setSelectedTemplateId(int selectedTemplateId) {
+<b class="nc">&nbsp;        this.selectedTemplateId = selectedTemplateId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * check for templates with create process path.
+&nbsp;     */
+&nbsp;    public void createProcessForProject() {
+<b class="nc">&nbsp;        redirectPath = CREATE_PROCESS_PATH;</b>
+<b class="nc">&nbsp;        checkForTemplates();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * check for templates with massimport path.
+&nbsp;     */
+&nbsp;    public void openMassImportForProject() {
+<b class="nc">&nbsp;        redirectPath = MASSIMPORT_PATH;</b>
+<b class="nc">&nbsp;        checkForTemplates();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Navigate to redirectPath page if &#39;selectedTemplateId&#39; is &gt; 0.
+&nbsp;     * Show template selection dialog if &#39;selectedTemplateId&#39; is 0 and more than one template is configured for
+&nbsp;     * current project.
+&nbsp;     * Display error message if no template is configured for current project.
+&nbsp;     */
+&nbsp;    public void checkForTemplates() {
+<b class="nc">&nbsp;        List&lt;TemplateDTO&gt; availableTemplates = this.project.getTemplates();</b>
+<b class="nc">&nbsp;        if (availableTemplates.size() == 1) {</b>
+<b class="nc">&nbsp;            this.selectedTemplateId = availableTemplates.get(0).getId();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (this.selectedTemplateId &gt; 0) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                FacesContext context = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;                String path = context.getExternalContext().getRequestContextPath() + redirectPath</b>
+<b class="nc">&nbsp;                        + &quot;&amp;templateId=&quot; + this.selectedTemplateId + &quot;&amp;projectId=&quot; + this.project.getId()</b>
+<b class="nc">&nbsp;                        + &quot;&amp;referrer=&quot; + context.getViewRoot().getViewId();</b>
+<b class="nc">&nbsp;                context.getExternalContext().redirect(path);</b>
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } else if (availableTemplates.size() &gt; 1) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().ajax().update(&quot;selectTemplateDialog&quot;);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;selectTemplateDialog&#39;).show();&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;noTemplatesConfigured&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,451 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SearchForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: SearchForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SearchForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/49)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/109)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.enterprise.context.RequestScoped;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;import javax.inject.Inject;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.dto.ProjectDTO;
+&nbsp;import org.kitodo.production.enums.FilterString;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;@Named(&quot;SearchForm&quot;)
+&nbsp;@RequestScoped
+&nbsp;public class SearchForm {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Logger instance.
+&nbsp;     */
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(SearchForm.class);</b>
+&nbsp;
+<b class="nc">&nbsp;    private List&lt;String&gt; projects = new ArrayList&lt;&gt;(); // proj:</b>
+<b class="nc">&nbsp;    private String project = &quot;&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;    private List&lt;String&gt; processPropertyTitles = new ArrayList&lt;&gt;(); // processeig:</b>
+<b class="nc">&nbsp;    private String processPropertyTitle = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String processPropertyValue = &quot;&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;    private List&lt;String&gt; stepTitles = new ArrayList&lt;&gt;(); // step:</b>
+<b class="nc">&nbsp;    private List&lt;TaskStatus&gt; stepstatus = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;    private String status = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String stepname = &quot;&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;    private List&lt;User&gt; user = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;    private String stepdonetitle = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String stepdoneuser = &quot;&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;    private String idin = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String processParentId = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String processTitle = &quot;&quot;; // proc:</b>
+&nbsp;
+<b class="nc">&nbsp;    private String projectOperand = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String processOperand = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String processPropertyOperand = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String masterpiecePropertyOperand = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String templatePropertyOperand = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private String stepOperand = &quot;&quot;;</b>
+&nbsp;
+&nbsp;    private final ProcessForm processForm;
+&nbsp;    private final CurrentTaskForm taskForm;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor with inject process form.
+&nbsp;     *
+&nbsp;     * @param processForm
+&nbsp;     *            managed bean
+&nbsp;     */
+&nbsp;    @Inject
+<b class="nc">&nbsp;    public SearchForm(ProcessForm processForm, CurrentTaskForm taskForm) {</b>
+<b class="nc">&nbsp;        this.stepstatus.addAll(ServiceManager.getFilterService().initStepStatus());</b>
+<b class="nc">&nbsp;        this.projects = ServiceManager.getFilterService().initProjects();</b>
+<b class="nc">&nbsp;        this.stepTitles = ServiceManager.getFilterService().initStepTitles();</b>
+<b class="nc">&nbsp;        this.processPropertyTitles = ServiceManager.getFilterService().initProcessPropertyTitles();</b>
+<b class="nc">&nbsp;        this.user.addAll(ServiceManager.getFilterService().initUserList());</b>
+<b class="nc">&nbsp;        this.processForm = processForm;</b>
+<b class="nc">&nbsp;        this.taskForm = taskForm;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;String&gt; getProjects() {
+<b class="nc">&nbsp;        return this.projects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProjects(List&lt;String&gt; projects) {
+<b class="nc">&nbsp;        this.projects = projects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;String&gt; getProcessPropertyTitles() {
+<b class="nc">&nbsp;        return this.processPropertyTitles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessPropertyTitles(List&lt;String&gt; processPropertyTitles) {
+<b class="nc">&nbsp;        this.processPropertyTitles = processPropertyTitles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;String&gt; getStepTitles() {
+<b class="nc">&nbsp;        return this.stepTitles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStepTitles(List&lt;String&gt; stepTitles) {
+<b class="nc">&nbsp;        this.stepTitles = stepTitles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;TaskStatus&gt; getStepstatus() {
+<b class="nc">&nbsp;        return this.stepstatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStepstatus(List&lt;TaskStatus&gt; stepstatus) {
+<b class="nc">&nbsp;        this.stepstatus = stepstatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStepdonetitle() {
+<b class="nc">&nbsp;        return this.stepdonetitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStepdonetitle(String stepdonetitle) {
+<b class="nc">&nbsp;        this.stepdonetitle = stepdonetitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStepdoneuser() {
+<b class="nc">&nbsp;        return this.stepdoneuser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStepdoneuser(String stepdoneuser) {
+<b class="nc">&nbsp;        this.stepdoneuser = stepdoneuser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getIdin() {
+<b class="nc">&nbsp;        return this.idin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setIdin(String idin) {
+<b class="nc">&nbsp;        this.idin = idin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProcessParentId() {
+<b class="nc">&nbsp;        return processParentId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessParentId(String processParentId) {
+<b class="nc">&nbsp;        this.processParentId = processParentId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProject() {
+<b class="nc">&nbsp;        return this.project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProject(String project) {
+<b class="nc">&nbsp;        this.project = project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProcessTitle() {
+<b class="nc">&nbsp;        return this.processTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessTitle(String processTitle) {
+<b class="nc">&nbsp;        this.processTitle = processTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProcessPropertyTitle() {
+<b class="nc">&nbsp;        return this.processPropertyTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessPropertyTitle(String processPropertyTitle) {
+<b class="nc">&nbsp;        this.processPropertyTitle = processPropertyTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProcessPropertyValue() {
+<b class="nc">&nbsp;        return this.processPropertyValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessPropertyValue(String processPropertyValue) {
+<b class="nc">&nbsp;        this.processPropertyValue = processPropertyValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStatus() {
+<b class="nc">&nbsp;        return this.status;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStatus(String status) {
+<b class="nc">&nbsp;        this.status = status;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStepname() {
+<b class="nc">&nbsp;        return this.stepname;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStepname(String stepname) {
+<b class="nc">&nbsp;        this.stepname = stepname;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;User&gt; getUser() {
+<b class="nc">&nbsp;        return this.user;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setUser(List&lt;User&gt; user) {
+<b class="nc">&nbsp;        this.user = user;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filter processes.
+&nbsp;     *
+&nbsp;     * @return filter as java.lang.String
+&nbsp;     */
+&nbsp;    public String filterProcesses() {
+<b class="nc">&nbsp;        processForm.changeFilter(createFilter());</b>
+<b class="nc">&nbsp;        return processForm.getProcessesPage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filter tasks.
+&nbsp;     *
+&nbsp;     * @return filter as java.lang.String
+&nbsp;     */
+&nbsp;    public String filterTasks() {
+<b class="nc">&nbsp;        taskForm.changeFilter(createFilter());</b>
+<b class="nc">&nbsp;        return taskForm.getTaskListPath();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String createFilter() {
+<b class="nc">&nbsp;        String search = &quot;&quot;;</b>
+<b class="nc">&nbsp;        if (!this.processTitle.isEmpty()) {</b>
+<b class="nc">&nbsp;            search += &quot;\&quot;&quot; + this.processOperand + this.processTitle + &quot;\&quot; &quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!this.idin.isEmpty()) {</b>
+<b class="nc">&nbsp;            search += &quot;\&quot;&quot; + FilterString.ID.getFilterEnglish() + this.idin + &quot;\&quot; &quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!this.processParentId.isEmpty()) {</b>
+<b class="nc">&nbsp;            search += &quot;\&quot;&quot; + FilterString.PARENTPROCESSID.getFilterEnglish() + this.processParentId + &quot;\&quot; &quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!this.project.isEmpty()) {</b>
+<b class="nc">&nbsp;            search += &quot;\&quot;&quot; + this.projectOperand + FilterString.PROJECT.getFilterEnglish() + this.project + &quot;\&quot; &quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!this.stepname.isEmpty()) {</b>
+<b class="nc">&nbsp;            search += &quot;\&quot;&quot; + this.stepOperand + this.status + &quot;:&quot; + this.stepname + &quot;\&quot; &quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!this.stepdonetitle.isEmpty() &amp;&amp; !this.stepdoneuser.isEmpty()</b>
+<b class="nc">&nbsp;                &amp;&amp; ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.WITH_USER_STEP_DONE_SEARCH)) {</b>
+<b class="nc">&nbsp;            search += &quot;\&quot;&quot; + FilterString.TASKDONEUSER.getFilterEnglish() + this.stepdoneuser + &quot;\&quot; \&quot;&quot;</b>
+<b class="nc">&nbsp;                    + FilterString.TASKDONETITLE.getFilterEnglish() + this.stepdonetitle + &quot;\&quot; &quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (StringUtils.isNotBlank(this.processPropertyValue)) {</b>
+<b class="nc">&nbsp;            if (StringUtils.isNotBlank(this.processPropertyTitle)) {</b>
+<b class="nc">&nbsp;                search += &quot;\&quot;&quot; + this.processPropertyOperand + FilterString.PROPERTY.getFilterEnglish() </b>
+&nbsp;                        + this.processPropertyTitle + &quot;:&quot; + this.processPropertyValue + &quot;\&quot; &quot;;
+&nbsp;            } else {
+<b class="nc">&nbsp;                search += &quot;\&quot;&quot; + this.processPropertyOperand + FilterString.PROPERTY.getFilterEnglish() </b>
+&nbsp;                        + &quot;*:&quot; + this.processPropertyValue + &quot;\&quot; &quot;;
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            if (StringUtils.isNotBlank(this.processPropertyTitle)) {</b>
+<b class="nc">&nbsp;                search += &quot;\&quot;&quot; + this.processPropertyOperand + FilterString.PROPERTY.getFilterEnglish() </b>
+&nbsp;                        + this.processPropertyTitle + &quot;:*\&quot; &quot;;
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return search;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String createSearchProperty(String title, String value, String operand, FilterString filterString) {
+<b class="nc">&nbsp;        if (Objects.nonNull(value) &amp;&amp; !value.isEmpty()) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(title) &amp;&amp; !title.isEmpty()) {</b>
+<b class="nc">&nbsp;                return &quot;\&quot;&quot; + operand + filterString.getFilterEnglish() + title + &quot;:&quot; + value + &quot;\&quot; &quot;;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return &quot;\&quot;&quot; + operand + filterString.getFilterEnglish() + value + &quot;\&quot; &quot;;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get operands.
+&nbsp;     *
+&nbsp;     * @return list of SelectItem objects
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getOperands() {
+<b class="nc">&nbsp;        List&lt;SelectItem&gt; answer = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        SelectItem and = new SelectItem(&quot;&quot;, Helper.getTranslation(&quot;AND&quot;));</b>
+<b class="nc">&nbsp;        SelectItem not = new SelectItem(&quot;-&quot;, Helper.getTranslation(&quot;NOT&quot;));</b>
+<b class="nc">&nbsp;        answer.add(and);</b>
+<b class="nc">&nbsp;        answer.add(not);</b>
+<b class="nc">&nbsp;        return answer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProjectOperand() {
+<b class="nc">&nbsp;        return this.projectOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProjectOperand(String projectOperand) {
+<b class="nc">&nbsp;        this.projectOperand = projectOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProcessPropertyOperand() {
+<b class="nc">&nbsp;        return this.processPropertyOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessPropertyOperand(String processPropertyOperand) {
+<b class="nc">&nbsp;        this.processPropertyOperand = processPropertyOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMasterpiecePropertyOperand() {
+<b class="nc">&nbsp;        return this.masterpiecePropertyOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMasterpiecePropertyOperand(String masterpiecePropertyOperand) {
+<b class="nc">&nbsp;        this.masterpiecePropertyOperand = masterpiecePropertyOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getTemplatePropertyOperand() {
+<b class="nc">&nbsp;        return this.templatePropertyOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTemplatePropertyOperand(String templatePropertyOperand) {
+<b class="nc">&nbsp;        this.templatePropertyOperand = templatePropertyOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStepOperand() {
+<b class="nc">&nbsp;        return this.stepOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStepOperand(String stepOperand) {
+<b class="nc">&nbsp;        this.stepOperand = stepOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProcessOperand() {
+<b class="nc">&nbsp;        return this.processOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessOperand(String processOperand) {
+<b class="nc">&nbsp;        this.processOperand = processOperand;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

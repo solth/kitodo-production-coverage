@@ -1,0 +1,201 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TemplateDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.persistence</a>
+</div>
+
+<h1>Coverage Summary for Class: TemplateDAO (org.kitodo.data.database.persistence)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TemplateDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (4/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    47,1%
+  </span>
+  <span class="absValue">
+    (8/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.persistence;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;
+<b class="fc">&nbsp;public class TemplateDAO extends BaseDAO&lt;Template&gt; {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Template getById(Integer id) throws DAOException {
+<b class="fc">&nbsp;        Template template = retrieveObject(Template.class, id);</b>
+<b class="fc">&nbsp;        if (template == null) {</b>
+<b class="nc">&nbsp;            throw new DAOException(&quot;Object cannot be found in database&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Template&gt; getAll() throws DAOException {
+<b class="fc">&nbsp;        return retrieveAllObjects(Template.class);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Template&gt; getAll(int offset, int size) throws DAOException {
+<b class="nc">&nbsp;        return retrieveObjects(&quot;FROM Template ORDER BY title ASC&quot;, offset, size);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Template&gt; getAllNotIndexed(int offset, int size) throws DAOException {
+<b class="nc">&nbsp;        return retrieveObjects(&quot;FROM Template WHERE indexAction = &#39;INDEX&#39; OR indexAction IS NULL ORDER BY id ASC&quot;,</b>
+&nbsp;            offset, size);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save list of templates.
+&nbsp;     *
+&nbsp;     * @param list
+&nbsp;     *            of templates
+&nbsp;     * @throws DAOException
+&nbsp;     *             an exception that can be thrown from the underlying saveList()
+&nbsp;     *             procedure failure.
+&nbsp;     */
+&nbsp;    public void saveList(List&lt;Template&gt; list) throws DAOException {
+<b class="nc">&nbsp;        storeList(list);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void remove(Integer id) throws DAOException {
+<b class="nc">&nbsp;        removeObject(Template.class, id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update process object after some changes.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void update(Template process) {
+<b class="nc">&nbsp;        updateObject(process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all process templates with exact title.
+&nbsp;     *
+&nbsp;     * @return list of all process templates as Template objects
+&nbsp;     */
+&nbsp;    public List&lt;Template&gt; getTemplatesWithTitle(String title) {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; parameters = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        parameters.put(&quot;title&quot;, title);</b>
+<b class="fc">&nbsp;        return getByQuery(&quot;FROM Template WHERE title LIKE :title ORDER BY title ASC&quot;, parameters);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all active templates for selected client.
+&nbsp;     *
+&nbsp;     * @return list of all active templates for selected client as Template objects
+&nbsp;     */
+&nbsp;    public List&lt;Template&gt; getActiveTemplates(int clientId) {
+<b class="nc">&nbsp;        Map&lt;String, Object&gt; parameters = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        parameters.put(&quot;clientId&quot;, clientId);</b>
+<b class="nc">&nbsp;        return getByQuery(&quot;SELECT t FROM Template AS t WHERE active = 1 AND client_id = :clientId&quot;,</b>
+&nbsp;            parameters);
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

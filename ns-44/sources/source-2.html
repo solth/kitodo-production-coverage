@@ -1,0 +1,309 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > BatchProcessHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.batch</a>
+</div>
+
+<h1>Coverage Summary for Class: BatchProcessHelper (org.kitodo.production.helper.batch)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BatchProcessHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/70)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.batch;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Batch;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;public class BatchProcessHelper extends BatchHelper {
+&nbsp;    private final List&lt;Process&gt; processes;
+&nbsp;    private final Batch batch;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(BatchProcessHelper.class);</b>
+&nbsp;    private Process currentProcess;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     *
+&nbsp;     * @param batch
+&nbsp;     *            object
+&nbsp;     */
+<b class="nc">&nbsp;    public BatchProcessHelper(Batch batch) {</b>
+<b class="nc">&nbsp;        this.batch = batch;</b>
+<b class="nc">&nbsp;        this.processes = batch.getProcesses();</b>
+<b class="nc">&nbsp;        this.currentProcess = processes.iterator().next();</b>
+<b class="nc">&nbsp;        loadProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get batch.
+&nbsp;     *
+&nbsp;     * @return value of batch
+&nbsp;     */
+&nbsp;    public Batch getBatch() {
+<b class="nc">&nbsp;        return batch;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current process.
+&nbsp;     *
+&nbsp;     * @return value of currentProcess
+&nbsp;     */
+&nbsp;    public Process getCurrentProcess() {
+<b class="nc">&nbsp;        return currentProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set current process.
+&nbsp;     *
+&nbsp;     * @param currentProcess
+&nbsp;     *            as Process
+&nbsp;     */
+&nbsp;    public void setCurrentProcess(Process currentProcess) {
+<b class="nc">&nbsp;        this.currentProcess = currentProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of processes.
+&nbsp;     *
+&nbsp;     * @return list of processes
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; getProcesses() {
+<b class="nc">&nbsp;        return this.processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update list of properties for chosen process.
+&nbsp;     *
+&nbsp;     * @param processId
+&nbsp;     *            id of chosen process
+&nbsp;     */
+&nbsp;    public void updatePropertyList(int processId) {
+<b class="nc">&nbsp;        for (Process process : this.processes) {</b>
+<b class="nc">&nbsp;            if (process.getId().equals(processId)) {</b>
+<b class="nc">&nbsp;                this.currentProcess = process;</b>
+<b class="nc">&nbsp;                loadProcessProperties();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save property for chosen process.
+&nbsp;     */
+&nbsp;    public void saveForChosenProcess() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getProcessService().save(this.currentProcess);</b>
+<b class="nc">&nbsp;            Helper.setMessage(&quot;propertySaved&quot;);</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorSaving&quot;, new Object[] {ObjectType.PROPERTY.getTranslationSingular() }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save property for all processes belonging to the batch.
+&nbsp;     */
+&nbsp;    public void saveForAllProcesses() {
+<b class="nc">&nbsp;        for (Process process : this.processes) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getProcessService().save(process);</b>
+<b class="nc">&nbsp;                Helper.setMessage(&quot;propertiesSaved&quot;);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                String value = Helper.getTranslation(&quot;propertiesForProcessNotSaved&quot;, process.getTitle());</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(value, logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Edit current property for chosen process.
+&nbsp;     */
+&nbsp;    public void editPropertyForOneProcess() {
+<b class="nc">&nbsp;        List&lt;Property&gt; ppList = getProperties();</b>
+<b class="nc">&nbsp;        for (Property pp : ppList) {</b>
+<b class="nc">&nbsp;            this.property = pp;</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;Property&gt; propertyList = this.currentProcess.getProperties();</b>
+<b class="nc">&nbsp;            for (Property processProperty : propertyList) {</b>
+<b class="nc">&nbsp;                if (Objects.isNull(processProperty.getTitle())) {</b>
+<b class="nc">&nbsp;                    this.currentProcess.getProperties().remove(processProperty);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            for (Process process : this.property.getProcesses()) {</b>
+<b class="nc">&nbsp;                if (!process.getProperties().contains(this.property)) {</b>
+<b class="nc">&nbsp;                    process.getProperties().add(this.property);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Edit current property for all processes belonging to the batch.
+&nbsp;     */
+&nbsp;    public void editPropertyForAllProcesses() {
+<b class="nc">&nbsp;        List&lt;Property&gt; ppList = getProperties();</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Property pp : ppList) {</b>
+<b class="nc">&nbsp;            this.property = pp;</b>
+&nbsp;
+<b class="nc">&nbsp;            Property processProperty = new Property();</b>
+<b class="nc">&nbsp;            processProperty.setTitle(this.property.getTitle());</b>
+<b class="nc">&nbsp;            processProperty.setValue(this.property.getValue());</b>
+&nbsp;
+<b class="nc">&nbsp;            for (Process process : this.processes) {</b>
+<b class="nc">&nbsp;                if (!process.equals(this.currentProcess)) {</b>
+<b class="nc">&nbsp;                    process = prepareProcessWithProperty(process, processProperty);</b>
+<b class="nc">&nbsp;                } else if (!process.getProperties().contains(this.property)) {</b>
+<b class="nc">&nbsp;                    process.getProperties().add(this.property);</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                validateProperties(process);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete property for one process.
+&nbsp;     */
+&nbsp;    public void deletePropertyForOneProcess() {
+<b class="nc">&nbsp;        this.property.getProcesses().clear();</b>
+<b class="nc">&nbsp;        this.currentProcess.getProperties().remove(this.property);</b>
+&nbsp;
+<b class="nc">&nbsp;        loadProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete property for all processes belonging to the batch.
+&nbsp;     */
+&nbsp;    public void deletePropertyForAllProcesses() {
+<b class="nc">&nbsp;        this.property.getProcesses().clear();</b>
+<b class="nc">&nbsp;        this.currentProcess.getProperties().remove(this.property);</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Process process : this.processes) {</b>
+<b class="nc">&nbsp;            for (Property property : process.getProperties()) {</b>
+<b class="nc">&nbsp;                if (property.getTitle().equals(this.property.getTitle())</b>
+<b class="nc">&nbsp;                        &amp;&amp; property.getValue().equals(this.property.getValue())) {</b>
+<b class="nc">&nbsp;                    property.getProcesses().clear();</b>
+<b class="nc">&nbsp;                    process.getProperties().remove(property);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        loadProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void loadProcessProperties() {
+<b class="nc">&nbsp;        this.properties = this.currentProcess.getProperties();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

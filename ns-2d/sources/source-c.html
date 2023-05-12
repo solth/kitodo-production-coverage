@@ -1,0 +1,170 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > InvalidMetadataValueException</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.exceptions</a>
+</div>
+
+<h1>Coverage Summary for Class: InvalidMetadataValueException (org.kitodo.exceptions)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">InvalidMetadataValueException</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.exceptions;
+&nbsp;
+&nbsp;import javax.management.InvalidAttributeValueException;
+&nbsp;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;
+&nbsp;/**
+&nbsp; * An error message that can be thrown if a metadata value is invalid.
+&nbsp; */
+&nbsp;public class InvalidMetadataValueException extends InvalidAttributeValueException {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * An identifier for the key whose value is incorrect.
+&nbsp;     */
+&nbsp;    private String key;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The wrong value.
+&nbsp;     */
+&nbsp;    private final String value;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new invalid metadata value exception.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            the (translated) key whose value is incorrect
+&nbsp;     * @param value
+&nbsp;     *            the wrong value
+&nbsp;     */
+<b class="nc">&nbsp;    public InvalidMetadataValueException(String key, String value) {</b>
+<b class="nc">&nbsp;        this.key = key;</b>
+<b class="nc">&nbsp;        this.value = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * When the error occurs on a child metadata element of a parent, while
+&nbsp;     * bubbling up, the exception can be added the name of the parent, so that
+&nbsp;     * the user knows what input is wrong.
+&nbsp;     *
+&nbsp;     * @param parentLabel
+&nbsp;     *            name of the parent which is wrong
+&nbsp;     */
+&nbsp;    public void addParent(String parentLabel) {
+<b class="nc">&nbsp;        key = parentLabel + &quot; » &quot; + key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getLocalizedMessage() {
+<b class="nc">&nbsp;        return Helper.getTranslation(&quot;dataEditor.invalidMetadataValue&quot;, key, value);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getMessage() {
+<b class="nc">&nbsp;        return &quot;Cannot store \&quot;&quot; + key + &quot;\&quot;: The value is invalid. Value: &quot; + value;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

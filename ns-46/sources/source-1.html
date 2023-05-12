@@ -1,0 +1,283 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CustomResourceBundle</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.messages</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomResourceBundle (org.kitodo.production.helper.messages)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomResourceBundle</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (6/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,6%
+  </span>
+  <span class="absValue">
+    (28/44)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.messages;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.net.MalformedURLException;
+&nbsp;import java.net.URL;
+&nbsp;import java.net.URLClassLoader;
+&nbsp;import java.nio.file.Path;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.security.AccessController;
+&nbsp;import java.security.PrivilegedAction;
+&nbsp;import java.util.Enumeration;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.MissingResourceException;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.ResourceBundle;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.production.helper.LocaleHelper;
+&nbsp;
+<b class="nc">&nbsp;abstract class CustomResourceBundle extends ResourceBundle {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(CustomResourceBundle.class);</b>
+&nbsp;    private static URLClassLoader urlClassLoader;
+<b class="fc">&nbsp;    private static Map&lt;String, Boolean&gt; propertiesFileExistsMap = new HashMap&lt;String, Boolean&gt;();</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Enumeration&lt;String&gt; getKeys() {
+<b class="nc">&nbsp;        throw new UnsupportedOperationException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected Object handleGetObject(String key) {
+<b class="nc">&nbsp;        throw new UnsupportedOperationException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create a URLClassLoader that is allowed to load resource bundles from the external directory
+&nbsp;     * containing translated messages and errors (e.g. /usr/local/kitodo/messages).
+&nbsp;
+&nbsp;     * @return instance of URLClassLoader
+&nbsp;     */
+&nbsp;    private static URLClassLoader getURLClassLoader() {
+<b class="fc">&nbsp;        if (Objects.isNull(urlClassLoader)) {</b>
+<b class="fc">&nbsp;            File file = new File(ConfigCore.getParameterOrDefaultValue(ParameterCore.DIR_LOCAL_MESSAGES));</b>
+<b class="fc">&nbsp;            if (file.exists()) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    final URL resourceURL = file.toURI().toURL();</b>
+<b class="fc">&nbsp;                    urlClassLoader = AccessController.doPrivileged(</b>
+<b class="fc">&nbsp;                        (PrivilegedAction&lt;URLClassLoader&gt;) () -&gt; new URLClassLoader(new URL[] { resourceURL })</b>
+&nbsp;                    );
+<b class="nc">&nbsp;                } catch (MalformedURLException e) {</b>
+<b class="nc">&nbsp;                    logger.info(e.getMessage(), e);</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                urlClassLoader = null;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return urlClassLoader;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if properties file for a specfiic external resource bundle does exist.
+&nbsp;     * Remembers existence in static map such that filesystem is not checked repeatedly.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;This check is required because resource bundles seem to always load if an URLClassLoader
+&nbsp;     * could be initialized even if the corresponding properties file in that directory does not 
+&nbsp;     * exist. The resulting resource bundle is simply empty then.&lt;/p&gt;
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;This check allows to only load from URLClassLoader, if the corresponding properties file
+&nbsp;     * actually exists.&lt;/p&gt;
+&nbsp;     * 
+&nbsp;     * @param bundleName the bundle name
+&nbsp;     * @param locale the locale
+&nbsp;     * @return true if properties file for resource bundle exists, else false
+&nbsp;     */
+&nbsp;    private static Boolean externalResourceBundleFileExists(String bundleName, Locale locale) {
+<b class="fc">&nbsp;        String key = bundleName + &quot;_&quot; + locale.getLanguage();</b>
+<b class="fc">&nbsp;        if (!propertiesFileExistsMap.containsKey(key)) {</b>
+<b class="fc">&nbsp;            String directory = ConfigCore.getParameterOrDefaultValue(ParameterCore.DIR_LOCAL_MESSAGES);</b>
+<b class="fc">&nbsp;            Path path = Paths.get(directory, bundleName + &quot;_&quot; + locale.getLanguage() + &quot;.properties&quot;);</b>
+<b class="fc">&nbsp;            File file = path.toFile();</b>
+&nbsp;            
+<b class="fc">&nbsp;            propertiesFileExistsMap.put(key, file.exists());</b>
+&nbsp;
+<b class="fc">&nbsp;            if (!file.exists()) {</b>
+<b class="fc">&nbsp;                logger.info(&quot;Could not find external resource bundle &#39;&quot; + bundleName + &quot;&#39; at &quot; + file);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return propertiesFileExistsMap.get(key);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Loads an external resource bundle (outside jar files) if a corresponding properties file 
+&nbsp;     * exists and an URLClassLoader could be build that has the permissions to load files from 
+&nbsp;     * that directory.
+&nbsp;     * 
+&nbsp;     * @param bundleName the bundle name
+&nbsp;     * @param locale the locale
+&nbsp;     * @return the external resource bundle or null if it does not exist
+&nbsp;     */
+&nbsp;    private static ResourceBundle getExternalResourceBundle(String bundleName, Locale locale) {
+<b class="fc">&nbsp;        if (!externalResourceBundleFileExists(bundleName, locale)) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        URLClassLoader urlLoader = getURLClassLoader();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(urlLoader)) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                return ResourceBundle.getBundle(bundleName, locale, urlLoader);</b>
+<b class="nc">&nbsp;            } catch (MissingResourceException e) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;Could not load external resource bundle &#39;&quot; + bundleName + &quot;&#39;: &quot; + e.getMessage());</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static ResourceBundle getExternalResourceBundle(String bundleName) {
+<b class="nc">&nbsp;        Locale locale = LocaleHelper.getCurrentLocale();</b>
+<b class="nc">&nbsp;        return getExternalResourceBundle(bundleName, locale);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get resource bundle. In case there is a custom version of translation
+&nbsp;     * files load them, if not load the default ones.
+&nbsp;     * 
+&nbsp;     * @param defaultBundleName
+&nbsp;     *            name of the default translation bundle
+&nbsp;     * @param customBundleName
+&nbsp;     *            name of the custom translation bundle
+&nbsp;     * @param locale
+&nbsp;     *            for which translation bundle should be created
+&nbsp;     * @return available translation bundle
+&nbsp;     */
+&nbsp;    public static ResourceBundle getResourceBundle(String defaultBundleName, String customBundleName, Locale locale) {
+<b class="fc">&nbsp;        ResourceBundle bundle = getExternalResourceBundle(customBundleName, locale);</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(bundle)) {</b>
+<b class="fc">&nbsp;            return bundle;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return ResourceBundle.getBundle(defaultBundleName, locale);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Loads default resource bundle (from inside jar files).
+&nbsp;     * @param bundleName the bundle name
+&nbsp;     * @return the resource bundle
+&nbsp;     */
+&nbsp;    protected ResourceBundle getBaseResources(String bundleName) {
+<b class="nc">&nbsp;        return ResourceBundle.getBundle(bundleName, LocaleHelper.getCurrentLocale());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Loads value from external resource bundles (outside jar files).
+&nbsp;     * @param key the key of the resource
+&nbsp;     * @param bundleName the bundle name
+&nbsp;     * @return the value or null if not exists
+&nbsp;     */
+&nbsp;    protected Object getValueFromExternalResourceBundle(String key, String bundleName) {
+<b class="nc">&nbsp;        ResourceBundle bundle = getExternalResourceBundle(bundleName);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(bundle)) {</b>
+<b class="nc">&nbsp;            return bundle.getObject(key);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

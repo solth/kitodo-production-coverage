@@ -1,0 +1,212 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FunctionalDivision</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataeditor.rulesetmanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: FunctionalDivision (org.kitodo.api.dataeditor.rulesetmanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FunctionalDivision</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataeditor.rulesetmanagement;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.TreeSet;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;
+&nbsp;/**
+&nbsp; * Divisions that have a function.
+&nbsp; */
+<b class="nc">&nbsp;public enum FunctionalDivision {</b>
+&nbsp;    /**
+&nbsp;     * Children are created by calendar form.
+&nbsp;     */
+<b class="nc">&nbsp;    CREATE_CHILDREN_WITH_CALENDAR(&quot;createChildrenWithCalendar&quot;),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A division whose children are created from this division directly.
+&nbsp;     */
+<b class="nc">&nbsp;    CREATE_CHILDREN_FROM_PARENT(&quot;createChildrenFromParent&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * With the logger, text can be written to a log file or to the console.
+&nbsp;     */
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(FunctionalDivision.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This character string defines how the special field is to be marked in
+&nbsp;     * the ruleset.
+&nbsp;     */
+&nbsp;    private final String mark;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Since this is an enum, the constructor cannot be called, except from Java
+&nbsp;     * when building the class.
+&nbsp;     *
+&nbsp;     * @param mark
+&nbsp;     *            how the special field is to be marked
+&nbsp;     */
+<b class="nc">&nbsp;    private FunctionalDivision(String mark) {</b>
+<b class="nc">&nbsp;        this.mark = mark;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Iterates over the {@code enum} constants, and if the candidate value has
+&nbsp;     * the searched mark, it is added to the list.
+&nbsp;     *
+&nbsp;     * @param mark
+&nbsp;     *            a character string defining how the special field is to be
+&nbsp;     *            marked in the ruleset
+&nbsp;     * @param to
+&nbsp;     *            object to add value, return value of {@link #valuesOf(String)}
+&nbsp;     * @return whether the loop has to continue
+&nbsp;     */
+&nbsp;    private static boolean addEnumByMark(String mark, Set&lt;FunctionalDivision&gt; to) {
+<b class="nc">&nbsp;        for (FunctionalDivision candidate : FunctionalDivision.values()) {</b>
+<b class="nc">&nbsp;            if (mark.equals(candidate.mark)) {</b>
+<b class="nc">&nbsp;                to.add(candidate);</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a string which defines how the special field is to be marked in
+&nbsp;     * the ruleset.
+&nbsp;     *
+&nbsp;     * @return how the special field is to be marked
+&nbsp;     */
+&nbsp;    public String getMark() {
+<b class="nc">&nbsp;        return mark;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This function is like {@code valueOf(String)}, except that it allows
+&nbsp;     * multiple values in the input string and can return multiple values in the
+&nbsp;     * return value. Unknown strings (misspellings) are reported in logging.
+&nbsp;     *
+&nbsp;     * @param marks
+&nbsp;     *            string to be processed
+&nbsp;     * @return fields
+&nbsp;     */
+&nbsp;    public static Set&lt;FunctionalDivision&gt; valuesOf(String marks) {
+<b class="nc">&nbsp;        Set&lt;FunctionalDivision&gt; values = new TreeSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (String mark : marks.split(&quot;\\s+&quot;, 0)) {</b>
+<b class="nc">&nbsp;            if (addEnumByMark(mark, values)) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            logger.warn(&quot;Ruleset declares undefined division use &#39;{}&#39;, must be one of: {}&quot;, mark,</b>
+<b class="nc">&nbsp;                    Arrays.stream(values()).map(FunctionalDivision::getMark).collect(Collectors.joining(&quot;, &quot;)));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return values;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

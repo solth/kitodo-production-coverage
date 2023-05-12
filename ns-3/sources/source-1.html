@@ -1,0 +1,217 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CommandResult</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.command</a>
+</div>
+
+<h1>Coverage Summary for Class: CommandResult (org.kitodo.api.command)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CommandResult</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (5/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (9/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.command;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;public class CommandResult {
+&nbsp;
+&nbsp;    /** The id of the command. */
+&nbsp;    private Integer id;
+&nbsp;
+&nbsp;    /** The command as a String. */
+&nbsp;    private String command;
+&nbsp;
+&nbsp;    /** If the command execution was successful. */
+&nbsp;    private boolean successful;
+&nbsp;
+&nbsp;    /** The resultMessages. */
+&nbsp;    private List&lt;String&gt; messages;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     * 
+&nbsp;     * @param id
+&nbsp;     *            The id.
+&nbsp;     * @param command
+&nbsp;     *            The command.
+&nbsp;     * @param successful
+&nbsp;     *            If command was successful.
+&nbsp;     * @param messages
+&nbsp;     *            The resultMessages
+&nbsp;     */
+<b class="fc">&nbsp;    public CommandResult(Integer id, String command, boolean successful, List&lt;String&gt; messages) {</b>
+<b class="fc">&nbsp;        this.id = id;</b>
+<b class="fc">&nbsp;        this.command = command;</b>
+<b class="fc">&nbsp;        this.successful = successful;</b>
+<b class="fc">&nbsp;        this.messages = messages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the id.
+&nbsp;     * 
+&nbsp;     * @return The id.
+&nbsp;     */
+&nbsp;    public Integer getId() {
+<b class="fc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the command.
+&nbsp;     * 
+&nbsp;     * @return The command.
+&nbsp;     */
+&nbsp;    public String getCommand() {
+<b class="fc">&nbsp;        return command;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets if command was successful.
+&nbsp;     * 
+&nbsp;     * @return The successful.
+&nbsp;     */
+&nbsp;    public boolean isSuccessful() {
+<b class="fc">&nbsp;        return successful;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the messages.
+&nbsp;     * 
+&nbsp;     * @return The messages.
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getMessages() {
+<b class="fc">&nbsp;        return messages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Indicates whether a CommandResults is &quot;equal to&quot; this one.
+&nbsp;     *
+&nbsp;     * @param object
+&nbsp;     *            The reference CommandResults with which to compare.
+&nbsp;     * @return True if CommandResults are equal.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object object) {
+<b class="nc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (object instanceof CommandResult) {</b>
+<b class="nc">&nbsp;            CommandResult that = (CommandResult) object;</b>
+&nbsp;
+<b class="nc">&nbsp;            return this.id.equals(that.id)</b>
+&nbsp;                    &amp;&amp; this.successful == that.successful
+<b class="nc">&nbsp;                    &amp;&amp; this.command.equals(that.command)</b>
+<b class="nc">&nbsp;                    &amp;&amp; this.messages.equals(that.messages);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="nc">&nbsp;        return Objects.hash(id, successful, command, messages);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

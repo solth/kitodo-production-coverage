@@ -1,0 +1,167 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FilterString</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.enums</a>
+</div>
+
+<h1>Coverage Summary for Class: FilterString (org.kitodo.production.enums)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FilterString</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (20/20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.enums;
+&nbsp;
+<b class="fc">&nbsp;public enum FilterString {</b>
+&nbsp;
+<b class="fc">&nbsp;    TASK(&quot;step:&quot;, &quot;schritt:&quot;),</b>
+<b class="fc">&nbsp;    TASKINWORK(&quot;stepinwork:&quot;, &quot;schrittinarbeit:&quot;),</b>
+<b class="fc">&nbsp;    TASKLOCKED(&quot;steplocked:&quot;, &quot;schrittgesperrt:&quot;),</b>
+<b class="fc">&nbsp;    TASKOPEN(&quot;stepopen:&quot;, &quot;schrittoffen:&quot;),</b>
+<b class="fc">&nbsp;    TASKDONE(&quot;stepdone:&quot;, &quot;schrittabgeschlossen:&quot;),</b>
+<b class="fc">&nbsp;    TASKDONETITLE(&quot;stepdonetitle:&quot;, &quot;abgeschlossenerschritttitel:&quot;),</b>
+<b class="fc">&nbsp;    TASKDONEUSER(&quot;stepdoneuser:&quot;, &quot;abgeschlossenerschrittbenutzer:&quot;),</b>
+<b class="fc">&nbsp;    PROJECT(&quot;project:&quot;, &quot;projekt:&quot;),</b>
+<b class="fc">&nbsp;    ID(&quot;id:&quot;, &quot;id:&quot;),</b>
+<b class="fc">&nbsp;    PARENTPROCESSID(&quot;parentprocessid:&quot;, &quot;elternprozessid:&quot;),</b>
+<b class="fc">&nbsp;    PROCESS(&quot;process:&quot;, &quot;prozess:&quot;),</b>
+<b class="fc">&nbsp;    BATCH(&quot;batch:&quot;, &quot;gruppe:&quot;),</b>
+<b class="fc">&nbsp;    TASKAUTOMATIC(&quot;stepautomatic:&quot;, &quot;schrittautomatisch:&quot;),</b>
+<b class="fc">&nbsp;    PROPERTY(&quot;property:&quot;,&quot;eigenschaft:&quot;);</b>
+&nbsp;
+&nbsp;    private final String filterEnglish;
+&nbsp;    private final String filterGerman;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     *
+&nbsp;     * @param filterEnglish
+&nbsp;     *            English version of filter string
+&nbsp;     * @param filterGerman
+&nbsp;     *            German version of filter string
+&nbsp;     */
+<b class="fc">&nbsp;    FilterString(String filterEnglish, String filterGerman) {</b>
+<b class="fc">&nbsp;        this.filterEnglish = filterEnglish;</b>
+<b class="fc">&nbsp;        this.filterGerman = filterGerman;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get English version of filter string.
+&nbsp;     *
+&nbsp;     * @return English version of filter string
+&nbsp;     */
+&nbsp;    public String getFilterEnglish() {
+<b class="fc">&nbsp;        return filterEnglish;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get German version of filter string.
+&nbsp;     *
+&nbsp;     * @return German version of filter string
+&nbsp;     */
+&nbsp;    public String getFilterGerman() {
+<b class="fc">&nbsp;        return filterGerman;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,204 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ExternalDataImportInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.externaldatamanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: ExternalDataImportInterface (org.kitodo.api.externaldatamanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ExternalDataImportInterface</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.externaldatamanagement;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import javax.swing.event.EventListenerList;
+&nbsp;
+&nbsp;import org.kitodo.api.schemaconverter.DataRecord;
+&nbsp;import org.kitodo.exceptions.NoRecordFoundException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Manages the import of data from an external source.
+&nbsp; */
+&nbsp;public interface ExternalDataImportInterface {
+&nbsp;
+<b class="nc">&nbsp;    EventListenerList externalDataListeners = new EventListenerList();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the full record with the given ID from the catalog.
+&nbsp;     *
+&nbsp;     * @param dataImport
+&nbsp;     *            DataImport object encapsulating all information required to perform the import
+&nbsp;     * @param identifier
+&nbsp;     *            The ID of the record that will be imported.
+&nbsp;     * @return The queried record as Record object.
+&nbsp;     */
+&nbsp;    DataRecord getFullRecordById(DataImport dataImport, String identifier) throws NoRecordFoundException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a list of full records from the query constructed by the given search parameters.
+&nbsp;     *
+&nbsp;     * @param dataImport
+&nbsp;     *            DataImport object encapsulating all information required to perform the import
+&nbsp;     * @param searchField
+&nbsp;     *            search field that will be queried
+&nbsp;     * @param searchValue
+&nbsp;     *            value of search field that will be queried
+&nbsp;     * @param rows
+&nbsp;     *            number of records to be returned
+&nbsp;     * @return list of DataRecords
+&nbsp;     */
+&nbsp;    List&lt;DataRecord&gt; getMultipleFullRecordsFromQuery(DataImport dataImport, String searchField, String searchValue, int rows);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Perform search in catalog with given ID &#39;catalogId&#39; with given search fields
+&nbsp;     * &#39;field&#39; and term &#39;term&#39;. The parameter rows controls how many records should
+&nbsp;     * be returned.
+&nbsp;     *
+&nbsp;     * @param dataImport
+&nbsp;     *            DataImport object encapsulating all information required to perform the import
+&nbsp;     * @param field
+&nbsp;     *            search field that will be queried
+&nbsp;     * @param term
+&nbsp;     *            value of search field that will be queried
+&nbsp;     * @param rows
+&nbsp;     *            number of records to be returned
+&nbsp;     * @return Search result of performed query.
+&nbsp;     */
+&nbsp;    SearchResult search(DataImport dataImport, String field, String term, int rows);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Perform search in catalog with given ID &#39;catalogId&#39; with given search fields
+&nbsp;     * &#39;field&#39; and term &#39;term&#39;. The parameter rows controls how many records should
+&nbsp;     * be returned. The parameter &#39;start&#39; controls the index of the first hit.
+&nbsp;     *
+&nbsp;     * @param dataImport
+&nbsp;     *            DataImport object encapsulating all information required to perform the import
+&nbsp;     * @param field
+&nbsp;     *            search field that will be queried
+&nbsp;     * @param term
+&nbsp;     *            value of search field that will be queried
+&nbsp;     * @param rows
+&nbsp;     *            number of records to be returned
+&nbsp;     * @param start
+&nbsp;     *            index of the first record to be returned
+&nbsp;     * @return Search result of performed query.
+&nbsp;     */
+&nbsp;    SearchResult search(DataImport dataImport, String field, String term, int start, int rows);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Searches for Data in a given source by term and field.
+&nbsp;     *
+&nbsp;     * @param ids
+&nbsp;     *            The ids from the entries to get.
+&nbsp;     * @param catalogId
+&nbsp;     *            ID of the catalog that will be queried.
+&nbsp;     * @return A list of result data.
+&nbsp;     */
+&nbsp;    Collection&lt;SingleHit&gt; getMultipleEntriesById(Collection&lt;String&gt; ids, String catalogId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

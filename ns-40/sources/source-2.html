@@ -1,0 +1,549 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MassImportForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.massimport</a>
+</div>
+
+<h1>Coverage Summary for Class: MassImportForm (org.kitodo.production.forms.massimport)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MassImportForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/37)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/109)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.massimport;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.faces.view.ViewScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.exceptions.ImportException;
+&nbsp;import org.kitodo.production.forms.BaseForm;
+&nbsp;import org.kitodo.production.forms.CsvRecord;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;import org.kitodo.production.services.data.MassImportService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;import org.primefaces.event.FileUploadEvent;
+&nbsp;import org.primefaces.model.file.UploadedFile;
+&nbsp;
+&nbsp;@Named(&quot;MassImportForm&quot;)
+&nbsp;@ViewScoped
+<b class="nc">&nbsp;public class MassImportForm extends BaseForm {</b>
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(MassImportForm.class);</b>
+&nbsp;
+&nbsp;    private int projectId;
+&nbsp;    private int templateId;
+&nbsp;    private String templateTitle;
+&nbsp;    private ImportConfiguration importConfiguration;
+&nbsp;    private UploadedFile file;
+<b class="nc">&nbsp;    private String csvSeparator = &quot;;&quot;;</b>
+<b class="nc">&nbsp;    private String previousCsvSeparator = null;</b>
+<b class="nc">&nbsp;    private List&lt;String&gt; metadataKeys = new LinkedList&lt;&gt;(Collections.singletonList(&quot;ID&quot;));</b>
+<b class="nc">&nbsp;    private List&lt;CsvRecord&gt; records = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;    private final List&lt;Character&gt; csvSeparatorCharacters = Arrays.asList(&#39;,&#39;, &#39;;&#39;);</b>
+<b class="nc">&nbsp;    private final MassImportService massImportService = ServiceManager.getMassImportService();</b>
+<b class="nc">&nbsp;    private final AddMetadataDialog addMetadataDialog = new AddMetadataDialog(this);</b>
+<b class="nc">&nbsp;    private HashMap&lt;String, String&gt; importSuccessMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;    private Integer progress = 0;</b>
+<b class="nc">&nbsp;    private Boolean rulesetConfigurationForOpacImportComplete = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prepare mass import.
+&nbsp;     *
+&nbsp;     * @param templateId ID of template used to create processes during mass import
+&nbsp;     * @param projectId ID of project for which processes are created
+&nbsp;     */
+&nbsp;    public void prepareMassImport(int templateId, int projectId) {
+<b class="nc">&nbsp;        this.projectId = projectId;</b>
+<b class="nc">&nbsp;        this.templateId = templateId;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            Template template = ServiceManager.getTemplateService().getById(templateId);</b>
+<b class="nc">&nbsp;            templateTitle = template.getTitle();</b>
+<b class="nc">&nbsp;            RulesetManagementInterface ruleset = ServiceManager.getRulesetService().openRuleset(template.getRuleset());</b>
+<b class="nc">&nbsp;            addMetadataDialog.setRulesetManagement(ruleset);</b>
+<b class="nc">&nbsp;            checkRecordIdentifierConfigured(ruleset);</b>
+<b class="nc">&nbsp;        } catch (DAOException | IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void checkRecordIdentifierConfigured(RulesetManagementInterface ruleset) {
+<b class="nc">&nbsp;        if (Objects.isNull(rulesetConfigurationForOpacImportComplete)) {</b>
+<b class="nc">&nbsp;            rulesetConfigurationForOpacImportComplete = ServiceManager.getImportService()</b>
+<b class="nc">&nbsp;                    .isRecordIdentifierMetadataConfigured(ruleset);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!rulesetConfigurationForOpacImportComplete) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;recordIdentifierMissingDialog&#39;).show();&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Handle file upload.
+&nbsp;     *
+&nbsp;     * @param event FileUploadEvent to handle
+&nbsp;     */
+&nbsp;    public void handleFileUpload(FileUploadEvent event) {
+<b class="nc">&nbsp;        file = event.getFile();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            List&lt;String&gt; csvLines = massImportService.getLines(file);</b>
+<b class="nc">&nbsp;            resetValues();</b>
+<b class="nc">&nbsp;            if (!csvLines.isEmpty()) {</b>
+<b class="nc">&nbsp;                metadataKeys = new LinkedList&lt;&gt;(Arrays.asList(csvLines.get(0).split(csvSeparator, -1)));</b>
+<b class="nc">&nbsp;                if (csvLines.size() &gt; 1) {</b>
+<b class="nc">&nbsp;                    records = massImportService.parseLines(csvLines.subList(1, csvLines.size()), csvSeparator);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void resetValues() {
+<b class="nc">&nbsp;        metadataKeys = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        records = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        importSuccessMap = new HashMap&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Event listender function called when user switches CSV separator character used to split text lines into cells.
+&nbsp;     */
+&nbsp;    public void changeSeparator() {
+<b class="nc">&nbsp;        metadataKeys = List.of(String.join(previousCsvSeparator, metadataKeys).split(csvSeparator));</b>
+<b class="nc">&nbsp;        records = massImportService.updateSeparator(records, previousCsvSeparator, csvSeparator);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add new CSV lines.
+&nbsp;     */
+&nbsp;    public void addRecord() {
+<b class="nc">&nbsp;        records.add(new CsvRecord(metadataKeys.size()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove CSV record.
+&nbsp;     *
+&nbsp;     * @param csvRecord CSV record to remove
+&nbsp;     */
+&nbsp;    public void removeLine(CsvRecord csvRecord) {
+<b class="nc">&nbsp;        records.remove(csvRecord);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Import all records from list.
+&nbsp;     */
+&nbsp;    public void startMassImport() {
+<b class="nc">&nbsp;        importSuccessMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        PrimeFaces.current().ajax().update(&quot;massImportResultDialog&quot;);</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            Map&lt;String, Map&lt;String, String&gt;&gt; presetMetadata = massImportService.prepareMetadata(metadataKeys, records);</b>
+<b class="nc">&nbsp;            importRecords(presetMetadata);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;massImportResultDialog&#39;).show();&quot;);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().ajax().update(&quot;massImportResultDialog&quot;);</b>
+<b class="nc">&nbsp;        } catch (ImportException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prepare massimport by resetting progress and import success map.
+&nbsp;     */
+&nbsp;    public void prepare() {
+<b class="nc">&nbsp;        progress = 0;</b>
+<b class="nc">&nbsp;        importSuccessMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        PrimeFaces.current().ajax().update(&quot;massImportProgressForm:massImportProgress&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Import records by ID and add preset metadata.
+&nbsp;     *
+&nbsp;     * @param processMetadata Map containing record IDs as keys and preset metadata lists as values
+&nbsp;     */
+&nbsp;    private void importRecords(Map&lt;String, Map&lt;String, String&gt;&gt; processMetadata) {
+<b class="nc">&nbsp;        ImportService importService = ServiceManager.getImportService();</b>
+<b class="nc">&nbsp;        PrimeFaces.current().ajax().update(&quot;massImportProgressDialog&quot;);</b>
+<b class="nc">&nbsp;        for (Map.Entry&lt;String, Map&lt;String, String&gt;&gt; entry : processMetadata.entrySet()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                importService.importProcess(entry.getKey(), projectId, templateId, importConfiguration,</b>
+<b class="nc">&nbsp;                        entry.getValue());</b>
+<b class="nc">&nbsp;                importSuccessMap.put(entry.getKey(), null);</b>
+<b class="nc">&nbsp;            } catch (ImportException e) {</b>
+<b class="nc">&nbsp;                importSuccessMap.put(entry.getKey(), e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            PrimeFaces.current().ajax().update(&quot;massImportProgressDialog&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get column header for column with index &quot;columnIndex&quot;.
+&nbsp;     *
+&nbsp;     * @param columnIndex index of column for which column header is returned
+&nbsp;     * @return column header
+&nbsp;     */
+&nbsp;    public String getColumnHeader(Integer columnIndex) {
+<b class="nc">&nbsp;        if (columnIndex &lt; metadataKeys.size()) {</b>
+<b class="nc">&nbsp;            return metadataKeys.get(columnIndex);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get projectId.
+&nbsp;     *
+&nbsp;     * @return value of projectId
+&nbsp;     */
+&nbsp;    public int getProjectId() {
+<b class="nc">&nbsp;        return projectId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set projectId.
+&nbsp;     *
+&nbsp;     * @param projectId
+&nbsp;     *            as int
+&nbsp;     */
+&nbsp;    public void setProjectId(int projectId) {
+<b class="nc">&nbsp;        this.projectId = projectId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get templateId.
+&nbsp;     *
+&nbsp;     * @return value of templateId
+&nbsp;     */
+&nbsp;    public int getTemplateId() {
+<b class="nc">&nbsp;        return templateId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set templateId.
+&nbsp;     *
+&nbsp;     * @param templateId
+&nbsp;     *            as int
+&nbsp;     */
+&nbsp;    public void setTemplateId(int templateId) {
+<b class="nc">&nbsp;        this.templateId = templateId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get importConfiguration.
+&nbsp;     *
+&nbsp;     * @return value of importConfiguration
+&nbsp;     */
+&nbsp;    public ImportConfiguration getImportConfigurationId() {
+<b class="nc">&nbsp;        return importConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set importConfiguration.
+&nbsp;     *
+&nbsp;     * @param importConfiguration
+&nbsp;     *            as ImportConfiguration
+&nbsp;     */
+&nbsp;    public void setImportConfigurationId(ImportConfiguration importConfiguration) {
+<b class="nc">&nbsp;        this.importConfiguration = importConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get file.
+&nbsp;     *
+&nbsp;     * @return value of file
+&nbsp;     */
+&nbsp;    public UploadedFile getFile() {
+<b class="nc">&nbsp;        return file;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set file.
+&nbsp;     *
+&nbsp;     * @param file
+&nbsp;     *            as org.primefaces.model.UploadedFile
+&nbsp;     */
+&nbsp;    public void setFile(UploadedFile file) {
+<b class="nc">&nbsp;        this.file = file;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get csvSeparator.
+&nbsp;     *
+&nbsp;     * @return value of csvSeparator
+&nbsp;     */
+&nbsp;    public String getCsvSeparator() {
+<b class="nc">&nbsp;        return csvSeparator;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set csvSeparator.
+&nbsp;     *
+&nbsp;     * @param csvSeparator as java.lang.String
+&nbsp;     */
+&nbsp;    public void setCsvSeparator(String csvSeparator) {
+<b class="nc">&nbsp;        this.previousCsvSeparator = this.csvSeparator;</b>
+<b class="nc">&nbsp;        this.csvSeparator = csvSeparator;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get metadataKeys.
+&nbsp;     *
+&nbsp;     * @return value of metadataKeys
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getMetadataKeys() {
+<b class="nc">&nbsp;        return metadataKeys;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set metadataKeys.
+&nbsp;     *
+&nbsp;     * @param metadataKeys as List of String
+&nbsp;     */
+&nbsp;    public void setMetadataKeys(List&lt;String&gt; metadataKeys) {
+<b class="nc">&nbsp;        this.metadataKeys = metadataKeys;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get records.
+&nbsp;     *
+&nbsp;     * @return value of records
+&nbsp;     */
+&nbsp;    public List&lt;CsvRecord&gt; getRecords() {
+<b class="nc">&nbsp;        return records;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set records.
+&nbsp;     *
+&nbsp;     * @param records as List of CsvRecord
+&nbsp;     */
+&nbsp;    public void setRecords(List&lt;CsvRecord&gt; records) {
+<b class="nc">&nbsp;        this.records = records;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get csvSeparatorCharacters.
+&nbsp;     *
+&nbsp;     * @return value of csvSeparatorCharacters
+&nbsp;     */
+&nbsp;    public List&lt;Character&gt; getCsvSeparatorCharacters() {
+<b class="nc">&nbsp;        return csvSeparatorCharacters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get templateTitle.
+&nbsp;     *
+&nbsp;     * @return value of templateTitle
+&nbsp;     */
+&nbsp;    public String getTemplateTitle() {
+<b class="nc">&nbsp;        return templateTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets addMetadataDialog.
+&nbsp;     *
+&nbsp;     * @return value of addMetadataDialog
+&nbsp;     */
+&nbsp;    public AddMetadataDialog getAddMetadataDialog() {
+<b class="nc">&nbsp;        return addMetadataDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list IDs of successfully imported processes.
+&nbsp;     *
+&nbsp;     * @return list of IDs of successfully import processes
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getSuccessfulImports() {
+<b class="nc">&nbsp;        if (Objects.nonNull(importSuccessMap)) {</b>
+<b class="nc">&nbsp;            return importSuccessMap.entrySet().stream().filter(entry -&gt; Objects.isNull(entry.getValue()))</b>
+<b class="nc">&nbsp;                    .map(Map.Entry::getKey).collect(Collectors.toList());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return Collections.emptyList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of IDs failed imports.
+&nbsp;     *
+&nbsp;     * @return list of IDs of failed imports
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getFailedImports() {
+<b class="nc">&nbsp;        if (Objects.nonNull(importSuccessMap)) {</b>
+<b class="nc">&nbsp;            return importSuccessMap.entrySet().stream().filter(entry -&gt; Objects.nonNull(entry.getValue()))</b>
+<b class="nc">&nbsp;                    .map(Map.Entry::getKey).collect(Collectors.toList());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return Collections.emptyList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get error message of import with ID &#39;recordId&#39;. Return &#39;null&#39; if record was imported without error.
+&nbsp;     *
+&nbsp;     * @param recordId ID of record for which error message is returned
+&nbsp;     * @return error message of import for ID &#39;recordId&#39;; returns &#39;null&#39; if no error occurred
+&nbsp;     */
+&nbsp;    public String getImportErrorMessage(String recordId) {
+<b class="nc">&nbsp;        return importSuccessMap.get(recordId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove metadata key and CsvCells with given index from list of metadata keys and all current CsvRecords.
+&nbsp;     *
+&nbsp;     * @param index index of metadata key and CsvCells to remove
+&nbsp;     */
+&nbsp;    public void removeMetadata(int index) {
+<b class="nc">&nbsp;        if (index &lt; metadataKeys.size()) {</b>
+<b class="nc">&nbsp;            metadataKeys.remove(index);</b>
+<b class="nc">&nbsp;            for (CsvRecord csvRecord : records) {</b>
+<b class="nc">&nbsp;                csvRecord.getCsvCells().remove(index);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get mass import progress.
+&nbsp;     *
+&nbsp;     * @return mass import progress
+&nbsp;     */
+&nbsp;    public int getProgress() {
+<b class="nc">&nbsp;        if (records.isEmpty()) {</b>
+<b class="nc">&nbsp;            progress = 0;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            progress = (importSuccessMap.size() * 100) / records.size();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        PrimeFaces.current().ajax().update(&quot;massImportProgressForm:massImportProgress&quot;);</b>
+<b class="nc">&nbsp;        return progress;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get number of already imported records.
+&nbsp;     *
+&nbsp;     * @return number of imported records
+&nbsp;     */
+&nbsp;    public int getNumberOfProcessesRecords() {
+<b class="nc">&nbsp;        return importSuccessMap.size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get rulesetConfigurationForOpacImportComplete.
+&nbsp;     *
+&nbsp;     * @return value of rulesetConfigurationForOpacImportComplete
+&nbsp;     */
+&nbsp;    public Boolean getRulesetConfigurationForOpacImportComplete() {
+<b class="nc">&nbsp;        return rulesetConfigurationForOpacImportComplete;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

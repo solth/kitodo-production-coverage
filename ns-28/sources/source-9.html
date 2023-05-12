@@ -1,0 +1,580 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > NestedKeyView</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset</a>
+</div>
+
+<h1>Coverage Summary for Class: NestedKeyView (org.kitodo.dataeditor.ruleset)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NestedKeyView</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,5%
+  </span>
+  <span class="absValue">
+    (86/91)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.TreeMap;
+&nbsp;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.ComplexMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.Domain;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewWithValuesInterface;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Key;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Ruleset;
+&nbsp;
+&nbsp;/**
+&nbsp; * A nested key view opens a view of a nested key. This is a key that breaks
+&nbsp; * down into subkey.
+&nbsp; *
+&nbsp; * @param &lt;D&gt;
+&nbsp; *            Type of declaration. Normally a key declaration, but since the
+&nbsp; *            division view is also a nested key view, it will then be a
+&nbsp; *            division declaration.
+&nbsp; */
+&nbsp;class NestedKeyView&lt;D extends KeyDeclaration&gt; extends AbstractKeyView&lt;D&gt; implements ComplexMetadataViewInterface {
+&nbsp;    /**
+&nbsp;     * Marks keys for which the user has requested an additional blank field.
+&nbsp;     * This process can be parallelized because the auxiliary table is not
+&nbsp;     * changed. Apart from the parallelization, the implementation has the same
+&nbsp;     * meaning with the following code:
+&nbsp;     *
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * for (String additionallySelectedKey : additionallySelectedKeys) {
+&nbsp;     *     auxiliaryTable.get(additionallySelectedKey).addOneAdditionalField();
+&nbsp;     * }
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     *
+&nbsp;     * @param &lt;V&gt;
+&nbsp;     *            the type of metadata values
+&nbsp;     * @param additionallySelectedKeys
+&nbsp;     *            key for which the user has requested an additional blank field
+&nbsp;     * @param auxiliaryTable
+&nbsp;     *            auxiliary table
+&nbsp;     * @throws NullPointerException
+&nbsp;     *             When the API caller tries to add a field that does not exist
+&nbsp;     *             in the ruleset.
+&nbsp;     */
+&nbsp;    private static &lt;V&gt; void addFieldsForAdditionallySelectedKeys(Collection&lt;String&gt; additionallySelectedKeys,
+&nbsp;                                                                 LinkedHashMap&lt;String,
+&nbsp;                                                                         AuxiliaryTableRow&gt; auxiliaryTable) {
+&nbsp;
+<b class="fc">&nbsp;        additionallySelectedKeys.parallelStream().map(auxiliaryTable::get)</b>
+<b class="fc">&nbsp;                .forEach(AuxiliaryTableRow::addOneAdditionalField);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Appends the rows to the auxiliary table. Since the order of the rows is
+&nbsp;     * relevant, you cannot parallelize here.
+&nbsp;     *
+&nbsp;     * @param rows
+&nbsp;     *            rows to append
+&nbsp;     * @param auxiliaryTable
+&nbsp;     *            auxiliary table to append to
+&nbsp;     */
+&nbsp;    private static void appendRowsToAuxiliaryTable(Collection&lt;AuxiliaryTableRow&gt; rows,
+&nbsp;                                                   LinkedHashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTable) {
+&nbsp;
+<b class="fc">&nbsp;        for (AuxiliaryTableRow auxiliaryTableRow : rows) {</b>
+<b class="fc">&nbsp;            auxiliaryTable.put(auxiliaryTableRow.getId(), auxiliaryTableRow);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sorts the table by copying it into a TreeMap with the translated label as
+&nbsp;     * the key. The label will also be appended with the id if there are ever
+&nbsp;     * two metadata keys with the same label in the rule set. Since TreeMap is
+&nbsp;     * not thread safe, it cannot be parallelized here.
+&nbsp;     *
+&nbsp;     * @param &lt;V&gt;
+&nbsp;     *            the type of metadata values
+&nbsp;     * @param auxiliaryTableToBeSorted
+&nbsp;     *            auxiliary table to be sorted
+&nbsp;     * @param priorityList
+&nbsp;     *            the wish list of the user’s preferred human language
+&nbsp;     * @return sorted list of fields
+&nbsp;     */
+&nbsp;    private static &lt;V&gt; Collection&lt;AuxiliaryTableRow&gt; sort(
+&nbsp;            HashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTableToBeSorted, List&lt;LanguageRange&gt; priorityList) {
+&nbsp;
+<b class="fc">&nbsp;        TreeMap&lt;String, AuxiliaryTableRow&gt; sorted = new TreeMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (AuxiliaryTableRow auxiliaryTableRow : auxiliaryTableToBeSorted.values()) {</b>
+<b class="fc">&nbsp;            sorted.put(auxiliaryTableRow.getLabel(priorityList) + &#39;\037&#39; + auxiliaryTableRow.getId(),</b>
+&nbsp;                auxiliaryTableRow);
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return sorted.values();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the nested key view is a division.
+&nbsp;     */
+&nbsp;    protected boolean division;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The ruleset.
+&nbsp;     */
+&nbsp;    protected Ruleset ruleset;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The settings.
+&nbsp;     */
+&nbsp;    protected Settings settings;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Manufacturer for a nested subkey. As you can see from the constructor
+&nbsp;     * being private, this shows that it is called only from this class to
+&nbsp;     * create a nested subkey view for a nested key view. In that case, this is
+&nbsp;     * always a grouped metadata.
+&nbsp;     *
+&nbsp;     * @param ruleset
+&nbsp;     *            the ruleset
+&nbsp;     * @param declaration
+&nbsp;     *            the declaration
+&nbsp;     * @param rule
+&nbsp;     *            the rule
+&nbsp;     * @param settings
+&nbsp;     *            the settings
+&nbsp;     * @param priorityList
+&nbsp;     *            the user’s wish list for the best possible translation
+&nbsp;     */
+&nbsp;    public NestedKeyView(Ruleset ruleset, D declaration, Rule rule, Settings settings,
+&nbsp;            List&lt;LanguageRange&gt; priorityList) {
+&nbsp;
+<b class="fc">&nbsp;        super(declaration, rule, priorityList);</b>
+<b class="fc">&nbsp;        this.ruleset = ruleset;</b>
+<b class="fc">&nbsp;        this.settings = settings;</b>
+<b class="fc">&nbsp;        this.division = false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new nested key view. Showing that the constructor is protected
+&nbsp;     * shows that it is being used by a subclass, that’s division view. A
+&nbsp;     * division view is a nested key view with additional division function.
+&nbsp;     *
+&nbsp;     * @param ruleset
+&nbsp;     *            the ruleset
+&nbsp;     * @param divisionDeclaration
+&nbsp;     *            the division declaration
+&nbsp;     * @param rule
+&nbsp;     *            the rule
+&nbsp;     * @param settings
+&nbsp;     *            the settings
+&nbsp;     * @param priorityList
+&nbsp;     *            the user’s wish list for the best possible translation
+&nbsp;     * @param division
+&nbsp;     *            Whether it is a division. Always true. This is a marker
+&nbsp;     *            parameter because two different constructors in Java can only
+&nbsp;     *            differ in their parameters and otherwise they would be the
+&nbsp;     *            same.
+&nbsp;     */
+&nbsp;    protected NestedKeyView(Ruleset ruleset, D divisionDeclaration, Rule rule, Settings settings,
+&nbsp;            List&lt;LanguageRange&gt; priorityList, boolean division) {
+<b class="fc">&nbsp;        super(divisionDeclaration, rule, priorityList);</b>
+&nbsp;
+<b class="fc">&nbsp;        this.ruleset = ruleset;</b>
+<b class="fc">&nbsp;        this.settings = settings;</b>
+<b class="fc">&nbsp;        this.division = division;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds any permission rules the children of the restriction rule used here
+&nbsp;     * are added to the table, as they affect the representation of the
+&nbsp;     * children.
+&nbsp;     *
+&nbsp;     * @param auxiliaryTable
+&nbsp;     *            auxiliary table
+&nbsp;     */
+&nbsp;    private void addAnyRules(LinkedHashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTable) {
+&nbsp;
+<b class="fc">&nbsp;        auxiliaryTable.entrySet().parallelStream().forEach(entry -&gt; entry.getValue()</b>
+<b class="fc">&nbsp;                .setRule(rule.getRuleForKey(entry.getKey(), division)));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds the keys selected by the user to be added to the list of keys to
+&nbsp;     * add. This procedure is a part of the function to
+&nbsp;     * {@link #createAuxiliaryTableWithKeysToBeSorted(LinkedHashMap, Rule, Collection, Collection)}.
+&nbsp;     *
+&nbsp;     * @param auxiliaryTable
+&nbsp;     *            the target table. If the key is already here, it will not be
+&nbsp;     *            added a second time.
+&nbsp;     * @param rule
+&nbsp;     *            the rule provides the key
+&nbsp;     * @param additionalKeys
+&nbsp;     *            list of the key marked as being added by the user
+&nbsp;     * @param toBeSorted
+&nbsp;     *            write access to the list of keys to be sorted
+&nbsp;     */
+&nbsp;    private void addAdditionalKeys(LinkedHashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTable,
+&nbsp;                                   Rule rule, Collection&lt;String&gt; additionalKeys,
+&nbsp;                                   HashMap&lt;String, AuxiliaryTableRow&gt; toBeSorted) {
+<b class="fc">&nbsp;        for (String additionalKey : additionalKeys) {</b>
+<b class="fc">&nbsp;            if (!auxiliaryTable.containsKey(additionalKey) &amp;&amp; !toBeSorted.containsKey(additionalKey)) {</b>
+<b class="nc">&nbsp;                Optional&lt;Key&gt; optionalKey = rule.isUnspecifiedUnrestricted() ? Optional.empty()</b>
+<b class="nc">&nbsp;                        : ruleset.getKey(additionalKey);</b>
+<b class="nc">&nbsp;                KeyDeclaration keyDeclaration = optionalKey.map(key -&gt; new KeyDeclaration(ruleset, key))</b>
+<b class="nc">&nbsp;                        .orElseGet(() -&gt; new KeyDeclaration(ruleset, additionalKey));</b>
+<b class="nc">&nbsp;                toBeSorted.put(additionalKey, new AuxiliaryTableRow(keyDeclaration, settings));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the rule is unspecified unrestricted, the remaining keys are added to
+&nbsp;     * the keys to be sorted. This procedure is a part of the function to
+&nbsp;     * {@link #createAuxiliaryTableWithKeysToBeSorted(LinkedHashMap, Rule, Collection, Collection)}.
+&nbsp;     *
+&nbsp;     * @param auxiliaryTable
+&nbsp;     *            the target table. If the key is already here, it will not be
+&nbsp;     *            added a second time.
+&nbsp;     * @param keyDeclarations
+&nbsp;     *            the keys to be checked
+&nbsp;     * @param toBeSorted
+&nbsp;     *            write access to the list of keys to be sorted
+&nbsp;     */
+&nbsp;    private void addRemainingKeys(LinkedHashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTable,
+&nbsp;                                  Collection&lt;KeyDeclaration&gt; keyDeclarations,
+&nbsp;                                  HashMap&lt;String, AuxiliaryTableRow&gt; toBeSorted) {
+<b class="fc">&nbsp;        for (KeyDeclaration keyDeclaration : keyDeclarations) {</b>
+<b class="fc">&nbsp;            if (!auxiliaryTable.containsKey(keyDeclaration.getId())) {</b>
+<b class="fc">&nbsp;                toBeSorted.put(keyDeclaration.getId(), new AuxiliaryTableRow(keyDeclaration, settings));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates an auxiliary table for additional keys. These will later be
+&nbsp;     * sorted alphabetically and the key will be added below the given order.
+&nbsp;     * This table contains values if there is no restriction rule or if the
+&nbsp;     * restriction rule specifies unspecified as unrestricted. Otherwise the
+&nbsp;     * table is empty for now. However, it can still receive elements in the
+&nbsp;     * further course, namely when metadata entries name a key that is not
+&nbsp;     * specified in the rule set. Then in this table namely for undefined key
+&nbsp;     * views are created.
+&nbsp;     *
+&nbsp;     * @param auxiliaryTable
+&nbsp;     *            table with already pre-sorted keys. Keys that are in this
+&nbsp;     *            table are not included in the table of keys yet to be sorted.
+&nbsp;     * @param rule
+&nbsp;     *            optionally a rule
+&nbsp;     * @param keyDeclarations
+&nbsp;     *            all key declarations
+&nbsp;     * @param additionalKeys
+&nbsp;     *            which keys the user has additionally selected
+&nbsp;     * @return an auxiliary table for additional keys yet to be sorted
+&nbsp;     */
+&nbsp;    private HashMap&lt;String, AuxiliaryTableRow&gt; createAuxiliaryTableWithKeysToBeSorted(
+&nbsp;            LinkedHashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTable, Rule rule,
+&nbsp;            Collection&lt;KeyDeclaration&gt; keyDeclarations, Collection&lt;String&gt; additionalKeys) {
+&nbsp;
+<b class="fc">&nbsp;        HashMap&lt;String, AuxiliaryTableRow&gt; toBeSorted = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (rule.isUnspecifiedUnrestricted()) {</b>
+<b class="fc">&nbsp;            addRemainingKeys(auxiliaryTable, keyDeclarations, toBeSorted);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        addAdditionalKeys(auxiliaryTable, rule, additionalKeys, toBeSorted);</b>
+<b class="fc">&nbsp;        return toBeSorted;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This is actually a major part of the functionality of this class that
+&nbsp;     * generates the helper table. You can see that here the individual
+&nbsp;     * functions are called from the class.
+&nbsp;     *
+&nbsp;     * @param currentEntries
+&nbsp;     *            which metadata are present in the view
+&nbsp;     * @param additionalKeys
+&nbsp;     *            which keys the user has additionally selected
+&nbsp;     * @return A helper table for all metadata keys
+&nbsp;     */
+&nbsp;    private Collection&lt;AuxiliaryTableRow&gt; createAuxiliaryTable(Collection&lt;Metadata&gt; currentEntries,
+&nbsp;            Collection&lt;String&gt; additionalKeys) {
+&nbsp;
+<b class="fc">&nbsp;        LinkedHashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTable = createAuxiliaryTableWithPreSortedKeys(</b>
+<b class="fc">&nbsp;            rule.getExplicitlyPermittedKeys(declaration));</b>
+<b class="fc">&nbsp;        HashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTableToBeSorted = createAuxiliaryTableWithKeysToBeSorted(</b>
+<b class="fc">&nbsp;            auxiliaryTable, rule, declaration.getKeyDeclarations(), additionalKeys);</b>
+<b class="fc">&nbsp;        storeValues(currentEntries, auxiliaryTable, auxiliaryTableToBeSorted);</b>
+<b class="fc">&nbsp;        appendRowsToAuxiliaryTable(sort(auxiliaryTableToBeSorted, priorityList), auxiliaryTable);</b>
+<b class="fc">&nbsp;        addAnyRules(auxiliaryTable);</b>
+<b class="fc">&nbsp;        addFieldsForAdditionallySelectedKeys(additionalKeys, auxiliaryTable);</b>
+<b class="fc">&nbsp;        return auxiliaryTable.values();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates the auxiliary table with the keys already specified by the
+&nbsp;     * restriction rule in their order. Since the order of the keys is relevant,
+&nbsp;     * you cannot parallelize them here.
+&nbsp;     *
+&nbsp;     * @param explicitlyPermittedKeys
+&nbsp;     *            keys given in their order by the restriction rule
+&nbsp;     * @return the auxiliary table
+&nbsp;     */
+&nbsp;    private LinkedHashMap&lt;String, AuxiliaryTableRow&gt; createAuxiliaryTableWithPreSortedKeys(
+&nbsp;            List&lt;KeyDeclaration&gt; explicitlyPermittedKeys) {
+&nbsp;
+<b class="fc">&nbsp;        LinkedHashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTable = new LinkedHashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (KeyDeclaration keyDeclaration : explicitlyPermittedKeys) {</b>
+<b class="fc">&nbsp;            auxiliaryTable.put(keyDeclaration.getId(), new AuxiliaryTableRow(keyDeclaration, settings));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return auxiliaryTable;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Here the addable metadata keys are fetched. To do this, the table must
+&nbsp;     * first be made and then an output made.
+&nbsp;     *
+&nbsp;     * @param currentEntries
+&nbsp;     *            metadata objects that have already been entered, along with
+&nbsp;     *            their key
+&nbsp;     * @param additionalKeys
+&nbsp;     *            metadata keys that the user has already selected
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Collection&lt;MetadataViewInterface&gt; getAddableMetadata(Collection&lt;Metadata&gt; currentEntries,
+&nbsp;            Collection&lt;String&gt; additionalKeys) {
+&nbsp;
+<b class="fc">&nbsp;        return getPossibleMetadata(currentEntries, additionalKeys, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Collection&lt;MetadataViewInterface&gt; getPossibleMetadata(Collection&lt;Metadata&gt; currentEntries,
+&nbsp;            Collection&lt;String&gt; additionalKeys, boolean all) {
+&nbsp;
+<b class="fc">&nbsp;        Collection&lt;MetadataViewInterface&gt; addableMetadata = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (AuxiliaryTableRow auxiliaryTableRow : createAuxiliaryTable(currentEntries, additionalKeys)) {</b>
+<b class="fc">&nbsp;            if (all || auxiliaryTableRow.isPossibleToExpandAnotherField()) {</b>
+<b class="fc">&nbsp;                addableMetadata.add(rowToView(auxiliaryTableRow));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return addableMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a full list of all metadata entries that are allowed as children
+&nbsp;     * of this nested key view.
+&nbsp;     *
+&nbsp;     * @return all allowed children
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Collection&lt;MetadataViewInterface&gt; getAllowedMetadata() {
+<b class="fc">&nbsp;        return getPossibleMetadata(Collections.emptyList(), Collections.emptySet(), true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a metadata view for one line of the auxiliary table.
+&nbsp;     *
+&nbsp;     * @param row
+&nbsp;     *            row to make a view for
+&nbsp;     * @return metadata view
+&nbsp;     */
+&nbsp;    private MetadataViewInterface rowToView(AuxiliaryTableRow row) {
+<b class="fc">&nbsp;        return row.isComplexKey() ? getNestedKeyView(row.getId())</b>
+<b class="fc">&nbsp;                : new KeyView(row.getKey(), rule.getRuleForKey(row.getId(), division), settings, priorityList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a key view for a grouped key. This is the case when when
+&nbsp;     * {@code &lt;key&gt;} elements occur within another {@code &lt;key&gt;} element in the
+&nbsp;     * ruleset.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            identifier for key in the nest
+&nbsp;     * @return a view on the child of the group
+&nbsp;     */
+&nbsp;    private NestedKeyView&lt;KeyDeclaration&gt; getNestedKeyView(String keyId) {
+<b class="fc">&nbsp;        Rule ruleForKey = rule.getRuleForKey(keyId, division);</b>
+<b class="fc">&nbsp;        if (division) {</b>
+<b class="fc">&nbsp;            ruleForKey.merge(ruleset.getRuleForKey(keyId));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return new NestedKeyView&lt;&gt;(ruleset, declaration.getSubkeyDeclaration(keyId), ruleForKey,</b>
+<b class="fc">&nbsp;                settings.getSettingsForKey(keyId), priorityList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sorts and visibly outputs the metadata. That’s the main function of the
+&nbsp;     * mask. The structure of metadata mask is like this: If there is rule,
+&nbsp;     * then the order of elements is by rule. But if the rule allows more
+&nbsp;     * elements or if there are data elements that are not in the rule, then
+&nbsp;     * they come in alphabetical order below them. The metadata elements must
+&nbsp;     * be sorted and therefore sometimes more fields are needed. Exceptions here
+&nbsp;     * are multiple selections only once, and with multiple values.
+&nbsp;     *
+&nbsp;     * @param currentEntries
+&nbsp;     *            metadata objects that have already been entered, along with
+&nbsp;     *            heir key
+&nbsp;     * @param additionalKeys
+&nbsp;     *            metadata keys that the user has already selected
+&nbsp;     * @return mask
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public List&lt;MetadataViewWithValuesInterface&gt; getSortedVisibleMetadata(Collection&lt;Metadata&gt; currentEntries,
+&nbsp;            Collection&lt;String&gt; additionalKeys) {
+&nbsp;
+<b class="fc">&nbsp;        LinkedList&lt;MetadataViewWithValuesInterface&gt; sortedVisibleMetadata = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        Collection&lt;Metadata&gt; excludedDataObjects = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (AuxiliaryTableRow auxiliaryTableRow : createAuxiliaryTable(currentEntries, additionalKeys)) {</b>
+<b class="fc">&nbsp;            if (auxiliaryTableRow.isContainingExcludedData()) {</b>
+<b class="fc">&nbsp;                excludedDataObjects.addAll(auxiliaryTableRow.getDataObjects(0));</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                for (int i = 0; i &lt; auxiliaryTableRow.getNumberOfTypeViewsToGenerate(); i++) {</b>
+<b class="fc">&nbsp;                    Optional&lt;MetadataViewInterface&gt; definedTypeView = Optional.of(rowToView(auxiliaryTableRow));</b>
+<b class="fc">&nbsp;                    sortedVisibleMetadata.add(new FormRow(definedTypeView, auxiliaryTableRow.getDataObjects(i)));</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (!excludedDataObjects.isEmpty()) {</b>
+<b class="fc">&nbsp;            sortedVisibleMetadata.addFirst(new FormRow(Optional.empty(), excludedDataObjects));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return sortedVisibleMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds the already entered metadata to the helper tables. For metadata
+&nbsp;     * that does not belong to any field, an undefined field is created. Since
+&nbsp;     * LinkedHashMap is not thread safe, it cannot be parallelized here.
+&nbsp;     *
+&nbsp;     * @param enteredMetaData
+&nbsp;     *            already entered metadata to be added to the auxiliary tables
+&nbsp;     * @param sortedAuxiliaryTable
+&nbsp;     *            help table with rows with default sorting
+&nbsp;     * @param auxiliaryTableToBeSorted
+&nbsp;     *            help table with rows that still have to be sorted
+&nbsp;     */
+&nbsp;    private void storeValues(Collection&lt;Metadata&gt; enteredMetaData,
+&nbsp;                             LinkedHashMap&lt;String, AuxiliaryTableRow&gt; sortedAuxiliaryTable,
+&nbsp;                             HashMap&lt;String, AuxiliaryTableRow&gt; auxiliaryTableToBeSorted) {
+&nbsp;
+<b class="fc">&nbsp;        for (Metadata metadata : enteredMetaData) {</b>
+<b class="fc">&nbsp;            String keyId = metadata.getKey();</b>
+<b class="fc">&nbsp;            if (sortedAuxiliaryTable.containsKey(keyId)) {</b>
+<b class="fc">&nbsp;                sortedAuxiliaryTable.get(keyId).add(metadata);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                auxiliaryTableToBeSorted.computeIfAbsent(keyId,</b>
+<b class="fc">&nbsp;                    missing -&gt; retrieveOrCompute(keyId));</b>
+<b class="fc">&nbsp;                auxiliaryTableToBeSorted.get(keyId).add(metadata);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private AuxiliaryTableRow retrieveOrCompute(String keyId) {
+<b class="fc">&nbsp;        Optional&lt;KeyDeclaration&gt; optionalKeyDeclaration = super.declaration.getKeyDeclarations().parallelStream()</b>
+<b class="fc">&nbsp;                .filter(childKeyDeclaration -&gt; keyId.equals(childKeyDeclaration.getId())).findAny();</b>
+<b class="fc">&nbsp;        KeyDeclaration keyDeclaration = optionalKeyDeclaration.orElseGet(() -&gt; new KeyDeclaration(ruleset, keyId));</b>
+<b class="fc">&nbsp;        return new AuxiliaryTableRow(keyDeclaration, settings);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Optional&lt;Domain&gt; getDomain() {
+<b class="fc">&nbsp;        return declaration.getDomain();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

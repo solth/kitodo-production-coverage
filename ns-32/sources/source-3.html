@@ -1,0 +1,290 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ImageConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.imagemanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: ImageConverter (org.kitodo.imagemanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImageConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67,6%
+  </span>
+  <span class="absValue">
+    (25/37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.imagemanagement;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.im4java.core.IMOperation;
+&nbsp;import org.kitodo.api.imagemanagement.ImageFileFormat;
+&nbsp;import org.kitodo.config.KitodoConfig;
+&nbsp;import org.kitodo.config.enums.ParameterImageManagement;
+&nbsp;
+&nbsp;/**
+&nbsp; * An image conversion task. One conversion task can create multiple result
+&nbsp; * images with different properties. This is done in one single ImageMagick
+&nbsp; * call, reading and decoding the source image into memory only once.
+&nbsp; */
+&nbsp;class ImageConverter {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ImageConverter.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick file type prefix to request no file being written.
+&nbsp;     */
+&nbsp;    private static final String FORMAT_OFF = &quot;NULL:&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick option {@code -units}. Note that {@code -units} must be set
+&nbsp;     * &lt;i&gt;before&lt;/i&gt; the operation whose value shall be interpreted in this
+&nbsp;     * unit.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.imagemagick.org/script/command-line-options.php?#units&quot;
+&nbsp;     */
+&nbsp;    private static final String OPTION_UNITS = &quot;-units&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * ImageMagick option {@code -depth}’s value {@code PixelsPerInch}.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.imagemagick.org/script/command-line-options.php?#units&quot;
+&nbsp;     */
+&nbsp;    private static final String OPTION_UNITS_TYPE_PIXELSPERINCH = &quot;PixelsPerInch&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Path to read the source image from.
+&nbsp;     */
+&nbsp;    private final String source;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Conversion results to create.
+&nbsp;     */
+<b class="fc">&nbsp;    private final Collection&lt;FutureDerivative&gt; results = new LinkedList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new image conversion task.
+&nbsp;     *
+&nbsp;     * @param imageFileUri
+&nbsp;     *            source image to convert
+&nbsp;     */
+<b class="fc">&nbsp;    ImageConverter(URI imageFileUri) {</b>
+<b class="fc">&nbsp;        source = uriToPath(imageFileUri);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Defines another result of the conversion process.
+&nbsp;     *
+&nbsp;     * @param path
+&nbsp;     *            output file URI
+&nbsp;     * @return the conversion result object to define conversion properties
+&nbsp;     */
+&nbsp;    FutureDerivative addResult(URI path) {
+<b class="fc">&nbsp;        FutureDerivative futureDerivative = new FutureDerivative(uriToPath(path));</b>
+<b class="fc">&nbsp;        results.add(futureDerivative);</b>
+<b class="fc">&nbsp;        return futureDerivative;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Defines another result of the conversion process.
+&nbsp;     *
+&nbsp;     * @param path
+&nbsp;     *            output file URI
+&nbsp;     * @param resultFileFormat
+&nbsp;     *            image format to generate
+&nbsp;     * @return the conversion result object to define conversion properties
+&nbsp;     */
+&nbsp;    FutureDerivative addResult(URI path, ImageFileFormat resultFileFormat) {
+<b class="fc">&nbsp;        FutureDerivative futureDerivative = new FutureDerivative(uriToPath(path), resultFileFormat);</b>
+<b class="fc">&nbsp;        results.add(futureDerivative);</b>
+<b class="fc">&nbsp;        return futureDerivative;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads further arguments from the configuration and passes them to
+&nbsp;     * ImageMagick. Arguments can be added to the configuration with the prefix
+&nbsp;     * {@code ImageManagement.param.}.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Examples:
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * &lt;table border=2 cellspacing=1 cellpadding=2&gt;
+&nbsp;     * &lt;tr&gt;
+&nbsp;     * &lt;th&gt;Configuration entry&lt;/th&gt;
+&nbsp;     * &lt;th&gt;Arguments sent to ImageMagick&lt;/th&gt;
+&nbsp;     * &lt;/tr&gt;
+&nbsp;     * &lt;tr&gt;
+&nbsp;     * &lt;td&gt;{@code ImageManagement.param.limit.memory=40MB}&lt;/td&gt;
+&nbsp;     * &lt;td&gt;{@code -limit memory 40MB}&lt;/td&gt;
+&nbsp;     * &lt;/tr&gt;
+&nbsp;     * &lt;tr&gt;
+&nbsp;     * &lt;td&gt;{@code ImageManagement.param.+set=date\:create}&lt;/td&gt;
+&nbsp;     * &lt;td&gt;{@code +set date:create}&lt;/td&gt;
+&nbsp;     * &lt;/tr&gt;
+&nbsp;     * &lt;tr&gt;
+&nbsp;     * &lt;td&gt;{@code ImageManagement.param.quiet=}&lt;/td&gt;
+&nbsp;     * &lt;td&gt;{@code -quiet}&lt;/td&gt;
+&nbsp;     * &lt;/tr&gt;
+&nbsp;     * &lt;/table&gt;
+&nbsp;     *
+&nbsp;     * @param commandLine
+&nbsp;     *            command line to which to add the arguments
+&nbsp;     */
+&nbsp;    private static void configureImageMagick(IMOperation commandLine) {
+<b class="fc">&nbsp;        final String configOptionsPrefix = &quot;ImageManagement.param.&quot;;</b>
+<b class="fc">&nbsp;        Iterator&lt;?&gt; keys = KitodoConfig.getConfig().getKeys(configOptionsPrefix);</b>
+<b class="fc">&nbsp;        while (keys.hasNext()) {</b>
+<b class="nc">&nbsp;            Object keyObject = keys.next();</b>
+<b class="nc">&nbsp;            if (keyObject instanceof String) {</b>
+<b class="nc">&nbsp;                String key = (String) keyObject;</b>
+<b class="nc">&nbsp;                String option = key.substring(configOptionsPrefix.length());</b>
+<b class="nc">&nbsp;                if (!(option.startsWith(&quot;+&quot;) || option.startsWith(&quot;-&quot;))) {</b>
+<b class="nc">&nbsp;                    option = &quot;-&quot;.concat(option);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                commandLine.addRawArgs(option.split(&quot;\\.&quot;));</b>
+&nbsp;                //FIXME: it is not secure to allow any possible key
+<b class="nc">&nbsp;                String value = KitodoConfig.getParameter(key);</b>
+<b class="nc">&nbsp;                if (!value.isEmpty()) {</b>
+<b class="nc">&nbsp;                    commandLine.addRawArgs(value);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Performs the conversion by calling ImageMagick.
+&nbsp;     */
+&nbsp;    void run() throws IOException {
+<b class="fc">&nbsp;        IMOperation commandLine = new IMOperation();</b>
+<b class="fc">&nbsp;        configureImageMagick(commandLine);</b>
+<b class="fc">&nbsp;        commandLine.addRawArgs(OPTION_UNITS, OPTION_UNITS_TYPE_PIXELSPERINCH);</b>
+<b class="fc">&nbsp;        commandLine.addImage(source);</b>
+<b class="fc">&nbsp;        results.forEach(result -&gt; result.addToCommandLine(commandLine));</b>
+<b class="fc">&nbsp;        commandLine.addImage(FORMAT_OFF);</b>
+<b class="fc">&nbsp;        ConvertRunner convertRunner = new ConvertRunner();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            convertRunner.setSearchPath(KitodoConfig.getParameter(ParameterImageManagement.SEARCH_PATH));</b>
+<b class="fc">&nbsp;        } catch (NoSuchElementException e) {</b>
+<b class="fc">&nbsp;            logger.trace(&quot;No deviant search path configured.&quot;, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        convertRunner.run(commandLine);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts an URI to an absolute local path as String.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            input file URI
+&nbsp;     * @return absolute local path
+&nbsp;     */
+&nbsp;    private static String uriToPath(URI uri) {
+<b class="fc">&nbsp;        return new File(uri).getAbsolutePath();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

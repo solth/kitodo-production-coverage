@@ -1,0 +1,388 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TaskSitter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.tasks</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskSitter (org.kitodo.production.helper.tasks)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskSitter</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69,5%
+  </span>
+  <span class="absValue">
+    (41/59)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">TaskSitter$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (6/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,5%
+  </span>
+  <span class="absValue">
+    (43/61)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.tasks;
+&nbsp;
+&nbsp;import java.time.Duration;
+&nbsp;import java.time.temporal.ChronoUnit;
+&nbsp;import java.time.temporal.TemporalUnit;
+&nbsp;import java.util.ConcurrentModificationException;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.ListIterator;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;
+&nbsp;import javax.servlet.ServletContextEvent;
+&nbsp;import javax.servlet.ServletContextListener;
+&nbsp;import javax.servlet.annotation.WebListener;
+&nbsp;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.production.helper.tasks.EmptyTask.Behaviour;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class TaskSitter takes care of the tasks in the task manager. While the
+&nbsp; * application is working, a scheduler on the TaskManager will call the run()
+&nbsp; * method of the TaskSitter every some seconds to delete threads that have died,
+&nbsp; * replace threads that are to be restarted by new copies of themselves (a
+&nbsp; * Thread can never be started twice) and finally starts some new threads if
+&nbsp; * there aren’t too many working any more. Several limits are configurable for
+&nbsp; * the {@link #run()} method.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * On shutdown of the servlet container, the TaskSitter will try to shut down
+&nbsp; * all threads that are still running. Because the TaskManager is singleton (its
+&nbsp; * constructor is private) a caring class is needed which will be available for
+&nbsp; * instantiation to the servlet container.
+&nbsp; */
+&nbsp;@WebListener
+<b class="fc">&nbsp;public class TaskSitter implements Runnable, ServletContextListener {</b>
+&nbsp;    /**
+&nbsp;     * The field autoRunLimit holds the number of threads which at most are
+&nbsp;     * allowed to be started automatically. It is by default initialised by the
+&nbsp;     * number of available processors of the runtime and set to 0 while the
+&nbsp;     * feature is disabled.
+&nbsp;     */
+&nbsp;    private static int autoRunLimit;
+&nbsp;
+&nbsp;    static {
+<b class="fc">&nbsp;        setAutoRunningThreads(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * When the servlet is unloaded, i.e. on container shutdown, the TaskManager
+&nbsp;     * shall be shut down gracefully.
+&nbsp;     *
+&nbsp;     * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void contextDestroyed(ServletContextEvent arg) {
+<b class="nc">&nbsp;        TaskManager.shutdownNow();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Currently, there is nothing to do when the servlet is loading.
+&nbsp;     *
+&nbsp;     * @see javax.servlet.ServletContextListener#contextInitialized(javax.servlet.ServletContextEvent)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void contextInitialized(ServletContextEvent argument) {
+&nbsp;        // nothing is done here
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the TaskManager’s
+&nbsp;     * autorun mode is on or not.
+&nbsp;     *
+&nbsp;     * @return whether the TaskManager is auto-running threads or not
+&nbsp;     */
+&nbsp;    public static boolean isAutoRunningThreads() {
+<b class="nc">&nbsp;        return autoRunLimit &gt; 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Examines the task list, deletes threads that have
+&nbsp;     * died, replaces threads that are to be restarted by new copies of
+&nbsp;     * themselves and finally starts new threads up to the given limit.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Several limits are configurable: There are both limits in number and in
+&nbsp;     * time for successfully finished or erroneous threads which can be set in
+&nbsp;     * the configuration. There are internal default values for these settings
+&nbsp;     * too, which will be applied in case of missing configuration entries.
+&nbsp;     * Since zombie processes will still occupy all their resources and aren’t
+&nbsp;     * available for garbage collection, these values have been chosen rather
+&nbsp;     * restrictive. For the limit for auto starting threads, see
+&nbsp;     * {@link #setAutoRunningThreads(boolean)}.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * If the task list is empty, the method will exit without further delay,
+&nbsp;     * otherwise it will initialise its variables and read the configuration.
+&nbsp;     * Reading the configuration is done again in each iteration so
+&nbsp;     * configuration changes will propagate here.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Then the function iterates along the task list and takes care for each
+&nbsp;     * task. To be able to modify the list in passing, we need a
+&nbsp;     * {@link java.util.ListIterator} here.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Running tasks reduce the clearance to run new tasks. (However, the
+&nbsp;     * clearance must not become negative.) New tasks will be added to the
+&nbsp;     * launch list, except if they have already been marked for removal, of
+&nbsp;     * course. If a task has terminated, it is handled as specified by its
+&nbsp;     * behavior variable: All tasks that are marked DELETE_IMMEDIATELY will
+&nbsp;     * instantly be disposed of; otherwise, they will be kept as long as
+&nbsp;     * configured and only be removed if their dead body has become older. Tasks
+&nbsp;     * marked PREPARE_FOR_RESTART will be replaced (because a
+&nbsp;     * {@link java.lang.Thread} cannot be started a second time) by a copy of
+&nbsp;     * them.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * If a ConcurrentModificationException arises during list examination, the
+&nbsp;     * method will behave like a polite servant and retire silently until the
+&nbsp;     * lordship has scarpered. This is not a pity because it will be started
+&nbsp;     * every some seconds.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * After having finished iterating, the method will reduce the absolute
+&nbsp;     * number of expired threads as configured. (Since new threads will be added
+&nbsp;     * to the bottom of the list and we therefore want to remove older ones
+&nbsp;     * top-down we cannot do this before we know their count, thus we cannot do
+&nbsp;     * this while iterating.) Last, new threads will be started up to the
+&nbsp;     * remaining available clearance.
+&nbsp;     *
+&nbsp;     * @see java.lang.Runnable#run()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void run() {
+<b class="fc">&nbsp;        TaskManager taskManager = TaskManager.singleton();</b>
+<b class="fc">&nbsp;        if (taskManager.taskList.isEmpty()) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        LinkedList&lt;EmptyTask&gt; launchableThreads = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        LinkedList&lt;EmptyTask&gt; finishedThreads = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        LinkedList&lt;EmptyTask&gt; failedThreads = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        int availableClearance = autoRunLimit;</b>
+&nbsp;
+<b class="fc">&nbsp;        int successfulMaxCount = ConfigCore.getIntParameterOrDefaultValue(ParameterCore.TASK_MANAGER_KEEP_SUCCESSFUL);</b>
+<b class="fc">&nbsp;        int failedMaxCount = ConfigCore.getIntParameterOrDefaultValue(ParameterCore.TASK_MANAGER_KEEP_FAILED);</b>
+<b class="fc">&nbsp;        Duration successfulMaxAge = ConfigCore.getDurationParameter(ParameterCore.TASK_MANAGER_KEEP_SUCCESSFUL_MINS,</b>
+&nbsp;                ChronoUnit.MINUTES);
+<b class="fc">&nbsp;        Duration failedMaxAge = ConfigCore.getDurationParameter(ParameterCore.TASK_MANAGER_KEEP_FAILED_MINS,</b>
+&nbsp;                ChronoUnit.MINUTES);
+&nbsp;
+<b class="fc">&nbsp;        ListIterator&lt;EmptyTask&gt; position = taskManager.taskList.listIterator();</b>
+&nbsp;        EmptyTask task;
+&nbsp;        try {
+<b class="fc">&nbsp;            while (position.hasNext()) {</b>
+<b class="fc">&nbsp;                availableClearance = handleTaskModification(launchableThreads, finishedThreads, failedThreads,</b>
+&nbsp;                        availableClearance, successfulMaxAge, failedMaxAge, position);
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (ConcurrentModificationException e) {</b>
+&nbsp;            return;
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        while (finishedThreads.size() &gt; successfulMaxCount &amp;&amp; (task = finishedThreads.pollFirst()) != null) {</b>
+<b class="nc">&nbsp;            taskManager.taskList.remove(task);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        while (failedThreads.size() &gt; failedMaxCount &amp;&amp; (task = failedThreads.pollFirst()) != null) {</b>
+<b class="nc">&nbsp;            taskManager.taskList.remove(task);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        while (launchableThreads.size() &gt; availableClearance) {</b>
+<b class="nc">&nbsp;            launchableThreads.removeLast();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        while ((task = launchableThreads.pollFirst()) != null) {</b>
+<b class="fc">&nbsp;            task.start();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private int handleTaskModification(LinkedList&lt;EmptyTask&gt; launchableThreads, LinkedList&lt;EmptyTask&gt; finishedThreads,
+&nbsp;                                       LinkedList&lt;EmptyTask&gt; failedThreads, int availableClearance,
+&nbsp;                                       Duration successfulMaxAge, Duration failedMaxAge,
+&nbsp;                                       ListIterator&lt;EmptyTask&gt; position) {
+&nbsp;        EmptyTask task;
+<b class="fc">&nbsp;        task = position.next();</b>
+<b class="fc">&nbsp;        switch (task.getTaskState()) {</b>
+&nbsp;            case WORKING:
+&nbsp;            case STOPPING:
+<b class="fc">&nbsp;                availableClearance = Math.max(availableClearance - 1, 0);</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            case NEW:
+<b class="fc">&nbsp;                if (Behaviour.DELETE_IMMEDIATELY.equals(task.getBehaviour())) {</b>
+<b class="nc">&nbsp;                    position.remove();</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    launchableThreads.addLast(task);</b>
+&nbsp;                }
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            default: // cases STOPPED, FINISHED, CRASHED
+<b class="fc">&nbsp;                switch (task.getBehaviour()) {</b>
+&nbsp;                    case DELETE_IMMEDIATELY:
+<b class="nc">&nbsp;                        position.remove();</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    case PREPARE_FOR_RESTART:
+<b class="nc">&nbsp;                        EmptyTask replacement = task.replace();</b>
+<b class="nc">&nbsp;                        if (Objects.nonNull(replacement)) {</b>
+<b class="nc">&nbsp;                            position.set(replacement);</b>
+<b class="nc">&nbsp;                            launchableThreads.addLast(replacement);</b>
+&nbsp;                        }
+&nbsp;                        break;
+&nbsp;                    default: // case KEEP_FOR_A_WHILE
+<b class="fc">&nbsp;                        boolean taskFinishedSuccessfully = Objects.isNull(task.getException());</b>
+<b class="fc">&nbsp;                        Duration durationDead = task.getDurationDead();</b>
+<b class="fc">&nbsp;                        if (Objects.isNull(durationDead)) {</b>
+<b class="fc">&nbsp;                            task.setTimeOfDeath();</b>
+<b class="fc">&nbsp;                        } else if (durationDead.compareTo(taskFinishedSuccessfully ? successfulMaxAge : failedMaxAge) &gt; 0) {</b>
+<b class="nc">&nbsp;                            position.remove();</b>
+<b class="nc">&nbsp;                            break;</b>
+&nbsp;                        }
+<b class="fc">&nbsp;                        if (taskFinishedSuccessfully) {</b>
+<b class="fc">&nbsp;                            finishedThreads.add(task);</b>
+&nbsp;                        } else {
+<b class="nc">&nbsp;                            failedThreads.add(task);</b>
+&nbsp;                        }
+&nbsp;                        break;
+&nbsp;                }
+&nbsp;        }
+<b class="fc">&nbsp;        return availableClearance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Turns the feature to auto-run tasks
+&nbsp;     * on or off. To enable, it will set the limit of auto running threads to
+&nbsp;     * the number of available cores of the runtime or to the value set in the
+&nbsp;     * global configuration file, if any. To disable auto-running it will set
+&nbsp;     * the number to 0.
+&nbsp;     *
+&nbsp;     * @param on
+&nbsp;     *            whether the TaskManager shall auto-run threads
+&nbsp;     */
+&nbsp;    public static void setAutoRunningThreads(boolean on) {
+<b class="fc">&nbsp;        if (on) {</b>
+<b class="fc">&nbsp;            int cores = Runtime.getRuntime().availableProcessors();</b>
+<b class="fc">&nbsp;            autoRunLimit = ConfigCore.getIntParameter(ParameterCore.TASK_MANAGER_AUTORUN_LIMIT, cores);</b>
+<b class="fc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            autoRunLimit = 0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

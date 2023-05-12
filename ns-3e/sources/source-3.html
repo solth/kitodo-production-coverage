@@ -1,0 +1,929 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CreateProcessForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: CreateProcessForm (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CreateProcessForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    49,1%
+  </span>
+  <span class="absValue">
+    (26/53)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    31,4%
+  </span>
+  <span class="absValue">
+    (97/309)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.net.URI;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;import javax.faces.view.ViewScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.FunctionalMetadata;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.externaldatamanagement.ImportConfigurationType;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Ruleset;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.CommandException;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.exceptions.RulesetNotFoundException;
+&nbsp;import org.kitodo.production.dto.ProcessDTO;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.forms.BaseForm;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.TempProcess;
+&nbsp;import org.kitodo.production.interfaces.MetadataTreeTableInterface;
+&nbsp;import org.kitodo.production.interfaces.RulesetSetupInterface;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.process.ProcessGenerator;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.dataeditor.DataEditorService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;import org.primefaces.model.TreeNode;
+&nbsp;
+&nbsp;@Named(&quot;CreateProcessForm&quot;)
+&nbsp;@ViewScoped
+&nbsp;public class CreateProcessForm extends BaseForm implements MetadataTreeTableInterface, RulesetSetupInterface {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(CreateProcessForm.class);</b>
+&nbsp;
+<b class="fc">&nbsp;    private final CatalogImportDialog catalogImportDialog = new CatalogImportDialog(this);</b>
+<b class="fc">&nbsp;    private final FileUploadDialog fileUploadDialog = new FileUploadDialog(this);</b>
+<b class="fc">&nbsp;    private final SearchDialog searchDialog = new SearchDialog(this);</b>
+<b class="fc">&nbsp;    private final ProcessDataTab processDataTab = new ProcessDataTab(this);</b>
+<b class="fc">&nbsp;    private final TitleRecordLinkTab titleRecordLinkTab = new TitleRecordLinkTab(this);</b>
+<b class="fc">&nbsp;    private final AddMetadataDialog addMetadataDialog = new AddMetadataDialog(this);</b>
+&nbsp;
+&nbsp;    private RulesetManagementInterface rulesetManagement;
+&nbsp;    private final List&lt;Locale.LanguageRange&gt; priorityList;
+<b class="fc">&nbsp;    private final String acquisitionStage = &quot;create&quot;;</b>
+&nbsp;    private Project project;
+&nbsp;    private Template template;
+<b class="fc">&nbsp;    private LinkedList&lt;TempProcess&gt; processes = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private LinkedList&lt;TempProcess&gt; childProcesses = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private final String processListPath = MessageFormat.format(REDIRECT_PATH, &quot;processes&quot;);</b>
+<b class="fc">&nbsp;    private String referringView = &quot;&quot;;</b>
+&nbsp;    private int progress;
+&nbsp;    private TempProcess currentProcess;
+<b class="fc">&nbsp;    private Boolean rulesetConfigurationForOpacImportComplete = null;</b>
+&nbsp;    private String defaultConfigurationType;
+&nbsp;    static final int TITLE_RECORD_LINK_TAB_INDEX = 1;
+&nbsp;
+<b class="fc">&nbsp;    public CreateProcessForm() {</b>
+<b class="fc">&nbsp;        priorityList = ServiceManager.getUserService().getCurrentMetadataLanguage();</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    CreateProcessForm(List&lt;Locale.LanguageRange&gt; priorityList) {</b>
+<b class="fc">&nbsp;        this.priorityList = priorityList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the ruleset management to access the ruleset.
+&nbsp;     *
+&nbsp;     * @return the ruleset management
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public RulesetManagementInterface getRulesetManagement() {
+<b class="fc">&nbsp;        return rulesetManagement;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update ruleset and docType.
+&nbsp;     *
+&nbsp;     * @param ruleset
+&nbsp;     *            as Ruleset
+&nbsp;     * @throws IOException
+&nbsp;     *             thrown if ruleset could not be read
+&nbsp;     */
+&nbsp;    public void updateRulesetAndDocType(Ruleset ruleset) throws IOException {
+<b class="fc">&nbsp;        rulesetManagement = ServiceManager.getRulesetService().openRuleset(ruleset);</b>
+<b class="fc">&nbsp;        processDataTab.setAllDocTypes(getAllRulesetDivisions());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;SelectItem&gt; getAllRulesetDivisions() {
+<b class="fc">&nbsp;        List&lt;SelectItem&gt; allDocTypes = rulesetManagement</b>
+<b class="fc">&nbsp;                .getStructuralElements(priorityList).entrySet()</b>
+<b class="fc">&nbsp;                .stream().map(entry -&gt; new SelectItem(entry.getKey(), entry.getValue()))</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="fc">&nbsp;        if (allDocTypes.isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorLoadingDocTypes&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return allDocTypes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the current acquisition stage to adapt the displaying of fields
+&nbsp;     * accordingly.
+&nbsp;     *
+&nbsp;     * @return the current acquisition stage
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String getAcquisitionStage() {
+<b class="fc">&nbsp;        return acquisitionStage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the language preference list of the editing user to display
+&nbsp;     * labels and options in the user-preferred language.
+&nbsp;     *
+&nbsp;     * @return the language preference list
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public List&lt;Locale.LanguageRange&gt; getPriorityList() {
+<b class="fc">&nbsp;        return priorityList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get importTab.
+&nbsp;     *
+&nbsp;     * @return value of catalogImportDialog
+&nbsp;     */
+&nbsp;    public CatalogImportDialog getCatalogImportDialog() {
+<b class="nc">&nbsp;        return catalogImportDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get fileUploadDialog.
+&nbsp;     *
+&nbsp;     * @return value of fileUploadDialog
+&nbsp;     */
+&nbsp;    public FileUploadDialog getFileUploadDialog() {
+<b class="nc">&nbsp;        return fileUploadDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processDataTab.
+&nbsp;     *
+&nbsp;     * @return value of processDataTab
+&nbsp;     */
+&nbsp;    public ProcessDataTab getProcessDataTab() {
+<b class="fc">&nbsp;        return processDataTab;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processMetadata.
+&nbsp;     *
+&nbsp;     * @return value of processMetadata
+&nbsp;     */
+&nbsp;    public ProcessMetadata getProcessMetadata() {
+<b class="fc">&nbsp;        return currentProcess.getProcessMetadata();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get searchDialog.
+&nbsp;     *
+&nbsp;     * @return value of searchDialog
+&nbsp;     */
+&nbsp;    public SearchDialog getSearchDialog() {
+<b class="nc">&nbsp;        return searchDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get titleRecordLinkTab.
+&nbsp;     *
+&nbsp;     * @return value of titleRecordLinkTab
+&nbsp;     */
+&nbsp;    public TitleRecordLinkTab getTitleRecordLinkTab() {
+<b class="fc">&nbsp;        return titleRecordLinkTab;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get addMetadataDialog.
+&nbsp;     * @return addMetadataDialog
+&nbsp;     */
+&nbsp;    public AddMetadataDialog getAddMetadataDialog() {
+<b class="nc">&nbsp;        return addMetadataDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get newProcesses.
+&nbsp;     *
+&nbsp;     * @return value of newProcesses
+&nbsp;     */
+&nbsp;    public List&lt;TempProcess&gt; getProcesses() {
+<b class="fc">&nbsp;        return processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set newProcesses.
+&nbsp;     *
+&nbsp;     * @param processes as java.util.List of Process
+&nbsp;     */
+&nbsp;    public void setProcesses(LinkedList&lt;TempProcess&gt; processes) {
+<b class="fc">&nbsp;        this.processes = processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get child processes.
+&nbsp;     *
+&nbsp;     * @return childProcesses
+&nbsp;     */
+&nbsp;    public List&lt;TempProcess&gt; getChildProcesses() {
+<b class="nc">&nbsp;        return this.childProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set childProcesses.
+&nbsp;     *
+&nbsp;     * @param childProcesses as java.util.LinkedList of TempProcess
+&nbsp;     */
+&nbsp;    public void setChildProcesses(LinkedList&lt;TempProcess&gt; childProcesses) {
+<b class="nc">&nbsp;        this.childProcesses = childProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the main Process that want to be created.
+&nbsp;     *
+&nbsp;     * @return value of first element in newProcesses
+&nbsp;     */
+&nbsp;    public Process getMainProcess() {
+<b class="fc">&nbsp;        if (processes.isEmpty()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ProcessGenerator processGenerator = new ProcessGenerator();</b>
+<b class="nc">&nbsp;                processGenerator.generateProcess(template.getId(), project.getId());</b>
+<b class="nc">&nbsp;                processes.add(new TempProcess(processGenerator.getGeneratedProcess(), new Workpiece()));</b>
+<b class="nc">&nbsp;            } catch (ProcessGenerationException exception) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(exception.getLocalizedMessage(), logger, exception);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return processes.get(0).getProcess();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get template.
+&nbsp;     *
+&nbsp;     * @return value of template
+&nbsp;     */
+&nbsp;    public Template getTemplate() {
+<b class="nc">&nbsp;        return template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set template.
+&nbsp;     *
+&nbsp;     * @param template as org.kitodo.data.database.beans.Template
+&nbsp;     */
+&nbsp;    public void setTemplate(Template template) {
+<b class="nc">&nbsp;        this.template = template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get project.
+&nbsp;     *
+&nbsp;     * @return value of project
+&nbsp;     */
+&nbsp;    public Project getProject() {
+<b class="nc">&nbsp;        return project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set project.
+&nbsp;     *
+&nbsp;     * @param project as org.kitodo.data.database.beans.Project
+&nbsp;     */
+&nbsp;    public void setProject(Project project) {
+<b class="nc">&nbsp;        this.project = project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create the process and save the metadata.
+&nbsp;     */
+&nbsp;    public String createNewProcess() {
+&nbsp;        try {
+<b class="fc">&nbsp;            if (!canCreateProcess()) {</b>
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            createProcessHierarchy();</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(PrimeFaces.current()) &amp;&amp; Objects.nonNull(FacesContext.getCurrentInstance())) {</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;sticky-notifications&#39;).renderMessage({&#39;summary&#39;:&#39;&quot;</b>
+<b class="nc">&nbsp;                        + Helper.getTranslation(&quot;processSaving&quot;) + &quot;&#39;,&#39;detail&#39;:&#39;&quot;</b>
+<b class="nc">&nbsp;                        + Helper.getTranslation( &quot;youWillBeRedirected&quot;) + &quot;&#39;,&#39;severity&#39;:&#39;info&#39;});&quot;);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            return processListPath;</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorSaving&quot;, new Object[] {ObjectType.PROCESS.getTranslationSingular() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;        } catch (RulesetNotFoundException e) {</b>
+<b class="nc">&nbsp;            String rulesetFile = &quot;Process list is empty&quot;;</b>
+<b class="nc">&nbsp;            if (!this.processes.isEmpty() &amp;&amp; Objects.nonNull(getMainProcess().getRuleset())) {</b>
+<b class="nc">&nbsp;                rulesetFile = getMainProcess().getRuleset().getFile();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;rulesetNotFound&quot;, new Object[] {rulesetFile }, logger, e);</b>
+<b class="nc">&nbsp;        } catch (IOException | ProcessGenerationException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getLocalizedMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new Process and reload current view to add another Process.
+&nbsp;     *
+&nbsp;     * @return path to reload current view
+&nbsp;     */
+&nbsp;    public String createNewProcessAndContinue() {
+<b class="nc">&nbsp;        String destination = createNewProcess();</b>
+<b class="nc">&nbsp;        if (!destination.equals(processListPath)) {</b>
+<b class="nc">&nbsp;            return destination;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Process parentProcess = titleRecordLinkTab.getTitleRecordProcess();</b>
+<b class="nc">&nbsp;        return FacesContext.getCurrentInstance().getExternalContext().getRequestServletPath()</b>
+&nbsp;                + &quot;?referrer=&quot; + referringView
+<b class="nc">&nbsp;                + &quot;&amp;templateId=&quot; + template.getId()</b>
+<b class="nc">&nbsp;                + &quot;&amp;projectId=&quot; + project.getId()</b>
+<b class="nc">&nbsp;                + (Objects.nonNull(parentProcess) ? &quot;&amp;parentId=&quot; + parentProcess.getId() : &quot;&quot;)</b>
+&nbsp;                + &quot;&amp;faces-redirect=true&quot;;
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean canCreateProcess() throws IOException {
+<b class="fc">&nbsp;        if (Objects.nonNull(titleRecordLinkTab.getTitleRecordProcess())) {</b>
+<b class="nc">&nbsp;            if ((Objects.isNull(titleRecordLinkTab.getSelectedInsertionPosition())</b>
+<b class="nc">&nbsp;                    || titleRecordLinkTab.getSelectedInsertionPosition().isEmpty())) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;createProcessForm.createNewProcess.noInsertionPositionSelected&quot;);</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            String forbiddenParentType = parentTypeIfForbidden();</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(forbiddenParentType)) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(Helper.getTranslation(&quot;dataEditor.forbiddenChildElement&quot;,</b>
+<b class="nc">&nbsp;                    processDataTab.getDocType(), forbiddenParentType));</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String parentTypeIfForbidden() throws IOException {
+<b class="nc">&nbsp;        URI metadataFileUri = ServiceManager.getProcessService()</b>
+<b class="nc">&nbsp;                .getMetadataFileUri(titleRecordLinkTab.getTitleRecordProcess());</b>
+<b class="nc">&nbsp;        Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(metadataFileUri);</b>
+<b class="nc">&nbsp;        List&lt;String&gt; indices = Arrays.asList(titleRecordLinkTab.getSelectedInsertionPosition()</b>
+<b class="nc">&nbsp;                .split(Pattern.quote(MetadataEditor.INSERTION_POSITION_SEPARATOR)));</b>
+<b class="nc">&nbsp;        LogicalDivision logicalDivision = workpiece.getLogicalStructure();</b>
+<b class="nc">&nbsp;        for (int index = 0; index &lt; indices.size(); index++) {</b>
+<b class="nc">&nbsp;            if (index &lt; indices.size() - 1) {</b>
+<b class="nc">&nbsp;                logicalDivision = logicalDivision.getChildren().get(Integer.parseInt(indices.get(index)));</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                String parentType = logicalDivision.getType();</b>
+<b class="nc">&nbsp;                StructuralElementViewInterface divisionView = rulesetManagement.getStructuralElementView(parentType,</b>
+&nbsp;                    acquisitionStage, priorityList);
+<b class="nc">&nbsp;                if (divisionView.getAllowedSubstructuralElements().containsKey(processDataTab.getDocType())) {</b>
+<b class="nc">&nbsp;                    return null;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    return parentType;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prepare new process which will be created.
+&nbsp;     *
+&nbsp;     * @param templateId
+&nbsp;     *            id of template to query from database
+&nbsp;     * @param projectId
+&nbsp;     *            id of project to query from database
+&nbsp;     * @param referringView
+&nbsp;     *            view the user was coming from
+&nbsp;     */
+&nbsp;    public void prepareProcess(int templateId, int projectId, String referringView, Integer parentId) {
+<b class="nc">&nbsp;        this.referringView = referringView;</b>
+<b class="nc">&nbsp;        ProcessGenerator processGenerator = new ProcessGenerator();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            boolean generated = processGenerator.generateProcess(templateId, projectId);</b>
+<b class="nc">&nbsp;            if (generated) {</b>
+<b class="nc">&nbsp;                Workpiece workpiece = new Workpiece();</b>
+<b class="nc">&nbsp;                processes = new LinkedList&lt;&gt;(Collections.singletonList(new TempProcess(</b>
+<b class="nc">&nbsp;                        processGenerator.getGeneratedProcess(), workpiece)));</b>
+<b class="nc">&nbsp;                currentProcess = processes.get(0);</b>
+<b class="nc">&nbsp;                project = processGenerator.getProject();</b>
+<b class="nc">&nbsp;                template = processGenerator.getTemplate();</b>
+<b class="nc">&nbsp;                updateRulesetAndDocType(getMainProcess().getRuleset());</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(project) &amp;&amp; Objects.nonNull(project.getDefaultImportConfiguration())) {</b>
+<b class="nc">&nbsp;                    setDefaultImportConfiguration(project.getDefaultImportConfiguration());</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    defaultConfigurationType = null;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                if (Objects.nonNull(parentId) &amp;&amp; parentId != 0) {</b>
+<b class="nc">&nbsp;                    ProcessDTO parentProcess = ServiceManager.getProcessService().findById(parentId);</b>
+<b class="nc">&nbsp;                    RulesetManagementInterface rulesetManagement = ServiceManager.getRulesetService()</b>
+<b class="nc">&nbsp;                            .openRuleset(ServiceManager.getRulesetService().getById(parentProcess.getRuleset().getId()));</b>
+<b class="nc">&nbsp;                    Map&lt;String, String&gt; allowedSubstructuralElements = rulesetManagement</b>
+<b class="nc">&nbsp;                            .getStructuralElementView(parentProcess.getBaseType(), &quot;&quot;, priorityList)</b>
+<b class="nc">&nbsp;                            .getAllowedSubstructuralElements();</b>
+<b class="nc">&nbsp;                    List&lt;SelectItem&gt; docTypes = allowedSubstructuralElements.entrySet()</b>
+<b class="nc">&nbsp;                            .stream().map(entry -&gt; new SelectItem(entry.getKey(), entry.getValue()))</b>
+<b class="nc">&nbsp;                            .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;                    processDataTab.setAllDocTypes(docTypes);</b>
+<b class="nc">&nbsp;                    titleRecordLinkTab.setChosenParentProcess(String.valueOf(parentId));</b>
+<b class="nc">&nbsp;                    titleRecordLinkTab.chooseParentProcess();</b>
+<b class="nc">&nbsp;                    if (Objects.nonNull(project.getDefaultChildProcessImportConfiguration())) {</b>
+<b class="nc">&nbsp;                        setDefaultImportConfiguration(project.getDefaultChildProcessImportConfiguration());</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        defaultConfigurationType = null;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    if (setChildCount(titleRecordLinkTab.getTitleRecordProcess(), rulesetManagement, workpiece)) {</b>
+<b class="nc">&nbsp;                        updateRulesetAndDocType(getMainProcess().getRuleset());</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="nc">&nbsp;                processDataTab.prepare();</b>
+<b class="nc">&nbsp;                showDefaultImportConfigurationDialog();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (ProcessGenerationException | DataException | DAOException | IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void showDefaultImportConfigurationDialog() {
+<b class="nc">&nbsp;        if (ImportConfigurationType.OPAC_SEARCH.name().equals(defaultConfigurationType)) {</b>
+<b class="nc">&nbsp;            checkRulesetConfiguration();</b>
+<b class="nc">&nbsp;        } else if (ImportConfigurationType.FILE_UPLOAD.name().equals(defaultConfigurationType)) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;fileUploadDialog&#39;).show()&quot;);</b>
+<b class="nc">&nbsp;        } else if (ImportConfigurationType.PROCESS_TEMPLATE.name().equals(defaultConfigurationType)) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;searchEditDialog&#39;).show()&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setDefaultImportConfiguration(ImportConfiguration importConfiguration) {
+<b class="nc">&nbsp;        defaultConfigurationType = importConfiguration.getConfigurationType();</b>
+<b class="nc">&nbsp;        if (ImportConfigurationType.OPAC_SEARCH.name().equals(importConfiguration.getConfigurationType())) {</b>
+<b class="nc">&nbsp;            catalogImportDialog.getHitModel().setImportConfiguration(importConfiguration);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().ajax().update(&quot;catalogSearchDialog&quot;);</b>
+<b class="nc">&nbsp;        } else if (ImportConfigurationType.PROCESS_TEMPLATE.name().equals(importConfiguration.getConfigurationType())) {</b>
+<b class="nc">&nbsp;            searchDialog.setOriginalProcess(importConfiguration.getDefaultTemplateProcess());</b>
+<b class="nc">&nbsp;            PrimeFaces.current().ajax().update(&quot;searchEditDialog&quot;);</b>
+<b class="nc">&nbsp;        } else if (ImportConfigurationType.FILE_UPLOAD.name().equals(importConfiguration.getConfigurationType())) {</b>
+<b class="nc">&nbsp;            fileUploadDialog.setImportConfiguration(importConfiguration);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().ajax().update(&quot;fileUploadDialog&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    static boolean setChildCount(Process parent, RulesetManagementInterface ruleset, Workpiece workpiece) throws IOException {
+<b class="fc">&nbsp;        Collection&lt;String&gt; childCountKeys = ruleset.getFunctionalKeys(FunctionalMetadata.CHILD_COUND);</b>
+<b class="fc">&nbsp;        if (childCountKeys.isEmpty()) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String childCount = Integer.toString(parent.getChildren().size() + 1);</b>
+<b class="fc">&nbsp;        for (String childCountKey : childCountKeys) {</b>
+<b class="fc">&nbsp;            MetadataEntry entry = new MetadataEntry();</b>
+<b class="fc">&nbsp;            entry.setKey(childCountKey);</b>
+<b class="fc">&nbsp;            entry.setValue(childCount);</b>
+<b class="fc">&nbsp;            workpiece.getLogicalStructure().getMetadata().add(entry);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create process hierarchy.
+&nbsp;     */
+&nbsp;    private void createProcessHierarchy()
+&nbsp;            throws DataException, ProcessGenerationException, IOException {
+&nbsp;        // discard all processes in hierarchy except the first if parent process in
+&nbsp;        // title record link tab is selected!
+<b class="fc">&nbsp;        if (this.processes.size() &gt; 1 &amp;&amp; Objects.nonNull(this.titleRecordLinkTab.getTitleRecordProcess())</b>
+<b class="nc">&nbsp;                &amp;&amp; Objects.nonNull(this.titleRecordLinkTab.getSelectedInsertionPosition())</b>
+<b class="nc">&nbsp;                &amp;&amp; !this.titleRecordLinkTab.getSelectedInsertionPosition().isEmpty()) {</b>
+<b class="nc">&nbsp;            this.processes = new LinkedList&lt;&gt;(Collections.singletonList(this.processes.get(0)));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        ProcessService.checkTasks(this.getMainProcess(), processDataTab.getDocType());</b>
+<b class="fc">&nbsp;        processAncestors();</b>
+<b class="fc">&nbsp;        processChildren();</b>
+&nbsp;        // main process and it&#39;s ancestors need to be saved, so they have IDs before creating their process directories
+<b class="fc">&nbsp;        ServiceManager.getProcessService().save(getMainProcess(), true);</b>
+<b class="fc">&nbsp;        if (!createProcessesLocation(this.processes)) {</b>
+<b class="nc">&nbsp;            throw new IOException(&quot;Unable to create directories for process hierarchy!&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (this.catalogImportDialog.isImportChildren() &amp;&amp; !createProcessesLocation(this.childProcesses)) {</b>
+<b class="nc">&nbsp;            throw new IOException(&quot;Unable to create directories for child processes!&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        saveProcessHierarchyMetadata();</b>
+&nbsp;        // TODO: do the same &#39;ensureNonEmptyTitles&#39; for child processes?
+<b class="fc">&nbsp;        if (ImportService.ensureNonEmptyTitles(this.processes)) {</b>
+&nbsp;            // saving the main process automatically saves its parent and ancestor processes as well!
+<b class="nc">&nbsp;            ServiceManager.getProcessService().save(getMainProcess(), true);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // add links between child processes and main process
+<b class="fc">&nbsp;        this.saveChildProcessLinks();</b>
+&nbsp;
+&nbsp;        // if a process is selected in &#39;TitleRecordLinkTab&#39; link it as parent with the first process in the list
+<b class="fc">&nbsp;        if (this.processes.size() &gt; 0 &amp;&amp; Objects.nonNull(titleRecordLinkTab.getTitleRecordProcess())) {</b>
+<b class="nc">&nbsp;            MetadataEditor.addLink(titleRecordLinkTab.getTitleRecordProcess(),</b>
+<b class="nc">&nbsp;                titleRecordLinkTab.getSelectedInsertionPosition(), this.processes.get(0).getProcess().getId());</b>
+<b class="nc">&nbsp;            ProcessService.setParentRelations(titleRecordLinkTab.getTitleRecordProcess(),</b>
+<b class="nc">&nbsp;                processes.get(0).getProcess());</b>
+<b class="nc">&nbsp;            String summary = Helper.getTranslation(&quot;newProcess.catalogueSearch.linkedToExistingProcessSummary&quot;);</b>
+<b class="nc">&nbsp;            String detail = Helper.getTranslation(&quot;newProcess.catalogueSearch.linkedToExistingProcessDetail&quot;,</b>
+<b class="nc">&nbsp;                titleRecordLinkTab.getTitleRecordProcess().getTitle());</b>
+<b class="nc">&nbsp;            catalogImportDialog.showGrowlMessage(summary, detail);</b>
+<b class="nc">&nbsp;        } else {</b>
+&nbsp;            // add links between consecutive processes in list
+<b class="fc">&nbsp;            for (int i = 0; i &lt; this.processes.size() - 1; i++) {</b>
+<b class="nc">&nbsp;                TempProcess tempProcess = this.processes.get(i);</b>
+<b class="nc">&nbsp;                MetadataEditor.addLink(this.processes.get(i + 1).getProcess(), &quot;0&quot;, tempProcess.getProcess().getId());</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        ServiceManager.getProcessService().save(getMainProcess(), true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save links between child processes and main process.
+&nbsp;     *
+&nbsp;     * @throws DataException thrown if child process could not be saved
+&nbsp;     * @throws IOException thrown if link between child and parent process could not be added
+&nbsp;     */
+&nbsp;    private void saveChildProcessLinks() throws IOException, DataException {
+<b class="fc">&nbsp;        this.progress = 0;</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(PrimeFaces.current()) &amp;&amp; Objects.nonNull(FacesContext.getCurrentInstance())) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;progressDialog&#39;)&quot;);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().ajax().update(&quot;progressForm:progressBar&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (TempProcess childProcess : this.childProcesses) {</b>
+<b class="nc">&nbsp;            int currentIndex = childProcesses.indexOf(childProcess);</b>
+<b class="nc">&nbsp;            MetadataEditor.addLink(getMainProcess(), String.valueOf(currentIndex),</b>
+<b class="nc">&nbsp;                    childProcess.getProcess().getId());</b>
+<b class="nc">&nbsp;            ServiceManager.getProcessService().save(childProcess.getProcess());</b>
+<b class="nc">&nbsp;            this.progress = (currentIndex + 1) * 100 / this.childProcesses.size();</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(PrimeFaces.current()) &amp;&amp; Objects.nonNull(FacesContext.getCurrentInstance())) {</b>
+<b class="nc">&nbsp;                PrimeFaces.current().ajax().update(&quot;progressForm:progressBar&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(PrimeFaces.current()) &amp;&amp; Objects.nonNull(FacesContext.getCurrentInstance())) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;progressDialog&#39;)&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processChildren() {
+&nbsp;        // set parent relations between main process and its imported child processes!
+&nbsp;        try {
+<b class="fc">&nbsp;            ImportService.processProcessChildren(getMainProcess(), childProcesses, rulesetManagement,</b>
+&nbsp;                    acquisitionStage, priorityList);
+<b class="nc">&nbsp;        } catch (DataException | InvalidMetadataValueException | NoSuchMetadataFieldException</b>
+&nbsp;                | ProcessGenerationException | IOException e) {
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Unable to attach child documents to process: &quot; + e.getMessage());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processAncestors() throws ProcessGenerationException {
+<b class="fc">&nbsp;        for (TempProcess tempProcess : this.processes) {</b>
+<b class="fc">&nbsp;            Process process = tempProcess.getProcess();</b>
+&nbsp;            // set parent relations between all consecutive process pairs
+<b class="fc">&nbsp;            int index = processes.indexOf(tempProcess);</b>
+<b class="fc">&nbsp;            if (index &lt; processes.size() - 1) {</b>
+<b class="nc">&nbsp;                ProcessService.setParentRelations(processes.get(index + 1).getProcess(), process);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (Objects.nonNull(tempProcess.getMetadataNodes())) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    tempProcess.getProcessMetadata().preserve();</b>
+<b class="nc">&nbsp;                    ImportService.processTempProcess(tempProcess, rulesetManagement, acquisitionStage, priorityList, null);</b>
+<b class="nc">&nbsp;                } catch (InvalidMetadataValueException | NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;                    throw new ProcessGenerationException(&quot;Error creating process hierarchy: invalid metadata found!&quot;);</b>
+<b class="nc">&nbsp;                } catch (RulesetNotFoundException e) {</b>
+<b class="nc">&nbsp;                    throw new ProcessGenerationException(</b>
+<b class="nc">&nbsp;                            &quot;Ruleset not found:&quot; + tempProcess.getProcess().getRuleset().getTitle());</b>
+<b class="nc">&nbsp;                } catch (IOException e) {</b>
+<b class="nc">&nbsp;                    throw new ProcessGenerationException(&quot;Error reading Ruleset: &quot; + tempProcess.getProcess().getRuleset().getTitle());</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void saveProcessHierarchyMetadata() {
+&nbsp;        // save ancestor processes meta.xml files
+<b class="fc">&nbsp;        for (TempProcess tempProcess : this.processes) {</b>
+<b class="fc">&nbsp;            if (this.processes.indexOf(tempProcess) == 0) {</b>
+<b class="fc">&nbsp;                tempProcess.getProcessMetadata().preserve();</b>
+&nbsp;            }
+<b class="fc">&nbsp;            saveTempProcessMetadata(tempProcess);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;        // save child processes meta.xml files
+<b class="fc">&nbsp;        for (TempProcess tempProcess : this.childProcesses) {</b>
+<b class="nc">&nbsp;            saveTempProcessMetadata(tempProcess);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void saveTempProcessMetadata(TempProcess tempProcess) {
+<b class="fc">&nbsp;        try (OutputStream out = ServiceManager.getFileService()</b>
+<b class="fc">&nbsp;                .write(ServiceManager.getProcessService().getMetadataFileUri(tempProcess.getProcess()))) {</b>
+<b class="fc">&nbsp;            tempProcess.getWorkpiece().setId(tempProcess.getProcess().getId().toString());</b>
+<b class="fc">&nbsp;            ServiceManager.getMetsService().save(tempProcess.getWorkpiece(), out);</b>
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean createProcessesLocation(List&lt;TempProcess&gt; processes) {
+<b class="fc">&nbsp;        for (TempProcess tempProcess : processes) {</b>
+<b class="fc">&nbsp;            if (processes.indexOf(tempProcess) &gt; 0 &amp;&amp; Objects.isNull(tempProcess.getMetadataNodes())) {</b>
+&nbsp;                // skip creating directories for processes that already exist!
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+&nbsp;            try {
+<b class="fc">&nbsp;                URI processBaseUri = ServiceManager.getFileService().createProcessLocation(tempProcess.getProcess());</b>
+<b class="fc">&nbsp;                tempProcess.getProcess().setProcessBaseUri(processBaseUri);</b>
+<b class="nc">&nbsp;            } catch (IOException | CommandException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    ServiceManager.getProcessService().remove(tempProcess.getProcess());</b>
+<b class="nc">&nbsp;                } catch (DataException ex) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                return false;</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public int getProgress() {
+<b class="nc">&nbsp;        return this.progress;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return referring view.
+&nbsp;     *
+&nbsp;     * @return referring view
+&nbsp;     */
+&nbsp;    public String getReferringView() {
+<b class="nc">&nbsp;        return this.referringView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the given ProcessDetail &#39;processDetail&#39; is contained in the current list of addable
+&nbsp;     * metadata types in the addDocStrucTypeDialog.
+&nbsp;     *
+&nbsp;     * @param treeNode treeNode to be added
+&nbsp;     * @return whether the given ProcessDetail can be added or not
+&nbsp;     */
+&nbsp;    public boolean canBeAdded(TreeNode treeNode) throws InvalidMetadataValueException {
+<b class="nc">&nbsp;        if (Objects.isNull(treeNode.getParent().getParent())) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(currentProcess.getProcessMetadata().getSelectedMetadataTreeNode())</b>
+<b class="nc">&nbsp;                    || Objects.isNull(addMetadataDialog.getAddableMetadata())) {</b>
+<b class="nc">&nbsp;                this.addMetadataDialog.prepareAddableMetadataForStructure();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else if (!Objects.equals(currentProcess.getProcessMetadata().getSelectedMetadataTreeNode(),</b>
+<b class="nc">&nbsp;                treeNode.getParent()) || Objects.isNull(addMetadataDialog.getAddableMetadata())) {</b>
+<b class="nc">&nbsp;            prepareAddableMetadataForGroup(treeNode.getParent());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(addMetadataDialog.getAddableMetadata())) {</b>
+<b class="nc">&nbsp;            return addMetadataDialog.getAddableMetadata()</b>
+<b class="nc">&nbsp;                    .stream()</b>
+<b class="nc">&nbsp;                    .map(SelectItem::getValue)</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toList())</b>
+<b class="nc">&nbsp;                    .contains(((ProcessDetail) treeNode.getData()).getMetadataID());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean canBeDeleted(ProcessDetail processDetail) {
+<b class="nc">&nbsp;        return processDetail.getOccurrences() &gt; 1 &amp;&amp; processDetail.getOccurrences() &gt; processDetail.getMinOccurs()</b>
+<b class="nc">&nbsp;                || (!processDetail.isRequired() &amp;&amp; !this.rulesetManagement.isAlwaysShowingForKey(processDetail.getMetadataID()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether given TreeNode contains ProcessFieldedMetadata and if any further metadata can
+&nbsp;     * be added to it or not.
+&nbsp;     *
+&nbsp;     * @param metadataNode TreeNode for which the check is performed
+&nbsp;     * @return whether given TreeNode contains ProcessFieldedMetadata and if any further metadata can be added to it
+&nbsp;     */
+&nbsp;    public boolean metadataAddableToGroup(TreeNode metadataNode) {
+<b class="nc">&nbsp;        if (metadataNode.getData() instanceof ProcessFieldedMetadata) {</b>
+<b class="nc">&nbsp;            return !(DataEditorService.getAddableMetadataForGroup(getMainProcess().getRuleset(), metadataNode).isEmpty());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prepare addable metadata for metadata group.
+&nbsp;     * @param treeNode metadataGroup treeNode
+&nbsp;     */
+&nbsp;    public void prepareAddableMetadataForGroup(TreeNode treeNode) {
+<b class="nc">&nbsp;        addMetadataDialog.prepareAddableMetadataForGroup(getMainProcess().getRuleset(), treeNode);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process ancestors.
+&nbsp;     *
+&nbsp;     * @return process ancestors
+&nbsp;     */
+&nbsp;    public List&lt;TempProcess&gt; getProcessAncestors() {
+<b class="nc">&nbsp;        return this.processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process children.
+&nbsp;     *
+&nbsp;     * @return process children
+&nbsp;     */
+&nbsp;    public List&lt;TempProcess&gt; getProcessChildren() {
+<b class="nc">&nbsp;        return this.childProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get value of metadata configured to hold the catalog ID, e.g. &quot;identifierMetadata&quot;
+&nbsp;     * (see OPACConfig.getIdentifierMetadata for details).
+&nbsp;     *
+&nbsp;     * @param tempProcess TempProcess whose ID metadata is returned
+&nbsp;     * @return ID metadata
+&nbsp;     */
+&nbsp;    public String getCatalogId(TempProcess tempProcess) {
+<b class="nc">&nbsp;        if (Objects.nonNull(tempProcess)) {</b>
+<b class="nc">&nbsp;            return tempProcess.getCatalogId(rulesetManagement.getFunctionalKeys(FunctionalMetadata.RECORD_IDENTIFIER));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot; - &quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Fill metadata fields in metadata tab with metadata values of given temp process on successful import.
+&nbsp;     * @param tempProcess TempProcess for which metadata is displayed
+&nbsp;     */
+&nbsp;    public void fillCreateProcessForm(TempProcess tempProcess)
+&nbsp;            throws ProcessGenerationException, IOException {
+<b class="nc">&nbsp;        if (Objects.nonNull(tempProcess)) {</b>
+<b class="nc">&nbsp;            currentProcess = tempProcess;</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(tempProcess.getWorkpiece())</b>
+<b class="nc">&nbsp;                    &amp;&amp; Objects.nonNull(tempProcess.getWorkpiece().getLogicalStructure())</b>
+<b class="nc">&nbsp;                    &amp;&amp; Objects.nonNull(tempProcess.getWorkpiece().getLogicalStructure().getType())) {</b>
+<b class="nc">&nbsp;                tempProcess.verifyDocType();</b>
+<b class="nc">&nbsp;                processDataTab.setDocType(tempProcess.getWorkpiece().getLogicalStructure().getType());</b>
+<b class="nc">&nbsp;                processDataTab.updateProcessMetadata();</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get currentProcess.
+&nbsp;     *
+&nbsp;     * @return value of currentProcess
+&nbsp;     */
+&nbsp;    public TempProcess getCurrentProcess() {
+<b class="fc">&nbsp;        return currentProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set currentProcess.
+&nbsp;     *
+&nbsp;     * @param currentProcess as org.kitodo.production.helper.TempProcess
+&nbsp;     */
+&nbsp;    public void setCurrentProcess(TempProcess currentProcess) {
+<b class="fc">&nbsp;        this.currentProcess = currentProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check whether ruleset configuration is complete for OPAC import, e.g. if functional metadata of type
+&nbsp;     * &#39;recordIdentifier&#39; has been configured for all document types in this ruleset.
+&nbsp;     * If configuration is complete, the import dialog is shown. Otherwise, a warning dialog is shown to inform the user
+&nbsp;     * about missing ruleset configurations.
+&nbsp;     */
+&nbsp;    public void checkRulesetConfiguration() {
+<b class="nc">&nbsp;        if (Objects.isNull(rulesetConfigurationForOpacImportComplete)) {</b>
+<b class="nc">&nbsp;            rulesetConfigurationForOpacImportComplete = ServiceManager.getImportService()</b>
+<b class="nc">&nbsp;                    .isRecordIdentifierMetadataConfigured(rulesetManagement);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (rulesetConfigurationForOpacImportComplete) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;catalogSearchDialog&#39;).show();&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;recordIdentifierMissingDialog&#39;).show();&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get defaultConfigurationType.
+&nbsp;     *
+&nbsp;     * @return value of defaultConfigurationType
+&nbsp;     */
+&nbsp;    public String getDefaultConfigurationType() {
+<b class="nc">&nbsp;        return defaultConfigurationType;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

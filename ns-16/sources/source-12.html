@@ -1,0 +1,764 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Project</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: Project (org.kitodo.data.database.beans)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Project</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,8%
+  </span>
+  <span class="absValue">
+    (37/64)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,3%
+  </span>
+  <span class="absValue">
+    (69/104)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Project$HibernateProxy$dsoeY2LZ</td>
+  </tr>
+  <tr>
+    <td class="name">Project$HibernateProxy$pyRA48Xt</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    57,8%
+  </span>
+  <span class="absValue">
+    (37/64)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,3%
+  </span>
+  <span class="absValue">
+    (69/104)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.beans;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.persistence.CascadeType;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.ForeignKey;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToMany;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.OneToMany;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;import org.kitodo.data.database.persistence.ProjectDAO;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;project&quot;)
+&nbsp;public class Project extends BaseIndexedBean implements Comparable&lt;Project&gt; {
+&nbsp;
+&nbsp;    @Column(name = &quot;title&quot;, nullable = false, unique = true)
+&nbsp;    private String title;
+&nbsp;
+&nbsp;    @Column(name = &quot;dmsImportRootPath&quot;)
+&nbsp;    private String dmsImportRootPath;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;metsRightsOwner&quot;)</b>
+&nbsp;    private String metsRightsOwner = &quot;&quot;;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;metsRightsOwnerLogo&quot;)</b>
+&nbsp;    private String metsRightsOwnerLogo = &quot;&quot;;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;metsRightsOwnerSite&quot;)</b>
+&nbsp;    private String metsRightsOwnerSite = &quot;&quot;;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;metsRightsOwnerMail&quot;)</b>
+&nbsp;    private String metsRightsOwnerMail = &quot;&quot;;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;metsDigiprovReference&quot;)</b>
+&nbsp;    private String metsDigiprovReference = &quot;&quot;;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;metsDigiprovPresentation&quot;)</b>
+&nbsp;    private String metsDigiprovPresentation = &quot;&quot;;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;metsPointerPath&quot;)</b>
+&nbsp;    private String metsPointerPath = &quot;&quot;;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;metsPurl&quot;)</b>
+&nbsp;    private String metsPurl = &quot;&quot;;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;metsContentId&quot;)</b>
+&nbsp;    private String metsContentIDs = &quot;&quot;;
+&nbsp;
+&nbsp;    @Column(name = &quot;startDate&quot;)
+&nbsp;    private Date startDate;
+&nbsp;
+&nbsp;    @Column(name = &quot;endDate&quot;)
+&nbsp;    private Date endDate;
+&nbsp;
+&nbsp;    @Column(name = &quot;numberOfPages&quot;)
+&nbsp;    private Integer numberOfPages;
+&nbsp;
+&nbsp;    @Column(name = &quot;numberOfVolumes&quot;)
+&nbsp;    private Integer numberOfVolumes;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;active&quot;)</b>
+<b class="fc">&nbsp;    private Boolean active = true;</b>
+&nbsp;
+&nbsp;    @ManyToMany(mappedBy = &quot;projects&quot;, cascade = CascadeType.PERSIST)
+&nbsp;    private List&lt;User&gt; users;
+&nbsp;
+&nbsp;    @OneToMany(mappedBy = &quot;project&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+&nbsp;    private List&lt;Process&gt; processes;
+&nbsp;
+&nbsp;    @ManyToMany(mappedBy = &quot;projects&quot;, cascade = CascadeType.PERSIST)
+&nbsp;    private List&lt;Template&gt; templates;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;default_importconfiguration_id&quot;,
+&nbsp;            foreignKey = @ForeignKey(name = &quot;FK_project_default_importconfiguration_id&quot;))
+&nbsp;    private ImportConfiguration defaultImportConfiguration;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;default_child_process_importconfiguration_id&quot;,
+&nbsp;            foreignKey = @ForeignKey(name = &quot;FK_project_default_child_process_importconfiguration_id&quot;))
+&nbsp;    private ImportConfiguration defaultChildProcessImportConfiguration;
+&nbsp;
+&nbsp;    @OneToMany(mappedBy = &quot;project&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+&nbsp;    private List&lt;Folder&gt; folders;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;client_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_client_id&quot;))
+&nbsp;    private Client client;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Folder to use as source for generation of derived resources.
+&nbsp;     */
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;generatorSource_folder_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_generatorSource_folder_id&quot;))
+&nbsp;    private Folder generatorSource;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Folder with media to use for the viewer.
+&nbsp;     */
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;mediaView_folder_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_mediaView_folder_id&quot;))
+&nbsp;    private Folder mediaView;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Folder with media to use for the preview.
+&nbsp;     */
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;preview_folder_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_preview_folder_id&quot;))
+&nbsp;    private Folder preview;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Folder with media to use for the video preview.
+&nbsp;     */
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;preview_audio_folder_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_preview_audio_folder_id&quot;))
+&nbsp;    private Folder audioPreview;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Folder with media to use for the video viewer.
+&nbsp;     */
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;mediaView_audio_folder_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_mediaView_audio_folder_id&quot;))
+&nbsp;    private Folder audioMediaView;
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Folder with media to use for the video preview.
+&nbsp;     */
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;preview_video_folder_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_preview_video_folder_id&quot;))
+&nbsp;    private Folder videoPreview;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Folder with media to use for the video viewer.
+&nbsp;     */
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;mediaView_video_folder_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_mediaView_video_folder_id&quot;))
+&nbsp;    private Folder videoMediaView;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+<b class="fc">&nbsp;    public Project() {</b>
+<b class="fc">&nbsp;        this.processes = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.users = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.folders = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.dmsImportRootPath = &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getTitle() {
+<b class="fc">&nbsp;        return this.title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTitle(String title) {
+<b class="fc">&nbsp;        this.title = title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of users of this project.
+&nbsp;     *
+&nbsp;     * @return the folders
+&nbsp;     */
+&nbsp;    public List&lt;User&gt; getUsers() {
+<b class="fc">&nbsp;        initialize(new ProjectDAO(), this.users);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.users)) {</b>
+<b class="nc">&nbsp;            this.users = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.users;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setUsers(List&lt;User&gt; users) {
+<b class="fc">&nbsp;        this.users = users;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of processes of this project.
+&nbsp;     *
+&nbsp;     * @return the folders
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; getProcesses() {
+<b class="fc">&nbsp;        initialize(new ProjectDAO(), this.processes);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.processes)) {</b>
+<b class="nc">&nbsp;            this.processes = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcesses(List&lt;Process&gt; processes) {
+<b class="fc">&nbsp;        this.processes = processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get templates.
+&nbsp;     *
+&nbsp;     * @return value of templates
+&nbsp;     */
+&nbsp;    public List&lt;Template&gt; getTemplates() {
+<b class="fc">&nbsp;        initialize(new ProjectDAO(), this.templates);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.templates)) {</b>
+<b class="fc">&nbsp;            this.templates = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.templates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set templates.
+&nbsp;     *
+&nbsp;     * @param templates
+&nbsp;     *            as list of templates
+&nbsp;     */
+&nbsp;    public void setTemplates(List&lt;Template&gt; templates) {
+<b class="fc">&nbsp;        this.templates = templates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getDmsImportRootPath() {
+<b class="nc">&nbsp;        return this.dmsImportRootPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setDmsImportRootPath(String dmsImportRootPath) {
+<b class="nc">&nbsp;        this.dmsImportRootPath = dmsImportRootPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of folders of this project.
+&nbsp;     *
+&nbsp;     * @return the folders
+&nbsp;     */
+&nbsp;    public List&lt;Folder&gt; getFolders() {
+<b class="fc">&nbsp;        initialize(new ProjectDAO(), this.folders);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.folders)) {</b>
+<b class="nc">&nbsp;            this.folders = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.folders;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the list of folders of this project.
+&nbsp;     *
+&nbsp;     * @param folders
+&nbsp;     *            list of folders to set
+&nbsp;     */
+&nbsp;    public void setFolders(List&lt;Folder&gt; folders) {
+<b class="fc">&nbsp;        this.folders = folders;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMetsRightsOwner() {
+<b class="fc">&nbsp;        return this.metsRightsOwner;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMetsRightsOwner(String metsRightsOwner) {
+<b class="fc">&nbsp;        this.metsRightsOwner = metsRightsOwner;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMetsRightsOwnerLogo() {
+<b class="fc">&nbsp;        return this.metsRightsOwnerLogo;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMetsRightsOwnerLogo(String metsRightsOwnerLogo) {
+<b class="nc">&nbsp;        this.metsRightsOwnerLogo = metsRightsOwnerLogo;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMetsRightsOwnerSite() {
+<b class="fc">&nbsp;        return this.metsRightsOwnerSite;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMetsRightsOwnerSite(String metsRightsOwnerSite) {
+<b class="nc">&nbsp;        this.metsRightsOwnerSite = metsRightsOwnerSite;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMetsRightsOwnerMail() {
+<b class="fc">&nbsp;        return this.metsRightsOwnerMail;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMetsRightsOwnerMail(String metsRigthsOwnerMail) {
+<b class="nc">&nbsp;        this.metsRightsOwnerMail = metsRigthsOwnerMail;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMetsDigiprovReference() {
+<b class="fc">&nbsp;        return this.metsDigiprovReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMetsDigiprovReference(String metsDigiprovReference) {
+<b class="nc">&nbsp;        this.metsDigiprovReference = metsDigiprovReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMetsDigiprovPresentation() {
+<b class="fc">&nbsp;        return this.metsDigiprovPresentation;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMetsDigiprovPresentation(String metsDigiprovPresentation) {
+<b class="nc">&nbsp;        this.metsDigiprovPresentation = metsDigiprovPresentation;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMetsPointerPath() {
+<b class="nc">&nbsp;        return this.metsPointerPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMetsPointerPath(String metsPointerPath) {
+<b class="nc">&nbsp;        this.metsPointerPath = metsPointerPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMetsPurl(String metsPurl) {
+<b class="nc">&nbsp;        this.metsPurl = metsPurl;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMetsPurl() {
+<b class="fc">&nbsp;        return this.metsPurl;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMetsContentIDs(String contentIDs) {
+<b class="nc">&nbsp;        this.metsContentIDs = contentIDs;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getMetsContentIDs() {
+<b class="fc">&nbsp;        return this.metsContentIDs;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get number of volumes.
+&nbsp;     *
+&nbsp;     * @return number of volumes for this project
+&nbsp;     */
+&nbsp;
+&nbsp;    public Integer getNumberOfVolumes() {
+<b class="fc">&nbsp;        if (this.numberOfVolumes == null) {</b>
+<b class="fc">&nbsp;            this.numberOfVolumes = 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.numberOfVolumes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set number of volumes.
+&nbsp;     *
+&nbsp;     * @param numberOfVolumes
+&nbsp;     *            for this project
+&nbsp;     */
+&nbsp;
+&nbsp;    public void setNumberOfVolumes(Integer numberOfVolumes) {
+<b class="fc">&nbsp;        this.numberOfVolumes = numberOfVolumes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get number of pages.
+&nbsp;     *
+&nbsp;     * @return number of pages
+&nbsp;     */
+&nbsp;    public Integer getNumberOfPages() {
+<b class="fc">&nbsp;        if (this.numberOfPages == null) {</b>
+<b class="fc">&nbsp;            this.numberOfPages = 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.numberOfPages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set number of pages.
+&nbsp;     *
+&nbsp;     * @param numberOfPages
+&nbsp;     *            the number of pages to set
+&nbsp;     */
+&nbsp;    public void setNumberOfPages(Integer numberOfPages) {
+<b class="fc">&nbsp;        this.numberOfPages = numberOfPages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get start date.
+&nbsp;     *
+&nbsp;     * @return the start date
+&nbsp;     */
+&nbsp;    public Date getStartDate() {
+<b class="fc">&nbsp;        if (this.startDate == null) {</b>
+<b class="fc">&nbsp;            this.startDate = new Date();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.startDate;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStartDate(Date startDate) {
+<b class="fc">&nbsp;        this.startDate = startDate;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get end date.
+&nbsp;     *
+&nbsp;     * @return the end date
+&nbsp;     */
+&nbsp;    public Date getEndDate() {
+<b class="fc">&nbsp;        if (this.endDate == null) {</b>
+<b class="fc">&nbsp;            this.endDate = new Date();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.endDate;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setEndDate(Date endDate) {
+<b class="fc">&nbsp;        this.endDate = endDate;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set if project is active.
+&nbsp;     *
+&nbsp;     * @param active
+&nbsp;     *            whether project is active
+&nbsp;     */
+&nbsp;    public void setActive(boolean active) {
+<b class="fc">&nbsp;        this.active = active;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get if project is active.
+&nbsp;     *
+&nbsp;     * @return whether project is active
+&nbsp;     */
+&nbsp;    public boolean isActive() {
+<b class="fc">&nbsp;        return this.active;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets client.
+&nbsp;     *
+&nbsp;     * @return The client.
+&nbsp;     */
+&nbsp;    public Client getClient() {
+<b class="fc">&nbsp;        return client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets client.
+&nbsp;     *
+&nbsp;     * @param client
+&nbsp;     *            The client.
+&nbsp;     */
+&nbsp;    public void setClient(Client client) {
+<b class="fc">&nbsp;        this.client = client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use as source for generation of derived resources
+&nbsp;     * of this project.
+&nbsp;     *
+&nbsp;     * @return the source folder for generation
+&nbsp;     */
+&nbsp;    public Folder getGeneratorSource() {
+<b class="fc">&nbsp;        return generatorSource;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use as source for generation of derived resources of
+&nbsp;     * this project.
+&nbsp;     *
+&nbsp;     * @param generatorSource
+&nbsp;     *            source folder for generation to set
+&nbsp;     */
+&nbsp;    public void setGeneratorSource(Folder generatorSource) {
+<b class="fc">&nbsp;        this.generatorSource = generatorSource;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for the media view.
+&nbsp;     *
+&nbsp;     * @return media view folder
+&nbsp;     */
+&nbsp;    public Folder getMediaView() {
+<b class="nc">&nbsp;        return mediaView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for the media view.
+&nbsp;     *
+&nbsp;     * @param mediaView
+&nbsp;     *            media view folder
+&nbsp;     */
+&nbsp;    public void setMediaView(Folder mediaView) {
+<b class="fc">&nbsp;        this.mediaView = mediaView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for preview.
+&nbsp;     *
+&nbsp;     * @return preview folder
+&nbsp;     */
+&nbsp;    public Folder getPreview() {
+<b class="nc">&nbsp;        return preview;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for preview.
+&nbsp;     *
+&nbsp;     * @param preview
+&nbsp;     *         preview folder
+&nbsp;     */
+&nbsp;    public void setPreview(Folder preview) {
+<b class="nc">&nbsp;        this.preview = preview;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for audio preview.
+&nbsp;     *
+&nbsp;     * @return audio preview folder
+&nbsp;     */
+&nbsp;    public Folder getAudioPreview() {
+<b class="nc">&nbsp;        return audioPreview;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for audio preview.
+&nbsp;     *
+&nbsp;     * @param audioPreview
+&nbsp;     *         audio preview folder
+&nbsp;     */
+&nbsp;    public void setAudioPreview(Folder audioPreview) {
+<b class="nc">&nbsp;        this.audioPreview = audioPreview;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for the audio media view.
+&nbsp;     *
+&nbsp;     * @return the audio media view folder
+&nbsp;     */
+&nbsp;    public Folder getAudioMediaView() {
+<b class="nc">&nbsp;        return audioMediaView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for the audio media view.
+&nbsp;     *
+&nbsp;     * @param audioMediaView
+&nbsp;     *         audio media view folder
+&nbsp;     */
+&nbsp;    public void setAudioMediaView(Folder audioMediaView) {
+<b class="nc">&nbsp;        this.audioMediaView = audioMediaView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for video preview.
+&nbsp;     *
+&nbsp;     * @return video preview folder
+&nbsp;     */
+&nbsp;    public Folder getVideoPreview() {
+<b class="nc">&nbsp;        return videoPreview;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for video preview.
+&nbsp;     *
+&nbsp;     * @param videoPreview
+&nbsp;     *         video preview folder
+&nbsp;     */
+&nbsp;    public void setVideoPreview(Folder videoPreview) {
+<b class="nc">&nbsp;        this.videoPreview = videoPreview;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for the video media view.
+&nbsp;     *
+&nbsp;     * @return the video media view folder
+&nbsp;     */
+&nbsp;    public Folder getVideoMediaView() {
+<b class="nc">&nbsp;        return videoMediaView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for the video media view.
+&nbsp;     *
+&nbsp;     * @param videoMediaView
+&nbsp;     *         video media view folder
+&nbsp;     */
+&nbsp;    public void setVideoMediaView(Folder videoMediaView) {
+<b class="nc">&nbsp;        this.videoMediaView = videoMediaView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get defaultImportConfiguration.
+&nbsp;     *
+&nbsp;     * @return value of defaultImportConfiguration
+&nbsp;     */
+&nbsp;    public ImportConfiguration getDefaultImportConfiguration() {
+<b class="nc">&nbsp;        return defaultImportConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set defaultImportConfiguration.
+&nbsp;     *
+&nbsp;     * @param defaultImportConfiguration as org.kitodo.data.database.beans.ImportConfiguration
+&nbsp;     */
+&nbsp;    public void setDefaultImportConfiguration(ImportConfiguration defaultImportConfiguration) {
+<b class="fc">&nbsp;        this.defaultImportConfiguration = defaultImportConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get defaultChildProcessImportConfiguration.
+&nbsp;     *
+&nbsp;     * @return value of defaultChildProcessImportConfiguration
+&nbsp;     */
+&nbsp;    public ImportConfiguration getDefaultChildProcessImportConfiguration() {
+<b class="nc">&nbsp;        return defaultChildProcessImportConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set defaultChildProcessImportConfiguration.
+&nbsp;     *
+&nbsp;     * @param defaultChildProcessImportConfiguration as org.kitodo.data.database.beans.ImportConfiguration
+&nbsp;     */
+&nbsp;    public void setDefaultChildProcessImportConfiguration(ImportConfiguration defaultChildProcessImportConfiguration) {
+<b class="nc">&nbsp;        this.defaultChildProcessImportConfiguration = defaultChildProcessImportConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int compareTo(Project project) {
+<b class="nc">&nbsp;        return this.getTitle().compareTo(project.getTitle());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object object) {
+<b class="nc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (object instanceof Project) {</b>
+<b class="nc">&nbsp;            Project project = (Project) object;</b>
+<b class="nc">&nbsp;            return Objects.equals(this.getId(), project.getId());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        return this.title == null ? 0 : this.title.hashCode();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ObjectType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.enums</a>
+</div>
+
+<h1>Coverage Summary for Class: ObjectType (org.kitodo.production.enums)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ObjectType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (4/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,1%
+  </span>
+  <span class="absValue">
+    (32/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.enums;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;
+<b class="fc">&nbsp;public enum ObjectType {</b>
+<b class="fc">&nbsp;    AUTHORITY(&quot;authority&quot;, &quot;authorities&quot;, false),</b>
+<b class="fc">&nbsp;    CLIENT(&quot;client&quot;, &quot;clients&quot;, false),</b>
+<b class="fc">&nbsp;    BATCH(&quot;batch&quot;, &quot;batches&quot;, true),</b>
+<b class="fc">&nbsp;    DATAEDITORSETTING(&quot;dataEditorSetting&quot;, &quot;dataEditorSettings&quot;, false),</b>
+<b class="fc">&nbsp;    DOCKET(&quot;docket&quot;, &quot;dockets&quot;, true),</b>
+<b class="fc">&nbsp;    FOLDER(&quot;folder&quot;, &quot;folders&quot;, false),</b>
+<b class="fc">&nbsp;    LDAP_GROUP(&quot;ldapGroup&quot;, &quot;ldapGroups&quot;, false),</b>
+<b class="fc">&nbsp;    LDAP_SERVER(&quot;ldapServer&quot;, &quot;ldapServers&quot;, false),</b>
+<b class="fc">&nbsp;    PROCESS(&quot;process&quot;, &quot;processes&quot;, true),</b>
+<b class="fc">&nbsp;    PROJECT(&quot;project&quot;, &quot;projects&quot;, true),</b>
+<b class="fc">&nbsp;    PROPERTY(&quot;property&quot;, &quot;properties&quot;, false),</b>
+<b class="fc">&nbsp;    RULESET(&quot;ruleset&quot;, &quot;rulesets&quot;, true),</b>
+<b class="fc">&nbsp;    TASK(&quot;task&quot;, &quot;tasks&quot;, true),</b>
+<b class="fc">&nbsp;    TEMPLATE(&quot;template&quot;, &quot;template&quot;, true),</b>
+<b class="fc">&nbsp;    USER(&quot;user&quot;, &quot;users&quot;, false),</b>
+<b class="fc">&nbsp;    ROLE(&quot;role&quot;, &quot;roles&quot;, false),</b>
+<b class="fc">&nbsp;    WORKFLOW(&quot;workflow&quot;, &quot;workflows&quot;, true),</b>
+<b class="fc">&nbsp;    FILTER(&quot;filter&quot;, &quot;filters&quot;, true),</b>
+<b class="fc">&nbsp;    IMPORT_CONFIGURATION(&quot;importConfig.configuration&quot;, &quot;importConfig.configurations&quot;, false),</b>
+<b class="fc">&nbsp;    MAPPING_FILE(&quot;mappingFile.file&quot;, &quot;mappingFile.files&quot;, false),</b>
+<b class="fc">&nbsp;    NONE(&quot;&quot;, &quot;&quot;, false);</b>
+&nbsp;
+&nbsp;    private final String messageKeySingular;
+&nbsp;
+&nbsp;    private final String messageKeyPlural;
+&nbsp;
+&nbsp;    private final boolean indexable;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor setting the message key of the object type, used to retrieve it&#39;s
+&nbsp;     * translation from the messages resource bundle.
+&nbsp;     *
+&nbsp;     * @param messageKeySingular
+&nbsp;     *            used for translating the object types name
+&nbsp;     */
+<b class="fc">&nbsp;    ObjectType(String messageKeySingular, String messageKeyPlural, boolean indexable) {</b>
+<b class="fc">&nbsp;        this.messageKeySingular = messageKeySingular;</b>
+<b class="fc">&nbsp;        this.messageKeyPlural = messageKeyPlural;</b>
+<b class="fc">&nbsp;        this.indexable = indexable;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return the translation of the object type for singular object.
+&nbsp;     *
+&nbsp;     * @return singular translation of this object type
+&nbsp;     */
+&nbsp;    public String getTranslationSingular() {
+<b class="nc">&nbsp;        return Helper.getTranslation(messageKeySingular);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return the translation of the object type for plural object.
+&nbsp;     *
+&nbsp;     * @return plural translation of this object type
+&nbsp;     */
+&nbsp;    public String getTranslationPlural() {
+<b class="nc">&nbsp;        return Helper.getTranslation(messageKeyPlural);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get indexable.
+&nbsp;     *
+&nbsp;     * @return value of indexable
+&nbsp;     */
+&nbsp;    public boolean isIndexable() {
+<b class="fc">&nbsp;        return indexable;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of indexable object types.
+&nbsp;     *
+&nbsp;     * @return list of indexable object types.
+&nbsp;     */
+&nbsp;    public static List&lt;ObjectType&gt; getIndexableObjectTypes() {
+<b class="fc">&nbsp;        List&lt;ObjectType&gt; objectTypes = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (ObjectType objectType : ObjectType.values()) {</b>
+<b class="fc">&nbsp;            if (objectType.isIndexable()) {</b>
+<b class="fc">&nbsp;                objectTypes.add(objectType);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return objectTypes;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

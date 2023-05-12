@@ -1,0 +1,269 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MassImportService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data</a>
+</div>
+
+<h1>Coverage Summary for Class: MassImportService (org.kitodo.production.services.data)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MassImportService</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/55)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data;
+&nbsp;
+&nbsp;import java.io.BufferedReader;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStreamReader;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.SimpleMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.exceptions.ImportException;
+&nbsp;import org.kitodo.production.forms.CsvCell;
+&nbsp;import org.kitodo.production.forms.CsvRecord;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessDetail;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessFieldedMetadata;
+&nbsp;import org.primefaces.model.file.UploadedFile;
+&nbsp;
+<b class="nc">&nbsp;public class MassImportService {</b>
+&nbsp;
+<b class="nc">&nbsp;    private static MassImportService instance = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return singleton variable of type MassImportService.
+&nbsp;     *
+&nbsp;     * @return unique instance of MassImportService
+&nbsp;     */
+&nbsp;    public static MassImportService getInstance() {
+<b class="nc">&nbsp;        MassImportService localReference = instance;</b>
+<b class="nc">&nbsp;        if (Objects.isNull(localReference)) {</b>
+<b class="nc">&nbsp;            synchronized (MassImportService.class) {</b>
+<b class="nc">&nbsp;                localReference = instance;</b>
+<b class="nc">&nbsp;                if (Objects.isNull(localReference)) {</b>
+<b class="nc">&nbsp;                    localReference = new MassImportService();</b>
+<b class="nc">&nbsp;                    instance = localReference;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return localReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Read and return lines from UploadedFile &#39;file&#39;.
+&nbsp;     * @param file UploadedFile for mass import
+&nbsp;     * @return list of lines from UploadedFile &#39;file&#39;
+&nbsp;     * @throws IOException thrown if InputStream cannot be read from provided UploadedFile &#39;file&#39;.
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getLines(UploadedFile file) throws IOException {
+<b class="nc">&nbsp;        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {</b>
+<b class="nc">&nbsp;            return reader.lines().collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates and returns new list of records from given list of records by applying a different
+&nbsp;     * CSV separator character to the lines obtained by joining the CSV cell values of the existing
+&nbsp;     * CSV records with the previous CSV separator character.
+&nbsp;     * @param records CSV records created using previous CSV separator character
+&nbsp;     * @param oldSeparator previous CSV separator character
+&nbsp;     * @param newSeparator new CSV separator character
+&nbsp;     * @return list of CSV records using new CSV separator character
+&nbsp;     */
+&nbsp;    public List&lt;CsvRecord&gt; updateSeparator(List&lt;CsvRecord&gt; records, String oldSeparator, String newSeparator) {
+<b class="nc">&nbsp;        List&lt;String&gt; lines = records.stream().map(record -&gt; record.getCsvCells()</b>
+<b class="nc">&nbsp;                .stream().map(CsvCell::getValue)</b>
+<b class="nc">&nbsp;                .collect(Collectors.joining(oldSeparator)))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        return parseLines(lines, newSeparator);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Split provided lines by given &#39;separator&#39;-String and return list of CsvRecord.
+&nbsp;     * @param lines lines to parse
+&nbsp;     * @param separator String used to split lines into individual parts
+&nbsp;     * @return list of CsvRecord
+&nbsp;     */
+&nbsp;    public List&lt;CsvRecord&gt; parseLines(List&lt;String&gt; lines, String separator) {
+<b class="nc">&nbsp;        List&lt;CsvRecord&gt; records = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (String line : lines) {</b>
+<b class="nc">&nbsp;            List&lt;CsvCell&gt; cells = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (String value : line.split(separator, -1)) {</b>
+<b class="nc">&nbsp;                cells.add(new CsvCell(value));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            records.add(new CsvRecord(cells));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return records;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Import records for given rows, containing IDs for individual download and optionally additional metadata
+&nbsp;     * to be added to each record.
+&nbsp;     * @param metadataKeys metadata keys for additional metadata added to individual records during import
+&nbsp;     * @param records list of CSV records
+&nbsp;     */
+&nbsp;    public Map&lt;String, Map&lt;String, String&gt;&gt; prepareMetadata(List&lt;String&gt; metadataKeys, List&lt;CsvRecord&gt; records)
+&nbsp;            throws ImportException {
+<b class="nc">&nbsp;        Map&lt;String, Map&lt;String, String&gt;&gt; presetMetadata = new LinkedHashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (CsvRecord record : records) {</b>
+<b class="nc">&nbsp;            Map&lt;String, String&gt; processMetadata = new HashMap&lt;&gt;();</b>
+&nbsp;            // skip first metadata key as it always contains the record ID to be used for search
+<b class="nc">&nbsp;            for (int index = 1; index &lt; metadataKeys.size(); index++) {</b>
+<b class="nc">&nbsp;                String metadataKey = metadataKeys.get(index);</b>
+<b class="nc">&nbsp;                if (StringUtils.isNotBlank(metadataKey)) {</b>
+<b class="nc">&nbsp;                    processMetadata.put(metadataKey, record.getCsvCells().get(index).getValue());</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            presetMetadata.put(record.getCsvCells().get(0).getValue(), processMetadata);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return presetMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all allowed metadata.
+&nbsp;     * @param divisions list of StructuralElementViewInterface
+&nbsp;     * @param enteredMetadata collection of preset metadata
+&nbsp;     * @return list of allowed metadata as List of ProcessDetail
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDetail&gt; getAddableMetadataTable(List&lt;StructuralElementViewInterface&gt; divisions,
+&nbsp;                                                       Collection&lt;Metadata&gt; enteredMetadata) {
+<b class="nc">&nbsp;        ProcessFieldedMetadata table = new ProcessFieldedMetadata();</b>
+<b class="nc">&nbsp;        List&lt;MetadataViewInterface&gt; commonMetadata = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; divisions.size(); i++) {</b>
+<b class="nc">&nbsp;            List&lt;MetadataViewInterface&gt; metadataView =</b>
+<b class="nc">&nbsp;                    divisions.get(i).getAddableMetadata(enteredMetadata, Collections.emptyList())</b>
+<b class="nc">&nbsp;                            .stream().sorted(Comparator.comparing(MetadataViewInterface::getLabel))</b>
+<b class="nc">&nbsp;                            .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                commonMetadata = new ArrayList&lt;&gt;(List.copyOf(metadataView));</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                commonMetadata.removeIf(item -&gt; metadataView.stream()</b>
+<b class="nc">&nbsp;                        .noneMatch(metadataElement -&gt; Objects.equals(item.getId(), metadataElement.getId())));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (commonMetadata.isEmpty()) {</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        for (MetadataViewInterface keyView : commonMetadata) {</b>
+<b class="nc">&nbsp;            if (!keyView.isComplex()) {</b>
+<b class="nc">&nbsp;                table.createMetadataEntryEdit((SimpleMetadataViewInterface) keyView, Collections.emptyList());</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return table.getRows();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

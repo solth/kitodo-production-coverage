@@ -1,0 +1,428 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RulesetManagement</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset</a>
+</div>
+
+<h1>Coverage Summary for Class: RulesetManagement (org.kitodo.dataeditor.ruleset)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RulesetManagement</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (12/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45,4%
+  </span>
+  <span class="absValue">
+    (44/97)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.xml.bind.JAXBException;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.FunctionalDivision;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.FunctionalMetadata;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.AcquisitionStage;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Division;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Key;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Namespace;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Ruleset;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Setting;
+&nbsp;import org.kitodo.utils.JAXBContextCache;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class provides the functionality of the rule set.
+&nbsp; */
+<b class="fc">&nbsp;public class RulesetManagement implements RulesetManagementInterface {</b>
+&nbsp;    /**
+&nbsp;     * A logger can be used to keep a log.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(RulesetManagement.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The ruleset.
+&nbsp;     */
+&nbsp;    private Ruleset ruleset;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the acquisition levels defined in this rule set. This function
+&nbsp;     * was not parallelized to repeatedly serve JSF in the same order when the
+&nbsp;     * function is called repeatedly.
+&nbsp;     *
+&nbsp;     * @return all acquisition levels showing up
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Collection&lt;String&gt; getAcquisitionStages() {
+<b class="nc">&nbsp;        List&lt;AcquisitionStage&gt; acquisitionStages = ruleset.getAcquisitionStages();</b>
+<b class="nc">&nbsp;        List&lt;String&gt; acquisitionStageNames = new ArrayList&lt;&gt;(acquisitionStages.size());</b>
+<b class="nc">&nbsp;        for (AcquisitionStage acquisitionStage : acquisitionStages) {</b>
+<b class="nc">&nbsp;            acquisitionStageNames.add(acquisitionStage.getName());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return acquisitionStageNames;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;String&gt; getFunctionalKeys(FunctionalMetadata functionalMetadata) {
+<b class="fc">&nbsp;        return getIdsOfKeysForSpecialField(ruleset.getKeys(), functionalMetadata);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;String&gt; getFunctionalDivisions(FunctionalDivision functionalDivision) {
+<b class="nc">&nbsp;        return getIdsOfDivisionsForSpecialField(ruleset.getDivisions(), functionalDivision);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Collection&lt;String&gt; getDivisionsWithNoWorkflow() {
+<b class="fc">&nbsp;        Collection&lt;DivisionDeclaration&gt; divisionDeclarations = ruleset.getDivisionDeclarations(true, true);</b>
+<b class="fc">&nbsp;        List&lt;Division&gt; divisions = divisionDeclarations.stream().map(DivisionDeclaration::getDivision)</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="fc">&nbsp;        return getDivionsWithNoWorkflow(divisions);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Collection&lt;String&gt; getDivionsWithNoWorkflow(List&lt;Division&gt; divisions) {
+<b class="fc">&nbsp;        ArrayList&lt;String&gt; divionsWithNoWorkflow = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Division division : divisions) {</b>
+<b class="fc">&nbsp;            if (!division.isWithWorkflow()) {</b>
+<b class="fc">&nbsp;                divionsWithNoWorkflow.add(division.getId());</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return divionsWithNoWorkflow;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;String&gt; getIdsOfDivisionsForSpecialField(List&lt;Division&gt; divisions,
+&nbsp;            FunctionalDivision functionalDivision) {
+<b class="nc">&nbsp;        ArrayList&lt;String&gt; idsOfDivisionsForSpecialField = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Division division : divisions) {</b>
+<b class="nc">&nbsp;            if (Objects.isNull(division.getUse())) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Set&lt;FunctionalDivision&gt; uses = FunctionalDivision.valuesOf(division.getUse());</b>
+<b class="nc">&nbsp;            if (uses.contains(functionalDivision)) {</b>
+<b class="nc">&nbsp;                idsOfDivisionsForSpecialField.add(division.getId());</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return idsOfDivisionsForSpecialField;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;String&gt; getIdsOfKeysForSpecialField(List&lt;Key&gt; keys, FunctionalMetadata functionalMetadata) {
+<b class="fc">&nbsp;        ArrayList&lt;String&gt; idsOfKeysForSpecialField = new ArrayList&lt;&gt;(1);</b>
+<b class="fc">&nbsp;        for (Key key : keys) {</b>
+<b class="fc">&nbsp;            if (key.getKeys().isEmpty()) {</b>
+<b class="fc">&nbsp;                if (Objects.isNull(key.getUse())) {</b>
+<b class="fc">&nbsp;                    continue;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                Set&lt;FunctionalMetadata&gt; uses = FunctionalMetadata.valuesOf(key.getUse());</b>
+<b class="fc">&nbsp;                if (uses.contains(functionalMetadata)) {</b>
+<b class="fc">&nbsp;                    idsOfKeysForSpecialField.add(key.getId());</b>
+&nbsp;                }
+<b class="fc">&nbsp;            } else {</b>
+<b class="fc">&nbsp;                List&lt;String&gt; idsOfKeysOfKey = getIdsOfKeysForSpecialField(key.getKeys(), functionalMetadata);</b>
+<b class="fc">&nbsp;                for (String idOfKeyOfKey : idsOfKeysOfKey) {</b>
+<b class="nc">&nbsp;                    idsOfKeysForSpecialField.add(key.getId() + &#39;@&#39; + idOfKeyOfKey);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return idsOfKeysForSpecialField;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a translated list of divisions available in the ruleset. The map
+&nbsp;     * maps from ID to label.
+&nbsp;     *
+&nbsp;     * @return the list of divisions
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Map&lt;String, String&gt; getStructuralElements(List&lt;LanguageRange&gt; priorityList) {
+<b class="fc">&nbsp;        return ruleset.getDivisions(priorityList, false, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Opens a view on a division of the rule set.
+&nbsp;     *
+&nbsp;     * @param divisionId
+&nbsp;     *            the division in view
+&nbsp;     * @param acquisitionStage
+&nbsp;     *            the current acquisition level
+&nbsp;     * @param priorityList
+&nbsp;     *            the wish list of the user regarding its preferred human
+&nbsp;     *            languages
+&nbsp;     * @return a view on a division
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public StructuralElementViewInterface getStructuralElementView(String divisionId, String acquisitionStage,
+&nbsp;            List&lt;LanguageRange&gt; priorityList) {
+&nbsp;
+<b class="fc">&nbsp;        Optional&lt;Division&gt; division = ruleset.getDivision(divisionId);</b>
+<b class="fc">&nbsp;        DivisionDeclaration divisionDeclaration = division.isPresent() ? new DivisionDeclaration(ruleset, division.get())</b>
+<b class="fc">&nbsp;                : new DivisionDeclaration(ruleset, divisionId);</b>
+<b class="fc">&nbsp;        return new DivisionView(ruleset, divisionDeclaration, acquisitionStage, priorityList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Opens a views on a metadata of the ruleset.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *          the id of the metadata
+&nbsp;     * @param acquisitionStage
+&nbsp;     *          the current acquisition level
+&nbsp;     * @param priorityList
+&nbsp;     *          the list of display languages preferred by the user
+&nbsp;     * @return a view on a metadata
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public NestedKeyView&lt;KeyDeclaration&gt; getMetadataView(String keyId, String acquisitionStage, List&lt;LanguageRange&gt; priorityList) {
+<b class="nc">&nbsp;        Optional&lt;Key&gt; key = ruleset.getKey(keyId);</b>
+<b class="nc">&nbsp;        KeyDeclaration keyDeclaration = key.isPresent() ? new KeyDeclaration(ruleset, key.get()) : new KeyDeclaration(ruleset, keyId);</b>
+<b class="nc">&nbsp;        Rule rule = ruleset.getRuleForKey(keyId);</b>
+<b class="nc">&nbsp;        return new NestedKeyView&lt;&gt;(ruleset, keyDeclaration, rule, ruleset.getSettings(acquisitionStage), priorityList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the most appropriate label for a key, if there is one.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            key whose label should be returned
+&nbsp;     * @param priorityList
+&nbsp;     *            weighted list of user-preferred display languages. Return
+&nbsp;     *            value of the function {@link LanguageRange#parse(String)}.
+&nbsp;     * @return the best-matching label, if any
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Optional&lt;String&gt; getTranslationForKey(String key, List&lt;LanguageRange&gt; priorityList) {
+<b class="nc">&nbsp;        Optional&lt;Key&gt; optionalKey = ruleset.getKey(key);</b>
+<b class="nc">&nbsp;        if (optionalKey.isPresent()) {</b>
+<b class="nc">&nbsp;            KeyDeclaration keyDeclaration = new KeyDeclaration(ruleset, optionalKey.get());</b>
+<b class="nc">&nbsp;            String label = keyDeclaration.getLabel(priorityList);</b>
+<b class="nc">&nbsp;            return Optional.of(label);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Loads a ruleset from a file.
+&nbsp;     *
+&nbsp;     * @param rulesetFile
+&nbsp;     *            file to load
+&nbsp;     * @throws IOException
+&nbsp;     *             if something goes wrong when reading
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void load(File rulesetFile) throws IOException {
+<b class="fc">&nbsp;        this.ruleset = read(rulesetFile);</b>
+<b class="fc">&nbsp;        initializeNamespaces(ruleset.getKeys(), rulesetFile.getParentFile());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initializes the elements of namespaces if there is a corresponding file.
+&nbsp;     *
+&nbsp;     * @param keys
+&nbsp;     *            the keys of the rule set (are processed recursively)
+&nbsp;     * @param home
+&nbsp;     *            the ruleset directory
+&nbsp;     * @throws IOException
+&nbsp;     *             if I/O fails
+&nbsp;     */
+&nbsp;    private void initializeNamespaces(List&lt;Key&gt; keys, File home) throws IOException {
+<b class="fc">&nbsp;        for (Key key : keys) {</b>
+<b class="fc">&nbsp;            Optional&lt;String&gt; optionalNamespace = key.getNamespace();</b>
+<b class="fc">&nbsp;            if (optionalNamespace.isPresent()) {</b>
+<b class="nc">&nbsp;                String namespaceURI = optionalNamespace.get();</b>
+<b class="nc">&nbsp;                File file = new File(home, namespaceURI.replaceFirst(&quot;^.*?/([^/]*?)[#/]?$&quot;, &quot;$1&quot;).concat(&quot;.xml&quot;));</b>
+<b class="nc">&nbsp;                if (file.isFile()) {</b>
+&nbsp;                    try {
+<b class="nc">&nbsp;                        Namespace namespace = read(Namespace.class, file);</b>
+<b class="nc">&nbsp;                        if (namespace.isAbout(namespaceURI)) {</b>
+<b class="nc">&nbsp;                            key.setOptions(namespace.getOptions());</b>
+&nbsp;                        } else {
+<b class="nc">&nbsp;                            logger.debug(</b>
+&nbsp;                                &quot;The file {} for the namespace {} declares an inappropriate namespace. (Check about.)&quot;,
+&nbsp;                                file, namespaceURI);
+&nbsp;                        }
+<b class="nc">&nbsp;                    } catch (IOException e) {</b>
+<b class="nc">&nbsp;                        logger.debug(&quot;The file {} for the namespace {} cannot be parsed: {}&quot;, file, namespaceURI,</b>
+<b class="nc">&nbsp;                            e.getMessage());</b>
+<b class="nc">&nbsp;                    }</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    logger.debug(&quot;The file {} for the namespace {} was not found or is unreadable.&quot;, file,</b>
+&nbsp;                        namespaceURI);
+&nbsp;                }
+&nbsp;            }
+&nbsp;            // is applied recursively to the sub-elements
+<b class="fc">&nbsp;            initializeNamespaces(key.getKeys(), home);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Ruleset read(File rulesetFile) throws IOException {
+<b class="fc">&nbsp;        Ruleset result = new Ruleset();</b>
+<b class="fc">&nbsp;        Ruleset base = read(Ruleset.class, rulesetFile);</b>
+<b class="fc">&nbsp;        for (String include : base.getIncludes()) {</b>
+<b class="nc">&nbsp;            File includedFile = new File(rulesetFile.getParentFile(), include);</b>
+<b class="nc">&nbsp;            Ruleset included = read(Ruleset.class, includedFile);</b>
+<b class="nc">&nbsp;            result.addAll(included);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        result.addAll(base);</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads an object from a file. For this purpose, a marshal eliminator of
+&nbsp;     * Java XML bindings is created, which eliminates the class of marshals and
+&nbsp;     * creates it as a Java object. As an error, an I/O exception is thrown out
+&nbsp;     * directly. Other marshal eliminator exceptions are packed in I/O
+&nbsp;     * exceptions, so the interface is independent of the parser used.
+&nbsp;     *
+&nbsp;     * @param objectClass
+&nbsp;     *            class of object to read
+&nbsp;     * @param inputFile
+&nbsp;     *            file to read from
+&nbsp;     * @return the read object
+&nbsp;     * @throws IOException
+&nbsp;     *             if I/O fails
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    private static &lt;T&gt; T read(Class&lt;T&gt; objectClass, File inputFile) throws IOException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return JAXBContextCache.getInstance().getUnmarshalled(objectClass, inputFile);</b>
+<b class="nc">&nbsp;        } catch (JAXBException e) {</b>
+&nbsp;            /*
+&nbsp;             * If the parser ran on an IOException, we can throw it out
+&nbsp;             * directly, because that allows the method signature.
+&nbsp;             */
+<b class="nc">&nbsp;            if (e.getCause() instanceof IOException) {</b>
+<b class="nc">&nbsp;                throw (IOException) e.getCause();</b>
+&nbsp;            } else {
+&nbsp;                /*
+&nbsp;                 * Conversely, parser exceptions must be wrapped in an
+&nbsp;                 * IOException because the method signature does not allow the
+&nbsp;                 * parser exceptions.
+&nbsp;                 */
+<b class="nc">&nbsp;                throw new IOException(e.getMessage(), e);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isAlwaysShowingForKey(String keyId) {
+<b class="nc">&nbsp;        Optional&lt;Setting&gt; optionalSetting = ruleset.getSettings().parallelStream()</b>
+<b class="nc">&nbsp;                .filter(setting -&gt; setting.getKey().equals(keyId)).findAny();</b>
+<b class="nc">&nbsp;        if (optionalSetting.isPresent()) {</b>
+<b class="nc">&nbsp;            return optionalSetting.get().isAlwaysShowing();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,295 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileUploadDialog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: FileUploadDialog (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileUploadDialog</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    20%
+  </span>
+  <span class="absValue">
+    (2/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4,9%
+  </span>
+  <span class="absValue">
+    (3/61)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.nio.charset.Charset;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;import javax.xml.transform.TransformerException;
+&nbsp;import javax.xml.xpath.XPathExpressionException;
+&nbsp;
+&nbsp;import org.apache.commons.io.IOUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.FunctionalMetadata;
+&nbsp;import org.kitodo.api.schemaconverter.DataRecord;
+&nbsp;import org.kitodo.api.schemaconverter.FileFormat;
+&nbsp;import org.kitodo.api.schemaconverter.MetadataFormat;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.exceptions.ConfigException;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.exceptions.UnsupportedFormatException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.TempProcess;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;import org.omnifaces.util.Ajax;
+&nbsp;import org.primefaces.event.FileUploadEvent;
+&nbsp;import org.primefaces.model.file.UploadedFile;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.xml.sax.SAXException;
+&nbsp;
+&nbsp;public class FileUploadDialog extends MetadataImportDialog {
+&nbsp;
+&nbsp;    private ImportConfiguration importConfiguration;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(FileUploadDialog.class);</b>
+<b class="fc">&nbsp;    private boolean additionalImport = false;</b>
+&nbsp;
+&nbsp;    public FileUploadDialog(CreateProcessForm createProcessForm) {
+<b class="fc">&nbsp;        super(createProcessForm);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * import from csv file.
+&nbsp;     *
+&nbsp;     * @param event
+&nbsp;     *            the file upload event
+&nbsp;     */
+&nbsp;    public void handleFileUpload(FileUploadEvent event) {
+<b class="nc">&nbsp;        UploadedFile uploadedFile = event.getFile();</b>
+<b class="nc">&nbsp;        ImportService importService = ServiceManager.getImportService();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            Document internalDocument = importService.convertDataRecordToInternal(</b>
+<b class="nc">&nbsp;                createRecordFromXMLElement(IOUtils.toString(uploadedFile.getInputStream(), Charset.defaultCharset())),</b>
+&nbsp;                importConfiguration, false);
+<b class="nc">&nbsp;            TempProcess tempProcess = importService.createTempProcessFromDocument(importConfiguration, internalDocument,</b>
+<b class="nc">&nbsp;                createProcessForm.getTemplate().getId(), createProcessForm.getProject().getId());</b>
+&nbsp;
+<b class="nc">&nbsp;            LinkedList&lt;TempProcess&gt; processes = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;            processes.add(tempProcess);</b>
+&nbsp;
+<b class="nc">&nbsp;            Collection&lt;String&gt; higherLevelIdentifier = this.createProcessForm.getRulesetManagement()</b>
+<b class="nc">&nbsp;                    .getFunctionalKeys(FunctionalMetadata.HIGHERLEVEL_IDENTIFIER);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (!higherLevelIdentifier.isEmpty()) {</b>
+<b class="nc">&nbsp;                String parentID = importService.getParentID(internalDocument, higherLevelIdentifier.toArray()[0]</b>
+<b class="nc">&nbsp;                                .toString(), importConfiguration.getParentElementTrimMode());</b>
+<b class="nc">&nbsp;                importService.checkForParent(parentID, createProcessForm.getTemplate().getRuleset(),</b>
+<b class="nc">&nbsp;                    createProcessForm.getProject().getId());</b>
+<b class="nc">&nbsp;                if (Objects.isNull(importService.getParentTempProcess())) {</b>
+<b class="nc">&nbsp;                    TempProcess parentTempProcess = extractParentRecordFromFile(uploadedFile, internalDocument);</b>
+<b class="nc">&nbsp;                    if (Objects.nonNull(parentTempProcess)) {</b>
+<b class="nc">&nbsp;                        processes.add(parentTempProcess);</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (createProcessForm.getProcesses().size() &gt; 0 &amp;&amp; additionalImport) {</b>
+<b class="nc">&nbsp;                extendsMetadataTableOfMetadataTab(processes);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                this.createProcessForm.setProcesses(processes);</b>
+<b class="nc">&nbsp;                TempProcess currentTempProcess = processes.getFirst();</b>
+<b class="nc">&nbsp;                attachToExistingParentAndGenerateAtstslIfNotExist(currentTempProcess);</b>
+<b class="nc">&nbsp;                createProcessForm.fillCreateProcessForm(currentTempProcess);</b>
+<b class="nc">&nbsp;                Ajax.update(FORM_CLIENTID);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException | ProcessGenerationException | URISyntaxException | ParserConfigurationException</b>
+&nbsp;                | UnsupportedFormatException | SAXException | ConfigException | XPathExpressionException
+&nbsp;                | TransformerException | DAOException | InvalidMetadataValueException
+&nbsp;                | NoSuchMetadataFieldException e) {
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private TempProcess extractParentRecordFromFile(UploadedFile uploadedFile, Document internalDocument)
+&nbsp;            throws XPathExpressionException, UnsupportedFormatException, URISyntaxException, IOException,
+&nbsp;            ParserConfigurationException, SAXException, ProcessGenerationException, TransformerException,
+&nbsp;            InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="nc">&nbsp;        Collection&lt;String&gt; higherLevelIdentifier = this.createProcessForm.getRulesetManagement()</b>
+<b class="nc">&nbsp;                .getFunctionalKeys(FunctionalMetadata.HIGHERLEVEL_IDENTIFIER);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (higherLevelIdentifier.size() &gt; 0) {</b>
+<b class="nc">&nbsp;            ImportService importService = ServiceManager.getImportService();</b>
+<b class="nc">&nbsp;            String parentID = importService.getParentID(internalDocument, higherLevelIdentifier.toArray()[0].toString(),</b>
+<b class="nc">&nbsp;                    importConfiguration.getParentElementTrimMode());</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(parentID) &amp;&amp; Objects.nonNull(importConfiguration.getParentMappingFile())) {</b>
+<b class="nc">&nbsp;                Document internalParentDocument = importService.convertDataRecordToInternal(</b>
+<b class="nc">&nbsp;                        createRecordFromXMLElement(IOUtils.toString(uploadedFile.getInputStream(), Charset.defaultCharset())),</b>
+&nbsp;                        importConfiguration, true);
+<b class="nc">&nbsp;                return importService.createTempProcessFromDocument(importConfiguration, internalParentDocument,</b>
+<b class="nc">&nbsp;                        createProcessForm.getTemplate().getId(), createProcessForm.getProject().getId());</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private DataRecord createRecordFromXMLElement(String xmlContent) {
+<b class="nc">&nbsp;        DataRecord record = new DataRecord();</b>
+<b class="nc">&nbsp;        record.setMetadataFormat(</b>
+<b class="nc">&nbsp;            MetadataFormat.getMetadataFormat(importConfiguration.getMetadataFormat()));</b>
+<b class="nc">&nbsp;        record.setFileFormat(FileFormat.getFileFormat(importConfiguration.getReturnFormat()));</b>
+<b class="nc">&nbsp;        record.setOriginalData(xmlContent);</b>
+<b class="nc">&nbsp;        return record;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;ImportConfiguration&gt; getImportConfigurations() {
+<b class="nc">&nbsp;        if (Objects.isNull(importConfigurations)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                importConfigurations = ServiceManager.getImportConfigurationService().getAllFileUploadConfigurations();</b>
+<b class="nc">&nbsp;            } catch (IllegalArgumentException | DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;                importConfigurations = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return importConfigurations;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selected importConfiguration.
+&nbsp;     *
+&nbsp;     * @return the selected importConfiguration.
+&nbsp;     */
+&nbsp;    public ImportConfiguration getImportConfiguration() {
+<b class="nc">&nbsp;        return importConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selected importConfiguration.
+&nbsp;     *
+&nbsp;     * @param importConfiguration the selected catalog.
+&nbsp;     */
+&nbsp;    public void setImportConfiguration(ImportConfiguration importConfiguration) {
+<b class="nc">&nbsp;        this.importConfiguration = importConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks the additional import.
+&nbsp;     *
+&nbsp;     * @return true if is additional import
+&nbsp;     */
+&nbsp;    public boolean isAdditionalImport() {
+<b class="nc">&nbsp;        return additionalImport;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set additional import.
+&nbsp;     *
+&nbsp;     * @param additionalImport
+&nbsp;     *            the value if is additional import
+&nbsp;     */
+&nbsp;    public void setAdditionalImport(boolean additionalImport) {
+<b class="nc">&nbsp;        this.additionalImport = additionalImport;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,253 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > OCRInput</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.ocr</a>
+</div>
+
+<h1>Coverage Summary for Class: OCRInput (org.kitodo.api.ocr)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OCRInput</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.ocr;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;
+&nbsp;/**
+&nbsp; * The properties of the ocr processing.
+&nbsp; */
+<b class="nc">&nbsp;public class OCRInput {</b>
+&nbsp;
+&nbsp;    /** The process id. */
+&nbsp;    private Integer processId;
+&nbsp;    /** The font type. */
+&nbsp;    private Collection&lt;String&gt; fontType;
+&nbsp;    /** The used languages. */
+&nbsp;    private Collection&lt;String&gt; languages;
+&nbsp;    /** Properties for given and returned files. */
+&nbsp;    private Collection&lt;FileProperty&gt; fileProperties;
+&nbsp;    /** The type of the result xml file. */
+&nbsp;    private String resultType;
+&nbsp;    /**
+&nbsp;     * Whole result should be stored in one file, or if every input gets an
+&nbsp;     * output file.
+&nbsp;     */
+&nbsp;    private Boolean singleResultFile;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the processId.
+&nbsp;     * 
+&nbsp;     * @return The processId.
+&nbsp;     */
+&nbsp;    public Integer getProcessId() {
+<b class="nc">&nbsp;        return processId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the processId.
+&nbsp;     * 
+&nbsp;     * @param processId
+&nbsp;     *            The processId.
+&nbsp;     */
+&nbsp;    public void setProcessId(Integer processId) {
+<b class="nc">&nbsp;        this.processId = processId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the fontType.
+&nbsp;     * 
+&nbsp;     * @return The fontType.
+&nbsp;     */
+&nbsp;    public Collection&lt;String&gt; getFontType() {
+<b class="nc">&nbsp;        return fontType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the fontType.
+&nbsp;     * 
+&nbsp;     * @param fontType
+&nbsp;     *            The fontType.
+&nbsp;     */
+&nbsp;    public void setFontType(Collection&lt;String&gt; fontType) {
+<b class="nc">&nbsp;        this.fontType = fontType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the languages.
+&nbsp;     * 
+&nbsp;     * @return The languages.
+&nbsp;     */
+&nbsp;    public Collection&lt;String&gt; getLanguages() {
+<b class="nc">&nbsp;        return languages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the languages.
+&nbsp;     * 
+&nbsp;     * @param languages
+&nbsp;     *            The languages.
+&nbsp;     */
+&nbsp;    public void setLanguages(Collection&lt;String&gt; languages) {
+<b class="nc">&nbsp;        this.languages = languages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the fileProperties.
+&nbsp;     * 
+&nbsp;     * @return The fileProperties.
+&nbsp;     */
+&nbsp;    public Collection&lt;FileProperty&gt; getFileProperties() {
+<b class="nc">&nbsp;        return fileProperties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the fileProperties.
+&nbsp;     * 
+&nbsp;     * @param fileProperties
+&nbsp;     *            The fileProperties.
+&nbsp;     */
+&nbsp;    public void setFileProperties(Collection&lt;FileProperty&gt; fileProperties) {
+<b class="nc">&nbsp;        this.fileProperties = fileProperties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the resultType.
+&nbsp;     * 
+&nbsp;     * @return The resultType.
+&nbsp;     */
+&nbsp;    public String getResultType() {
+<b class="nc">&nbsp;        return resultType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the resultType.
+&nbsp;     * 
+&nbsp;     * @param resultType
+&nbsp;     *            The resultType.
+&nbsp;     */
+&nbsp;    public void setResultType(String resultType) {
+<b class="nc">&nbsp;        this.resultType = resultType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the singleResultfile.
+&nbsp;     * 
+&nbsp;     * @return The singleResultfile.
+&nbsp;     */
+&nbsp;    public Boolean getSingleResultFile() {
+<b class="nc">&nbsp;        return singleResultFile;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the singleResultfile.
+&nbsp;     * 
+&nbsp;     * @param singleResultFile
+&nbsp;     *            The singleResultfile.
+&nbsp;     */
+&nbsp;    public void setSingleResultFile(Boolean singleResultFile) {
+<b class="nc">&nbsp;        this.singleResultFile = singleResultFile;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

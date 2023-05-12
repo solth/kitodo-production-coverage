@@ -1,0 +1,167 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Updater</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.workflow.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Updater (org.kitodo.production.workflow.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Updater</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (6/8)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.workflow.model;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;public class Updater {
+&nbsp;
+&nbsp;    private Template template;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Public constructor.
+&nbsp;     *
+&nbsp;     * @param template
+&nbsp;     *      for which processes need to be updated
+&nbsp;     */
+<b class="fc">&nbsp;    public Updater(Template template) {</b>
+<b class="fc">&nbsp;        this.template = template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update all processes assigned to given template.
+&nbsp;     */
+&nbsp;    public void updateProcessesAssignedToTemplate() throws DataException {
+<b class="fc">&nbsp;        List&lt;Process&gt; processes = this.template.getProcesses();</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Process process : processes) {</b>
+<b class="fc">&nbsp;            ServiceManager.getProcessService().save(process);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get template.
+&nbsp;     *
+&nbsp;     * @return Template
+&nbsp;     */
+&nbsp;    public Template getTemplate() {
+<b class="nc">&nbsp;        return template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set template.
+&nbsp;     *
+&nbsp;     * @param template
+&nbsp;     *        which was updated
+&nbsp;     */
+&nbsp;    public void setTemplate(Template template) {
+<b class="nc">&nbsp;        this.template = template;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

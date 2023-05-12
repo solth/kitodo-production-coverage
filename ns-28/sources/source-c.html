@@ -1,0 +1,275 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Settings</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset</a>
+</div>
+
+<h1>Coverage Summary for Class: Settings (org.kitodo.dataeditor.ruleset)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Settings</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97,8%
+  </span>
+  <span class="absValue">
+    (45/46)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.function.Function;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Setting;
+&nbsp;
+&nbsp;/**
+&nbsp; * Exposes settings from the ruleset. It is not about the metadata, but how
+&nbsp; * they are displayed in the editor, so graphical interface is configurable.
+&nbsp; */
+&nbsp;public class Settings {
+&nbsp;    /**
+&nbsp;     * Current settings.
+&nbsp;     */
+&nbsp;    private Map&lt;String, Setting&gt; currentSettings;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor for a new settings object.
+&nbsp;     *
+&nbsp;     * @param baseSettings
+&nbsp;     *            we start with this setting
+&nbsp;     */
+<b class="fc">&nbsp;    public Settings(Collection&lt;Setting&gt; baseSettings) {</b>
+<b class="fc">&nbsp;        this.currentSettings = baseSettings.parallelStream()</b>
+<b class="fc">&nbsp;                .collect(Collectors.toMap(Setting::getKey, Function.identity()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the settings for a key.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            key for which the query is
+&nbsp;     * @return settings for the key
+&nbsp;     */
+&nbsp;    Settings getSettingsForKey(String keyId) {
+<b class="fc">&nbsp;        Setting keySetting = currentSettings.get(keyId);</b>
+<b class="fc">&nbsp;        return new Settings(keySetting == null ? Collections.emptyList() : keySetting.getSettings());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the key is always showing.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            key for which the query is
+&nbsp;     * @return whether the key is always showing
+&nbsp;     */
+&nbsp;    boolean isAlwaysShowing(String keyId) {
+<b class="fc">&nbsp;        if (currentSettings.containsKey(keyId)) {</b>
+<b class="fc">&nbsp;            return currentSettings.get(keyId).isAlwaysShowing();</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the key is editable.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            key for which the query is
+&nbsp;     * @return whether the key is editable
+&nbsp;     */
+&nbsp;    boolean isEditable(String keyId) {
+<b class="fc">&nbsp;        if (currentSettings.containsKey(keyId)) {</b>
+<b class="fc">&nbsp;            return currentSettings.get(keyId).isEditable();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the key is excluded.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            key for which the query is
+&nbsp;     * @return whether the key is excluded
+&nbsp;     */
+&nbsp;    boolean isExcluded(String keyId) {
+<b class="fc">&nbsp;        if (currentSettings.containsKey(keyId)) {</b>
+<b class="fc">&nbsp;            return currentSettings.get(keyId).isExcluded();</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the key is multi-line.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            key for which the query is
+&nbsp;     * @return whether the key is multi-line
+&nbsp;     */
+&nbsp;    boolean isMultiline(String keyId) {
+<b class="fc">&nbsp;        if (currentSettings.containsKey(keyId)) {</b>
+<b class="fc">&nbsp;            return currentSettings.get(keyId).isMultiline();</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Connects to others.
+&nbsp;     *
+&nbsp;     * @param other
+&nbsp;     *            to connect others with it
+&nbsp;     */
+&nbsp;    public void merge(Collection&lt;Setting&gt; other) {
+<b class="fc">&nbsp;        Collection&lt;Setting&gt; merged = merge(currentSettings.values(), other);</b>
+<b class="fc">&nbsp;        currentSettings = merged.parallelStream().collect(Collectors.toMap(Setting::getKey, Function.identity()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Connection of two times settings. Because it may be common and specific,
+&nbsp;     * and then specific is better. This is with acquisition stages.
+&nbsp;     *
+&nbsp;     * @param currentSettings
+&nbsp;     *            common
+&nbsp;     * @param otherSettings
+&nbsp;     *            specific
+&nbsp;     * @return connection of two times settings
+&nbsp;     */
+&nbsp;    private List&lt;Setting&gt; merge(Collection&lt;Setting&gt; currentSettings, Collection&lt;Setting&gt; otherSettings) {
+<b class="fc">&nbsp;        Map&lt;String, Setting&gt; currentSettingsMap = currentSettings.parallelStream()</b>
+<b class="fc">&nbsp;                .collect(Collectors.toMap(Setting::getKey, Function.identity()));</b>
+<b class="fc">&nbsp;        Map&lt;String, Setting&gt; otherSettingsMap = otherSettings.parallelStream()</b>
+<b class="fc">&nbsp;                .collect(Collectors.toMap(Setting::getKey, Function.identity()));</b>
+<b class="fc">&nbsp;        Set&lt;String&gt; keyIds = new HashSet&lt;&gt;(currentSettingsMap.keySet());</b>
+<b class="fc">&nbsp;        keyIds.addAll(otherSettingsMap.keySet());</b>
+<b class="fc">&nbsp;        List&lt;Setting&gt; mergedSettings = new ArrayList&lt;&gt;(keyIds.size());</b>
+<b class="fc">&nbsp;        for (String keyId : keyIds) {</b>
+<b class="fc">&nbsp;            if (currentSettingsMap.containsKey(keyId)) {</b>
+<b class="fc">&nbsp;                Setting current = currentSettingsMap.get(keyId);</b>
+<b class="fc">&nbsp;                if (otherSettingsMap.containsKey(keyId)) {</b>
+<b class="fc">&nbsp;                    Setting other = otherSettingsMap.get(keyId);</b>
+<b class="fc">&nbsp;                    Setting merged = new Setting();</b>
+<b class="fc">&nbsp;                    merged.setKey(current.getKey());</b>
+<b class="fc">&nbsp;                    merged.setAlwaysShowing(</b>
+<b class="fc">&nbsp;                        other.getAlwaysShowing() != null ? other.getAlwaysShowing() : current.getAlwaysShowing());</b>
+<b class="fc">&nbsp;                    merged.setEditable(other.getEditable() != null ? other.getEditable() : current.getEditable());</b>
+<b class="fc">&nbsp;                    merged.setExcluded(other.getExcluded() != null ? other.getExcluded() : current.getExcluded());</b>
+<b class="fc">&nbsp;                    merged.setMultiline(other.getMultiline() != null ? other.getMultiline() : current.getMultiline());</b>
+<b class="fc">&nbsp;                    merged.setSettings(merge(current.getSettings(), other.getSettings()));</b>
+<b class="fc">&nbsp;                    mergedSettings.add(merged);</b>
+<b class="fc">&nbsp;                } else {</b>
+<b class="fc">&nbsp;                    mergedSettings.add(current);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            } else {</b>
+<b class="fc">&nbsp;                mergedSettings.add(otherSettingsMap.get(keyId));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return mergedSettings;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

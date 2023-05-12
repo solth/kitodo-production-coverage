@@ -1,0 +1,148 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RulesetReaderInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.rulesetreader</a>
+</div>
+
+<h1>Coverage Summary for Class: RulesetReaderInterface (org.kitodo.api.rulesetreader)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">RulesetReaderInterface</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.rulesetreader;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;
+&nbsp;/** This interface is to access the ruleset and acquire information from it. */
+&nbsp;public interface RulesetReaderInterface {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all possible divisions from the ruleset.
+&nbsp;     *
+&nbsp;     * @param languages
+&nbsp;     *            the preferred languages for translation
+&nbsp;     * @return a {@link Map} collection of all divisions that contains
+&nbsp;     *         {@link String} as id and {@link String} as translation
+&nbsp;     */
+&nbsp;    Map&lt;String, String&gt; getAllDivisions(List&lt;LanguageRange&gt; languages);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all possible acquisition stages.
+&nbsp;     *
+&nbsp;     * @return A Collection of all acquisition stages
+&nbsp;     */
+&nbsp;    Collection&lt;String&gt; getAllAcquisitionStages();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all metadata, which can be added for a specific division.
+&nbsp;     * 
+&nbsp;     * @param rulesetRequestData
+&nbsp;     *            The needed data for retrieval.
+&nbsp;     * @return A {@link Map} collection of addable metadata that contains
+&nbsp;     *         {@link String} as id and {@link String} as translation
+&nbsp;     */
+&nbsp;    Map&lt;String, String&gt; getAddableMetadataForDivision(RulesetRequestData rulesetRequestData);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the sorted visible metadata.
+&nbsp;     * 
+&nbsp;     * @param rulesetRequestData
+&nbsp;     *            The needed data for retrieval.
+&nbsp;     * @return a Collection of Metadata.
+&nbsp;     */
+&nbsp;    Collection&lt;Metadata&gt; getSortedVisibleMetadataForDivision(RulesetRequestData rulesetRequestData);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets options for metadata.
+&nbsp;     * 
+&nbsp;     * @param metadata
+&nbsp;     *            The Metadata to get options for.
+&nbsp;     * @return A {@link Map} collection of options that contains {@link String}
+&nbsp;     *         as value and {@link String} as label
+&nbsp;     */
+&nbsp;    Map&lt;String, String&gt; getOptionsForMetadata(Metadata metadata);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets a translation for metadata.
+&nbsp;     * 
+&nbsp;     * @param metadata
+&nbsp;     *            the metadata to be translated.
+&nbsp;     * @param languages
+&nbsp;     *            the goal language for translation
+&nbsp;     * @return A translated string.
+&nbsp;     */
+&nbsp;    String getTranslationForMetadata(Metadata metadata, List&lt;LanguageRange&gt; languages);
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

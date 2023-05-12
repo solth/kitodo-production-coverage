@@ -1,0 +1,594 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TemplateForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: TemplateForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TemplateForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/34)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/134)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.annotation.PostConstruct;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Docket;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Ruleset;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.beans.Workflow;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.WorkflowException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.model.LazyDTOModel;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.TemplateService;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;import org.kitodo.production.workflow.model.Converter;
+&nbsp;
+&nbsp;@Named(&quot;TemplateForm&quot;)
+&nbsp;@SessionScoped
+&nbsp;public class TemplateForm extends TemplateBaseForm {
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(TemplateForm.class);</b>
+&nbsp;    private Template template;
+<b class="nc">&nbsp;    private List&lt;Project&gt; assignedProjects = new ArrayList&lt;&gt;();</b>
+&nbsp;    private Task task;
+<b class="nc">&nbsp;    private boolean showInactiveTemplates = false;</b>
+&nbsp;    private static final String TITLE_USED = &quot;templateTitleAlreadyInUse&quot;;
+<b class="nc">&nbsp;    private final String templateListPath = MessageFormat.format(REDIRECT_PATH, &quot;projects&quot;);</b>
+<b class="nc">&nbsp;    private final String templateEditPath = MessageFormat.format(REDIRECT_PATH, &quot;templateEdit&quot;);</b>
+&nbsp;    private List&lt;String&gt; templateFilters;
+&nbsp;    private List&lt;String&gt; selectedTemplateFilters;
+&nbsp;    private static final String DEACTIVATED_TEMPLATES_FILTER = &quot;deactivatedTemplates&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+<b class="nc">&nbsp;    public TemplateForm() {</b>
+<b class="nc">&nbsp;        super.setLazyDTOModel(new LazyDTOModel(ServiceManager.getTemplateService()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize list of template filters (currently only &#39;deactivated templates&#39;).
+&nbsp;     */
+&nbsp;    @PostConstruct
+&nbsp;    public void init() {
+<b class="nc">&nbsp;        templateFilters = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        templateFilters.add(DEACTIVATED_TEMPLATES_FILTER);</b>
+<b class="nc">&nbsp;        selectedTemplateFilters = new LinkedList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if inactive templates should be shown.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isShowInactiveTemplates() {
+<b class="nc">&nbsp;        return this.showInactiveTemplates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set if inactive templates should be shown.
+&nbsp;     *
+&nbsp;     * @param showInactiveTemplates
+&nbsp;     *            true or false
+&nbsp;     */
+&nbsp;    public void setShowInactiveTemplates(boolean showInactiveTemplates) {
+<b class="nc">&nbsp;        this.showInactiveTemplates = showInactiveTemplates;</b>
+<b class="nc">&nbsp;        ServiceManager.getTemplateService().setShowInactiveTemplates(showInactiveTemplates);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new template.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String newTemplate() {
+<b class="nc">&nbsp;        this.template = new Template();</b>
+<b class="nc">&nbsp;        this.template.setTitle(&quot;&quot;);</b>
+<b class="nc">&nbsp;        this.template.setClient(ServiceManager.getUserService().getSessionClientOfAuthenticatedUser());</b>
+<b class="nc">&nbsp;        this.assignedProjects.clear();</b>
+<b class="nc">&nbsp;        return templateEditPath + &quot;&amp;id=&quot; + (Objects.isNull(this.template.getId()) ? 0 : this.template.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Duplicate the selected template.
+&nbsp;     *
+&nbsp;     * @param itemId
+&nbsp;     *            ID of the template to duplicate
+&nbsp;     * @return page address; either redirect to the edit template page or return
+&nbsp;     *         &#39;null&#39; if the template could not be retrieved, which will prompt
+&nbsp;     *         JSF to remain on the same page and reuse the bean.
+&nbsp;     */
+&nbsp;    public String duplicate(Integer itemId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Template baseTemplate = ServiceManager.getTemplateService().getById(itemId);</b>
+<b class="nc">&nbsp;            this.template = ServiceManager.getTemplateService().duplicateTemplate(baseTemplate);</b>
+<b class="nc">&nbsp;            this.assignedProjects.clear();</b>
+<b class="nc">&nbsp;            this.assignedProjects.addAll(template.getProjects());</b>
+<b class="nc">&nbsp;            this.setSaveDisabled(false);</b>
+<b class="nc">&nbsp;            return templateEditPath;</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DUPLICATE, new Object[] {ObjectType.TEMPLATE.getTranslationSingular() },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save template and redirect to list view.
+&nbsp;     *
+&nbsp;     * @return url to list view
+&nbsp;     */
+&nbsp;    public String save() {
+<b class="nc">&nbsp;        if (isTitleValid()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                prepareTasks();</b>
+<b class="nc">&nbsp;            } catch (DAOException | DataException | IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;errorDiagram&quot;, new Object[] {this.template.getWorkflow().getTitle() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;            } catch (WorkflowException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;errorDiagram&quot;,</b>
+<b class="nc">&nbsp;                    new Object[] {this.template.getWorkflow().getTitle(), e.getMessage() }, logger, e);</b>
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            this.template.getProjects().clear();</b>
+<b class="nc">&nbsp;            this.template.getProjects().addAll(assignedProjects);</b>
+&nbsp;
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getTemplateService().save(this.template, true);</b>
+<b class="nc">&nbsp;                template = ServiceManager.getTemplateService().getById(this.template.getId());</b>
+<b class="nc">&nbsp;                new WorkflowControllerService().activateNextTasks(template.getTasks());</b>
+<b class="nc">&nbsp;            } catch (DataException | IOException | DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.TEMPLATE.getTranslationSingular() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return templateListPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isTitleValid() {
+<b class="nc">&nbsp;        String templateTitle = this.template.getTitle();</b>
+<b class="nc">&nbsp;        if (StringUtils.isNotBlank(templateTitle)) {</b>
+<b class="nc">&nbsp;            List&lt;Template&gt; templates = ServiceManager.getTemplateService().getTemplatesWithTitleAndClient(templateTitle,</b>
+<b class="nc">&nbsp;                    this.template.getClient().getId());</b>
+<b class="nc">&nbsp;            int count = templates.size();</b>
+<b class="nc">&nbsp;            if (count &gt; 1) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_OCCURRED, TITLE_USED);</b>
+<b class="nc">&nbsp;                return false;</b>
+<b class="nc">&nbsp;            } else if (count == 1) {</b>
+<b class="nc">&nbsp;                Integer templateId = this.template.getId();</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(templateId) &amp;&amp; templates.get(0).getId().equals(templateId)) {</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_OCCURRED, TITLE_USED);</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Helper.setErrorMessage(ERROR_INCOMPLETE_DATA, &quot;templateTitleEmpty&quot;);</b>
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove template if there is no assigned processes.
+&nbsp;     */
+&nbsp;    public void delete() {
+<b class="nc">&nbsp;        if (!this.template.getProcesses().isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;processAssignedError&quot;);</b>
+&nbsp;        } else {
+&nbsp;            try {
+<b class="nc">&nbsp;                if (Objects.nonNull(this.template.getWorkflow())) {</b>
+<b class="nc">&nbsp;                    this.template.getWorkflow().getTemplates().remove(this.template);</b>
+<b class="nc">&nbsp;                    this.template.setWorkflow(null);</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                ServiceManager.getTemplateService().remove(this.template);</b>
+<b class="nc">&nbsp;            } catch (Exception e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_DELETING, new Object[] {ObjectType.TEMPLATE.getTranslationSingular() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save task and redirect to processEdit view.
+&nbsp;     *
+&nbsp;     * @return url to templateEdit view
+&nbsp;     */
+&nbsp;    public String saveTaskAndRedirect() {
+<b class="nc">&nbsp;        saveTask(this.task, this.template, ObjectType.TEMPLATE.getTranslationSingular(),</b>
+<b class="nc">&nbsp;            ServiceManager.getTemplateService());</b>
+<b class="nc">&nbsp;        return templateEditPath + &quot;&amp;id=&quot; + (Objects.isNull(this.template.getId()) ? 0 : this.template.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get diagram image for current template.
+&nbsp;     *
+&nbsp;     * @return diagram image file
+&nbsp;     */
+&nbsp;    public InputStream getTasksDiagram() {
+<b class="nc">&nbsp;        if (Objects.nonNull(this.template.getWorkflow())) {</b>
+<b class="nc">&nbsp;            return ServiceManager.getTemplateService().getTasksDiagram(this.template.getWorkflow().getTitle());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return ServiceManager.getTemplateService().getTasksDiagram(&quot;&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of dockets for select list.
+&nbsp;     *
+&nbsp;     * @return list of dockets
+&nbsp;     */
+&nbsp;    public List&lt;Docket&gt; getDockets() {
+<b class="nc">&nbsp;        return ServiceManager.getDocketService().getAllForSelectedClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of projects for select list.
+&nbsp;     *
+&nbsp;     * @return list of SelectItem objects
+&nbsp;     */
+&nbsp;    public List&lt;Project&gt; getProjects() {
+<b class="nc">&nbsp;        return ServiceManager.getProjectService().getAllForSelectedClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of rulesets for select list.
+&nbsp;     *
+&nbsp;     * @return list of ruleset
+&nbsp;     */
+&nbsp;    public List&lt;Ruleset&gt; getRulesets() {
+<b class="nc">&nbsp;        return ServiceManager.getRulesetService().getAllForSelectedClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of workflows for select list.
+&nbsp;     *
+&nbsp;     * @return list of workflows
+&nbsp;     */
+&nbsp;    public List&lt;Workflow&gt; getWorkflows() {
+<b class="nc">&nbsp;        return ServiceManager.getWorkflowService().getAvailableWorkflows();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if user is not assigned to the project. Used for disabling projects.
+&nbsp;     *
+&nbsp;     * @param project
+&nbsp;     *            for check
+&nbsp;     * @return false if user is assigned to this project, otherwise true
+&nbsp;     */
+&nbsp;    public boolean isUserNotAssignedToProject(Project project) {
+<b class="nc">&nbsp;        for (User user : project.getUsers()) {</b>
+<b class="nc">&nbsp;            if (user.getId().equals(ServiceManager.getUserService().getCurrentUser().getId())) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set template by id.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of template to set
+&nbsp;     */
+&nbsp;    public void setTemplateById(int id) {
+&nbsp;        try {
+<b class="nc">&nbsp;            setTemplate(ServiceManager.getTemplateService().getById(id));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.TEMPLATE.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for template edit form. If the given
+&nbsp;     * parameter &#39;id&#39; is &#39;0&#39;, the form for creating a new template will be
+&nbsp;     * displayed.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of the template to load
+&nbsp;     */
+&nbsp;    public void loadTemplate(int id) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (id != 0) {</b>
+<b class="nc">&nbsp;                setTemplate(ServiceManager.getTemplateService().getById(id));</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                newTemplate();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            setSaveDisabled(false);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.TEMPLATE.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for task form.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of the task to load
+&nbsp;     */
+&nbsp;    public void loadTask(int id) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (id != 0) {</b>
+<b class="nc">&nbsp;                setTask(ServiceManager.getTaskService().getById(id));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            setSaveDisabled(true);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.TASK.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get template.
+&nbsp;     *
+&nbsp;     * @return value of template
+&nbsp;     */
+&nbsp;    public Template getTemplate() {
+<b class="nc">&nbsp;        return template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set template.
+&nbsp;     *
+&nbsp;     * @param template
+&nbsp;     *            as Template
+&nbsp;     */
+&nbsp;    public void setTemplate(Template template) {
+<b class="nc">&nbsp;        this.template = template;</b>
+<b class="nc">&nbsp;        this.assignedProjects.clear();</b>
+<b class="nc">&nbsp;        this.assignedProjects.addAll(template.getProjects());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get assignedProjects.
+&nbsp;     *
+&nbsp;     * @return value of assigned projects
+&nbsp;     */
+&nbsp;    public List&lt;Project&gt; getAssignedProjects() {
+<b class="nc">&nbsp;        return assignedProjects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set assignedProjects.
+&nbsp;     *
+&nbsp;     * @param assignedProjects
+&nbsp;     *            as assignedProjects
+&nbsp;     */
+&nbsp;    public void setAssignedProjects(List&lt;Project&gt; assignedProjects) {
+<b class="nc">&nbsp;        this.assignedProjects = assignedProjects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get task.
+&nbsp;     *
+&nbsp;     * @return value of task
+&nbsp;     */
+&nbsp;    public Task getTask() {
+<b class="nc">&nbsp;        return task;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set task.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            as Task
+&nbsp;     */
+&nbsp;    public void setTask(Task task) {
+<b class="nc">&nbsp;        this.task = task;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareTasks() throws DAOException, IOException, WorkflowException, DataException {
+<b class="nc">&nbsp;        List&lt;Task&gt; templateTasks = new ArrayList&lt;&gt;(this.template.getTasks());</b>
+<b class="nc">&nbsp;        if (!templateTasks.isEmpty()) {</b>
+<b class="nc">&nbsp;            this.template.getTasks().clear();</b>
+<b class="nc">&nbsp;            TemplateService templateService = ServiceManager.getTemplateService();</b>
+<b class="nc">&nbsp;            templateService.save(template, true);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(template.getWorkflow())) {</b>
+<b class="nc">&nbsp;            Converter converter = new Converter(this.template.getWorkflow().getTitle());</b>
+<b class="nc">&nbsp;            converter.convertWorkflowToTemplate(this.template);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the template with the provided ID &#39;templateId&#39; is used by any processes.
+&nbsp;     *
+&nbsp;     * @param templateId
+&nbsp;     *          ID of template to check
+&nbsp;     * @return whether template is used by any processes or not
+&nbsp;     */
+&nbsp;    public boolean isTemplateUsed(int templateId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            return !ServiceManager.getProcessService().findByTemplate(templateId).isEmpty();</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the current template is used by any processes.
+&nbsp;     *
+&nbsp;     * @return whether the current template is used by any processes or not
+&nbsp;     */
+&nbsp;    public boolean isCurrentTemplateInUse() {
+<b class="nc">&nbsp;        if (Objects.nonNull(this.template) &amp;&amp; Objects.nonNull(this.template.getId()) &amp;&amp; this.template.getId() &gt; 0) {</b>
+<b class="nc">&nbsp;            return isTemplateUsed(this.template.getId());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get templateFilters.
+&nbsp;     *
+&nbsp;     * @return value of templateFilters
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getTemplateFilters() {
+<b class="nc">&nbsp;        return templateFilters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set templateFilters.
+&nbsp;     *
+&nbsp;     * @param templateFilters as list of Strings
+&nbsp;     */
+&nbsp;    public void setTemplateFilters(List&lt;String&gt; templateFilters) {
+<b class="nc">&nbsp;        this.templateFilters = templateFilters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selectedTemplateFilters.
+&nbsp;     *
+&nbsp;     * @return value of selectedTemplateFilters
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getSelectedTemplateFilters() {
+<b class="nc">&nbsp;        return selectedTemplateFilters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selectedTemplateFilters.
+&nbsp;     *
+&nbsp;     * @param selectedTemplateFilters as list of Strings
+&nbsp;     */
+&nbsp;    public void setSelectedTemplateFilters(List&lt;String&gt; selectedTemplateFilters) {
+<b class="nc">&nbsp;        this.selectedTemplateFilters = selectedTemplateFilters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Event listener for template filter changed event.
+&nbsp;     */
+&nbsp;    public void templateFiltersChanged() {
+<b class="nc">&nbsp;        setShowInactiveTemplates(selectedTemplateFilters.contains(DEACTIVATED_TEMPLATES_FILTER));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

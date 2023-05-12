@@ -1,0 +1,610 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TaskDTO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.dto</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskDTO (org.kitodo.production.dto)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskDTO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    59,2%
+  </span>
+  <span class="absValue">
+    (29/49)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (30/50)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.dto;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.kitodo.data.database.enums.TaskEditType;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;
+&nbsp;/**
+&nbsp; * Task DTO object.
+&nbsp; */
+<b class="fc">&nbsp;public class TaskDTO extends BaseDTO {</b>
+&nbsp;
+&nbsp;    private String title;
+&nbsp;    private String localizedTitle;
+&nbsp;    private Integer ordering;
+&nbsp;    private TaskStatus processingStatus;
+&nbsp;    private String processingStatusTitle;
+&nbsp;    private TaskEditType editType;
+&nbsp;    private String editTypeTitle;
+&nbsp;    private UserDTO processingUser;
+&nbsp;    private String processingTime;
+&nbsp;    private String processingBegin;
+&nbsp;    private String processingEnd;
+&nbsp;    private ProcessDTO process;
+&nbsp;    private ProjectDTO project;
+&nbsp;    private TemplateDTO template;
+<b class="fc">&nbsp;    private List&lt;Integer&gt; roleIds = new ArrayList&lt;&gt;();</b>
+&nbsp;    private int rolesSize;
+&nbsp;    private boolean correction;
+&nbsp;    private Integer correctionCommentStatus;
+&nbsp;    private boolean typeAutomatic;
+&nbsp;    private boolean typeMetadata;
+&nbsp;    private boolean typeImagesRead;
+&nbsp;    private boolean typeImagesWrite;
+&nbsp;    private boolean batchStep;
+&nbsp;    private boolean batchAvailable;
+&nbsp;    
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get title.
+&nbsp;     *
+&nbsp;     * @return title as String
+&nbsp;     */
+&nbsp;    public String getTitle() {
+<b class="fc">&nbsp;        return title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set title.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setTitle(String title) {
+<b class="fc">&nbsp;        this.title = title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get localized title.
+&nbsp;     *
+&nbsp;     * @return localized title as String
+&nbsp;     */
+&nbsp;    public String getLocalizedTitle() {
+<b class="nc">&nbsp;        return localizedTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set localized title.
+&nbsp;     *
+&nbsp;     * @param localizedTitle
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setLocalizedTitle(String localizedTitle) {
+<b class="fc">&nbsp;        this.localizedTitle = localizedTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get ordering as Integer.
+&nbsp;     *
+&nbsp;     * @return ordering as Integer
+&nbsp;     */
+&nbsp;    public Integer getOrdering() {
+<b class="nc">&nbsp;        return this.ordering;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set ordering as Integer.
+&nbsp;     *
+&nbsp;     * @param ordering
+&nbsp;     *            as Integer
+&nbsp;     */
+&nbsp;    public void setOrdering(Integer ordering) {
+<b class="fc">&nbsp;        this.ordering = ordering;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processing status as TaskStatus object.
+&nbsp;     *
+&nbsp;     * @return processing status as TaskStatus object
+&nbsp;     */
+&nbsp;    public TaskStatus getProcessingStatus() {
+<b class="fc">&nbsp;        return processingStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processing status as TaskStatus object.
+&nbsp;     *
+&nbsp;     * @param processingStatus
+&nbsp;     *            as TaskStatus object
+&nbsp;     */
+&nbsp;    public void setProcessingStatus(TaskStatus processingStatus) {
+<b class="fc">&nbsp;        this.processingStatus = processingStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processing status title as String.
+&nbsp;     *
+&nbsp;     * @return processing status title as String
+&nbsp;     */
+&nbsp;    public String getProcessingStatusTitle() {
+<b class="nc">&nbsp;        return processingStatusTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processing status title as String.
+&nbsp;     *
+&nbsp;     * @param processingStatusTitle
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setProcessingStatusTitle(String processingStatusTitle) {
+<b class="fc">&nbsp;        this.processingStatusTitle = processingStatusTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get editType as {@link TaskEditType}.
+&nbsp;     *
+&nbsp;     * @return current edit type
+&nbsp;     */
+&nbsp;    public TaskEditType getEditType() {
+<b class="fc">&nbsp;        return editType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set editType to specific value from {@link TaskEditType}.
+&nbsp;     *
+&nbsp;     * @param editType
+&nbsp;     *            as {@link TaskEditType}
+&nbsp;     */
+&nbsp;    public void setEditType(TaskEditType editType) {
+<b class="fc">&nbsp;        this.editType = editType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get edit type title as String.
+&nbsp;     *
+&nbsp;     * @return current edit type title as String
+&nbsp;     */
+&nbsp;    public String getEditTypeTitle() {
+<b class="nc">&nbsp;        return editTypeTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set edit type title as String.
+&nbsp;     *
+&nbsp;     * @param editTypeTitle
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setEditTypeTitle(String editTypeTitle) {
+<b class="fc">&nbsp;        this.editTypeTitle = editTypeTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processing user as UserDTO.
+&nbsp;     *
+&nbsp;     * @return processing user as UserDTO
+&nbsp;     */
+&nbsp;    public UserDTO getProcessingUser() {
+<b class="nc">&nbsp;        return processingUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processing user as UserDTO.
+&nbsp;     *
+&nbsp;     * @param processingUser
+&nbsp;     *            as UserDTO
+&nbsp;     */
+&nbsp;    public void setProcessingUser(UserDTO processingUser) {
+<b class="fc">&nbsp;        this.processingUser = processingUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processing time as String.
+&nbsp;     *
+&nbsp;     * @return processing time as String
+&nbsp;     */
+&nbsp;    public String getProcessingTime() {
+<b class="nc">&nbsp;        return processingTime;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processing time as String.
+&nbsp;     *
+&nbsp;     * @param processingTime
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setProcessingTime(String processingTime) {
+<b class="fc">&nbsp;        this.processingTime = processingTime;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processing begin time as String.
+&nbsp;     *
+&nbsp;     * @return processing begin time as String
+&nbsp;     */
+&nbsp;    public String getProcessingBegin() {
+<b class="nc">&nbsp;        return processingBegin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processing begin time as String.
+&nbsp;     *
+&nbsp;     * @param processingBegin
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setProcessingBegin(String processingBegin) {
+<b class="fc">&nbsp;        this.processingBegin = processingBegin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processing end time as String.
+&nbsp;     *
+&nbsp;     * @return processing end time as String
+&nbsp;     */
+&nbsp;    public String getProcessingEnd() {
+<b class="nc">&nbsp;        return processingEnd;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processing end time as String.
+&nbsp;     *
+&nbsp;     * @param processingEnd
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setProcessingEnd(String processingEnd) {
+<b class="fc">&nbsp;        this.processingEnd = processingEnd;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process as ProcessDTO.
+&nbsp;     *
+&nbsp;     * @return process as ProcessDTO
+&nbsp;     */
+&nbsp;    public ProcessDTO getProcess() {
+<b class="fc">&nbsp;        return process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set process as ProcessDTO.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            as ProcessDTO
+&nbsp;     */
+&nbsp;    public void setProcess(ProcessDTO process) {
+<b class="fc">&nbsp;        this.process = process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get project.
+&nbsp;     *
+&nbsp;     * @return project as ProjectDTO
+&nbsp;     */
+&nbsp;    public ProjectDTO getProject() {
+<b class="nc">&nbsp;        return project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set project.
+&nbsp;     *
+&nbsp;     * @param project
+&nbsp;     *            as ProjectDTO
+&nbsp;     */
+&nbsp;    public void setProject(ProjectDTO project) {
+<b class="fc">&nbsp;        this.project = project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get template as TemplateDTO.
+&nbsp;     *
+&nbsp;     * @return template as TemplateDTO
+&nbsp;     */
+&nbsp;    public TemplateDTO getTemplate() {
+<b class="nc">&nbsp;        return template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set template as TemplateDTO.
+&nbsp;     *
+&nbsp;     * @param template
+&nbsp;     *            as TemplateDTO
+&nbsp;     */
+&nbsp;    public void setTemplate(TemplateDTO template) {
+<b class="nc">&nbsp;        this.template = template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of roles.
+&nbsp;     *
+&nbsp;     * @return list of role ids as Integer
+&nbsp;     */
+&nbsp;    public List&lt;Integer&gt; getRoleIds() {
+<b class="nc">&nbsp;        return roleIds;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of roles.
+&nbsp;     *
+&nbsp;     * @param roleIds
+&nbsp;     *            list of role ids as Integer
+&nbsp;     */
+&nbsp;    public void setRoleIds(List&lt;Integer&gt; roleIds) {
+<b class="fc">&nbsp;        this.roleIds = roleIds;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get roles size.
+&nbsp;     *
+&nbsp;     * @return the size of the roles list
+&nbsp;     */
+&nbsp;    public int getRolesSize() {
+<b class="fc">&nbsp;        return this.rolesSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set roles size.
+&nbsp;     *
+&nbsp;     * @param rolesSize
+&nbsp;     *            as int
+&nbsp;     */
+&nbsp;    public void setRolesSize(int rolesSize) {
+<b class="fc">&nbsp;        this.rolesSize = rolesSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get correction.
+&nbsp;     *
+&nbsp;     * @return value of correction
+&nbsp;     */
+&nbsp;    public boolean isCorrection() {
+<b class="nc">&nbsp;        return correction;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set correction.
+&nbsp;     *
+&nbsp;     * @param correction as boolean
+&nbsp;     */
+&nbsp;    public void setCorrection(boolean correction) {
+<b class="fc">&nbsp;        this.correction = correction;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information if task type is automatic.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isTypeAutomatic() {
+<b class="nc">&nbsp;        return typeAutomatic;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set information if task type is automatic.
+&nbsp;     *
+&nbsp;     * @param typeAutomatic
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setTypeAutomatic(boolean typeAutomatic) {
+<b class="fc">&nbsp;        this.typeAutomatic = typeAutomatic;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information if task type is metadata.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isTypeMetadata() {
+<b class="nc">&nbsp;        return typeMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set information if task type is metadata.
+&nbsp;     *
+&nbsp;     * @param typeMetadata
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setTypeMetadata(boolean typeMetadata) {
+<b class="fc">&nbsp;        this.typeMetadata = typeMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information if task type is images read.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isTypeImagesRead() {
+<b class="nc">&nbsp;        return typeImagesRead;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set information if task type is images read.
+&nbsp;     *
+&nbsp;     * @param typeImagesRead
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setTypeImagesRead(boolean typeImagesRead) {
+<b class="fc">&nbsp;        this.typeImagesRead = typeImagesRead;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information if task type is images write.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isTypeImagesWrite() {
+<b class="nc">&nbsp;        return typeImagesWrite;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set information if task type is images write.
+&nbsp;     *
+&nbsp;     * @param typeImagesWrite
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setTypeImagesWrite(boolean typeImagesWrite) {
+<b class="fc">&nbsp;        this.typeImagesWrite = typeImagesWrite;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information if task is batch(step).
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isBatchStep() {
+<b class="nc">&nbsp;        return batchStep;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set information if batch is available for task - there is more than one task
+&nbsp;     * with the same title assigned to the batch.).
+&nbsp;     *
+&nbsp;     * @param batchAvailable
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setBatchAvailable(boolean batchAvailable) {
+<b class="fc">&nbsp;        this.batchAvailable = batchAvailable;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information if batch is available for task - there is more than one task
+&nbsp;     * with the same title assigned to the batch.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isBatchAvailable() {
+<b class="nc">&nbsp;        return batchAvailable;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set information if task is batch(step).
+&nbsp;     *
+&nbsp;     * @param batchStep
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setBatchStep(boolean batchStep) {
+<b class="fc">&nbsp;        this.batchStep = batchStep;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the correction comment status, see CorrectionComments enum, as int value.
+&nbsp;     * 
+&nbsp;     * @return the correction comment status as integer
+&nbsp;     */
+&nbsp;    public Integer getCorrectionCommentStatus() {
+<b class="nc">&nbsp;        return this.correctionCommentStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set the correction comment status as int value.
+&nbsp;     * 
+&nbsp;     * @param status the status as integer
+&nbsp;     */
+&nbsp;    public void setCorrectionCommentStatus(Integer status) {
+<b class="fc">&nbsp;        this.correctionCommentStatus = status;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

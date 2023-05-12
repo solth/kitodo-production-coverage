@@ -1,0 +1,521 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > KitodoServiceLoader</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.serviceloader</a>
+</div>
+
+<h1>Coverage Summary for Class: KitodoServiceLoader (org.kitodo.serviceloader)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KitodoServiceLoader</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69,2%
+  </span>
+  <span class="absValue">
+    (9/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,6%
+  </span>
+  <span class="absValue">
+    (68/146)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.serviceloader;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FileInputStream;
+&nbsp;import java.io.FileNotFoundException;
+&nbsp;import java.io.FileOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.net.URL;
+&nbsp;import java.net.URLClassLoader;
+&nbsp;import java.nio.file.DirectoryStream;
+&nbsp;import java.nio.file.FileSystems;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.nio.file.Path;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Enumeration;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Properties;
+&nbsp;import java.util.ServiceLoader;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.jar.JarEntry;
+&nbsp;import java.util.jar.JarFile;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.servlet.http.HttpSession;
+&nbsp;
+&nbsp;import org.apache.commons.io.FileUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.KitodoConfig;
+&nbsp;
+&nbsp;public class KitodoServiceLoader&lt;T&gt; {
+&nbsp;    private Class&lt;T&gt; clazz;
+<b class="fc">&nbsp;    private String modulePath = &quot;&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;The class loader chain keeps track of the respective newest class loader
+&nbsp;     * created for loading new jar files. Previously loaded jar files are
+&nbsp;     * found by delegating requests to each parent class loader, and finally,
+&nbsp;     * to the webapp and system class loader. See:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;http://tomcat.apache.org/tomcat-9.0-doc/class-loader-howto.html&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Module/Plugin classes loaded from jar files can only be accessed through
+&nbsp;     * this class loader.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;In the future, a refresh mechanism could be implemented by throwing away
+&nbsp;     * this chain, starting a new one and reloading all jars.&lt;/p&gt;
+&nbsp;     */
+<b class="fc">&nbsp;    private static ClassLoader classLoaderChain = Thread.currentThread().getContextClassLoader();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Already loaded jars are remembered by their file path, and thus, not
+&nbsp;     * loaded multiple times during runtime.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Set&lt;String&gt; loadedJars = new HashSet&lt;&gt;();</b>
+&nbsp;
+&nbsp;    private static final String POM_PROPERTIES_FILE = &quot;pom.properties&quot;;
+&nbsp;    private static final String ARTIFACT_ID_PROPERTY = &quot;artifactId&quot;;
+&nbsp;    private static final String TEMP_DIR_PREFIX = &quot;kitodo_&quot;;
+&nbsp;    private static final String META_INF_FOLDER = &quot;META-INF&quot;;
+&nbsp;    private static final String RESOURCES_FOLDER = &quot;resources&quot;;
+&nbsp;    private static final String PAGES_FOLDER = &quot;pages&quot;;
+&nbsp;    private static final String JAR = &quot;*.jar&quot;;
+&nbsp;    private static final String ERROR = &quot;Classpath could not be accessed&quot;;
+&nbsp;
+<b class="fc">&nbsp;    private static final Path SYSTEM_TEMP_FOLDER = FileSystems.getDefault()</b>
+<b class="fc">&nbsp;            .getPath(System.getProperty(&quot;java.io.tmpdir&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(KitodoServiceLoader.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor for KitodoServiceLoader.
+&nbsp;     *
+&nbsp;     * @param clazz
+&nbsp;     *            interface class of module to load
+&nbsp;     */
+<b class="fc">&nbsp;    public KitodoServiceLoader(Class&lt;T&gt; clazz) {</b>
+<b class="fc">&nbsp;        String modulesDirectory = KitodoConfig.getKitodoModulesDirectory();</b>
+<b class="fc">&nbsp;        this.clazz = clazz;</b>
+<b class="fc">&nbsp;        File kitodoModules = new File(modulesDirectory).getAbsoluteFile();</b>
+<b class="fc">&nbsp;        if (kitodoModules.exists()) {</b>
+<b class="fc">&nbsp;            this.modulePath = modulesDirectory;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            logger.error(&quot;Specified module folder does not exist: {}&quot;, kitodoModules);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private ServiceLoader&lt;T&gt; getClassLoader() {
+<b class="fc">&nbsp;        loadModulesIntoClasspath();</b>
+<b class="fc">&nbsp;        loadBeans();</b>
+<b class="fc">&nbsp;        loadFrontendFilesIntoCore();</b>
+&nbsp;        // services and their classes need to be loaded from the class loader
+&nbsp;        // chain instead of the default class loader
+<b class="fc">&nbsp;        return ServiceLoader.load(clazz, KitodoServiceLoader.classLoaderChain);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Loads a module from the classpath which implements the constructed clazz.
+&nbsp;     * Frontend files of all modules will be loaded into the core module.
+&nbsp;     *
+&nbsp;     * @return A module with type T.
+&nbsp;     */
+&nbsp;    public T loadModule() {
+<b class="fc">&nbsp;        ServiceLoader&lt;T&gt; loader = getClassLoader();</b>
+<b class="fc">&nbsp;        Iterator&lt;T&gt; loaderIterator = loader.iterator();</b>
+<b class="fc">&nbsp;        if (!loaderIterator.hasNext()) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Couldn&#39;t find a module for {}!&quot;, clazz);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return loaderIterator.next();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Loads and returns all modules from the classpath which implement the constructed clazz.
+&nbsp;     * @return List of modules with type T
+&nbsp;     */
+&nbsp;    public List&lt;T&gt; loadModules() {
+<b class="fc">&nbsp;        ServiceLoader&lt;T&gt; loader = getClassLoader();</b>
+<b class="fc">&nbsp;        LinkedList&lt;T&gt; modules = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        loader.iterator().forEachRemaining(modules::add);</b>
+<b class="fc">&nbsp;        return modules;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Loads bean classes and registers them to the FacesContext. Afterwards
+&nbsp;     * they can be used in all frontend files
+&nbsp;     */
+&nbsp;    private void loadBeans() {
+<b class="fc">&nbsp;        Path moduleFolder = FileSystems.getDefault().getPath(modulePath);</b>
+<b class="fc">&nbsp;        try (DirectoryStream&lt;Path&gt; stream = Files.newDirectoryStream(moduleFolder, JAR)) {</b>
+<b class="fc">&nbsp;            for (Path f : stream) {</b>
+<b class="fc">&nbsp;                try (JarFile jarFile = new JarFile(f.toString())) {</b>
+<b class="fc">&nbsp;                    if (hasFrontendFiles(jarFile)) {</b>
+<b class="nc">&nbsp;                        Enumeration&lt;JarEntry&gt; entries = jarFile.entries();</b>
+<b class="nc">&nbsp;                        URL[] urls = {new URL(&quot;jar:file:&quot; + f.toString() + &quot;!/&quot;) };</b>
+<b class="nc">&nbsp;                        try (URLClassLoader cl = URLClassLoader.newInstance(urls)) {</b>
+<b class="nc">&nbsp;                            while (entries.hasMoreElements()) {</b>
+<b class="nc">&nbsp;                                JarEntry je = entries.nextElement();</b>
+&nbsp;                                /*
+&nbsp;                                 * IMPORTANT: Naming convention: the name of the
+&nbsp;                                 * java class has to be in upper camel case or
+&nbsp;                                 * &quot;pascal case&quot; and must be equal to the file
+&nbsp;                                 * name of the corresponding facelet file
+&nbsp;                                 * concatenated with the word &quot;Form&quot;.
+&nbsp;                                 *
+&nbsp;                                 * Example: template filename &quot;sample.xhtml&quot; =&gt;
+&nbsp;                                 * &quot;SampleForm.java&quot;
+&nbsp;                                 *
+&nbsp;                                 * That is the reason for the following check
+&nbsp;                                 * (e.g. whether the JarEntry name ends with
+&nbsp;                                 * &quot;Form.class&quot;)
+&nbsp;                                 */
+<b class="nc">&nbsp;                                if (je.isDirectory() || !je.getName().endsWith(&quot;Form.class&quot;)) {</b>
+<b class="nc">&nbsp;                                    continue;</b>
+&nbsp;                                }
+&nbsp;
+<b class="nc">&nbsp;                                String className = je.getName().substring(0, je.getName().length() - 6);</b>
+<b class="nc">&nbsp;                                className = className.replace(&#39;/&#39;, &#39;.&#39;);</b>
+<b class="nc">&nbsp;                                Class&lt;?&gt; aClass = cl.loadClass(className);</b>
+<b class="nc">&nbsp;                                String beanName = className.substring(className.lastIndexOf(&#39;.&#39;) + 1).trim();</b>
+&nbsp;
+<b class="nc">&nbsp;                                FacesContext facesContext = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;                                HttpSession session = (HttpSession) facesContext.getExternalContext().getSession(false);</b>
+<b class="nc">&nbsp;                                Object newInstance = aClass.getDeclaredConstructor().newInstance();</b>
+<b class="nc">&nbsp;                                session.getServletContext().setAttribute(beanName, newInstance);</b>
+<b class="nc">&nbsp;                            }</b>
+<b class="nc">&nbsp;                        }</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            logger.error(ERROR, e.getMessage());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the found jar files have frontend files, they will be extracted and
+&nbsp;     * copied into the frontend folder of the core module. Before copying,
+&nbsp;     * existing frontend files of the same module will be deleted from the core
+&nbsp;     * module. Afterwards the created temporary folder will be deleted as well.
+&nbsp;     */
+&nbsp;    private void loadFrontendFilesIntoCore() {
+&nbsp;
+<b class="fc">&nbsp;        Path moduleFolder = FileSystems.getDefault().getPath(modulePath);</b>
+&nbsp;
+<b class="fc">&nbsp;        try (DirectoryStream&lt;Path&gt; stream = Files.newDirectoryStream(moduleFolder, JAR)) {</b>
+&nbsp;
+<b class="fc">&nbsp;            for (Path f : stream) {</b>
+<b class="fc">&nbsp;                File loc = new File(f.toString());</b>
+<b class="fc">&nbsp;                try (JarFile jarFile = new JarFile(loc)) {</b>
+&nbsp;
+<b class="fc">&nbsp;                    if (hasFrontendFiles(jarFile)) {</b>
+&nbsp;
+<b class="nc">&nbsp;                        Path temporaryFolder = Files.createTempDirectory(SYSTEM_TEMP_FOLDER, TEMP_DIR_PREFIX);</b>
+&nbsp;
+<b class="nc">&nbsp;                        File tempDir = new File(Paths.get(temporaryFolder.toUri()).toAbsolutePath().toString());</b>
+&nbsp;
+<b class="nc">&nbsp;                        extractFrontEndFiles(loc.getAbsolutePath(), tempDir);</b>
+&nbsp;
+<b class="nc">&nbsp;                        String moduleName = extractModuleName(tempDir);</b>
+<b class="nc">&nbsp;                        if (moduleName.isEmpty()) {</b>
+<b class="nc">&nbsp;                            logger.info(&quot;No module found in JarFile &#39;{}&#39;.&quot;, jarFile.getName());</b>
+&nbsp;
+&nbsp;                        } else {
+<b class="nc">&nbsp;                            FacesContext facesContext = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;                            HttpSession session = (HttpSession) facesContext.getExternalContext().getSession(false);</b>
+&nbsp;
+<b class="nc">&nbsp;                            String filePath = session.getServletContext().getRealPath(File.separator + PAGES_FOLDER)</b>
+&nbsp;                                    + File.separator + moduleName;
+<b class="nc">&nbsp;                            FileUtils.deleteDirectory(new File(filePath));</b>
+&nbsp;
+<b class="nc">&nbsp;                            String resourceFolder = String.join(File.separator,</b>
+<b class="nc">&nbsp;                                    Arrays.asList(tempDir.getAbsolutePath(), META_INF_FOLDER, RESOURCES_FOLDER));</b>
+<b class="nc">&nbsp;                            copyFrontEndFiles(resourceFolder, filePath);</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                        FileUtils.deleteDirectory(tempDir);</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            logger.error(ERROR, e.getMessage());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Extracts the module name of the current module by finding the
+&nbsp;     * pom.properties in the given temporary folder
+&nbsp;     *
+&nbsp;     * @param temporaryFolder
+&nbsp;     *            folder in which the pom.properties file will be searched for
+&nbsp;     *
+&nbsp;     * @return String
+&nbsp;     */
+&nbsp;    private String extractModuleName(File temporaryFolder) throws IOException {
+<b class="nc">&nbsp;        String moduleName = &quot;&quot;;</b>
+<b class="nc">&nbsp;        File properties = findFile(POM_PROPERTIES_FILE, temporaryFolder);</b>
+<b class="nc">&nbsp;        try (InputStream input = new FileInputStream(properties)) {</b>
+<b class="nc">&nbsp;            Properties prop = new Properties();</b>
+<b class="nc">&nbsp;            prop.load(input);</b>
+<b class="nc">&nbsp;            moduleName = prop.getProperty(ARTIFACT_ID_PROPERTY);</b>
+<b class="nc">&nbsp;        } catch (FileNotFoundException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return moduleName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copies extracted frontend files by a given source folder name to the
+&nbsp;     * destination Folder given by a destination folder name.
+&nbsp;     *
+&nbsp;     * @param sourceFolder
+&nbsp;     *            copies all extracted frontend files
+&nbsp;     * @param destinationFolder
+&nbsp;     *            jarFile that will be checked for frontend files
+&nbsp;     */
+&nbsp;    private void copyFrontEndFiles(String sourceFolder, String destinationFolder) throws IOException {
+<b class="nc">&nbsp;        FileUtils.copyDirectory(new File(sourceFolder), new File(destinationFolder));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks, whether a passed jarFile has frontend files or not. Returns true,
+&nbsp;     * when the jar contains a folder with the name &quot;resources&quot;.
+&nbsp;     *
+&nbsp;     * @param jarPath
+&nbsp;     *            jarFile that will be checked for frontend files
+&nbsp;     * @param destinationFolder
+&nbsp;     *            destination path, where the frontend files will be extracted
+&nbsp;     *            to
+&nbsp;     *
+&nbsp;     */
+&nbsp;    private void extractFrontEndFiles(String jarPath, File destinationFolder) throws IOException {
+<b class="nc">&nbsp;        if (!destinationFolder.exists()) {</b>
+<b class="nc">&nbsp;            destinationFolder.mkdir();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        try (JarFile jar = new JarFile(jarPath)) {</b>
+<b class="nc">&nbsp;            Enumeration&lt;JarEntry&gt; jarEntries = jar.entries();</b>
+<b class="nc">&nbsp;            while (jarEntries.hasMoreElements()) {</b>
+<b class="nc">&nbsp;                JarEntry currentJarEntry = jarEntries.nextElement();</b>
+&nbsp;
+<b class="nc">&nbsp;                if (currentJarEntry.getName().contains(RESOURCES_FOLDER)</b>
+<b class="nc">&nbsp;                        || currentJarEntry.getName().contains(POM_PROPERTIES_FILE)) {</b>
+<b class="nc">&nbsp;                    File resourceFile = new File(destinationFolder + File.separator + currentJarEntry.getName());</b>
+<b class="nc">&nbsp;                    if (!resourceFile.toPath().normalize().startsWith(destinationFolder.toPath())) {</b>
+<b class="nc">&nbsp;                        throw new IOException(&quot;ZIP file damaged! Invalid entry: &quot; + currentJarEntry.getName());</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    if (currentJarEntry.isDirectory()) {</b>
+<b class="nc">&nbsp;                        resourceFile.mkdirs();</b>
+<b class="nc">&nbsp;                        continue;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    if (currentJarEntry.getName().contains(POM_PROPERTIES_FILE)) {</b>
+<b class="nc">&nbsp;                        resourceFile.getParentFile().mkdirs();</b>
+&nbsp;                    }
+&nbsp;
+<b class="nc">&nbsp;                    try (InputStream inputStream = jar.getInputStream(currentJarEntry);</b>
+<b class="nc">&nbsp;                            FileOutputStream fos = new FileOutputStream(resourceFile)) {</b>
+<b class="nc">&nbsp;                        while (inputStream.available() &gt; 0) {</b>
+<b class="nc">&nbsp;                            fos.write(inputStream.read());</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                    }</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks, whether a passed jarFile has frontend files or not. Returns true,
+&nbsp;     * when the jar contains a folder with the name &quot;resources&quot;
+&nbsp;     *
+&nbsp;     * @param jarFile
+&nbsp;     *            jarFile that will be checked for frontend files
+&nbsp;     *
+&nbsp;     * @return boolean
+&nbsp;     */
+&nbsp;    private boolean hasFrontendFiles(JarFile jarFile) {
+<b class="fc">&nbsp;        Enumeration&lt;JarEntry&gt; enums = jarFile.entries();</b>
+<b class="fc">&nbsp;        while (enums.hasMoreElements()) {</b>
+<b class="fc">&nbsp;            JarEntry jarEntry = enums.nextElement();</b>
+<b class="fc">&nbsp;            if (jarEntry.getName().contains(RESOURCES_FOLDER) &amp;&amp; jarEntry.isDirectory()) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Tries to find a file by a given file name in a folder by folder name.
+&nbsp;     *
+&nbsp;     * @param name
+&nbsp;     *            file name that will be searched for
+&nbsp;     * @param folder
+&nbsp;     *            folder that will be searched
+&nbsp;     *
+&nbsp;     * @return File
+&nbsp;     *
+&nbsp;     * @throws FileNotFoundException
+&nbsp;     *             when File with given name could not be found in given folder
+&nbsp;     *
+&nbsp;     */
+&nbsp;    private File findFile(String name, File folder) throws FileNotFoundException {
+<b class="nc">&nbsp;        Collection&lt;File&gt; files = FileUtils.listFiles(folder, null, true);</b>
+<b class="nc">&nbsp;        for (File currentFile : files) {</b>
+<b class="nc">&nbsp;            if (currentFile.getName().equals(name)) {</b>
+<b class="nc">&nbsp;                return currentFile;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        throw new FileNotFoundException(</b>
+<b class="nc">&nbsp;                &quot;ERROR: file &#39;&quot; + name + &quot;&#39; not found in folder &#39;&quot; + folder.getAbsolutePath() + &quot;&#39;!&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;Loads jars from the modules directory by creating a separate class
+&nbsp;     * loader each time jars are loaded, connected in a chain of class loaders
+&nbsp;     * through their parent relationship.
+&nbsp;     * A ServiceLoader can find them when using the most recent class loader
+&nbsp;     * added to the chain of class loaders.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If used inappropriately, this may lead to unexpected behaviour, e.g.,
+&nbsp;     * when referring to the same singleton from multiple modules, since
+&nbsp;     * classes could be loaded twice.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If several modules depend on each other (load classes from another
+&nbsp;     * module), both modules have to be present at the same time when loading
+&nbsp;     * happens. Otherwise, the order at which jars are loaded could break
+&nbsp;     * things, since new classes will not be visible to jars loaded by an
+&nbsp;     * earlier class loader created at an earlier time.&lt;/p&gt;
+&nbsp;     */
+&nbsp;    private void loadModulesIntoClasspath() {
+<b class="fc">&nbsp;        Path moduleFolder = FileSystems.getDefault().getPath(modulePath);</b>
+&nbsp;
+<b class="fc">&nbsp;        try (DirectoryStream&lt;Path&gt; stream = Files.newDirectoryStream(moduleFolder, JAR)) {</b>
+&nbsp;
+&nbsp;            // collect urls of new jars present in the module directory
+<b class="fc">&nbsp;            Set&lt;URL&gt; jarsToBeAdded = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;            for (Path f : stream) {</b>
+&nbsp;
+<b class="fc">&nbsp;                File loc = new File(f.toString());</b>
+<b class="fc">&nbsp;                URL url = loc.toURI().toURL();</b>
+&nbsp;
+<b class="fc">&nbsp;                if (!KitodoServiceLoader.loadedJars.contains(url.toString())) {</b>
+<b class="fc">&nbsp;                    jarsToBeAdded.add(url);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;
+&nbsp;            // create a single URL class loader with all jars
+&nbsp;            // such that plugins can load classes from each other
+<b class="fc">&nbsp;            if (jarsToBeAdded.size() &gt; 0) {</b>
+&nbsp;
+<b class="fc">&nbsp;                for (URL url : jarsToBeAdded) {</b>
+<b class="fc">&nbsp;                    logger.info(&quot;Loading module jar file from path &quot; + url.toString());</b>
+<b class="fc">&nbsp;                    KitodoServiceLoader.loadedJars.add(url.toString());</b>
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;                URL[] urls = new URL[jarsToBeAdded.size()];</b>
+<b class="fc">&nbsp;                jarsToBeAdded.toArray(urls);</b>
+<b class="fc">&nbsp;                classLoaderChain = new URLClassLoader(urls, KitodoServiceLoader.classLoaderChain);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            logger.error(ERROR, e.getMessage());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

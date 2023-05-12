@@ -1,0 +1,187 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PropertyType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.enums</a>
+</div>
+
+<h1>Coverage Summary for Class: PropertyType (org.kitodo.data.database.enums)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PropertyType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,1%
+  </span>
+  <span class="absValue">
+    (4/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,2%
+  </span>
+  <span class="absValue">
+    (12/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.enums;
+&nbsp;
+&nbsp;/**
+&nbsp; * This enum contains property types, which can be used for display and
+&nbsp; * validation purpose Validation can be done by engaging validation classes,
+&nbsp; * which could be returned by the validation type Enum, contained in here.
+&nbsp; * //TODO: do we need one such an Enum?
+&nbsp; */
+<b class="fc">&nbsp;public enum PropertyType {</b>
+&nbsp;
+<b class="fc">&nbsp;    UNKNOWN(0, &quot;unknown&quot;),</b>
+<b class="fc">&nbsp;    MESSAGE_IMPORTANT(3, &quot;messageImportant&quot;),</b>
+<b class="fc">&nbsp;    MESSAGE_ERROR(4, &quot;messageError&quot;),</b>
+<b class="fc">&nbsp;    STRING(5, &quot;String&quot;);</b>
+&nbsp;
+&nbsp;    private int id;
+&nbsp;    private String name;
+&nbsp;
+<b class="fc">&nbsp;    PropertyType(int id, String inName) {</b>
+<b class="fc">&nbsp;        this.id = id;</b>
+<b class="fc">&nbsp;        this.name = inName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getName() {
+<b class="nc">&nbsp;        return this.name.toLowerCase();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public java.lang.String toString() {
+<b class="nc">&nbsp;        return this.name();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get property by name.
+&nbsp;     * 
+&nbsp;     * @param name
+&nbsp;     *            of property
+&nbsp;     * @return PropertyType object
+&nbsp;     */
+&nbsp;    public static PropertyType getByName(String name) {
+<b class="nc">&nbsp;        for (PropertyType p : PropertyType.values()) {</b>
+<b class="nc">&nbsp;            if (p.getName().equalsIgnoreCase(name)) {</b>
+<b class="nc">&nbsp;                return p;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return STRING;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get id.
+&nbsp;     *
+&nbsp;     * @return the id
+&nbsp;     */
+&nbsp;    public int getId() {
+<b class="fc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get property type by id.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of property type
+&nbsp;     * @return property type
+&nbsp;     */
+&nbsp;    public static PropertyType getById(int id) {
+<b class="fc">&nbsp;        for (PropertyType p : PropertyType.values()) {</b>
+<b class="fc">&nbsp;            if (p.getId() == id) {</b>
+<b class="fc">&nbsp;                return p;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return STRING;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

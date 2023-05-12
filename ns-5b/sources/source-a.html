@@ -1,0 +1,1497 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ImportService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data</a>
+</div>
+
+<h1>Coverage Summary for Class: ImportService (org.kitodo.production.services.data)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImportService</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,2%
+  </span>
+  <span class="absValue">
+    (40/57)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,1%
+  </span>
+  <span class="absValue">
+    (332/571)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ImportService$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    70,7%
+  </span>
+  <span class="absValue">
+    (41/58)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,2%
+  </span>
+  <span class="absValue">
+    (333/572)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.net.URI;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.ListIterator;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;import javax.xml.transform.TransformerException;
+&nbsp;import javax.xml.xpath.XPath;
+&nbsp;import javax.xml.xpath.XPathConstants;
+&nbsp;import javax.xml.xpath.XPathExpressionException;
+&nbsp;import javax.xml.xpath.XPathFactory;
+&nbsp;
+&nbsp;import org.apache.commons.io.FileUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.FunctionalMetadata;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.externaldatamanagement.DataImport;
+&nbsp;import org.kitodo.api.externaldatamanagement.ExternalDataImportInterface;
+&nbsp;import org.kitodo.api.externaldatamanagement.ImportConfigurationType;
+&nbsp;import org.kitodo.api.externaldatamanagement.SearchInterfaceType;
+&nbsp;import org.kitodo.api.externaldatamanagement.SearchResult;
+&nbsp;import org.kitodo.api.schemaconverter.DataRecord;
+&nbsp;import org.kitodo.api.schemaconverter.ExemplarRecord;
+&nbsp;import org.kitodo.api.schemaconverter.FileFormat;
+&nbsp;import org.kitodo.api.schemaconverter.MetadataFormat;
+&nbsp;import org.kitodo.api.schemaconverter.SchemaConverterInterface;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.ConfigProject;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.beans.MappingFile;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Ruleset;
+&nbsp;import org.kitodo.data.database.beans.SearchField;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.beans.UrlParameter;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.enums.TaskEditType;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.CatalogException;
+&nbsp;import org.kitodo.exceptions.CommandException;
+&nbsp;import org.kitodo.exceptions.ConfigException;
+&nbsp;import org.kitodo.exceptions.DoctypeMissingException;
+&nbsp;import org.kitodo.exceptions.ImportException;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoRecordFoundException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.exceptions.ParameterNotFoundException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.exceptions.UnsupportedFormatException;
+&nbsp;import org.kitodo.production.dto.ProcessDTO;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessBooleanMetadata;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessDetail;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessFieldedMetadata;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessSelectMetadata;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessTextMetadata;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.ProcessHelper;
+&nbsp;import org.kitodo.production.helper.TempProcess;
+&nbsp;import org.kitodo.production.helper.XMLUtils;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.process.ProcessGenerator;
+&nbsp;import org.kitodo.production.process.ProcessValidator;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.workflow.KitodoNamespaceContext;
+&nbsp;import org.kitodo.serviceloader.KitodoServiceLoader;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.Node;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;import org.xml.sax.SAXException;
+&nbsp;import org.xml.sax.SAXParseException;
+&nbsp;
+<b class="fc">&nbsp;public class ImportService {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ImportService.class);</b>
+&nbsp;    public static final String ACQUISITION_STAGE_CREATE = &quot;create&quot;;
+&nbsp;
+<b class="fc">&nbsp;    private static volatile ImportService instance = null;</b>
+&nbsp;    private static ExternalDataImportInterface importModule;
+&nbsp;    private static final String KITODO_NAMESPACE = &quot;http://meta.kitodo.org/v1/&quot;;
+&nbsp;    private static final String KITODO_STRING = &quot;kitodo&quot;;
+&nbsp;
+&nbsp;    private ProcessGenerator processGenerator;
+&nbsp;    private static final String REPLACE_ME = &quot;REPLACE_ME&quot;;
+&nbsp;    // default value for identifierMetadata if no OPAC specific metadata has been configured in kitodo_opac.xml
+&nbsp;    private static final String PARENT_XPATH = &quot;//kitodo:metadata[@name=&#39;&quot; + REPLACE_ME + &quot;&#39;]&quot;;
+&nbsp;    private static final String PARENTHESIS_TRIM_MODE = &quot;parenthesis&quot;;
+&nbsp;    private LinkedList&lt;ExemplarRecord&gt; exemplarRecords;
+&nbsp;
+&nbsp;    private static final String PERSON = &quot;Person&quot;;
+&nbsp;    private static final String ROLE = &quot;Role&quot;;
+&nbsp;    private static final String AUTHOR = &quot;Author&quot;;
+&nbsp;    private static final String FIRST_NAME = &quot;FirstName&quot;;
+&nbsp;    private static final String LAST_NAME = &quot;LastName&quot;;
+&nbsp;
+&nbsp;    private static final String MONOGRAPH = &quot;Monograph&quot;;
+&nbsp;    private static final String VOLUME = &quot;Volume&quot;;
+&nbsp;    private static final String MULTI_VOLUME_WORK = &quot;MultiVolumeWork&quot;;
+&nbsp;
+<b class="fc">&nbsp;    private String tiffDefinition = &quot;&quot;;</b>
+&nbsp;    private boolean usingTemplates;
+&nbsp;
+&nbsp;    private TempProcess parentTempProcess;
+&nbsp;
+&nbsp;    private static final String CATALOG_IDENTIFIER = &quot;CatalogIDDigital&quot;;
+&nbsp;
+&nbsp;    private static final String SRU_OPERATION = &quot;operation&quot;;
+&nbsp;    private static final String SRU_SEARCH_RETRIEVE = &quot;searchRetrieve&quot;;
+&nbsp;    private static final String SRU_VERSION = &quot;version&quot;;
+&nbsp;    private static final String SRU_RECORD_SCHEMA = &quot;recordSchema&quot;;
+&nbsp;    private static final String OAI_VERB = &quot;verb&quot;;
+&nbsp;    private static final String OAI_GET_RECORD = &quot;GetRecord&quot;;
+&nbsp;    private static final String OAI_METADATA_PREFIX = &quot;metadataPrefix&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return singleton variable of type ImportService.
+&nbsp;     *
+&nbsp;     * @return unique instance of ImportService
+&nbsp;     */
+&nbsp;    public static ImportService getInstance() {
+<b class="fc">&nbsp;        ImportService localReference = instance;</b>
+<b class="fc">&nbsp;        if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;            synchronized (ImportService.class) {</b>
+<b class="fc">&nbsp;                localReference = instance;</b>
+<b class="fc">&nbsp;                if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;                    localReference = new ImportService();</b>
+<b class="fc">&nbsp;                    instance = localReference;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return localReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load ExternalDataImportInterface implementation with KitodoServiceLoader and perform given query string
+&nbsp;     * with loaded module.
+&nbsp;     *
+&nbsp;     * @param searchField field to query
+&nbsp;     * @param searchTerm  given search term
+&nbsp;     * @param importConfiguration ImportConfiguration to use
+&nbsp;     * @param start index of first record returned
+&nbsp;     * @param rows number of records returned
+&nbsp;     * @return search result
+&nbsp;     */
+&nbsp;    public SearchResult performSearch(String searchField, String searchTerm, ImportConfiguration importConfiguration,
+&nbsp;                                      int start, int rows) {
+<b class="nc">&nbsp;        importModule = initializeImportModule();</b>
+<b class="nc">&nbsp;        searchTerm = getSearchTermWithDelimiter(searchTerm, importConfiguration);</b>
+<b class="nc">&nbsp;        return importModule.search(createDataImportFromImportConfiguration(importConfiguration), searchField,</b>
+&nbsp;                searchTerm, start, rows);
+&nbsp;    }
+&nbsp;
+&nbsp;    private ExternalDataImportInterface initializeImportModule() {
+<b class="fc">&nbsp;        KitodoServiceLoader&lt;ExternalDataImportInterface&gt; loader =</b>
+&nbsp;                new KitodoServiceLoader&lt;&gt;(ExternalDataImportInterface.class);
+<b class="fc">&nbsp;        return loader.loadModule();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load search fields from provided ImportConfiguration and return them as a list of Strings.
+&nbsp;     *
+&nbsp;     * @param importConfiguration ImportConfiguration to use
+&nbsp;     * @return list containing search fields
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getAvailableSearchFields(ImportConfiguration importConfiguration) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (SearchInterfaceType.FTP.name().equals(importConfiguration.getInterfaceType())) {</b>
+&nbsp;                // FTP server do not support query parameters but only use the filename for OPAC search!
+<b class="nc">&nbsp;                return Collections.singletonList(Helper.getTranslation(&quot;filename&quot;));</b>
+<b class="nc">&nbsp;            } else if (SearchInterfaceType.OAI.name().equals(importConfiguration.getInterfaceType())) {</b>
+&nbsp;                // OAI PMH interfaces do not support query parameters but only use the ID of the record to retrieve it!
+<b class="nc">&nbsp;                return Collections.singletonList(Helper.getTranslation(&quot;recordId&quot;));</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                List&lt;String&gt; fields = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;                List&lt;SearchField&gt; searchFields = importConfiguration.getSearchFields();</b>
+&nbsp;
+<b class="nc">&nbsp;                if (Objects.nonNull(searchFields)) {</b>
+<b class="nc">&nbsp;                    for (SearchField searchField : searchFields) {</b>
+<b class="nc">&nbsp;                        if (!searchField.isDisplayed()) {</b>
+<b class="nc">&nbsp;                            continue;</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                        fields.add(searchField.getLabel());</b>
+<b class="nc">&nbsp;                    }</b>
+&nbsp;                }
+<b class="nc">&nbsp;                return fields;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Error retrieving search fields from ImportConfiguration &#39;&quot;</b>
+<b class="nc">&nbsp;                    + importConfiguration.getTitle() + &quot;&#39;: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve default search field label of given ImportConfiguration.
+&nbsp;     *
+&nbsp;     * @param importConfiguration ImportConfiguration
+&nbsp;     * @return label of default search field
+&nbsp;     */
+&nbsp;    public static String getDefaultSearchField(ImportConfiguration importConfiguration) {
+<b class="nc">&nbsp;        if (SearchInterfaceType.FTP.name().equals(importConfiguration.getInterfaceType())) {</b>
+<b class="nc">&nbsp;            return Helper.getTranslation(&quot;filename&quot;);</b>
+<b class="nc">&nbsp;        } else if (SearchInterfaceType.OAI.name().equals(importConfiguration.getInterfaceType())) {</b>
+<b class="nc">&nbsp;            return Helper.getTranslation(&quot;recordId&quot;);</b>
+<b class="nc">&nbsp;        } else if (Objects.nonNull(importConfiguration.getDefaultSearchField())) {</b>
+<b class="nc">&nbsp;            return importConfiguration.getDefaultSearchField().getLabel();</b>
+<b class="nc">&nbsp;        } else if (!importConfiguration.getSearchFields().isEmpty()) {</b>
+<b class="nc">&nbsp;            return importConfiguration.getSearchFields().get(0).getLabel();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether to skip hit list for given ImportConfiguration and search field or not.
+&nbsp;     * Hit list is skipped either if SearchInterfaceType of given ImportConfiguration does not support
+&nbsp;     * hit lists (e.g. OAI interfaces in their current implementation) or if the provided search field
+&nbsp;     * equals the ID search field of the given ImportConfiguration.
+&nbsp;     * @param configuration ImportConfiguration to check
+&nbsp;     * @param field value of SearchField to check
+&nbsp;     * @return whether to skip hit list or not
+&nbsp;     */
+&nbsp;    public static boolean skipHitlist(ImportConfiguration configuration, String field) {
+<b class="fc">&nbsp;        if (SearchInterfaceType.FTP.name().equals(configuration.getInterfaceType())) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        else if (SearchInterfaceType.OAI.name().equals(configuration.getInterfaceType())</b>
+<b class="nc">&nbsp;                || field.equals(configuration.getIdSearchField().getLabel())) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return (Objects.isNull(configuration.getMetadataRecordIdXPath())</b>
+<b class="nc">&nbsp;                || Objects.isNull(configuration.getMetadataRecordTitleXPath()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get default import depth for given import configuration.
+&nbsp;     *
+&nbsp;     * @param importConfiguration ImportConfiguration
+&nbsp;     * @return default import depth of given import configuration
+&nbsp;     */
+&nbsp;    public int getDefaultImportDepth(ImportConfiguration importConfiguration) {
+<b class="nc">&nbsp;        int depth = importConfiguration.getDefaultImportDepth();</b>
+<b class="nc">&nbsp;        if (depth &lt; 0 || depth &gt; 5) {</b>
+<b class="nc">&nbsp;            return 2;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return depth;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private LinkedList&lt;ExemplarRecord&gt; extractExemplarRecords(DataRecord record,
+&nbsp;                                                              ImportConfiguration importConfiguration)
+&nbsp;            throws XPathExpressionException,
+&nbsp;            ParserConfigurationException, SAXException, IOException {
+<b class="fc">&nbsp;        LinkedList&lt;ExemplarRecord&gt; exemplarRecords = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        String exemplarXPath = importConfiguration.getItemFieldXpath();</b>
+<b class="fc">&nbsp;        String ownerXPath = importConfiguration.getItemFieldOwnerSubPath();</b>
+<b class="fc">&nbsp;        String signatureXPath = importConfiguration.getItemFieldSignatureSubPath();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!StringUtils.isBlank(exemplarXPath) &amp;&amp; !StringUtils.isBlank(ownerXPath)</b>
+<b class="nc">&nbsp;                &amp;&amp; !StringUtils.isBlank(signatureXPath) &amp;&amp; record.getOriginalData() instanceof String) {</b>
+<b class="nc">&nbsp;            String xmlString = (String) record.getOriginalData();</b>
+<b class="nc">&nbsp;            XPath xPath = XPathFactory.newInstance().newXPath();</b>
+<b class="nc">&nbsp;            xPath.setNamespaceContext(new KitodoNamespaceContext());</b>
+<b class="nc">&nbsp;            Document doc = XMLUtils.parseXMLString(xmlString);</b>
+<b class="nc">&nbsp;            NodeList exemplars = (NodeList) xPath.compile(exemplarXPath).evaluate(doc, XPathConstants.NODESET);</b>
+<b class="nc">&nbsp;            for (int i = 0; i &lt; exemplars.getLength(); i++) {</b>
+<b class="nc">&nbsp;                Node exemplar = exemplars.item(i);</b>
+<b class="nc">&nbsp;                Node ownerNode = (Node) xPath.compile(ownerXPath).evaluate(exemplar, XPathConstants.NODE);</b>
+<b class="nc">&nbsp;                Node signatureNode = (Node) xPath.compile(signatureXPath).evaluate(exemplar, XPathConstants.NODE);</b>
+&nbsp;
+<b class="nc">&nbsp;                if (Objects.nonNull(ownerNode) &amp;&amp; Objects.nonNull(signatureNode)) {</b>
+<b class="nc">&nbsp;                    String owner = ownerNode.getTextContent();</b>
+<b class="nc">&nbsp;                    String signature = signatureNode.getTextContent();</b>
+<b class="nc">&nbsp;                    if (!StringUtils.isBlank(owner) &amp;&amp; !StringUtils.isBlank(signature)) {</b>
+<b class="nc">&nbsp;                        exemplarRecords.add(new ExemplarRecord(owner, signature));</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return exemplarRecords;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Iterate over &quot;SchemaConverterInterface&quot; implementations using KitodoServiceLoader and return
+&nbsp;     * first implementation that supports the Metadata and File formats of the given DataRecord object
+&nbsp;     * as source formats and the Kitodo internal format and XML as target formats, respectively.
+&nbsp;     *
+&nbsp;     * @param record
+&nbsp;     *      Record whose metadata and return formats are used to filter the SchemaConverterInterface implementations
+&nbsp;     *
+&nbsp;     * @return List of SchemaConverterInterface implementations that support the metadata and return formats of the
+&nbsp;     *      given Record.
+&nbsp;     *
+&nbsp;     * @throws UnsupportedFormatException when no SchemaConverter module with matching formats could be found
+&nbsp;     */
+&nbsp;    private SchemaConverterInterface getSchemaConverter(DataRecord record) throws UnsupportedFormatException {
+<b class="fc">&nbsp;        KitodoServiceLoader&lt;SchemaConverterInterface&gt; loader =</b>
+&nbsp;                new KitodoServiceLoader&lt;&gt;(SchemaConverterInterface.class);
+<b class="fc">&nbsp;        List&lt;SchemaConverterInterface&gt; converterModules = loader.loadModules().stream()</b>
+<b class="fc">&nbsp;                .filter(converter -&gt; converter.supportsSourceFileFormat(record.getFileFormat())</b>
+<b class="fc">&nbsp;                        &amp;&amp; converter.supportsTargetFileFormat(FileFormat.XML))</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="fc">&nbsp;        if (converterModules.isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new UnsupportedFormatException(&quot;No SchemaConverter found that supports &#39;&quot;</b>
+<b class="nc">&nbsp;                    + record.getMetadataFormat() + &quot;&#39; and &#39;&quot; + record.getFileFormat() + &quot;&#39;!&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return converterModules.get(0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get docType form imported record.
+&nbsp;     * @param record imported record
+&nbsp;     *       as Document
+&nbsp;     * @return docType as String
+&nbsp;     */
+&nbsp;    private String getRecordDocType(Document record, Ruleset ruleset) throws IOException {
+<b class="fc">&nbsp;        Collection&lt;String&gt; doctypes = getDocTypeMetadata(ruleset);</b>
+<b class="fc">&nbsp;        Element root = record.getDocumentElement();</b>
+<b class="fc">&nbsp;        NodeList kitodoNodes = root.getElementsByTagNameNS(KITODO_NAMESPACE, KITODO_STRING);</b>
+<b class="fc">&nbsp;        if (kitodoNodes.getLength() &gt; 0 &amp;&amp; !doctypes.isEmpty()) {</b>
+<b class="fc">&nbsp;            NodeList importedMetadata = kitodoNodes.item(0).getChildNodes();</b>
+<b class="fc">&nbsp;            for (int i = 0; i &lt; importedMetadata.getLength(); i++) {</b>
+<b class="fc">&nbsp;                Node metadataNode = importedMetadata.item(i);</b>
+<b class="fc">&nbsp;                Element metadataElement = (Element) metadataNode;</b>
+<b class="fc">&nbsp;                if (doctypes.contains(metadataElement.getAttribute(&quot;name&quot;))) {</b>
+<b class="fc">&nbsp;                    return metadataElement.getTextContent();</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the parent ID from the document.
+&nbsp;     * @param document Document to parse
+&nbsp;     * @param higherLevelIdentifier the given identifier
+&nbsp;     * @param trimMode trim mode for parent id
+&nbsp;     * @return parent ID
+&nbsp;     */
+&nbsp;    public String getParentID(Document document, String higherLevelIdentifier, String trimMode)
+&nbsp;        throws XPathExpressionException {
+<b class="fc">&nbsp;        XPath parentIDXpath = XPathFactory.newInstance().newXPath();</b>
+<b class="fc">&nbsp;        parentIDXpath.setNamespaceContext(new KitodoNamespaceContext());</b>
+<b class="fc">&nbsp;        NodeList nodeList = (NodeList) parentIDXpath.compile(PARENT_XPATH.replace(REPLACE_ME, higherLevelIdentifier))</b>
+<b class="fc">&nbsp;                .evaluate(document, XPathConstants.NODESET);</b>
+<b class="fc">&nbsp;        if (nodeList.getLength() == 1) {</b>
+<b class="fc">&nbsp;            Node parentIDNode = nodeList.item(0);</b>
+<b class="fc">&nbsp;            if (PARENTHESIS_TRIM_MODE.equals(trimMode)) {</b>
+<b class="nc">&nbsp;                return parentIDNode.getTextContent().replaceAll(&quot;\\([^)]+\\)&quot;, &quot;&quot;);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return parentIDNode.getTextContent();</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a temporary Process from the given document with templateID und projectID.
+&nbsp;     * @param document the given document
+&nbsp;     * @param templateID the template to use
+&nbsp;     * @param projectID the project to use
+&nbsp;     * @return a temporary process
+&nbsp;     */
+&nbsp;    public TempProcess createTempProcessFromDocument(ImportConfiguration importConfiguration, Document document,
+&nbsp;                                                     int templateID, int projectID)
+&nbsp;            throws ProcessGenerationException, IOException, TransformerException, InvalidMetadataValueException,
+&nbsp;            NoSuchMetadataFieldException {
+<b class="fc">&nbsp;        Process process = null;</b>
+&nbsp;        // &quot;processGenerator&quot; needs to be initialized when function is called for the first time
+<b class="fc">&nbsp;        if (Objects.isNull(processGenerator)) {</b>
+<b class="nc">&nbsp;            processGenerator = new ProcessGenerator();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (processGenerator.generateProcess(templateID, projectID)) {</b>
+<b class="fc">&nbsp;            process = processGenerator.getGeneratedProcess();</b>
+&nbsp;        }
+&nbsp;        TempProcess tempProcess;
+&nbsp;
+<b class="fc">&nbsp;        if (importConfiguration.getPrestructuredImport()) {</b>
+&nbsp;            // logical structure is created by import XSLT file!
+<b class="nc">&nbsp;            Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(document);</b>
+<b class="nc">&nbsp;            tempProcess = new TempProcess(process, workpiece);</b>
+<b class="nc">&nbsp;        } else if (Objects.nonNull(process) &amp;&amp; Objects.nonNull(process.getRuleset())) {</b>
+<b class="fc">&nbsp;            String docType = getRecordDocType(document, process.getRuleset());</b>
+<b class="fc">&nbsp;            NodeList metadataNodes = extractMetadataNodeList(document);</b>
+<b class="fc">&nbsp;            tempProcess = new TempProcess(process, metadataNodes, docType);</b>
+<b class="fc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            throw new ProcessGenerationException(&quot;Ruleset missing!&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return tempProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String importProcessAndReturnParentID(String recordId, LinkedList&lt;TempProcess&gt; allProcesses,
+&nbsp;                                                  ImportConfiguration importConfiguration, int projectID,
+&nbsp;                                                  int templateID, boolean isParentInRecord, String parentIdMetadata)
+&nbsp;            throws IOException, ProcessGenerationException, XPathExpressionException, ParserConfigurationException,
+&nbsp;            NoRecordFoundException, UnsupportedFormatException, URISyntaxException, SAXException, TransformerException,
+&nbsp;            InvalidMetadataValueException, NoSuchMetadataFieldException {
+&nbsp;
+<b class="fc">&nbsp;        Document internalDocument = importDocument(importConfiguration, recordId, allProcesses.isEmpty(), isParentInRecord);</b>
+<b class="fc">&nbsp;        TempProcess tempProcess = createTempProcessFromDocument(importConfiguration, internalDocument, templateID, projectID);</b>
+&nbsp;
+&nbsp;        // Workaround for classifying MultiVolumeWorks with insufficient information
+<b class="fc">&nbsp;        if (!allProcesses.isEmpty()) {</b>
+<b class="fc">&nbsp;            String childDocType = allProcesses.getLast().getWorkpiece().getLogicalStructure().getType();</b>
+<b class="fc">&nbsp;            Workpiece workpiece = tempProcess.getWorkpiece();</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(workpiece) &amp;&amp; Objects.nonNull(workpiece.getLogicalStructure())) {</b>
+<b class="fc">&nbsp;                String docType = workpiece.getLogicalStructure().getType();</b>
+<b class="fc">&nbsp;                if ((MONOGRAPH.equals(childDocType) || VOLUME.equals(childDocType)) &amp;&amp; MONOGRAPH.equals(docType)) {</b>
+<b class="nc">&nbsp;                    tempProcess.getWorkpiece().getLogicalStructure().setType(MULTI_VOLUME_WORK);</b>
+<b class="nc">&nbsp;                    allProcesses.getFirst().getWorkpiece().getLogicalStructure().setType(VOLUME);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        allProcesses.add(tempProcess);</b>
+<b class="fc">&nbsp;        if (!isParentInRecord &amp;&amp; StringUtils.isNotBlank(parentIdMetadata)) {</b>
+<b class="fc">&nbsp;            return getParentID(internalDocument, parentIdMetadata,importConfiguration.getParentElementTrimMode());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the searchTerm with configured Delimiter.
+&nbsp;     * @param searchTerm the search term to add delimiters.
+&nbsp;     * @param importConfiguration the ImportConfiguration to use
+&nbsp;     * @return searchTermWithDelimiter
+&nbsp;     */
+&nbsp;    public String getSearchTermWithDelimiter(String searchTerm, ImportConfiguration importConfiguration) {
+<b class="fc">&nbsp;        String searchTermWithDelimiter = searchTerm;</b>
+<b class="fc">&nbsp;        String queryDelimiter = importConfiguration.getQueryDelimiter();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(queryDelimiter)) {</b>
+<b class="nc">&nbsp;            searchTermWithDelimiter = queryDelimiter + searchTermWithDelimiter + queryDelimiter;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return searchTermWithDelimiter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Import a record identified by the given ID &#39;recordId&#39;.
+&nbsp;     * Additionally, import all ancestors of the given process referenced in the original data of the process imported
+&nbsp;     * from the OPAC selected in the given CreateProcessForm instance.
+&nbsp;     * Return the list of processes as a LinkedList of TempProcess.
+&nbsp;     *
+&nbsp;     * @param recordId identifier of the process to import
+&nbsp;     * @param importConfiguration ImportConfiguration used to import the record
+&nbsp;     * @param projectId the ID of the project for which a process is created
+&nbsp;     * @param templateId the ID of the template from which a process is created
+&nbsp;     * @param importDepth the number of hierarchical processes that will be imported from the catalog
+&nbsp;     * @param parentIdMetadata names of Metadata types holding parent IDs of structure elements in internal format
+&nbsp;     * @return List of TempProcess
+&nbsp;     */
+&nbsp;    public LinkedList&lt;TempProcess&gt; importProcessHierarchy(String recordId, ImportConfiguration importConfiguration,
+&nbsp;                                                          int projectId, int templateId, int importDepth,
+&nbsp;                                                          Collection&lt;String&gt; parentIdMetadata)
+&nbsp;            throws IOException, ProcessGenerationException, XPathExpressionException, ParserConfigurationException,
+&nbsp;            NoRecordFoundException, UnsupportedFormatException, URISyntaxException, SAXException, DAOException,
+&nbsp;            TransformerException, InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="fc">&nbsp;        importModule = initializeImportModule();</b>
+<b class="fc">&nbsp;        processGenerator = new ProcessGenerator();</b>
+<b class="fc">&nbsp;        LinkedList&lt;TempProcess&gt; processes = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        String parentMetadataKey = &quot;&quot;;</b>
+<b class="fc">&nbsp;        if (parentIdMetadata.isEmpty()) {</b>
+<b class="nc">&nbsp;            if (importDepth &gt; 1) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;newProcess.catalogueSearch.parentIDMetadataMissing&quot;);</b>
+<b class="nc">&nbsp;                importDepth = 1;</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            parentMetadataKey = parentIdMetadata.toArray()[0].toString();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String parentID = importProcessAndReturnParentID(recordId, processes, importConfiguration, projectId,</b>
+&nbsp;                templateId, false, parentMetadataKey);
+<b class="fc">&nbsp;        Template template = ServiceManager.getTemplateService().getById(templateId);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(template.getRuleset())) {</b>
+<b class="nc">&nbsp;            throw new ProcessGenerationException(&quot;Ruleset of template &quot; + template.getId() + &quot; is null!&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        importParents(recordId, importConfiguration, projectId, templateId, importDepth, processes, parentID, template,</b>
+&nbsp;                parentMetadataKey);
+&nbsp;
+<b class="fc">&nbsp;        ListIterator&lt;TempProcess&gt; processesIterator = processes.listIterator();</b>
+<b class="fc">&nbsp;        while (processesIterator.hasNext()) {</b>
+<b class="fc">&nbsp;            int fromIndex = processesIterator.nextIndex() + 1;</b>
+<b class="fc">&nbsp;            List&lt;TempProcess&gt; parents = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;            if (fromIndex &lt; processes.size()) {</b>
+<b class="fc">&nbsp;                parents = processes.subList(fromIndex, processes.size());</b>
+&nbsp;            }
+<b class="fc">&nbsp;            ProcessHelper.generateAtstslFields(processesIterator.next(), parents, ACQUISITION_STAGE_CREATE, false);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void importParents(String recordId, ImportConfiguration importConfiguration, int projectId, int templateId,
+&nbsp;                               int importDepth, LinkedList&lt;TempProcess&gt; processes, String parentID, Template template,
+&nbsp;                               String parentIdMetadata)
+&nbsp;            throws ProcessGenerationException, IOException, XPathExpressionException, ParserConfigurationException,
+&nbsp;            NoRecordFoundException, UnsupportedFormatException, URISyntaxException, SAXException, DAOException,
+&nbsp;            InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="fc">&nbsp;        int level = 1;</b>
+<b class="fc">&nbsp;        this.parentTempProcess = null;</b>
+<b class="fc">&nbsp;        while (Objects.nonNull(parentID) &amp;&amp; level &lt; importDepth) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                Process parentProcess = loadParentProcess(template.getRuleset(), projectId, parentID);</b>
+<b class="fc">&nbsp;                if (Objects.isNull(parentProcess)) {</b>
+<b class="fc">&nbsp;                    if (Objects.nonNull(importConfiguration.getParentMappingFile())) {</b>
+<b class="nc">&nbsp;                        parentID = importProcessAndReturnParentID(recordId, processes, importConfiguration, projectId,</b>
+&nbsp;                                templateId, true, parentIdMetadata);
+&nbsp;                    } else {
+<b class="fc">&nbsp;                        parentID = importProcessAndReturnParentID(parentID, processes, importConfiguration, projectId,</b>
+&nbsp;                                templateId, false, parentIdMetadata);
+&nbsp;                    }
+<b class="fc">&nbsp;                    level++;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    logger.info(&quot;Process with ID &#39;{}&#39; already in database. Stop hierarchical import.&quot;, parentID);</b>
+<b class="nc">&nbsp;                    URI workpieceUri = ServiceManager.getProcessService().getMetadataFileUri(parentProcess);</b>
+<b class="nc">&nbsp;                    Workpiece parentWorkpiece = ServiceManager.getMetsService().loadWorkpiece(workpieceUri);</b>
+<b class="nc">&nbsp;                    this.parentTempProcess = new TempProcess(parentProcess, parentWorkpiece);</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (SAXParseException | DAOException | TransformerException e) {</b>
+&nbsp;                // this happens for example if a document is part of a &quot;Virtueller Bestand&quot; in
+&nbsp;                // Kalliope for which a
+&nbsp;                // proper &quot;record&quot; is not returned from its SRU interface
+<b class="nc">&nbsp;                logger.error(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;                break;</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;        // always try to find a parent for last imported process (e.g. level ==
+&nbsp;        // importDepth) in the database!
+<b class="fc">&nbsp;        if (Objects.nonNull(parentID) &amp;&amp; level == importDepth) {</b>
+<b class="nc">&nbsp;            checkForParent(parentID, template.getRuleset(), projectId);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if there already is a parent process in Database.
+&nbsp;     */
+&nbsp;    public void checkForParent(String parentID, Ruleset ruleset, int projectID)
+&nbsp;            throws DAOException, IOException, ProcessGenerationException {
+<b class="nc">&nbsp;        if (Objects.isNull(parentID)) {</b>
+<b class="nc">&nbsp;            this.parentTempProcess = null;</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;        Process parentProcess = loadParentProcess(ruleset, projectID, parentID);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(parentProcess)) {</b>
+<b class="nc">&nbsp;            logger.info(&quot;Linking last imported process to parent process with ID {} in database!&quot;, parentID);</b>
+<b class="nc">&nbsp;            URI workpieceUri = ServiceManager.getProcessService().getMetadataFileUri(parentProcess);</b>
+<b class="nc">&nbsp;            Workpiece parentWorkpiece = ServiceManager.getMetsService().loadWorkpiece(workpieceUri);</b>
+<b class="nc">&nbsp;            this.parentTempProcess = new TempProcess(parentProcess, parentWorkpiece);</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;        this.parentTempProcess = null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;DataRecord&gt; searchChildRecords(ImportConfiguration config, String parentId, int numberOfRows) {
+<b class="nc">&nbsp;        SearchField parenIDSearchField = config.getParentSearchField();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(parenIDSearchField)) {</b>
+<b class="nc">&nbsp;            throw new ConfigException(&quot;Unable to find parent ID search field for catalog &#39;&quot; + config.getTitle() + &quot;&#39;!&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return importModule.getMultipleFullRecordsFromQuery(createDataImportFromImportConfiguration(config),</b>
+<b class="nc">&nbsp;                parenIDSearchField.getLabel(), parentId, numberOfRows);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get number of child records of record with ID &#39;parentId&#39; from catalog &#39;opac&#39;.
+&nbsp;     *
+&nbsp;     * @param importConfiguration ImportConfiguration to use
+&nbsp;     * @param parentId ID of the parent record
+&nbsp;     * @return number of child records
+&nbsp;     */
+&nbsp;    public int getNumberOfChildren(ImportConfiguration importConfiguration, String parentId) {
+<b class="nc">&nbsp;        SearchField parentIDSearchField = importConfiguration.getParentSearchField();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(parentIDSearchField)) {</b>
+<b class="nc">&nbsp;            throw new ConfigException(&quot;Unable to find parent ID search field for catalog &#39;&quot;</b>
+<b class="nc">&nbsp;                    + importConfiguration.getTitle() + &quot;&#39;!&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        SearchResult searchResult = performSearch(parentIDSearchField.getLabel(), parentId, importConfiguration, 0, 0);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(searchResult)) {</b>
+<b class="nc">&nbsp;            return searchResult.getNumberOfHits();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Error retrieving number of children for record with ID &quot; + parentId + &quot; from OPAC &quot;</b>
+<b class="nc">&nbsp;                    + importConfiguration.getTitle() + &quot;!&quot;);</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Search child records of record with ID &#39;elementID&#39; from catalog &#39;opac&#39;, transform them into a list of
+&nbsp;     * &#39;TempProcess&#39; and return the list.
+&nbsp;     *
+&nbsp;     * @param importConfiguration ImportConfiguration to use
+&nbsp;     * @param elementID ID of record for which child records are retrieved
+&nbsp;     * @param projectId ID of project for which processes are created
+&nbsp;     * @param templateId ID of template with which processes are created
+&nbsp;     * @param rows number of child records to retrieve from catalog
+&nbsp;     * @param parentProcesses parent processes of the children
+&nbsp;     * @return list of TempProcesses containing the retrieved child records.
+&nbsp;     */
+&nbsp;    public LinkedList&lt;TempProcess&gt; getChildProcesses(ImportConfiguration importConfiguration, String elementID,
+&nbsp;                                                     int projectId, int templateId, int rows, List&lt;TempProcess&gt; parentProcesses)
+&nbsp;            throws SAXException, UnsupportedFormatException, URISyntaxException, ParserConfigurationException,
+&nbsp;            NoRecordFoundException, IOException, ProcessGenerationException, TransformerException,
+&nbsp;            InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="nc">&nbsp;        importModule = initializeImportModule();</b>
+<b class="nc">&nbsp;        List&lt;DataRecord&gt; childRecords = searchChildRecords(importConfiguration, elementID, rows);</b>
+<b class="nc">&nbsp;        LinkedList&lt;TempProcess&gt; childProcesses = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (!childRecords.isEmpty()) {</b>
+<b class="nc">&nbsp;            SchemaConverterInterface converter = getSchemaConverter(childRecords.get(0));</b>
+<b class="nc">&nbsp;            List&lt;File&gt; mappingFiles = getMappingFiles(importConfiguration);</b>
+<b class="nc">&nbsp;            for (DataRecord childRecord : childRecords) {</b>
+<b class="nc">&nbsp;                DataRecord internalRecord = converter.convert(childRecord, MetadataFormat.KITODO, FileFormat.XML, mappingFiles);</b>
+<b class="nc">&nbsp;                Document childDocument = XMLUtils.parseXMLString((String)internalRecord.getOriginalData());</b>
+<b class="nc">&nbsp;                TempProcess tempProcess = createTempProcessFromDocument(importConfiguration, childDocument,</b>
+&nbsp;                        templateId, projectId);
+<b class="nc">&nbsp;                ProcessHelper.generateAtstslFields(tempProcess, parentProcesses, ACQUISITION_STAGE_CREATE, false);</b>
+<b class="nc">&nbsp;                childProcesses.add(tempProcess);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+&nbsp;            // TODO: sort child processes (by what? catalog ID? Signature?)
+<b class="nc">&nbsp;            return childProcesses;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new NoRecordFoundException(&quot;No child records found for data record with ID &#39;&quot; + elementID</b>
+<b class="nc">&nbsp;                    + &quot;&#39; in OPAC &#39;&quot; + importConfiguration.getTitle() + &quot;&#39;!&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private Document importDocument(ImportConfiguration importConfiguration, String identifier,
+&nbsp;                                    boolean extractExemplars, boolean isParentInRecord)
+&nbsp;            throws NoRecordFoundException, UnsupportedFormatException, URISyntaxException, IOException,
+&nbsp;            XPathExpressionException, ParserConfigurationException, SAXException, ProcessGenerationException {
+&nbsp;        // ################ IMPORT #################
+<b class="fc">&nbsp;        importModule = initializeImportModule();</b>
+<b class="fc">&nbsp;        DataRecord dataRecord = importModule.getFullRecordById(</b>
+<b class="fc">&nbsp;                createDataImportFromImportConfiguration(importConfiguration),</b>
+<b class="fc">&nbsp;                getSearchTermWithDelimiter(identifier, importConfiguration));</b>
+<b class="fc">&nbsp;        if (extractExemplars) {</b>
+<b class="fc">&nbsp;            exemplarRecords = extractExemplarRecords(dataRecord, importConfiguration);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return convertDataRecordToInternal(dataRecord, importConfiguration, isParentInRecord);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts a given dataRecord to an internal document.
+&nbsp;     * @param dataRecord the dataRecord to convert.
+&nbsp;     * @param importConfiguration the import configuration to use
+&nbsp;     * @param isParentInRecord if parentRecord is in childRecord
+&nbsp;     * @return the converted Document
+&nbsp;     */
+&nbsp;    public Document convertDataRecordToInternal(DataRecord dataRecord, ImportConfiguration importConfiguration,
+&nbsp;                                                boolean isParentInRecord)
+&nbsp;            throws UnsupportedFormatException, URISyntaxException, IOException, ParserConfigurationException,
+&nbsp;            SAXException, XPathExpressionException, ProcessGenerationException {
+<b class="fc">&nbsp;        SchemaConverterInterface converter = getSchemaConverter(dataRecord);</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;File&gt; mappingFiles = getMappingFiles(importConfiguration, isParentInRecord);</b>
+&nbsp;
+&nbsp;        // transform dataRecord to Kitodo internal format using appropriate SchemaConverter!
+<b class="fc">&nbsp;        File debugFolder = ConfigCore.getKitodoDebugDirectory();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(debugFolder)) {</b>
+<b class="nc">&nbsp;            FileUtils.writeStringToFile(new File(debugFolder, &quot;catalogRecord.xml&quot;),</b>
+<b class="nc">&nbsp;                    (String) dataRecord.getOriginalData(), StandardCharsets.UTF_8);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        DataRecord internalRecord = converter.convert(dataRecord, MetadataFormat.KITODO, FileFormat.XML, mappingFiles);</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(debugFolder)) {</b>
+<b class="nc">&nbsp;            FileUtils.writeStringToFile(new File(debugFolder, &quot;internalRecord.xml&quot;),</b>
+<b class="nc">&nbsp;                    (String) internalRecord.getOriginalData(), StandardCharsets.UTF_8);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (!(internalRecord.getOriginalData() instanceof String)) {</b>
+<b class="nc">&nbsp;            throw new UnsupportedFormatException(&quot;Original metadata of internal record has to be an XML String, &#39;&quot;</b>
+<b class="nc">&nbsp;                    + internalRecord.getOriginalData().getClass().getName() + &quot;&#39; found!&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Document resultDocument = null;</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            resultDocument = XMLUtils.parseXMLString((String) internalRecord.getOriginalData());</b>
+<b class="fc">&nbsp;        } catch (SAXParseException e) {</b>
+<b class="fc">&nbsp;            String interfaceName = importConfiguration.getInterfaceType();</b>
+<b class="fc">&nbsp;            if (Arrays.stream(SearchInterfaceType.values()).anyMatch(sit -&gt; sit.name().equals(interfaceName))) {</b>
+<b class="fc">&nbsp;                SearchInterfaceType searchInterfaceType = SearchInterfaceType.valueOf(interfaceName);</b>
+<b class="fc">&nbsp;                String errorMessageXpath = searchInterfaceType.getErrorMessageXpath();</b>
+<b class="fc">&nbsp;                if (Objects.nonNull(errorMessageXpath) &amp;&amp; dataRecord.getOriginalData() instanceof String) {</b>
+<b class="nc">&nbsp;                    Element originalDocument = XMLUtils.parseXMLString((String) dataRecord.getOriginalData()).getDocumentElement();</b>
+<b class="nc">&nbsp;                    String errorMessage = XPathFactory.newInstance().newXPath().evaluate(errorMessageXpath, originalDocument);</b>
+<b class="nc">&nbsp;                    if (StringUtils.isNotBlank(errorMessage)) {</b>
+<b class="nc">&nbsp;                        errorMessage = interfaceName.toUpperCase() + &quot; error: &#39;&quot; + errorMessage + &quot;&#39;&quot;;</b>
+<b class="nc">&nbsp;                        throw new CatalogException(errorMessage);</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="fc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                throw e;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (Objects.isNull(resultDocument)) {</b>
+<b class="fc">&nbsp;            throw new ProcessGenerationException(Helper.getTranslation(&quot;importError.emptyDocument&quot;));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return resultDocument;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private NodeList extractMetadataNodeList(Document document) throws ProcessGenerationException {
+<b class="fc">&nbsp;        NodeList kitodoNodes = document.getElementsByTagNameNS(KITODO_NAMESPACE, KITODO_STRING);</b>
+<b class="fc">&nbsp;        if (kitodoNodes.getLength() != 1) {</b>
+<b class="nc">&nbsp;            throw new ProcessGenerationException(&quot;Number of &#39;kitodo&#39; nodes unequal to &#39;1&#39; =&gt; unable to generate process!&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Node kitodoNode = kitodoNodes.item(0);</b>
+<b class="fc">&nbsp;        return kitodoNode.getChildNodes();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;File&gt; getMappingFiles(ImportConfiguration importConfiguration, boolean forParentInRecord)
+&nbsp;            throws URISyntaxException {
+<b class="fc">&nbsp;        List&lt;File&gt; mappingFiles = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;        List&lt;String&gt; mappingFileNames;
+&nbsp;        try {
+<b class="fc">&nbsp;            if (forParentInRecord) {</b>
+<b class="nc">&nbsp;                mappingFileNames = Collections.singletonList(importConfiguration.getParentMappingFile().getFile());</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                mappingFileNames = importConfiguration.getMappingFiles().stream().map(MappingFile::getFile)</b>
+<b class="fc">&nbsp;                        .collect(Collectors.toList());</b>
+&nbsp;            }
+<b class="fc">&nbsp;            for (String mappingFileName : mappingFileNames) {</b>
+<b class="fc">&nbsp;                URI xsltFile = Paths.get(ConfigCore.getParameter(ParameterCore.DIR_XSLT)).toUri()</b>
+<b class="fc">&nbsp;                        .resolve(new URI(mappingFileName.trim()));</b>
+<b class="fc">&nbsp;                mappingFiles.add(ServiceManager.getFileService().getFile(xsltFile));</b>
+<b class="fc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return mappingFiles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;File&gt; getMappingFiles(ImportConfiguration importConfiguration) throws URISyntaxException {
+<b class="nc">&nbsp;        return getMappingFiles(importConfiguration, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the value of a specific processDetail in the processDetails.
+&nbsp;     *
+&nbsp;     * @param processDetail
+&nbsp;     *            as ProcessDetail
+&nbsp;     * @return the value as a java.lang.String
+&nbsp;     */
+&nbsp;    public static String getProcessDetailValue(ProcessDetail processDetail) {
+<b class="fc">&nbsp;        String value = &quot;&quot;;</b>
+<b class="fc">&nbsp;        if (processDetail instanceof ProcessTextMetadata) {</b>
+<b class="fc">&nbsp;            return ((ProcessTextMetadata) processDetail).getValue();</b>
+<b class="fc">&nbsp;        } else if (processDetail instanceof ProcessBooleanMetadata) {</b>
+<b class="nc">&nbsp;            return String.valueOf(((ProcessBooleanMetadata) processDetail).isActive());</b>
+<b class="fc">&nbsp;        } else if (processDetail instanceof ProcessSelectMetadata) {</b>
+<b class="fc">&nbsp;            return String.join(&quot;, &quot;, ((ProcessSelectMetadata) processDetail).getSelectedItems());</b>
+<b class="fc">&nbsp;        } else if (processDetail instanceof ProcessFieldedMetadata &amp;&amp; processDetail.getMetadataID().equals(PERSON)) {</b>
+<b class="fc">&nbsp;            value = getCreator(((ProcessFieldedMetadata) processDetail).getRows());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set the value of a specific process detail in processDetails.
+&nbsp;     * @param processDetail the specific process detail whose value should be set to the param value
+&nbsp;     *      as ProcessDetail
+&nbsp;     * @param value
+&nbsp;     *       as a java.lang.String
+&nbsp;     */
+&nbsp;    public static void setProcessDetailValue(ProcessDetail processDetail, String value) {
+<b class="fc">&nbsp;        if (processDetail instanceof ProcessTextMetadata) {</b>
+&nbsp;            // TODO: incorporate &quot;initstart&quot; and &quot;initend&quot; values from kitodo_projects.xml like AddtionalField!
+<b class="fc">&nbsp;            ((ProcessTextMetadata) processDetail).setValue(value);</b>
+<b class="fc">&nbsp;        } else if (processDetail instanceof ProcessBooleanMetadata) {</b>
+<b class="nc">&nbsp;            ((ProcessBooleanMetadata) processDetail).setActive(Boolean.parseBoolean(value));</b>
+<b class="fc">&nbsp;        } else if (processDetail instanceof ProcessSelectMetadata) {</b>
+<b class="fc">&nbsp;            ((ProcessSelectMetadata) processDetail).setSelectedItem(value);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all creators names.
+&nbsp;     * @param processDetailsList the list of elements in processDetails
+&nbsp;     *      as a list of processDetail
+&nbsp;     * @return all creators names as a String
+&nbsp;     */
+&nbsp;    public static String getListOfCreators(List&lt;ProcessDetail&gt; processDetailsList) {
+<b class="fc">&nbsp;        String listofAuthors = &quot;&quot;;</b>
+<b class="fc">&nbsp;        for (ProcessDetail detail : processDetailsList) {</b>
+<b class="fc">&nbsp;            if (detail instanceof ProcessFieldedMetadata</b>
+<b class="fc">&nbsp;                    &amp;&amp; PERSON.equals(detail.getMetadataID())) {</b>
+<b class="fc">&nbsp;                ProcessFieldedMetadata tableRow = (ProcessFieldedMetadata) detail;</b>
+<b class="fc">&nbsp;                for (ProcessDetail detailsTableRow : tableRow.getRows()) {</b>
+<b class="fc">&nbsp;                    if (ROLE.equals(detailsTableRow.getMetadataID())</b>
+<b class="fc">&nbsp;                            &amp;&amp; AUTHOR.equals(getProcessDetailValue(detailsTableRow))) {</b>
+<b class="fc">&nbsp;                        listofAuthors = listofAuthors.concat(getCreator(tableRow.getRows()));</b>
+<b class="fc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return listofAuthors;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getCreator(List&lt;ProcessDetail&gt; processDetailList) {
+<b class="fc">&nbsp;        String author = &quot;&quot;;</b>
+<b class="fc">&nbsp;        for (ProcessDetail detail : processDetailList) {</b>
+<b class="fc">&nbsp;            String detailMetadataID = detail.getMetadataID();</b>
+<b class="fc">&nbsp;            String detailValue = getProcessDetailValue(detail);</b>
+<b class="fc">&nbsp;            if ((FIRST_NAME.equals(detailMetadataID)</b>
+<b class="fc">&nbsp;                    || LAST_NAME.equals(detailMetadataID))</b>
+<b class="fc">&nbsp;                    &amp;&amp; !StringUtils.isBlank(detailValue)) {</b>
+<b class="fc">&nbsp;                author = author.concat(detailValue);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return author;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prepare.
+&nbsp;     * @param projectTitle
+&nbsp;     *      title of the project
+&nbsp;     * @throws IOException when trying to create a &#39;ConfigProject&#39; instance.
+&nbsp;     * @throws DoctypeMissingException when trying to load TifDefinition fails
+&nbsp;     */
+&nbsp;    public void prepare(String projectTitle) throws IOException, DoctypeMissingException {
+<b class="nc">&nbsp;        ConfigProject configProject = new ConfigProject(projectTitle);</b>
+<b class="nc">&nbsp;        usingTemplates = configProject.isUseTemplates();</b>
+<b class="nc">&nbsp;        tiffDefinition = configProject.getTifDefinition();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get useTemplate.
+&nbsp;     *
+&nbsp;     * @return value of useTemplate
+&nbsp;     */
+&nbsp;    public boolean isUsingTemplates() {
+<b class="nc">&nbsp;        return usingTemplates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set useTemplate.
+&nbsp;     *
+&nbsp;     * @param usingTemplates as boolean
+&nbsp;     */
+&nbsp;    public void setUsingTemplates(boolean usingTemplates) {
+<b class="nc">&nbsp;        this.usingTemplates = usingTemplates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get tiffDefinition.
+&nbsp;     *
+&nbsp;     * @return value of tifDefinition
+&nbsp;     */
+&nbsp;    public String getTiffDefinition() {
+<b class="fc">&nbsp;        return tiffDefinition;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get exemplarRecords.
+&nbsp;     *
+&nbsp;     * @return value of exemplarRecords
+&nbsp;     */
+&nbsp;    public LinkedList&lt;ExemplarRecord&gt; getExemplarRecords() {
+<b class="nc">&nbsp;        return exemplarRecords;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selected exemplar record data.
+&nbsp;     * @param exemplarRecord
+&nbsp;     *          selected exemplar record
+&nbsp;     * @param importConfiguration
+&nbsp;     *          ImportConfiguration
+&nbsp;     * @param metadata
+&nbsp;     *          list of metadata fields
+&nbsp;     * @throws ParameterNotFoundException if a parameter required for exemplar record extraction is missing
+&nbsp;     */
+&nbsp;    public static void setSelectedExemplarRecord(ExemplarRecord exemplarRecord, ImportConfiguration importConfiguration,
+&nbsp;                                                 List&lt;ProcessDetail&gt; metadata)  throws ParameterNotFoundException {
+<b class="nc">&nbsp;        String ownerMetadataName = importConfiguration.getItemFieldOwnerMetadata();</b>
+<b class="nc">&nbsp;        String signatureMetadataName = importConfiguration.getItemFieldSignatureMetadata();</b>
+<b class="nc">&nbsp;        if (StringUtils.isBlank(ownerMetadataName)) {</b>
+<b class="nc">&nbsp;            throw new ParameterNotFoundException(&quot;ownerMetadata&quot;);</b>
+<b class="nc">&nbsp;        } else if (StringUtils.isBlank(signatureMetadataName)) {</b>
+<b class="nc">&nbsp;            throw new ParameterNotFoundException(&quot;signatureMetadata&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (ProcessDetail processDetail : metadata) {</b>
+<b class="nc">&nbsp;            if (ownerMetadataName.equals(processDetail.getMetadataID())) {</b>
+<b class="nc">&nbsp;                ImportService.setProcessDetailValue(processDetail, exemplarRecord.getOwner());</b>
+<b class="nc">&nbsp;            } else if (signatureMetadataName.equals(processDetail.getMetadataID())) {</b>
+<b class="nc">&nbsp;                ImportService.setProcessDetailValue(processDetail, exemplarRecord.getSignature());</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get parentTempProcess.
+&nbsp;     *
+&nbsp;     * @return value of parentTempProcess
+&nbsp;     */
+&nbsp;    public TempProcess getParentTempProcess() {
+<b class="nc">&nbsp;        return parentTempProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Process loadParentProcess(Ruleset ruleset, int projectId, String parentId)
+&nbsp;            throws ProcessGenerationException, DAOException, IOException {
+&nbsp;
+<b class="fc">&nbsp;        Process parentProcess = null;</b>
+<b class="fc">&nbsp;        for (String identifierMetadata : getFunctionalMetadata(ruleset, FunctionalMetadata.RECORD_IDENTIFIER)) {</b>
+<b class="fc">&nbsp;            if (Objects.isNull(parentProcess)) {</b>
+<b class="fc">&nbsp;                HashMap&lt;String, String&gt; parentIDMetadata = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;                parentIDMetadata.put(identifierMetadata, parentId);</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    for (ProcessDTO processDTO : ServiceManager.getProcessService().findByMetadata(parentIDMetadata, true)) {</b>
+<b class="nc">&nbsp;                        Process process = ServiceManager.getProcessService().getById(processDTO.getId());</b>
+<b class="nc">&nbsp;                        if (Objects.isNull(process.getRuleset()) || Objects.isNull(process.getRuleset().getId())) {</b>
+<b class="nc">&nbsp;                            throw new ProcessGenerationException(&quot;Ruleset or ruleset ID of potential parent process &quot;</b>
+<b class="nc">&nbsp;                                    + process.getId() + &quot; is null!&quot;);</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                        if (process.getProject().getId() == projectId</b>
+<b class="nc">&nbsp;                                &amp;&amp; process.getRuleset().getId().equals(ruleset.getId())) {</b>
+<b class="nc">&nbsp;                            parentProcess = process;</b>
+<b class="nc">&nbsp;                            break;</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                    }</b>
+<b class="nc">&nbsp;                } catch (DataException e) {</b>
+<b class="nc">&nbsp;                    logger.error(e.getLocalizedMessage());</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return parentProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the &quot;parentIdSearchField&quot; is configured in the current ImportConfiguration.
+&nbsp;     *
+&nbsp;     * @param importConfiguration name of the OPAC to check
+&nbsp;     * @return whether &quot;parentIdSearchField&quot; is configured for current ImportConfiguration
+&nbsp;     * @throws ConfigException thrown if configuration for OPAC &#39;catalogName&#39; could not be found
+&nbsp;     */
+&nbsp;    public boolean isParentIdSearchFieldConfigured(ImportConfiguration importConfiguration) throws ConfigException {
+<b class="nc">&nbsp;        return Objects.nonNull(importConfiguration.getParentSearchField());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensure all processes in given list &#39;tempProcesses&#39; have a non empty title.
+&nbsp;     *
+&nbsp;     * @param tempProcesses list of TempProcesses to be checked
+&nbsp;     * @return whether a title was changed or not
+&nbsp;     * @throws IOException if the meta.xml file of a process could not be loaded
+&nbsp;     */
+&nbsp;    public static boolean ensureNonEmptyTitles(LinkedList&lt;TempProcess&gt; tempProcesses) throws IOException {
+<b class="fc">&nbsp;        boolean changedTitle = false;</b>
+<b class="fc">&nbsp;        for (TempProcess tempProcess : tempProcesses) {</b>
+<b class="fc">&nbsp;            Process process = tempProcess.getProcess();</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(process) &amp;&amp; StringUtils.isEmpty(process.getTitle())) {</b>
+&nbsp;                // FIXME:
+&nbsp;                //  if metadataFileUri is null or no meta.xml can be found, the tempProcess has not
+&nbsp;                //  yet been saved to disk and contains the workpiece directly, instead!
+<b class="nc">&nbsp;                URI metadataFileUri = ServiceManager.getProcessService().getMetadataFileUri(process);</b>
+<b class="nc">&nbsp;                Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(metadataFileUri);</b>
+<b class="nc">&nbsp;                Collection&lt;Metadata&gt; metadata = workpiece.getLogicalStructure().getMetadata();</b>
+<b class="nc">&nbsp;                String processTitle = &quot;[&quot; + Helper.getTranslation(&quot;process&quot;) + &quot; &quot; + process.getId() + &quot;]&quot;;</b>
+<b class="nc">&nbsp;                for (Metadata metadatum : metadata) {</b>
+<b class="nc">&nbsp;                    if (CATALOG_IDENTIFIER.equals(metadatum.getKey())) {</b>
+<b class="nc">&nbsp;                        processTitle = ((MetadataEntry) metadatum).getValue();</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                process.setTitle(processTitle);</b>
+<b class="nc">&nbsp;                changedTitle = true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return changedTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Process list of child processes.
+&nbsp;     *
+&nbsp;     * @param mainProcess main process to which list of child processes are attached
+&nbsp;     * @param childProcesses list of child processes that are attached to the main process
+&nbsp;     * @throws DataException thrown if saving a process fails
+&nbsp;     * @throws InvalidMetadataValueException thrown if process workpiece contains invalid metadata
+&nbsp;     * @throws NoSuchMetadataFieldException thrown if process workpiece contains undefined metadata
+&nbsp;     * @throws ProcessGenerationException thrown if process title cannot be created
+&nbsp;     */
+&nbsp;    public static void processProcessChildren(Process mainProcess, LinkedList&lt;TempProcess&gt; childProcesses,
+&nbsp;                                              RulesetManagementInterface managementInterface, String acquisitionStage,
+&nbsp;                                              List&lt;Locale.LanguageRange&gt; priorityList)
+&nbsp;            throws DataException, InvalidMetadataValueException, NoSuchMetadataFieldException,
+&nbsp;            ProcessGenerationException, IOException {
+<b class="fc">&nbsp;        for (TempProcess tempProcess : childProcesses) {</b>
+<b class="nc">&nbsp;            if (Objects.isNull(tempProcess) || Objects.isNull(tempProcess.getProcess())) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;Child process {} is null =&gt; Skip!&quot;, childProcesses.indexOf(tempProcess) + 1);</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            processTempProcess(tempProcess, managementInterface, acquisitionStage, priorityList, null);</b>
+<b class="nc">&nbsp;            Process childProcess = tempProcess.getProcess();</b>
+<b class="nc">&nbsp;            ServiceManager.getProcessService().save(childProcess, true);</b>
+<b class="nc">&nbsp;            ProcessService.setParentRelations(mainProcess, childProcess);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add workpiece and template properties to given Process &#39;process&#39;.
+&nbsp;     *
+&nbsp;     * @param tempProcess
+&nbsp;     *         TempProcess that will be processed
+&nbsp;     * @param template
+&nbsp;     *         Template of process
+&nbsp;     * @param processDetails
+&nbsp;     *         metadata of process
+&nbsp;     * @param docType
+&nbsp;     *         String containing document type
+&nbsp;     * @param imageDescription
+&nbsp;     *         String containing image description
+&nbsp;     */
+&nbsp;    public static void addProperties(TempProcess tempProcess, Template template, List&lt;ProcessDetail&gt; processDetails,
+&nbsp;            String docType, String imageDescription) {
+<b class="fc">&nbsp;        Process process = tempProcess.getProcess();</b>
+<b class="fc">&nbsp;        addMetadataProperties(processDetails, process);</b>
+<b class="fc">&nbsp;        ProcessGenerator.addPropertyForWorkpiece(process, &quot;TSL/ATS&quot;, tempProcess.getAtstsl());</b>
+<b class="fc">&nbsp;        ProcessGenerator.addPropertyForWorkpiece(process, &quot;DocType&quot;, docType);</b>
+<b class="fc">&nbsp;        ProcessGenerator.addPropertyForWorkpiece(process, &quot;TifHeaderImagedescription&quot;, imageDescription);</b>
+<b class="fc">&nbsp;        ProcessGenerator.addPropertyForWorkpiece(process, &quot;TifHeaderDocumentname&quot;, process.getTitle());</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(template)) {</b>
+<b class="fc">&nbsp;            ProcessGenerator.addPropertyForProcess(process, &quot;Template&quot;, template.getTitle());</b>
+<b class="fc">&nbsp;            ProcessGenerator.addPropertyForProcess(process, &quot;TemplateID&quot;, String.valueOf(template.getId()));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void addMetadataProperties(List&lt;ProcessDetail&gt; processDetailList, Process process) {
+&nbsp;        try {
+<b class="fc">&nbsp;            for (ProcessDetail processDetail : processDetailList) {</b>
+<b class="fc">&nbsp;                Collection&lt;Metadata&gt; processMetadata = processDetail.getMetadataWithFilledValues();</b>
+<b class="fc">&nbsp;                if (!processMetadata.isEmpty() &amp;&amp; processMetadata.toArray()[0] instanceof Metadata) {</b>
+<b class="fc">&nbsp;                    String metadataValue = ImportService.getProcessDetailValue(processDetail);</b>
+<b class="fc">&nbsp;                    Metadata metadata = (Metadata) processMetadata.toArray()[0];</b>
+<b class="fc">&nbsp;                    if (Objects.nonNull(metadata.getDomain())) {</b>
+<b class="fc">&nbsp;                        switch (metadata.getDomain()) {</b>
+&nbsp;                            case DMD_SEC:
+<b class="fc">&nbsp;                                ProcessGenerator.addPropertyForWorkpiece(process, processDetail.getLabel(), metadataValue);</b>
+<b class="fc">&nbsp;                                break;</b>
+&nbsp;                            case SOURCE_MD:
+<b class="fc">&nbsp;                                ProcessGenerator.addPropertyForTemplate(process, processDetail.getLabel(), metadataValue);</b>
+<b class="fc">&nbsp;                                break;</b>
+&nbsp;                            case TECH_MD:
+<b class="nc">&nbsp;                                ProcessGenerator.addPropertyForProcess(process, processDetail.getLabel(), metadataValue);</b>
+<b class="nc">&nbsp;                                break;</b>
+&nbsp;                            default:
+<b class="nc">&nbsp;                                logger.info(&quot;Don&#39;t save metadata &#39;{}&#39; with domain &#39;{}&#39; to property.&quot;,</b>
+<b class="nc">&nbsp;                                    processDetail.getMetadataID(), metadata.getDomain());</b>
+<b class="nc">&nbsp;                                break;</b>
+&nbsp;                        }
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        ProcessGenerator.addPropertyForWorkpiece(process, processDetail.getLabel(), metadataValue);</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getLocalizedMessage());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update tasks of given Process &#39;process&#39;.
+&nbsp;     *
+&nbsp;     * @param process Process whose tasks are updated
+&nbsp;     */
+&nbsp;    public static void updateTasks(Process process) {
+<b class="fc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="fc">&nbsp;            task.setProcessingTime(process.getCreationDate());</b>
+<b class="fc">&nbsp;            task.setEditType(TaskEditType.AUTOMATIC);</b>
+<b class="fc">&nbsp;            if (task.getProcessingStatus() == TaskStatus.DONE) {</b>
+<b class="fc">&nbsp;                task.setProcessingBegin(process.getCreationDate());</b>
+<b class="fc">&nbsp;                Date date = new Date();</b>
+<b class="fc">&nbsp;                task.setProcessingTime(date);</b>
+<b class="fc">&nbsp;                task.setProcessingEnd(date);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Process given TempProcess &#39;tempProcess&#39; by creating the metadata, doc type and properties for the process and
+&nbsp;     * updating the process&#39; tasks.
+&nbsp;     *
+&nbsp;     * @param tempProcess TempProcess that will be processed
+&nbsp;     * @param managementInterface RulesetManagementInterface to create metadata and tiff header
+&nbsp;     * @param acquisitionStage String containing the acquisition stage
+&nbsp;     * @param priorityList List of LanguageRange objects
+&nbsp;     * @throws InvalidMetadataValueException thrown if the process contains invalid metadata
+&nbsp;     * @throws NoSuchMetadataFieldException thrown if the process contains undefined metadata
+&nbsp;     * @throws ProcessGenerationException thrown if process title could not be generated
+&nbsp;     */
+&nbsp;    public static void processTempProcess(TempProcess tempProcess, RulesetManagementInterface managementInterface,
+&nbsp;            String acquisitionStage, List&lt;Locale.LanguageRange&gt; priorityList, TempProcess parentTempProcess)
+&nbsp;            throws InvalidMetadataValueException, NoSuchMetadataFieldException, ProcessGenerationException,
+&nbsp;            IOException {
+&nbsp;
+<b class="fc">&nbsp;        List&lt;ProcessDetail&gt; processDetails = ProcessHelper.transformToProcessDetails(tempProcess, managementInterface,</b>
+&nbsp;                acquisitionStage, priorityList);
+<b class="fc">&nbsp;        String docType = tempProcess.getWorkpiece().getLogicalStructure().getType();</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;TempProcess&gt; parentTempProcesses = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(parentTempProcess)) {</b>
+<b class="nc">&nbsp;            parentTempProcesses.add(parentTempProcess);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        ProcessHelper.generateAtstslFields(tempProcess, processDetails, parentTempProcesses, docType,</b>
+&nbsp;                managementInterface, acquisitionStage, priorityList);
+&nbsp;
+<b class="fc">&nbsp;        if (!ProcessValidator.isProcessTitleCorrect(tempProcess.getProcess().getTitle())) {</b>
+<b class="nc">&nbsp;            throw new ProcessGenerationException(&quot;Unable to create process&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Process process = tempProcess.getProcess();</b>
+<b class="fc">&nbsp;        process.setSortHelperImages(tempProcess.getGuessedImages());</b>
+<b class="fc">&nbsp;        addProperties(tempProcess, tempProcess.getProcess().getTemplate(), processDetails, docType,</b>
+<b class="fc">&nbsp;                tempProcess.getProcess().getTitle());</b>
+<b class="fc">&nbsp;        ProcessService.checkTasks(process, docType);</b>
+<b class="fc">&nbsp;        updateTasks(process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Imports a process and saves it to database.
+&nbsp;     * @param ppn the ppn to import
+&nbsp;     * @param projectId the projectId
+&nbsp;     * @param templateId the templateId
+&nbsp;     * @param importConfiguration the selected import configuration
+&nbsp;     * @param presetMetadata Map containing preset metadata with keys as metadata keys and values as metadata values
+&nbsp;     * @return the importedProcess
+&nbsp;     */
+&nbsp;    public Process importProcess(String ppn, int projectId, int templateId, ImportConfiguration importConfiguration,
+&nbsp;                                 Map&lt;String, String&gt; presetMetadata) throws ImportException {
+<b class="fc">&nbsp;        LinkedList&lt;TempProcess&gt; processList = new LinkedList&lt;&gt;();</b>
+&nbsp;        TempProcess tempProcess;
+&nbsp;        Template template;
+&nbsp;        try {
+<b class="fc">&nbsp;            template = ServiceManager.getTemplateService().getById(templateId);</b>
+<b class="fc">&nbsp;            String parentMetadataKey = &quot;&quot;;</b>
+<b class="fc">&nbsp;            List&lt;String&gt; higherLevelIdentifiers = new ArrayList&lt;&gt;(</b>
+<b class="fc">&nbsp;                    getHigherLevelIdentifierMetadata(template.getRuleset()));</b>
+<b class="fc">&nbsp;            if (!higherLevelIdentifiers.isEmpty()) {</b>
+<b class="nc">&nbsp;                parentMetadataKey = higherLevelIdentifiers.get(0);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            final String parentId = importProcessAndReturnParentID(ppn, processList, importConfiguration, projectId,</b>
+&nbsp;                    templateId, false, parentMetadataKey);
+<b class="fc">&nbsp;            setParentProcess(parentId, projectId, template);</b>
+<b class="fc">&nbsp;            tempProcess = processList.get(0);</b>
+<b class="fc">&nbsp;            String metadataLanguage = ServiceManager.getUserService().getCurrentUser().getMetadataLanguage();</b>
+<b class="fc">&nbsp;            tempProcess.getWorkpiece().getLogicalStructure().getMetadata().addAll(createMetadata(presetMetadata));</b>
+<b class="fc">&nbsp;            processTempProcess(tempProcess, ServiceManager.getRulesetService().openRuleset(template.getRuleset()),</b>
+<b class="fc">&nbsp;                    &quot;create&quot;, Locale.LanguageRange.parse(metadataLanguage.isEmpty() ? &quot;en&quot; : metadataLanguage),</b>
+&nbsp;                    parentTempProcess);
+<b class="fc">&nbsp;            String title = tempProcess.getProcess().getTitle();</b>
+<b class="fc">&nbsp;            String validateRegEx = ConfigCore.getParameterOrDefaultValue(ParameterCore.VALIDATE_PROCESS_TITLE_REGEX);</b>
+<b class="fc">&nbsp;            if (StringUtils.isBlank(title)) {</b>
+<b class="nc">&nbsp;                throw new ProcessGenerationException(Helper.getTranslation(&quot;processTitleEmpty&quot;));</b>
+<b class="fc">&nbsp;            } else if (!title.matches(validateRegEx)) {</b>
+<b class="nc">&nbsp;                throw new ProcessGenerationException(Helper.getTranslation(&quot;processTitleInvalid&quot;, title));</b>
+<b class="fc">&nbsp;            } else if (ServiceManager.getProcessService().findNumberOfProcessesWithTitle(title) &gt; 0) {</b>
+<b class="nc">&nbsp;                throw new ProcessGenerationException(Helper.getTranslation(&quot;processTitleAlreadyInUse&quot;, title));</b>
+&nbsp;            }
+<b class="fc">&nbsp;            ServiceManager.getProcessService().save(tempProcess.getProcess(), true);</b>
+<b class="fc">&nbsp;            URI processBaseUri = ServiceManager.getFileService().createProcessLocation(tempProcess.getProcess());</b>
+<b class="fc">&nbsp;            tempProcess.getProcess().setProcessBaseUri(processBaseUri);</b>
+<b class="fc">&nbsp;            OutputStream out = ServiceManager.getFileService()</b>
+<b class="fc">&nbsp;                    .write(ServiceManager.getProcessService().getMetadataFileUri(tempProcess.getProcess()));</b>
+<b class="fc">&nbsp;            tempProcess.getWorkpiece().setId(tempProcess.getProcess().getId().toString());</b>
+<b class="fc">&nbsp;            ServiceManager.getMetsService().save(tempProcess.getWorkpiece(), out);</b>
+<b class="fc">&nbsp;            linkToParent(tempProcess);</b>
+<b class="fc">&nbsp;            ServiceManager.getProcessService().save(tempProcess.getProcess());</b>
+<b class="fc">&nbsp;        } catch (DAOException | IOException | ProcessGenerationException | XPathExpressionException</b>
+&nbsp;                | ParserConfigurationException | NoRecordFoundException | UnsupportedFormatException
+&nbsp;                | URISyntaxException | SAXException | InvalidMetadataValueException | NoSuchMetadataFieldException
+&nbsp;                | DataException | CommandException | TransformerException | CatalogException e) {
+<b class="fc">&nbsp;            logger.error(e);</b>
+<b class="fc">&nbsp;            throw new ImportException(e.getLocalizedMessage());</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return tempProcess.getProcess();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void linkToParent(TempProcess tempProcess) throws DAOException, ProcessGenerationException, IOException {
+<b class="fc">&nbsp;        if (Objects.nonNull(parentTempProcess) &amp;&amp; Objects.nonNull(parentTempProcess.getProcess())) {</b>
+<b class="nc">&nbsp;            URI parentProcessUri = ServiceManager.getProcessService()</b>
+<b class="nc">&nbsp;                    .getMetadataFileUri(parentTempProcess.getProcess());</b>
+<b class="nc">&nbsp;            Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(parentProcessUri);</b>
+<b class="nc">&nbsp;            if (Objects.isNull(workpiece)) {</b>
+<b class="nc">&nbsp;                throw new ProcessGenerationException(&quot;Workpiece of parent process is null!&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            MetadataEditor.addLink(workpiece.getLogicalStructure(), tempProcess.getProcess().getId());</b>
+<b class="nc">&nbsp;            try (OutputStream outputStream = ServiceManager.getFileService().write(parentProcessUri)) {</b>
+<b class="nc">&nbsp;                ServiceManager.getMetsService().save(workpiece, outputStream);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            ProcessService.setParentRelations(parentTempProcess.getProcess(), tempProcess.getProcess());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setParentProcess(String parentId, int projectId, Template template)
+&nbsp;            throws DAOException, IOException, ProcessGenerationException {
+<b class="fc">&nbsp;        parentTempProcess = null;</b>
+<b class="fc">&nbsp;        if (StringUtils.isNotBlank(parentId)) {</b>
+<b class="nc">&nbsp;            checkForParent(parentId, template.getRuleset(), projectId);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Collection&lt;String&gt; getFunctionalMetadata(Ruleset ruleset, FunctionalMetadata metadata)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;        RulesetManagementInterface rulesetManagement = ServiceManager.getRulesetManagementService()</b>
+<b class="fc">&nbsp;                .getRulesetManagement();</b>
+<b class="fc">&nbsp;        String rulesetDir = ConfigCore.getParameter(ParameterCore.DIR_RULESETS);</b>
+<b class="fc">&nbsp;        String rulesetPath = Paths.get(rulesetDir, ruleset.getFile()).toString();</b>
+<b class="fc">&nbsp;        rulesetManagement.load(new File(rulesetPath));</b>
+<b class="fc">&nbsp;        return rulesetManagement.getFunctionalKeys(metadata);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;MetadataEntry&gt; createMetadata(Map&lt;String, String&gt; presetMetadata) {
+<b class="fc">&nbsp;        List&lt;MetadataEntry&gt; metadata = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Map.Entry&lt;String, String&gt; presetMetadataEntry : presetMetadata.entrySet()) {</b>
+<b class="nc">&nbsp;            MetadataEntry metadataEntry = new MetadataEntry();</b>
+<b class="nc">&nbsp;            metadataEntry.setKey(presetMetadataEntry.getKey());</b>
+<b class="nc">&nbsp;            metadataEntry.setValue(presetMetadataEntry.getValue());</b>
+<b class="nc">&nbsp;            metadataEntry.setDomain(MdSec.DMD_SEC);</b>
+<b class="nc">&nbsp;            metadata.add(metadataEntry);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return metadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load doc type metadata keys from provided ruleset.
+&nbsp;     * @param ruleset Ruleset from which doc type metadata keys are loaded and returned
+&nbsp;     * @return list of Strings containing the IDs of the doc type metadata defined in the provided ruleset.
+&nbsp;     * @throws IOException thrown if ruleset file cannot be loaded
+&nbsp;     */
+&nbsp;    public static Collection&lt;String&gt; getDocTypeMetadata(Ruleset ruleset) throws IOException {
+<b class="fc">&nbsp;        return getFunctionalMetadata(ruleset, FunctionalMetadata.DOC_TYPE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load and return higher level identifier metadata keys from provided ruleset.
+&nbsp;     * @param ruleset Ruleset from which higher level identifier metadata keys are loaded and returned
+&nbsp;     * @return list of String containing the keys of metadata defined as higher level identifier
+&nbsp;     * @throws IOException thrown if ruleset file cannot be loaded
+&nbsp;     */
+&nbsp;    public static Collection&lt;String&gt; getHigherLevelIdentifierMetadata(Ruleset ruleset) throws IOException {
+<b class="fc">&nbsp;        return getFunctionalMetadata(ruleset, FunctionalMetadata.HIGHERLEVEL_IDENTIFIER);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private DataImport createDataImportFromImportConfiguration(ImportConfiguration importConfiguration) {
+<b class="fc">&nbsp;        String configType = importConfiguration.getConfigurationType();</b>
+<b class="fc">&nbsp;        if (!ImportConfigurationType.OPAC_SEARCH.name().equals(configType)) {</b>
+<b class="nc">&nbsp;            throw new ConfigException(&quot;Configuration error: given import configuration &#39;&quot;</b>
+<b class="nc">&nbsp;                    + importConfiguration.getTitle() + &quot;&#39; is of type &#39;&quot; + configType</b>
+&nbsp;                    + &quot;&#39; (OPAC_SEARCH expected instead)!&quot;);
+&nbsp;        }
+<b class="fc">&nbsp;        DataImport dataImport = new DataImport();</b>
+<b class="fc">&nbsp;        dataImport.setTitle(importConfiguration.getTitle());</b>
+<b class="fc">&nbsp;        dataImport.setSearchInterfaceType(SearchInterfaceType.valueOf(importConfiguration.getInterfaceType()));</b>
+<b class="fc">&nbsp;        dataImport.setReturnFormat(FileFormat.valueOf(importConfiguration.getReturnFormat()));</b>
+<b class="fc">&nbsp;        dataImport.setMetadataFormat(MetadataFormat.valueOf(importConfiguration.getMetadataFormat()));</b>
+<b class="fc">&nbsp;        dataImport.setScheme(importConfiguration.getScheme());</b>
+<b class="fc">&nbsp;        dataImport.setHost(importConfiguration.getHost());</b>
+<b class="fc">&nbsp;        dataImport.setPath(importConfiguration.getPath());</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(importConfiguration.getPort())) {</b>
+<b class="fc">&nbsp;            dataImport.setPort(importConfiguration.getPort());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        dataImport.setIdPrefix(importConfiguration.getIdPrefix());</b>
+<b class="fc">&nbsp;        dataImport.setUsername(importConfiguration.getUsername());</b>
+<b class="fc">&nbsp;        dataImport.setPassword(importConfiguration.getPassword());</b>
+<b class="fc">&nbsp;        dataImport.setAnonymousAccess(importConfiguration.isAnonymousAccess());</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(importConfiguration.getIdSearchField())) {</b>
+<b class="fc">&nbsp;            dataImport.setIdParameter(importConfiguration.getIdSearchField().getValue());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        HashMap&lt;String, String&gt; searchFields = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (SearchField searchField : importConfiguration.getSearchFields()) {</b>
+<b class="fc">&nbsp;            searchFields.put(searchField.getLabel(), searchField.getValue());</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        dataImport.setSearchFields(searchFields);</b>
+<b class="fc">&nbsp;        dataImport.setUrlParameters(getUrlParameters(importConfiguration));</b>
+<b class="fc">&nbsp;        dataImport.setRecordIdXPath(importConfiguration.getMetadataRecordIdXPath());</b>
+<b class="fc">&nbsp;        dataImport.setRecordTitleXPath(importConfiguration.getMetadataRecordTitleXPath());</b>
+<b class="fc">&nbsp;        return dataImport;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private HashMap&lt;String, String&gt; getUrlParameters(ImportConfiguration importConfiguration) {
+<b class="fc">&nbsp;        HashMap&lt;String, String&gt; urlParameters = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (SearchInterfaceType.SRU.name().equals(importConfiguration.getInterfaceType())) {</b>
+<b class="fc">&nbsp;            urlParameters.put(SRU_OPERATION, SRU_SEARCH_RETRIEVE);</b>
+<b class="fc">&nbsp;            if (Objects.isNull(importConfiguration.getSruVersion())</b>
+<b class="fc">&nbsp;                    || Objects.isNull(importConfiguration.getSruRecordSchema())) {</b>
+<b class="nc">&nbsp;                throw new ConfigException(&quot;Either SRU version or SRU record schema is null!&quot;);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            urlParameters.put(SRU_VERSION, importConfiguration.getSruVersion());</b>
+<b class="fc">&nbsp;            urlParameters.put(SRU_RECORD_SCHEMA, importConfiguration.getSruRecordSchema());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (SearchInterfaceType.OAI.name().equals(importConfiguration.getInterfaceType())) {</b>
+<b class="nc">&nbsp;            urlParameters.put(OAI_VERB, OAI_GET_RECORD);</b>
+<b class="nc">&nbsp;            if (Objects.isNull(importConfiguration.getOaiMetadataPrefix())) {</b>
+<b class="nc">&nbsp;                throw new ConfigException(&quot;OAI metadata prefix is null!&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            urlParameters.put(OAI_METADATA_PREFIX, importConfiguration.getOaiMetadataPrefix());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (SearchInterfaceType.CUSTOM.name().equals(importConfiguration.getInterfaceType())) {</b>
+<b class="fc">&nbsp;            for (UrlParameter parameter : importConfiguration.getUrlParameters()) {</b>
+<b class="fc">&nbsp;                urlParameters.put(parameter.getParameterKey(), parameter.getParameterValue());</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return urlParameters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the functional metadata &#39;recordIdentifier&#39; is configured for all top level doc struct
+&nbsp;     * types in the given RulesetManagementInterface or not.
+&nbsp;     * @param rulesetManagementInterface RulesetManagementInterface to use
+&nbsp;     * @return whether &#39;recordIdentifier&#39; is seht for all doc struct types
+&nbsp;     */
+&nbsp;    public boolean isRecordIdentifierMetadataConfigured(RulesetManagementInterface rulesetManagementInterface) {
+<b class="nc">&nbsp;        User user = ServiceManager.getUserService().getCurrentUser();</b>
+<b class="nc">&nbsp;        String metadataLanguage = user.getMetadataLanguage();</b>
+<b class="nc">&nbsp;        List&lt;Locale.LanguageRange&gt; languages = Locale.LanguageRange.parse(metadataLanguage.isEmpty()</b>
+<b class="nc">&nbsp;                ? Locale.ENGLISH.getCountry() : metadataLanguage);</b>
+<b class="nc">&nbsp;        Map&lt;String, String&gt; structuralElements = rulesetManagementInterface.getStructuralElements(languages);</b>
+<b class="nc">&nbsp;        Collection&lt;String&gt; recordIdentifierMetadata = rulesetManagementInterface</b>
+<b class="nc">&nbsp;                .getFunctionalKeys(FunctionalMetadata.RECORD_IDENTIFIER);</b>
+<b class="nc">&nbsp;        for (Map.Entry&lt;String, String&gt; division : structuralElements.entrySet()) {</b>
+<b class="nc">&nbsp;            StructuralElementViewInterface viewInterface = rulesetManagementInterface</b>
+<b class="nc">&nbsp;                    .getStructuralElementView(division.getKey(), ACQUISITION_STAGE_CREATE, languages);</b>
+<b class="nc">&nbsp;            List&lt;String&gt; allowedMetadataKeys = viewInterface.getAllowedMetadata().stream()</b>
+<b class="nc">&nbsp;                    .map(MetadataViewInterface::getId).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;            allowedMetadataKeys.retainAll(recordIdentifierMetadata);</b>
+<b class="nc">&nbsp;            if (allowedMetadataKeys.isEmpty()) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

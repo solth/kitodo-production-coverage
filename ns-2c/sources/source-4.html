@@ -1,0 +1,522 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > BehaviorType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.metskitodo</a>
+</div>
+
+<h1>Coverage Summary for Class: BehaviorType (org.kitodo.dataformat.metskitodo)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BehaviorType</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/65)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;//
+&nbsp;// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.0 generiert 
+&nbsp;// Siehe &lt;a href=&quot;https://javaee.github.io/jaxb-v2/&quot;&gt;https://javaee.github.io/jaxb-v2/&lt;/a&gt; 
+&nbsp;// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+&nbsp;// Generiert: 2023.05.12 um 01:28:08 PM CEST 
+&nbsp;//
+&nbsp;
+&nbsp;
+&nbsp;package org.kitodo.dataformat.metskitodo;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;import javax.xml.bind.annotation.XmlID;
+&nbsp;import javax.xml.bind.annotation.XmlIDREF;
+&nbsp;import javax.xml.bind.annotation.XmlSchemaType;
+&nbsp;import javax.xml.bind.annotation.XmlType;
+&nbsp;import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+&nbsp;import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+&nbsp;import javax.xml.datatype.XMLGregorianCalendar;
+&nbsp;import org.jvnet.jaxb2_commons.lang.Equals2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.EqualsStrategy2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+&nbsp;import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+&nbsp;import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * behaviorType: Complex Type for Behaviors
+&nbsp; * 			 A behavior can be used to associate executable behaviors with content in the METS object.  A behavior element has an interface definition element that represents an abstract definition  of the set  of behaviors represented by a particular behavior.  A behavior element also has an behavior  mechanism which is a module of executable code that implements and runs the behavior defined abstractly by the interface definition.
+&nbsp; * 			
+&nbsp; * 
+&nbsp; * &lt;p&gt;Java-Klasse für behaviorType complex type.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * &amp;lt;complexType name=&quot;behaviorType&quot;&amp;gt;
+&nbsp; *   &amp;lt;complexContent&amp;gt;
+&nbsp; *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *       &amp;lt;sequence&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;interfaceDef&quot; type=&quot;{http://www.loc.gov/METS/}objectType&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;mechanism&quot; type=&quot;{http://www.loc.gov/METS/}objectType&quot;/&amp;gt;
+&nbsp; *       &amp;lt;/sequence&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;STRUCTID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREFS&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;BTYPE&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;CREATED&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}dateTime&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;LABEL&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;GROUPID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;ADMID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREFS&quot; /&amp;gt;
+&nbsp; *     &amp;lt;/restriction&amp;gt;
+&nbsp; *   &amp;lt;/complexContent&amp;gt;
+&nbsp; * &amp;lt;/complexType&amp;gt;
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * 
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;@XmlType(name = &quot;behaviorType&quot;, propOrder = {
+&nbsp;    &quot;interfaceDef&quot;,
+&nbsp;    &quot;mechanism&quot;
+&nbsp;})
+<b class="nc">&nbsp;public class BehaviorType implements Equals2</b>
+&nbsp;{
+&nbsp;
+&nbsp;    protected ObjectType interfaceDef;
+&nbsp;    @XmlElement(required = true)
+&nbsp;    protected ObjectType mechanism;
+&nbsp;    @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;    @XmlID
+&nbsp;    @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;    protected String id;
+&nbsp;    @XmlAttribute(name = &quot;STRUCTID&quot;)
+&nbsp;    @XmlIDREF
+&nbsp;    @XmlSchemaType(name = &quot;IDREFS&quot;)
+&nbsp;    protected List&lt;Object&gt; structid;
+&nbsp;    @XmlAttribute(name = &quot;BTYPE&quot;)
+&nbsp;    protected String btype;
+&nbsp;    @XmlAttribute(name = &quot;CREATED&quot;)
+&nbsp;    @XmlSchemaType(name = &quot;dateTime&quot;)
+&nbsp;    protected XMLGregorianCalendar created;
+&nbsp;    @XmlAttribute(name = &quot;LABEL&quot;)
+&nbsp;    protected String label;
+&nbsp;    @XmlAttribute(name = &quot;GROUPID&quot;)
+&nbsp;    protected String groupid;
+&nbsp;    @XmlAttribute(name = &quot;ADMID&quot;)
+&nbsp;    @XmlIDREF
+&nbsp;    @XmlSchemaType(name = &quot;IDREFS&quot;)
+&nbsp;    protected List&lt;Object&gt; admid;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der interfaceDef-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link ObjectType }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public ObjectType getInterfaceDef() {
+<b class="nc">&nbsp;        return interfaceDef;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der interfaceDef-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link ObjectType }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setInterfaceDef(ObjectType value) {
+<b class="nc">&nbsp;        this.interfaceDef = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der mechanism-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link ObjectType }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public ObjectType getMechanism() {
+<b class="nc">&nbsp;        return mechanism;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der mechanism-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link ObjectType }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setMechanism(ObjectType value) {
+<b class="nc">&nbsp;        this.mechanism = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getID() {
+<b class="nc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der id-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setID(String value) {
+<b class="nc">&nbsp;        this.id = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the structid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the structid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getSTRUCTID().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link Object }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;Object&gt; getSTRUCTID() {
+<b class="nc">&nbsp;        if (structid == null) {</b>
+<b class="nc">&nbsp;            structid = new ArrayList&lt;Object&gt;();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.structid;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der btype-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getBTYPE() {
+<b class="nc">&nbsp;        return btype;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der btype-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setBTYPE(String value) {
+<b class="nc">&nbsp;        this.btype = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der created-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link XMLGregorianCalendar }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public XMLGregorianCalendar getCREATED() {
+<b class="nc">&nbsp;        return created;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der created-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link XMLGregorianCalendar }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setCREATED(XMLGregorianCalendar value) {
+<b class="nc">&nbsp;        this.created = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der label-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getLABEL() {
+<b class="nc">&nbsp;        return label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der label-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setLABEL(String value) {
+<b class="nc">&nbsp;        this.label = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der groupid-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getGROUPID() {
+<b class="nc">&nbsp;        return groupid;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der groupid-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setGROUPID(String value) {
+<b class="nc">&nbsp;        this.groupid = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the admid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the admid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getADMID().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link Object }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;Object&gt; getADMID() {
+<b class="nc">&nbsp;        if (admid == null) {</b>
+<b class="nc">&nbsp;            admid = new ArrayList&lt;Object&gt;();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.admid;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="nc">&nbsp;        if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        final BehaviorType that = ((BehaviorType) object);</b>
+&nbsp;        {
+&nbsp;            ObjectType lhsInterfaceDef;
+<b class="nc">&nbsp;            lhsInterfaceDef = this.getInterfaceDef();</b>
+&nbsp;            ObjectType rhsInterfaceDef;
+<b class="nc">&nbsp;            rhsInterfaceDef = that.getInterfaceDef();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;interfaceDef&quot;, lhsInterfaceDef), LocatorUtils.property(thatLocator, &quot;interfaceDef&quot;, rhsInterfaceDef), lhsInterfaceDef, rhsInterfaceDef, (this.interfaceDef!= null), (that.interfaceDef!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            ObjectType lhsMechanism;
+<b class="nc">&nbsp;            lhsMechanism = this.getMechanism();</b>
+&nbsp;            ObjectType rhsMechanism;
+<b class="nc">&nbsp;            rhsMechanism = that.getMechanism();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mechanism&quot;, lhsMechanism), LocatorUtils.property(thatLocator, &quot;mechanism&quot;, rhsMechanism), lhsMechanism, rhsMechanism, (this.mechanism!= null), (that.mechanism!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsID;
+<b class="nc">&nbsp;            lhsID = this.getID();</b>
+&nbsp;            String rhsID;
+<b class="nc">&nbsp;            rhsID = that.getID();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            List&lt;Object&gt; lhsSTRUCTID;
+<b class="nc">&nbsp;            lhsSTRUCTID = (((this.structid!= null)&amp;&amp;(!this.structid.isEmpty()))?this.getSTRUCTID():null);</b>
+&nbsp;            List&lt;Object&gt; rhsSTRUCTID;
+<b class="nc">&nbsp;            rhsSTRUCTID = (((that.structid!= null)&amp;&amp;(!that.structid.isEmpty()))?that.getSTRUCTID():null);</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;structid&quot;, lhsSTRUCTID), LocatorUtils.property(thatLocator, &quot;structid&quot;, rhsSTRUCTID), lhsSTRUCTID, rhsSTRUCTID, ((this.structid!= null)&amp;&amp;(!this.structid.isEmpty())), ((that.structid!= null)&amp;&amp;(!that.structid.isEmpty())))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsBTYPE;
+<b class="nc">&nbsp;            lhsBTYPE = this.getBTYPE();</b>
+&nbsp;            String rhsBTYPE;
+<b class="nc">&nbsp;            rhsBTYPE = that.getBTYPE();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;btype&quot;, lhsBTYPE), LocatorUtils.property(thatLocator, &quot;btype&quot;, rhsBTYPE), lhsBTYPE, rhsBTYPE, (this.btype!= null), (that.btype!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            XMLGregorianCalendar lhsCREATED;
+<b class="nc">&nbsp;            lhsCREATED = this.getCREATED();</b>
+&nbsp;            XMLGregorianCalendar rhsCREATED;
+<b class="nc">&nbsp;            rhsCREATED = that.getCREATED();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;created&quot;, lhsCREATED), LocatorUtils.property(thatLocator, &quot;created&quot;, rhsCREATED), lhsCREATED, rhsCREATED, (this.created!= null), (that.created!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsLABEL;
+<b class="nc">&nbsp;            lhsLABEL = this.getLABEL();</b>
+&nbsp;            String rhsLABEL;
+<b class="nc">&nbsp;            rhsLABEL = that.getLABEL();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;label&quot;, lhsLABEL), LocatorUtils.property(thatLocator, &quot;label&quot;, rhsLABEL), lhsLABEL, rhsLABEL, (this.label!= null), (that.label!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsGROUPID;
+<b class="nc">&nbsp;            lhsGROUPID = this.getGROUPID();</b>
+&nbsp;            String rhsGROUPID;
+<b class="nc">&nbsp;            rhsGROUPID = that.getGROUPID();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;groupid&quot;, lhsGROUPID), LocatorUtils.property(thatLocator, &quot;groupid&quot;, rhsGROUPID), lhsGROUPID, rhsGROUPID, (this.groupid!= null), (that.groupid!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            List&lt;Object&gt; lhsADMID;
+<b class="nc">&nbsp;            lhsADMID = (((this.admid!= null)&amp;&amp;(!this.admid.isEmpty()))?this.getADMID():null);</b>
+&nbsp;            List&lt;Object&gt; rhsADMID;
+<b class="nc">&nbsp;            rhsADMID = (((that.admid!= null)&amp;&amp;(!that.admid.isEmpty()))?that.getADMID():null);</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;admid&quot;, lhsADMID), LocatorUtils.property(thatLocator, &quot;admid&quot;, rhsADMID), lhsADMID, rhsADMID, ((this.admid!= null)&amp;&amp;(!this.admid.isEmpty())), ((that.admid!= null)&amp;&amp;(!that.admid.isEmpty())))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(Object object) {
+<b class="nc">&nbsp;        final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;        return equals(null, null, object, strategy);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

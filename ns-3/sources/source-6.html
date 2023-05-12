@@ -1,0 +1,256 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SimpleMetadataViewInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataeditor.rulesetmanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: SimpleMetadataViewInterface (org.kitodo.api.dataeditor.rulesetmanagement)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SimpleMetadataViewInterface</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,9%
+  </span>
+  <span class="absValue">
+    (3/7)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SimpleMetadataViewInterface$MockitoMock$j8lKI86D</td>
+  </tr>
+  <tr>
+    <td class="name">SimpleMetadataViewInterface$MockitoMock$j8lKI86D$auxiliary$afKsgK25</td>
+  </tr>
+  <tr>
+    <td class="name">SimpleMetadataViewInterface$MockitoMock$j8lKI86D$auxiliary$AVMrn2Mp</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,9%
+  </span>
+  <span class="absValue">
+    (3/7)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataeditor.rulesetmanagement;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides an interface for the metadata key view service. The metadata key
+&nbsp; * view service provides a filtered view on metadata keys.
+&nbsp; */
+&nbsp;public interface SimpleMetadataViewInterface extends MetadataViewInterface {
+&nbsp;    /**
+&nbsp;     * Maps a boolean value to a metadata value.
+&nbsp;     *
+&nbsp;     * @param value
+&nbsp;     *            boolean input value
+&nbsp;     * @return value to save as a metadata entry. If absent, delete the
+&nbsp;     *         metadata entry.
+&nbsp;     */
+&nbsp;    default Optional&lt;String&gt; convertBoolean(boolean value) {
+<b class="nc">&nbsp;        if (value) {</b>
+<b class="nc">&nbsp;            return getSelectItems(Collections.emptyList()).keySet().stream().filter(StringUtils::isNotEmpty).findAny();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the default value for the input type boolean.
+&nbsp;     *
+&nbsp;     * @return the default value
+&nbsp;     */
+&nbsp;    default boolean getBooleanDefaultValue() {
+<b class="nc">&nbsp;        return !getDefaultItems().isEmpty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the value for the entry that appears first when a field is
+&nbsp;     * added.
+&nbsp;     *
+&nbsp;     * @return the default value
+&nbsp;     */
+&nbsp;    Collection&lt;String&gt; getDefaultItems();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the default value for all input types except boolean and multiple
+&nbsp;     * selection.
+&nbsp;     *
+&nbsp;     * @return the default value
+&nbsp;     */
+&nbsp;    default String getDefaultValue() {
+<b class="fc">&nbsp;        Collection&lt;String&gt; defaultItems = getDefaultItems();</b>
+<b class="fc">&nbsp;        return defaultItems.isEmpty() ? &quot;&quot; : defaultItems.iterator().next();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies how the input item should be displayed.
+&nbsp;     *
+&nbsp;     * @return how the input item should be displayed
+&nbsp;     */
+&nbsp;    InputType getInputType();
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Returns the minimum number of digits for integer types.
+&nbsp;     *
+&nbsp;     * @return the minimum number of digits
+&nbsp;     */
+&nbsp;    int getMinDigits();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the possible values if the metadata key is a list of values. For
+&nbsp;     * the maps of metadata entries, the function should only read the map keys,
+&nbsp;     * and should set the map value to {@link Boolean#TRUE} for those metadata
+&nbsp;     * entries that do have an influence on the showing select items, to let the
+&nbsp;     * caller know that it must update the select items in case this metadata
+&nbsp;     * entry changes.
+&nbsp;     *
+&nbsp;     * @param metadata
+&nbsp;     *            metadata entries. Conditional select items may depend on their
+&nbsp;     *            values. For nested keys, order of arguments is top-down, i.e.
+&nbsp;     *            first grand-grandparent, then grandparent, then parent, last
+&nbsp;     *            sibling.
+&nbsp;     * @return the possible values
+&nbsp;     */
+&nbsp;    Map&lt;String, String&gt; getSelectItems(List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; metadata);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns {@code false}. A simple metadata key is not complex.
+&nbsp;     *
+&nbsp;     * @return always false
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    default boolean isComplex() {
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether values under this key can be edited in this view.
+&nbsp;     *
+&nbsp;     * @return whether values can be edited
+&nbsp;     */
+&nbsp;    boolean isEditable();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the value corresponds to the value range. The value range
+&nbsp;     * can be determined in various ways. Integers or dates must parse, it may
+&nbsp;     * be that the value must be in a list or is checked against a regular
+&nbsp;     * expression. The application can then still decide whether to allow the
+&nbsp;     * value to be saved or not.
+&nbsp;     *
+&nbsp;     * @param value
+&nbsp;     *            value to be tested
+&nbsp;     * @param metadata
+&nbsp;     *            metadata entries. The available options for conditional select
+&nbsp;     *            items depend on their values. For nested keys, order of
+&nbsp;     *            arguments is top-down, i.e. from grand-grandparent to sibling.
+&nbsp;     * @return whether the value corresponds to the value range
+&nbsp;     */
+&nbsp;    boolean isValid(String value, List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; metadata);
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

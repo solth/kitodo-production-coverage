@@ -1,0 +1,196 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SearchDialog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: SearchDialog (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SearchDialog</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (2/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    15%
+  </span>
+  <span class="absValue">
+    (3/20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;public class SearchDialog {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(SearchDialog.class);</b>
+&nbsp;
+&nbsp;    private final CreateProcessForm createProcessForm;
+&nbsp;    private Process originalProcess;
+&nbsp;
+<b class="fc">&nbsp;    SearchDialog(CreateProcessForm createProcessForm) {</b>
+<b class="fc">&nbsp;        this.createProcessForm = createProcessForm;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get originalProcess.
+&nbsp;     *
+&nbsp;     * @return value of originalProcess
+&nbsp;     */
+&nbsp;    public Process getOriginalProcess() {
+<b class="nc">&nbsp;        return originalProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set originalProcess.
+&nbsp;     *
+&nbsp;     * @param originalProcess as java.lang.Process
+&nbsp;     */
+&nbsp;    public void setOriginalProcess(Process originalProcess) {
+<b class="nc">&nbsp;        this.originalProcess = originalProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get Process templates.
+&nbsp;     *
+&nbsp;     * @return list of SelectItem objects
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; getProcessesForChoiceList() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getProcessService().getTemplateProcesses();</b>
+<b class="nc">&nbsp;        } catch (DataException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;            return new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copy metadata of selected process.
+&nbsp;     */
+&nbsp;    public void copyMetadata() {
+&nbsp;        try {
+<b class="nc">&nbsp;            URI metadataUri = ServiceManager.getProcessService().getMetadataFileUri(this.originalProcess);</b>
+<b class="nc">&nbsp;            Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(metadataUri);</b>
+<b class="nc">&nbsp;            LogicalDivision root = workpiece.getLogicalStructure();</b>
+<b class="nc">&nbsp;            if (StringUtils.isNotBlank(root.getType())) {</b>
+<b class="nc">&nbsp;                this.createProcessForm.getProcessDataTab().setDocType(root.getType());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(originalProcess.getParent())) {</b>
+<b class="nc">&nbsp;                this.createProcessForm.getTitleRecordLinkTab().setParentAsTitleRecord(originalProcess.getParent());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            this.createProcessForm.getProcessMetadata().getProcessDetails().setMetadata(root.getMetadata());</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(CreateProcessForm.ERROR_READING, new Object[] {&quot;template-metadata&quot; }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

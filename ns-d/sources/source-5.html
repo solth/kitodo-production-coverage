@@ -1,0 +1,199 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetadataFormatConversion</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.schemaconverter</a>
+</div>
+
+<h1>Coverage Summary for Class: MetadataFormatConversion (org.kitodo.api.schemaconverter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetadataFormatConversion</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/21)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.schemaconverter;
+&nbsp;
+&nbsp;import java.net.MalformedURLException;
+&nbsp;import java.net.URL;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+<b class="nc">&nbsp;public enum MetadataFormatConversion {</b>
+<b class="nc">&nbsp;    MODS_2_KITODO(&quot;mods2kitodo.xsl&quot;, null, MetadataFormat.KITODO),</b>
+<b class="nc">&nbsp;    PICA_2_KITODO(&quot;pica2kitodo.xsl&quot;, null, MetadataFormat.KITODO),</b>
+<b class="nc">&nbsp;    MARC_2_MODS(&quot;marc21slim2mods.xsl&quot;, &quot;https://www.loc.gov/standards/mods/v3/MARC21slim2MODS3-4.xsl&quot;,</b>
+&nbsp;            MetadataFormat.MODS);
+&nbsp;
+<b class="nc">&nbsp;    private static final Map&lt;MetadataFormat, List&lt;MetadataFormatConversion&gt;&gt; DEFAULT_CONVERSIONS = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    static {
+<b class="nc">&nbsp;        DEFAULT_CONVERSIONS.put(MetadataFormat.MODS, Collections.singletonList(MODS_2_KITODO));</b>
+<b class="nc">&nbsp;        DEFAULT_CONVERSIONS.put(MetadataFormat.PICA, Collections.singletonList(PICA_2_KITODO));</b>
+<b class="nc">&nbsp;        DEFAULT_CONVERSIONS.put(MetadataFormat.MARC, Arrays.asList(MARC_2_MODS, MODS_2_KITODO));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private final String fileName;
+&nbsp;    private URL source;
+&nbsp;    private final MetadataFormat targetFormat;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor setting filename and source URI for the XSL transformation file.
+&nbsp;     * @param filename Filename including suffix without any path.
+&nbsp;     * @param source Remote source where the file can be retrieved from if it is not yet available in Kitodo.
+&nbsp;     * @param targetFormat target MetadataFormat of this MetadataFormatConversion
+&nbsp;     */
+<b class="nc">&nbsp;    MetadataFormatConversion(String filename, String source, MetadataFormat targetFormat) {</b>
+<b class="nc">&nbsp;        this.fileName = filename;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            this.source = new URL(source);</b>
+<b class="nc">&nbsp;        } catch (MalformedURLException e) {</b>
+<b class="nc">&nbsp;            this.source = null;</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        this.targetFormat = targetFormat;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get fileName.
+&nbsp;     *
+&nbsp;     * @return value of fileName
+&nbsp;     */
+&nbsp;    public String getFileName() {
+<b class="nc">&nbsp;        return fileName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get source.
+&nbsp;     *
+&nbsp;     * @return value of source
+&nbsp;     */
+&nbsp;    public URL getSource() {
+<b class="nc">&nbsp;        return source;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get targetFormat.
+&nbsp;     *
+&nbsp;     * @return value of targetFormat
+&nbsp;     */
+&nbsp;    public MetadataFormat getTargetFormat() {
+<b class="nc">&nbsp;        return targetFormat;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get filename of default metadata conversion file for given metadata format.
+&nbsp;     *
+&nbsp;     * @param metadataFormat metadata format for which filename of default conversion file is returned
+&nbsp;     * @return filename of default conversion file or null if no default conversion file exists for given format
+&nbsp;     */
+&nbsp;    public static List&lt;MetadataFormatConversion&gt; getDefaultConfigurationFileName(MetadataFormat metadataFormat) {
+<b class="nc">&nbsp;        if (DEFAULT_CONVERSIONS.containsKey(metadataFormat)) {</b>
+<b class="nc">&nbsp;            return DEFAULT_CONVERSIONS.get(metadataFormat);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

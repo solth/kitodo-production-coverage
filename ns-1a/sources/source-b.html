@@ -1,0 +1,185 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ImportConfigurationDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.persistence</a>
+</div>
+
+<h1>Coverage Summary for Class: ImportConfigurationDAO (org.kitodo.data.database.persistence)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImportConfigurationDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,6%
+  </span>
+  <span class="absValue">
+    (5/9)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.persistence;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;
+<b class="fc">&nbsp;public class ImportConfigurationDAO extends BaseDAO&lt;ImportConfiguration&gt; {</b>
+&nbsp;    /**
+&nbsp;     * Retrieves a ImportConfiguration identified by the given id from the database.
+&nbsp;     *
+&nbsp;     * @param id of ImportConfiguration to load
+&nbsp;     * @return persisted bean
+&nbsp;     * @throws DAOException if a HibernateException is thrown
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public ImportConfiguration getById(Integer id) throws DAOException {
+<b class="fc">&nbsp;        ImportConfiguration importConfiguration = retrieveObject(ImportConfiguration.class, id);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(importConfiguration)) {</b>
+<b class="nc">&nbsp;            throw new DAOException(&quot;Unable to find import configuration object with ID &quot; + id + &quot;!&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return importConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all ImportConfiguration objects from the database.
+&nbsp;     *
+&nbsp;     * @return all persisted beans
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public List&lt;ImportConfiguration&gt; getAll() throws DAOException {
+<b class="fc">&nbsp;        return retrieveAllObjects(ImportConfiguration.class);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all ImportConfiguration objects in given range.
+&nbsp;     *
+&nbsp;     * @param offset result
+&nbsp;     * @param size   amount of results
+&nbsp;     * @return constrained list of persisted beans
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public List&lt;ImportConfiguration&gt; getAll(int offset, int size) throws DAOException {
+<b class="nc">&nbsp;        return retrieveObjects(&quot;FROM importconfiguration ORDER BY id ASC&quot;, offset, size);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all not indexed ImportConfiguration objects in given range.
+&nbsp;     *
+&nbsp;     * @param offset result
+&nbsp;     * @param size   amount of results
+&nbsp;     * @return constrained list of persisted beans
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public List&lt;ImportConfiguration&gt; getAllNotIndexed(int offset, int size) throws DAOException {
+<b class="nc">&nbsp;        throw new UnsupportedOperationException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes ImportConfiguration object specified by the given importConfigurationId from the database.
+&nbsp;     *
+&nbsp;     * @param importConfigurationId of bean to delete
+&nbsp;     * @throws DAOException if the current session can&#39;t be retrieved or an exception is
+&nbsp;     *                      thrown while performing the rollback
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void remove(Integer importConfigurationId) throws DAOException {
+<b class="nc">&nbsp;        removeObject(ImportConfiguration.class, importConfigurationId);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

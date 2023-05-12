@@ -1,0 +1,252 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > XmlResponseHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.queryurlimport</a>
+</div>
+
+<h1>Coverage Summary for Class: XmlResponseHandler (org.kitodo.queryurlimport)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">XmlResponseHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (6/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    35,2%
+  </span>
+  <span class="absValue">
+    (19/54)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.queryurlimport;
+&nbsp;
+&nbsp;import java.io.ByteArrayInputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.lang.reflect.UndeclaredThrowableException;
+&nbsp;import java.nio.charset.Charset;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;import javax.xml.xpath.XPath;
+&nbsp;import javax.xml.xpath.XPathExpressionException;
+&nbsp;import javax.xml.xpath.XPathFactory;
+&nbsp;
+&nbsp;import org.apache.commons.io.IOUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.http.HttpResponse;
+&nbsp;import org.jdom2.output.Format;
+&nbsp;import org.jdom2.output.XMLOutputter;
+&nbsp;import org.kitodo.api.externaldatamanagement.DataImport;
+&nbsp;import org.kitodo.api.externaldatamanagement.SearchInterfaceType;
+&nbsp;import org.kitodo.api.externaldatamanagement.SearchResult;
+&nbsp;import org.kitodo.api.externaldatamanagement.SingleHit;
+&nbsp;import org.kitodo.exceptions.CatalogException;
+&nbsp;import org.kitodo.exceptions.ConfigException;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;import org.xml.sax.InputSource;
+&nbsp;import org.xml.sax.SAXException;
+&nbsp;
+<b class="fc">&nbsp;class XmlResponseHandler {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();</b>
+<b class="fc">&nbsp;    private static final XMLOutputter xmlOutputter = new XMLOutputter();</b>
+<b class="fc">&nbsp;    private static final XPath xPath = XPathFactory.newInstance().newXPath();</b>
+&nbsp;
+&nbsp;    static {
+<b class="fc">&nbsp;        documentBuilderFactory.setNamespaceAware(true);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            documentBuilderFactory.setFeature(&quot;http://apache.org/xml/features/disallow-doctype-decl&quot;, true);</b>
+<b class="nc">&nbsp;        } catch (ParserConfigurationException parserConfigurationException) {</b>
+<b class="nc">&nbsp;            throw new UndeclaredThrowableException(parserConfigurationException);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        xmlOutputter.setFormat(Format.getPrettyFormat());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return SearchResult for given HttpResponse.
+&nbsp;     * @param response HttpResponse for which a SearchResult is created
+&nbsp;     * @return SearchResult created from given HttpResponse
+&nbsp;     */
+&nbsp;    static SearchResult getSearchResult(HttpResponse response, DataImport dataImport) throws IOException {
+<b class="nc">&nbsp;        SearchInterfaceType interfaceType = dataImport.getSearchInterfaceType();</b>
+<b class="nc">&nbsp;        SearchResult searchResult = new SearchResult();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(response) &amp;&amp; Objects.nonNull(response.getEntity())) {</b>
+<b class="nc">&nbsp;            String content = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());</b>
+<b class="nc">&nbsp;            Document resultDocument = transformResponseToDocument(content);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(resultDocument)) {</b>
+<b class="nc">&nbsp;                searchResult.setHits(extractHits(resultDocument, dataImport));</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(interfaceType.getNumberOfRecordsString())) {</b>
+<b class="nc">&nbsp;                    searchResult.setNumberOfHits(extractNumberOfRecords(resultDocument, interfaceType));</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    searchResult.setNumberOfHits(searchResult.getHits().size());</b>
+&nbsp;                }
+<b class="nc">&nbsp;                if (searchResult.getNumberOfHits() &lt; 1 &amp;&amp; Objects.nonNull(interfaceType.getErrorMessageXpath())) {</b>
+<b class="nc">&nbsp;                    String errorMessage = getTextContent(resultDocument.getDocumentElement(),</b>
+<b class="nc">&nbsp;                            interfaceType.getErrorMessageXpath());</b>
+<b class="nc">&nbsp;                    if (StringUtils.isNotBlank(errorMessage)) {</b>
+<b class="nc">&nbsp;                        errorMessage = interfaceType.getTypeString().toUpperCase() + &quot; error: &#39;&quot; + errorMessage + &quot;&#39;&quot;;</b>
+<b class="nc">&nbsp;                        throw new CatalogException(errorMessage);</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return searchResult;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Transform given HttpResponse into Document and return it.
+&nbsp;     * @param content String that is transformed into a Document
+&nbsp;     * @return Document into which given HttpResponse has been transformed
+&nbsp;     */
+&nbsp;    private static Document transformResponseToDocument(String content) {
+<b class="fc">&nbsp;        if (Objects.nonNull(content)) {</b>
+<b class="fc">&nbsp;            return parseXML(content);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new ConfigException(&quot;Query response is null&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Document parseXML(String xmlString) {
+&nbsp;        try {
+<b class="fc">&nbsp;            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();</b>
+<b class="fc">&nbsp;            return documentBuilder.parse(new InputSource(new ByteArrayInputStream(xmlString</b>
+<b class="fc">&nbsp;                    .getBytes(StandardCharsets.UTF_8))));</b>
+<b class="nc">&nbsp;        } catch (ParserConfigurationException | IOException | SAXException e) {</b>
+<b class="nc">&nbsp;            throw new ConfigException(e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static LinkedList&lt;SingleHit&gt; extractHits(Document document, DataImport dataImport) {
+<b class="nc">&nbsp;        SearchInterfaceType type = dataImport.getSearchInterfaceType();</b>
+<b class="nc">&nbsp;        LinkedList&lt;SingleHit&gt; hits = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        NodeList records = document.getElementsByTagNameNS(type.getNamespace(), type.getRecordString());</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; records.getLength(); i++) {</b>
+<b class="nc">&nbsp;            Element recordElement = (Element) records.item(i);</b>
+<b class="nc">&nbsp;            String recordTitle = getTextContent(recordElement, dataImport.getRecordTitleXPath());</b>
+<b class="nc">&nbsp;            String recordId = getTextContent(recordElement, dataImport.getRecordIdXPath());</b>
+<b class="nc">&nbsp;            hits.add(new SingleHit(recordTitle, recordId));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return hits;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static int extractNumberOfRecords(String content, SearchInterfaceType type) {
+<b class="fc">&nbsp;        return extractNumberOfRecords(transformResponseToDocument(content), type);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static int extractNumberOfRecords(Document document, SearchInterfaceType type) {
+<b class="fc">&nbsp;        NodeList numberOfRecordNodes = document.getElementsByTagNameNS(type.getNamespace(), type.getNumberOfRecordsString());</b>
+<b class="fc">&nbsp;        assert numberOfRecordNodes.getLength() == 1;</b>
+<b class="fc">&nbsp;        Element numberOfRecordsElement = (Element) numberOfRecordNodes.item(0);</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(numberOfRecordsElement)) {</b>
+<b class="fc">&nbsp;            return Integer.parseInt(numberOfRecordsElement.getTextContent().trim());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static String getTextContent(Element element, String xpathString) {
+&nbsp;        try {
+<b class="nc">&nbsp;            return xPath.evaluate(xpathString, element);</b>
+<b class="nc">&nbsp;        } catch (XPathExpressionException e) {</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

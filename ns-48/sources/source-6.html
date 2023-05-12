@@ -1,0 +1,383 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LegacyLogicalDocStructHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.metadata.legacytypeimplementations</a>
+</div>
+
+<h1>Coverage Summary for Class: LegacyLogicalDocStructHelper (org.kitodo.production.helper.metadata.legacytypeimplementations)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LegacyLogicalDocStructHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    20%
+  </span>
+  <span class="absValue">
+    (3/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    19,3%
+  </span>
+  <span class="absValue">
+    (22/114)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.metadata.legacytypeimplementations;
+&nbsp;
+&nbsp;import java.lang.reflect.InvocationTargetException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.Level;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.Domain;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewWithValuesInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;
+&nbsp;/**
+&nbsp; * Connects a legacy doc struct from the logical map to an included structural
+&nbsp; * element. This is a soldering class to keep legacy code operational which is
+&nbsp; * about to be removed. Do not use this class.
+&nbsp; */
+&nbsp;public class LegacyLogicalDocStructHelper implements LegacyDocStructHelperInterface, BindingSaveInterface {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(LegacyLogicalDocStructHelper.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The logical division accessed via this soldering class.
+&nbsp;     */
+&nbsp;    private LogicalDivision logicalDivision;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The current ruleset.
+&nbsp;     */
+&nbsp;    private RulesetManagementInterface ruleset;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The view on this division.
+&nbsp;     */
+&nbsp;    private StructuralElementViewInterface divisionView;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The user’s metadata language priority list.
+&nbsp;     */
+&nbsp;    private List&lt;LanguageRange&gt; priorityList;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The parent of this class—required by legacy code.
+&nbsp;     */
+&nbsp;    private LegacyLogicalDocStructHelper parent;
+&nbsp;
+&nbsp;    LegacyLogicalDocStructHelper(LogicalDivision logicalDivision, LegacyLogicalDocStructHelper parent,
+<b class="fc">&nbsp;            RulesetManagementInterface ruleset, List&lt;LanguageRange&gt; priorityList) {</b>
+<b class="fc">&nbsp;        this.logicalDivision = logicalDivision;</b>
+<b class="fc">&nbsp;        this.ruleset = ruleset;</b>
+<b class="fc">&nbsp;        this.priorityList = priorityList;</b>
+<b class="fc">&nbsp;        this.parent = parent;</b>
+<b class="fc">&nbsp;        String type = logicalDivision.getType();</b>
+<b class="fc">&nbsp;        this.divisionView = ruleset.getStructuralElementView(Objects.nonNull(type) ? type : &quot;&quot;, &quot;edit&quot;, priorityList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public void addMetadata(LegacyMetadataHelper metadata) {
+<b class="nc">&nbsp;        Optional&lt;MetadataViewInterface&gt; optionalKeyView = divisionView</b>
+<b class="nc">&nbsp;                .getAddableMetadata(logicalDivision.getMetadata(), Collections.emptyList()).parallelStream()</b>
+<b class="nc">&nbsp;                .filter(keyView -&gt; keyView.getId().equals(metadata.getMetadataType().getName())).findFirst();</b>
+<b class="nc">&nbsp;        Optional&lt;Domain&gt; optionalDomain = optionalKeyView.isPresent() ? optionalKeyView.get().getDomain()</b>
+<b class="nc">&nbsp;                : Optional.empty();</b>
+<b class="nc">&nbsp;        if (!optionalDomain.isPresent() || !optionalDomain.get().equals(Domain.METS_DIV)) {</b>
+<b class="nc">&nbsp;            MetadataEntry metadataEntry = new MetadataEntry();</b>
+<b class="nc">&nbsp;            metadata.setBinding(this, metadataEntry, optionalDomain.orElse(Domain.DESCRIPTION));</b>
+<b class="nc">&nbsp;            metadata.saveToBinding();</b>
+<b class="nc">&nbsp;            logicalDivision.getMetadata().add(metadataEntry);</b>
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            metadata.setBinding(this, null, Domain.METS_DIV);</b>
+<b class="nc">&nbsp;            metadata.saveToBinding();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void saveMetadata(LegacyMetadataHelper metadata) {
+<b class="nc">&nbsp;        if (Domain.METS_DIV.equals(metadata.getDomain())) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                logicalDivision.getClass().getMethod(&quot;set&quot;.concat(metadata.getMetadataType().getName()), String.class)</b>
+<b class="nc">&nbsp;                        .invoke(logicalDivision, metadata.getValue());</b>
+<b class="nc">&nbsp;            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {</b>
+<b class="nc">&nbsp;                throw new IllegalArgumentException(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } else if (metadata.getBinding() != null) {</b>
+<b class="nc">&nbsp;            metadata.getBinding().setKey(metadata.getMetadataType().getName());</b>
+<b class="nc">&nbsp;            metadata.getBinding().setDomain(MetadataEditor.domainToMdSec(metadata.getDomain()));</b>
+<b class="nc">&nbsp;            metadata.getBinding().setValue(metadata.getValue());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public LegacyReferenceHelper addReferenceTo(LegacyDocStructHelperInterface docStruct, String type) {
+<b class="nc">&nbsp;        View view = new View();</b>
+<b class="nc">&nbsp;        LegacyInnerPhysicalDocStructHelper target = (LegacyInnerPhysicalDocStructHelper) docStruct;</b>
+<b class="nc">&nbsp;        view.setPhysicalDivision(target.getPhysicalDivision());</b>
+<b class="nc">&nbsp;        logicalDivision.getViews().add(view);</b>
+<b class="nc">&nbsp;        view.getPhysicalDivision().getLogicalDivisions().add(logicalDivision);</b>
+<b class="nc">&nbsp;        return new LegacyReferenceHelper(target);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public List&lt;LegacyMetadataTypeHelper&gt; getAddableMetadataTypes() {
+<b class="nc">&nbsp;        Collection&lt;MetadataViewInterface&gt; addableKeys = divisionView.getAddableMetadata(</b>
+<b class="nc">&nbsp;            logicalDivision.getMetadata(),</b>
+<b class="nc">&nbsp;            Collections.emptyList());</b>
+<b class="nc">&nbsp;        ArrayList&lt;LegacyMetadataTypeHelper&gt; addableMetadataTypes = new ArrayList&lt;&gt;(addableKeys.size());</b>
+<b class="nc">&nbsp;        for (MetadataViewInterface key : addableKeys) {</b>
+<b class="nc">&nbsp;            addableMetadataTypes.add(new LegacyMetadataTypeHelper(key));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return addableMetadataTypes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public List&lt;LegacyDocStructHelperInterface&gt; getAllChildren() {
+<b class="nc">&nbsp;        List&lt;LegacyDocStructHelperInterface&gt; wrappedChildren = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (LogicalDivision child : logicalDivision.getChildren()) {</b>
+<b class="nc">&nbsp;            wrappedChildren.add(new LegacyLogicalDocStructHelper(child, this, ruleset, priorityList));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return wrappedChildren;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public List&lt;LegacyMetadataHelper&gt; getAllMetadata() {
+<b class="fc">&nbsp;        List&lt;LegacyMetadataHelper&gt; allMetadata = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        List&lt;MetadataViewWithValuesInterface&gt; entryViews = divisionView</b>
+<b class="fc">&nbsp;                .getSortedVisibleMetadata(logicalDivision.getMetadata(), Collections.emptyList());</b>
+<b class="fc">&nbsp;        for (MetadataViewWithValuesInterface entryView : entryViews) {</b>
+<b class="fc">&nbsp;            Optional&lt;MetadataViewInterface&gt; optionalMetadata = entryView.getMetadata();</b>
+<b class="fc">&nbsp;            if (optionalMetadata.isPresent()) {</b>
+<b class="fc">&nbsp;                MetadataViewInterface key = optionalMetadata.get();</b>
+<b class="fc">&nbsp;                for (Metadata value : entryView.getValues()) {</b>
+<b class="fc">&nbsp;                    if (value instanceof MetadataEntry) {</b>
+<b class="fc">&nbsp;                        allMetadata.add(new LegacyMetadataHelper(null, new LegacyMetadataTypeHelper(key),</b>
+<b class="fc">&nbsp;                                ((MetadataEntry) value).getValue()));</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return allMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public List&lt;LegacyMetadataHelper&gt; getAllMetadataByType(LegacyMetadataTypeHelper metadataType) {
+<b class="nc">&nbsp;        List&lt;LegacyMetadataHelper&gt; allMetadata = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;MetadataViewWithValuesInterface&gt; entryViews = divisionView</b>
+<b class="nc">&nbsp;                .getSortedVisibleMetadata(logicalDivision.getMetadata(), Collections.emptyList());</b>
+<b class="nc">&nbsp;        for (MetadataViewWithValuesInterface entryView : entryViews) {</b>
+<b class="nc">&nbsp;            if (entryView.getMetadata().isPresent()) {</b>
+<b class="nc">&nbsp;                Optional&lt;MetadataViewInterface&gt; optionalMetadata = entryView.getMetadata();</b>
+<b class="nc">&nbsp;                MetadataViewInterface key = optionalMetadata.get();</b>
+<b class="nc">&nbsp;                if (key.getId().equals(metadataType.getName())) {</b>
+<b class="nc">&nbsp;                    for (Metadata value : entryView.getValues()) {</b>
+<b class="nc">&nbsp;                        if (value instanceof MetadataEntry) {</b>
+<b class="nc">&nbsp;                            allMetadata.add(new LegacyMetadataHelper(null, new LegacyMetadataTypeHelper(key),</b>
+<b class="nc">&nbsp;                                    ((MetadataEntry) value).getValue()));</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                    }</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return allMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public Collection&lt;LegacyReferenceHelper&gt; getAllToReferences(String type) {
+<b class="nc">&nbsp;        switch (type) {</b>
+&nbsp;            case &quot;logical_physical&quot;:
+<b class="nc">&nbsp;                Collection&lt;View&gt; views = logicalDivision.getViews();</b>
+<b class="nc">&nbsp;                ArrayList&lt;LegacyReferenceHelper&gt; allReferences = new ArrayList&lt;&gt;(views.size());</b>
+<b class="nc">&nbsp;                for (View view : views) {</b>
+<b class="nc">&nbsp;                    PhysicalDivision physicalDivision = view.getPhysicalDivision();</b>
+<b class="nc">&nbsp;                    allReferences.add(new LegacyReferenceHelper(new LegacyInnerPhysicalDocStructHelper(physicalDivision)));</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                return allReferences;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalArgumentException(&quot;Unknown reference type: &quot; + type);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata eines Docstructs ermitteln.
+&nbsp;     *
+&nbsp;     * @param inStruct
+&nbsp;     *            DocStruct object
+&nbsp;     * @param inMetadataType
+&nbsp;     *            MetadataType object
+&nbsp;     * @return Metadata
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    public static LegacyMetadataHelper getMetadata(LegacyDocStructHelperInterface inStruct, LegacyMetadataTypeHelper inMetadataType) {
+<b class="nc">&nbsp;        if (inStruct != null &amp;&amp; inMetadataType != null) {</b>
+<b class="nc">&nbsp;            List&lt;? extends LegacyMetadataHelper&gt; all = inStruct.getAllMetadataByType(inMetadataType);</b>
+<b class="nc">&nbsp;            if (all.isEmpty()) {</b>
+<b class="nc">&nbsp;                LegacyMetadataHelper md = new LegacyMetadataHelper(inMetadataType);</b>
+<b class="nc">&nbsp;                md.setDocStruct(inStruct);</b>
+<b class="nc">&nbsp;                inStruct.addMetadata(md);</b>
+<b class="nc">&nbsp;                return md;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return all.get(0);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public LegacyLogicalDocStructTypeHelper getDocStructType() {
+<b class="nc">&nbsp;        return new LegacyLogicalDocStructTypeHelper(divisionView);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is not part of the interface, but the JSF code digs in the
+&nbsp;     * depths of the UGH and uses it on the guts.
+&nbsp;     *
+&nbsp;     * @return Method delegated to {@link #getDocStructType()}
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    public LegacyLogicalDocStructTypeHelper getType() {
+<b class="nc">&nbsp;        if (!logger.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;            StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();</b>
+<b class="nc">&nbsp;            logger.log(Level.WARN, &quot;Method {}.{}() invokes {}.{}(), bypassing the interface!&quot;,</b>
+<b class="nc">&nbsp;                stackTrace[1].getClassName(), stackTrace[1].getMethodName(), stackTrace[0].getClassName(),</b>
+<b class="nc">&nbsp;                stackTrace[0].getMethodName());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return getDocStructType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Deprecated
+&nbsp;    public boolean isDocStructTypeAllowedAsChild(LegacyLogicalDocStructTypeHelper type) {
+<b class="nc">&nbsp;        return divisionView.getAllowedSubstructuralElements().containsKey(type.getName());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public void removeMetadata(LegacyMetadataHelper metaDatum) {
+<b class="nc">&nbsp;        Iterator&lt;Metadata&gt; entries = logicalDivision.getMetadata().iterator();</b>
+<b class="nc">&nbsp;        String metadataTypeName = metaDatum.getMetadataType().getName();</b>
+<b class="nc">&nbsp;        while (entries.hasNext()) {</b>
+<b class="nc">&nbsp;            Metadata entry = entries.next();</b>
+<b class="nc">&nbsp;            if (entry.getKey().equals(metadataTypeName)</b>
+<b class="nc">&nbsp;                    &amp;&amp; ((MetadataEntry) entry).getValue().equals(metaDatum.getValue())) {</b>
+<b class="nc">&nbsp;                entries.remove();</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

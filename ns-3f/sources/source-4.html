@@ -1,0 +1,293 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ChangeDocStrucTypeDialog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: ChangeDocStrucTypeDialog (org.kitodo.production.forms.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ChangeDocStrucTypeDialog</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    15,4%
+  </span>
+  <span class="absValue">
+    (2/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    6,2%
+  </span>
+  <span class="absValue">
+    (4/64)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.dataeditor;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;/**
+&nbsp; * Backing bean for the change doc struc type dialog of the metadata editor.
+&nbsp; */
+&nbsp;public class ChangeDocStrucTypeDialog {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ChangeDocStrucTypeDialog.class);</b>
+&nbsp;
+&nbsp;    private final DataEditorForm dataEditor;
+<b class="fc">&nbsp;    private final List&lt;SelectItem&gt; docStructTypes = new ArrayList&lt;&gt;();</b>
+&nbsp;    private String docStructType;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backing bean for the add doc struc type dialog of the metadata editor.
+&nbsp;     *
+&nbsp;     * @see &quot;WEB-INF/templates/includes/metadataEditor/dialogs/changeDocStrucType.xhtml&quot;
+&nbsp;     */
+<b class="fc">&nbsp;    ChangeDocStrucTypeDialog(DataEditorForm dataEditor) {</b>
+<b class="fc">&nbsp;        this.dataEditor = dataEditor;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Edit the doc struc.
+&nbsp;     */
+&nbsp;    public void editDocStruc() {
+<b class="nc">&nbsp;        LogicalDivision selectedStructure = getSelectedLogicalStructure();</b>
+<b class="nc">&nbsp;        selectedStructure.setType(docStructType);</b>
+<b class="nc">&nbsp;        dataEditor.refreshStructurePanel();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the docStructEditTypeSelection drop-down
+&nbsp;     * menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the docStructEditTypeSelection
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getDocStructTypes() {
+<b class="nc">&nbsp;        return docStructTypes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return selected doc struct type.
+&nbsp;     *
+&nbsp;     * @return selected doc struct type
+&nbsp;     */
+&nbsp;    public String getDocStructType() {
+<b class="nc">&nbsp;        return docStructType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the docStructEditTypeSelection drop-down menu.
+&nbsp;     *
+&nbsp;     * @param docStructEditTypeSelectionSelectedItem
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setDocStructType(String docStructEditTypeSelectionSelectedItem) {
+<b class="nc">&nbsp;        this.docStructType = docStructEditTypeSelectionSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prepare popup dialog by retrieving available doc struct types for
+&nbsp;     * selected element.
+&nbsp;     */
+&nbsp;    public void prepare() {
+&nbsp;        try {
+<b class="nc">&nbsp;            LogicalDivision selectedStructure = getSelectedLogicalStructure();</b>
+<b class="nc">&nbsp;            Map&lt;String, String&gt; possibleTypes = findAllPossibleTypes(selectedStructure);</b>
+<b class="nc">&nbsp;            docStructTypes.clear();</b>
+<b class="nc">&nbsp;            for (Entry&lt;String, String&gt; typeOption : possibleTypes.entrySet()) {</b>
+<b class="nc">&nbsp;                docStructTypes.add(new SelectItem(typeOption.getKey(), typeOption.getValue()));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            if (!docStructTypes.isEmpty() &amp;&amp; !dataEditor.getProcess().getRuleset().isOrderMetadataByRuleset()) {</b>
+<b class="nc">&nbsp;                docStructTypes.sort(Comparator.comparing(SelectItem::getLabel));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            docStructType = selectedStructure.getType();</b>
+<b class="nc">&nbsp;        } catch (IllegalStateException | IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private LogicalDivision getSelectedLogicalStructure() {
+<b class="nc">&nbsp;        if (dataEditor.getSelectedStructure().isPresent()) {</b>
+<b class="nc">&nbsp;            return dataEditor.getSelectedStructure().get();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;could not retrieve selected structure&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private Map&lt;String, String&gt; findAllPossibleTypes(
+&nbsp;            LogicalDivision logicalDivision) throws IOException {
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, String&gt; possibleTypes = getAllowedChildTypesFromIncludedStructuralParentElement(</b>
+&nbsp;            logicalDivision);
+<b class="nc">&nbsp;        restrictTypesToChildElements(logicalDivision, possibleTypes);</b>
+<b class="nc">&nbsp;        return possibleTypes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Map&lt;String, String&gt; getAllowedChildTypesFromIncludedStructuralParentElement(
+&nbsp;            LogicalDivision logicalDivision) throws IOException {
+&nbsp;
+<b class="nc">&nbsp;        LogicalDivision logicalStructure = dataEditor.getWorkpiece().getLogicalStructure();</b>
+<b class="nc">&nbsp;        if (logicalStructure.equals(logicalDivision)) {</b>
+<b class="nc">&nbsp;            if (Objects.isNull(dataEditor.getProcess().getParent())) {</b>
+<b class="nc">&nbsp;                return dataEditor.getRulesetManagement().getStructuralElements(dataEditor.getPriorityList());</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return getAllowedChildTypesFromParentalProcess();</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            LinkedList&lt;LogicalDivision&gt; ancestors = MetadataEditor</b>
+<b class="nc">&nbsp;                    .getAncestorsOfLogicalDivision(logicalDivision, logicalStructure);</b>
+<b class="nc">&nbsp;            String parentType = ancestors.getLast().getType();</b>
+<b class="nc">&nbsp;            return getAllowedSubstructuralElements(parentType);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private Map&lt;String, String&gt; getAllowedChildTypesFromParentalProcess() throws IOException {
+<b class="nc">&nbsp;        URI parentMetadataUri = ServiceManager.getProcessService()</b>
+<b class="nc">&nbsp;                .getMetadataFileUri(dataEditor.getProcess().getParent());</b>
+<b class="nc">&nbsp;        LogicalDivision parentLogicalStructure = ServiceManager.getMetsService().loadWorkpiece(parentMetadataUri)</b>
+<b class="nc">&nbsp;                .getLogicalStructure();</b>
+<b class="nc">&nbsp;        List&lt;LogicalDivision&gt; parentHierarchyPath = MetadataEditor</b>
+<b class="nc">&nbsp;                .determineLogicalDivisionPathToChild(parentLogicalStructure,</b>
+<b class="nc">&nbsp;                    dataEditor.getProcess().getId());</b>
+<b class="nc">&nbsp;        if (parentHierarchyPath.isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;proces is not linked in parent process&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return getAllowedSubstructuralElements(</b>
+<b class="nc">&nbsp;            ((LinkedList&lt;LogicalDivision&gt;) parentHierarchyPath).getLast().getType());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Map&lt;String, String&gt; getAllowedSubstructuralElements(String parentType) {
+<b class="nc">&nbsp;        StructuralElementViewInterface parentView = dataEditor.getRulesetManagement().getStructuralElementView(parentType,</b>
+<b class="nc">&nbsp;            dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;        return parentView.getAllowedSubstructuralElements();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void restrictTypesToChildElements(
+&nbsp;            LogicalDivision logicalDivision, Map&lt;String, String&gt; possibleTypes) {
+<b class="nc">&nbsp;        if (logicalDivision.getChildren().isEmpty()) {</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;        Set&lt;String&gt; childTypes = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (LogicalDivision child : logicalDivision.getChildren()) {</b>
+<b class="nc">&nbsp;            childTypes.add(child.getType());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        for (Iterator&lt;Entry&lt;String, String&gt;&gt; possibleTypesIterator = possibleTypes.entrySet()</b>
+<b class="nc">&nbsp;                .iterator(); possibleTypesIterator.hasNext();) {</b>
+<b class="nc">&nbsp;            String typeToCheck = possibleTypesIterator.next().getKey();</b>
+<b class="nc">&nbsp;            StructuralElementViewInterface viewOnTypeToCheck = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                typeToCheck, dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;            if (!viewOnTypeToCheck.getAllowedSubstructuralElements().keySet().containsAll(childTypes)) {</b>
+<b class="nc">&nbsp;                possibleTypesIterator.remove();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

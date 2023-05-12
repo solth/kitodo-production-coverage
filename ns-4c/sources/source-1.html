@@ -1,0 +1,685 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LdapUser</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.ldap</a>
+</div>
+
+<h1>Coverage Summary for Class: LdapUser (org.kitodo.production.ldap)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LdapUser</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/65)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/168)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.ldap;
+&nbsp;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.security.InvalidKeyException;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.MessageDigest;
+&nbsp;import java.security.NoSuchAlgorithmException;
+&nbsp;import java.util.Hashtable;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.StringTokenizer;
+&nbsp;
+&nbsp;import javax.crypto.BadPaddingException;
+&nbsp;import javax.crypto.Cipher;
+&nbsp;import javax.crypto.IllegalBlockSizeException;
+&nbsp;import javax.crypto.NoSuchPaddingException;
+&nbsp;import javax.crypto.spec.SecretKeySpec;
+&nbsp;import javax.naming.Binding;
+&nbsp;import javax.naming.Context;
+&nbsp;import javax.naming.Name;
+&nbsp;import javax.naming.NameClassPair;
+&nbsp;import javax.naming.NameNotFoundException;
+&nbsp;import javax.naming.NameParser;
+&nbsp;import javax.naming.NamingEnumeration;
+&nbsp;import javax.naming.NamingException;
+&nbsp;import javax.naming.OperationNotSupportedException;
+&nbsp;import javax.naming.directory.Attribute;
+&nbsp;import javax.naming.directory.Attributes;
+&nbsp;import javax.naming.directory.BasicAttribute;
+&nbsp;import javax.naming.directory.BasicAttributes;
+&nbsp;import javax.naming.directory.DirContext;
+&nbsp;import javax.naming.directory.ModificationItem;
+&nbsp;import javax.naming.directory.SearchControls;
+&nbsp;import javax.naming.directory.SearchResult;
+&nbsp;
+&nbsp;import org.apache.commons.codec.binary.Base64;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.bouncycastle.crypto.digests.MD4Digest;
+&nbsp;import org.kitodo.data.database.beans.LdapGroup;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class is used by the DirObj example. It is a DirContext class that can
+&nbsp; * be stored by service providers like the LDAP system providers.
+&nbsp; */
+&nbsp;public class LdapUser implements DirContext {
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(LdapUser.class);</b>
+&nbsp;    private String ldapLogin;
+&nbsp;    private Attributes attributes;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor of LdapUser.
+&nbsp;     */
+<b class="nc">&nbsp;    public LdapUser() {</b>
+<b class="nc">&nbsp;        this.attributes = new BasicAttributes(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * configure LdapUser with User data.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            User object
+&nbsp;     * @param inPassword
+&nbsp;     *            String
+&nbsp;     * @param inUidNumber
+&nbsp;     *            String
+&nbsp;     */
+&nbsp;    public void configure(User user, String inPassword, String inUidNumber)
+&nbsp;            throws NamingException, NoSuchAlgorithmException {
+<b class="nc">&nbsp;        MD4Digest digester = new MD4Digest();</b>
+<b class="nc">&nbsp;        if (!user.getLdapGroup().getLdapServer().isReadOnly()) {</b>
+&nbsp;
+<b class="nc">&nbsp;            if (Objects.nonNull(user.getLdapLogin())) {</b>
+<b class="nc">&nbsp;                this.ldapLogin = user.getLdapLogin();</b>
+&nbsp;
+&nbsp;            } else {
+<b class="nc">&nbsp;                this.ldapLogin = user.getLogin();</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            LdapGroup ldapGroup = user.getLdapGroup();</b>
+<b class="nc">&nbsp;            if (Objects.isNull(ldapGroup.getObjectClasses())) {</b>
+<b class="nc">&nbsp;                throw new NamingException(&quot;no objectclass defined&quot;);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            prepareAttributes(ldapGroup, user, inUidNumber);</b>
+&nbsp;
+&nbsp;            /*
+&nbsp;             * Samba passwords
+&nbsp;             */
+&nbsp;            /* LanMgr */
+&nbsp;            try {
+<b class="nc">&nbsp;                this.attributes.put(&quot;sambaLMPassword&quot;, toHexString(lmHash(inPassword)));</b>
+<b class="nc">&nbsp;            } catch (InvalidKeyException | NoSuchPaddingException | BadPaddingException</b>
+&nbsp;                    | IllegalBlockSizeException | RuntimeException e) {
+<b class="nc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;            /* NTLM */
+<b class="nc">&nbsp;            byte[] unicodePassword = inPassword.getBytes(StandardCharsets.UTF_16LE);</b>
+<b class="nc">&nbsp;            byte[] hmm = new byte[digester.getDigestSize()];</b>
+<b class="nc">&nbsp;            digester.update(unicodePassword, 0, unicodePassword.length);</b>
+<b class="nc">&nbsp;            digester.doFinal(hmm, 0);</b>
+<b class="nc">&nbsp;            this.attributes.put(&quot;sambaNTPassword&quot;, toHexString(hmm));</b>
+&nbsp;
+&nbsp;            /*
+&nbsp;             * Encryption of password und Base64-Enconding
+&nbsp;             */
+&nbsp;
+<b class="nc">&nbsp;            String passwordEncrytion = ldapGroup.getLdapServer().getPasswordEncryption().getTitle();</b>
+&nbsp;
+<b class="nc">&nbsp;            MessageDigest md = MessageDigest.getInstance(passwordEncrytion);</b>
+<b class="nc">&nbsp;            md.update(inPassword.getBytes(StandardCharsets.UTF_8));</b>
+<b class="nc">&nbsp;            String encodedDigest = new String(Base64.encodeBase64(md.digest()), StandardCharsets.UTF_8);</b>
+<b class="nc">&nbsp;            this.attributes.put(&quot;userPassword&quot;, &quot;{&quot; + passwordEncrytion + &quot;}&quot; + encodedDigest);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareAttributes(LdapGroup ldapGroup, User user, String inUidNumber) {
+<b class="nc">&nbsp;        Attribute oc = new BasicAttribute(&quot;objectclass&quot;);</b>
+<b class="nc">&nbsp;        StringTokenizer tokenizer = new StringTokenizer(ldapGroup.getObjectClasses(), &quot;,&quot;);</b>
+<b class="nc">&nbsp;        while (tokenizer.hasMoreTokens()) {</b>
+<b class="nc">&nbsp;            oc.add(tokenizer.nextToken());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        this.attributes.put(oc);</b>
+&nbsp;
+<b class="nc">&nbsp;        this.attributes.put(&quot;uid&quot;, replaceVariables(ldapGroup.getUid(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;cn&quot;, replaceVariables(ldapGroup.getUid(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;displayName&quot;, replaceVariables(ldapGroup.getDisplayName(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;description&quot;, replaceVariables(ldapGroup.getDescription(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;gecos&quot;, replaceVariables(ldapGroup.getGecos(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;loginShell&quot;, replaceVariables(ldapGroup.getLoginShell(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;sn&quot;, replaceVariables(ldapGroup.getSn(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;homeDirectory&quot;, replaceVariables(ldapGroup.getHomeDirectory(), user, inUidNumber));</b>
+&nbsp;
+<b class="nc">&nbsp;        this.attributes.put(&quot;sambaAcctFlags&quot;, replaceVariables(ldapGroup.getSambaAcctFlags(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;sambaLogonScript&quot;, replaceVariables(ldapGroup.getSambaLogonScript(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;sambaPrimaryGroupSID&quot;,</b>
+<b class="nc">&nbsp;                replaceVariables(ldapGroup.getSambaPrimaryGroupSID(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;sambaSID&quot;, replaceVariables(ldapGroup.getSambaSID(), user, inUidNumber));</b>
+&nbsp;
+<b class="nc">&nbsp;        this.attributes.put(&quot;sambaPwdMustChange&quot;,</b>
+<b class="nc">&nbsp;                replaceVariables(ldapGroup.getSambaPwdMustChange(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;sambaPasswordHistory&quot;,</b>
+<b class="nc">&nbsp;                replaceVariables(ldapGroup.getSambaPasswordHistory(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;sambaLogonHours&quot;, replaceVariables(ldapGroup.getSambaLogonHours(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;sambaKickoffTime&quot;, replaceVariables(ldapGroup.getSambaKickoffTime(), user, inUidNumber));</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;sambaPwdLastSet&quot;, String.valueOf(System.currentTimeMillis() / 1000L));</b>
+&nbsp;
+<b class="nc">&nbsp;        this.attributes.put(&quot;uidNumber&quot;, inUidNumber);</b>
+<b class="nc">&nbsp;        this.attributes.put(&quot;gidNumber&quot;, replaceVariables(ldapGroup.getGidNumber(), user, inUidNumber));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Replace Variables with current user details.
+&nbsp;     *
+&nbsp;     * @param inString
+&nbsp;     *            String
+&nbsp;     * @param inUser
+&nbsp;     *            User object
+&nbsp;     * @param inUidNumber
+&nbsp;     *            String
+&nbsp;     * @return String with replaced variables
+&nbsp;     */
+&nbsp;    private String replaceVariables(String inString, User inUser, String inUidNumber) {
+<b class="nc">&nbsp;        if (Objects.isNull(inString)) {</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        String replaced = inString.replaceAll(&quot;\\{login\\}&quot;, inUser.getLogin());</b>
+<b class="nc">&nbsp;        replaced = replaced.replaceAll(&quot;\\{user full name\\}&quot;, inUser.getName() + &quot; &quot; + inUser.getSurname());</b>
+<b class="nc">&nbsp;        replaced = replaced.replaceAll(&quot;\\{uidnumber\\*2\\+1000\\}&quot;,</b>
+<b class="nc">&nbsp;            String.valueOf(Integer.parseInt(inUidNumber) * 2 + 1000));</b>
+<b class="nc">&nbsp;        replaced = replaced.replaceAll(&quot;\\{uidnumber\\*2\\+1001\\}&quot;,</b>
+<b class="nc">&nbsp;            String.valueOf(Integer.parseInt(inUidNumber) * 2 + 1001));</b>
+<b class="nc">&nbsp;        logger.debug(&quot;Replace instring: {} - {} - {}&quot;, inString, inUser, inUidNumber);</b>
+<b class="nc">&nbsp;        logger.debug(&quot;replaced: {}&quot;, replaced);</b>
+<b class="nc">&nbsp;        return replaced;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the LM Hash of the user&#39;s password.
+&nbsp;     *
+&nbsp;     * @param password
+&nbsp;     *            The password.
+&nbsp;     * @return The LM Hash of the given password, used in the calculation of the LM
+&nbsp;     *         Response.
+&nbsp;     */
+&nbsp;    public static byte[] lmHash(String password) throws BadPaddingException, NoSuchAlgorithmException,
+&nbsp;            NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
+&nbsp;
+<b class="nc">&nbsp;        byte[] oemPassword = password.toUpperCase().getBytes(StandardCharsets.US_ASCII);</b>
+<b class="nc">&nbsp;        int length = Math.min(oemPassword.length, 14);</b>
+<b class="nc">&nbsp;        byte[] keyBytes = new byte[14];</b>
+<b class="nc">&nbsp;        System.arraycopy(oemPassword, 0, keyBytes, 0, length);</b>
+<b class="nc">&nbsp;        Key lowKey = createDESKey(keyBytes, 0);</b>
+<b class="nc">&nbsp;        Key highKey = createDESKey(keyBytes, 7);</b>
+<b class="nc">&nbsp;        byte[] magicConstant = &quot;KGS!@#$%&quot;.getBytes(StandardCharsets.US_ASCII);</b>
+<b class="nc">&nbsp;        Cipher des = Cipher.getInstance(&quot;DES/ECB/NoPadding&quot;);</b>
+<b class="nc">&nbsp;        des.init(Cipher.ENCRYPT_MODE, lowKey);</b>
+<b class="nc">&nbsp;        byte[] lowHash = des.doFinal(magicConstant);</b>
+<b class="nc">&nbsp;        des.init(Cipher.ENCRYPT_MODE, highKey);</b>
+<b class="nc">&nbsp;        byte[] highHash = des.doFinal(magicConstant);</b>
+<b class="nc">&nbsp;        byte[] lmHash = new byte[16];</b>
+<b class="nc">&nbsp;        System.arraycopy(lowHash, 0, lmHash, 0, 8);</b>
+<b class="nc">&nbsp;        System.arraycopy(highHash, 0, lmHash, 8, 8);</b>
+<b class="nc">&nbsp;        return lmHash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a DES encryption key from the given key material.
+&nbsp;     *
+&nbsp;     * @param bytes
+&nbsp;     *            A byte array containing the DES key material.
+&nbsp;     * @param offset
+&nbsp;     *            The offset in the given byte array at which the 7-byte key
+&nbsp;     *            material starts.
+&nbsp;     * @return A DES encryption key created from the key material starting at the
+&nbsp;     *         specified offset in the given byte array.
+&nbsp;     */
+&nbsp;    private static Key createDESKey(byte[] bytes, int offset) {
+<b class="nc">&nbsp;        byte[] keyBytes = new byte[7];</b>
+<b class="nc">&nbsp;        System.arraycopy(bytes, offset, keyBytes, 0, 7);</b>
+<b class="nc">&nbsp;        byte[] material = new byte[8];</b>
+<b class="nc">&nbsp;        material[0] = keyBytes[0];</b>
+<b class="nc">&nbsp;        material[1] = (byte) (keyBytes[0] &lt;&lt; 7 | (keyBytes[1] &amp; 0xff) &gt;&gt;&gt; 1);</b>
+<b class="nc">&nbsp;        material[2] = (byte) (keyBytes[1] &lt;&lt; 6 | (keyBytes[2] &amp; 0xff) &gt;&gt;&gt; 2);</b>
+<b class="nc">&nbsp;        material[3] = (byte) (keyBytes[2] &lt;&lt; 5 | (keyBytes[3] &amp; 0xff) &gt;&gt;&gt; 3);</b>
+<b class="nc">&nbsp;        material[4] = (byte) (keyBytes[3] &lt;&lt; 4 | (keyBytes[4] &amp; 0xff) &gt;&gt;&gt; 4);</b>
+<b class="nc">&nbsp;        material[5] = (byte) (keyBytes[4] &lt;&lt; 3 | (keyBytes[5] &amp; 0xff) &gt;&gt;&gt; 5);</b>
+<b class="nc">&nbsp;        material[6] = (byte) (keyBytes[5] &lt;&lt; 2 | (keyBytes[6] &amp; 0xff) &gt;&gt;&gt; 6);</b>
+<b class="nc">&nbsp;        material[7] = (byte) (keyBytes[6] &lt;&lt; 1);</b>
+<b class="nc">&nbsp;        oddParity(material);</b>
+<b class="nc">&nbsp;        return new SecretKeySpec(material, &quot;DES&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Applies odd parity to the given byte array.
+&nbsp;     *
+&nbsp;     * @param bytes
+&nbsp;     *            The data whose parity bits are to be adjusted for odd parity.
+&nbsp;     */
+&nbsp;    private static void oddParity(byte[] bytes) {
+<b class="nc">&nbsp;        for (int i = 0; i &lt; bytes.length; i++) {</b>
+<b class="nc">&nbsp;            byte b = bytes[i];</b>
+<b class="nc">&nbsp;            boolean needsParity = (((b &gt;&gt;&gt; 7) ^ (b &gt;&gt;&gt; 6) ^ (b &gt;&gt;&gt; 5) ^ (b &gt;&gt;&gt; 4) ^ (b &gt;&gt;&gt; 3) ^ (b &gt;&gt;&gt; 2) ^ (b &gt;&gt;&gt; 1))</b>
+&nbsp;                    &amp; 0x01) == 0;
+<b class="nc">&nbsp;            if (needsParity) {</b>
+<b class="nc">&nbsp;                bytes[i] |= (byte) 0x01;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                bytes[i] &amp;= (byte) 0xfe;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * To HEX String.
+&nbsp;     *
+&nbsp;     * @param bytes
+&nbsp;     *            byte
+&nbsp;     * @return String
+&nbsp;     */
+&nbsp;    public static String toHexString(byte[] bytes) {
+<b class="nc">&nbsp;        StringBuilder retString = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (byte aByte : bytes) {</b>
+<b class="nc">&nbsp;            retString.append(Integer.toHexString(0x0100 + (aByte &amp; 0x00FF)).substring(1));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return retString.toString().toUpperCase();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Attributes getAttributes(String name) throws NamingException {
+<b class="nc">&nbsp;        if (!name.equals(&quot;&quot;)) {</b>
+<b class="nc">&nbsp;            throw new NameNotFoundException();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return (Attributes) this.attributes.clone();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Attributes getAttributes(Name name) throws NamingException {
+<b class="nc">&nbsp;        return getAttributes(name.toString());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Attributes getAttributes(String name, String[] ids) throws NamingException {
+<b class="nc">&nbsp;        if (!name.isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new NameNotFoundException();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Attributes answer = new BasicAttributes(true);</b>
+&nbsp;        Attribute target;
+<b class="nc">&nbsp;        for (String id : ids) {</b>
+<b class="nc">&nbsp;            target = this.attributes.get(id);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(target)) {</b>
+<b class="nc">&nbsp;                answer.put(target);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return answer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Attributes getAttributes(Name name, String[] ids) throws NamingException {
+<b class="nc">&nbsp;        return getAttributes(name.toString(), ids);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return this.ldapLogin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // not used for this example
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object lookup(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object lookup(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void bind(Name name, Object obj) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void bind(String name, Object obj) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void bind(Name name, Object obj, Attributes attrs) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void bind(String name, Object obj, Attributes attrs) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void rebind(Name name, Object obj) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void rebind(String name, Object obj) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void rebind(Name name, Object obj, Attributes attrs) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void rebind(String name, Object obj, Attributes attrs) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void unbind(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void unbind(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void rename(Name oldName, Name newName) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void rename(String oldName, String newName) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;NameClassPair&gt; list(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;NameClassPair&gt; list(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;Binding&gt; listBindings(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;Binding&gt; listBindings(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void destroySubcontext(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void destroySubcontext(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Context createSubcontext(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Context createSubcontext(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public DirContext createSubcontext(Name name, Attributes attrs) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public DirContext createSubcontext(String name, Attributes attrs) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object lookupLink(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object lookupLink(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NameParser getNameParser(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NameParser getNameParser(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String composeName(String name, String prefix) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Name composeName(Name name, Name prefix) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object addToEnvironment(String propName, Object propVal) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object removeFromEnvironment(String propName) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Hashtable&lt;?, ?&gt; getEnvironment() throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void close() throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // -- DirContext
+&nbsp;    @Override
+&nbsp;    public void modifyAttributes(Name name, int modOp, Attributes attrs) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void modifyAttributes(String name, int modOp, Attributes attrs) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void modifyAttributes(Name name, ModificationItem[] mods) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void modifyAttributes(String name, ModificationItem[] mods) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public DirContext getSchema(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public DirContext getSchema(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public DirContext getSchemaClassDefinition(Name name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public DirContext getSchemaClassDefinition(String name) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;SearchResult&gt; search(Name name, Attributes matchingAttributes, String[] attributesToReturn)
+&nbsp;            throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;SearchResult&gt; search(String name, Attributes matchingAttributes,
+&nbsp;            String[] attributesToReturn) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;SearchResult&gt; search(Name name, Attributes matchingAttributes) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;SearchResult&gt; search(String name, Attributes matchingAttributes) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;SearchResult&gt; search(Name name, String filter, SearchControls cons)
+&nbsp;            throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;SearchResult&gt; search(String name, String filter, SearchControls cons)
+&nbsp;            throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;SearchResult&gt; search(Name name, String filterExpr, Object[] filterArgs,
+&nbsp;            SearchControls cons) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NamingEnumeration&lt;SearchResult&gt; search(String name, String filterExpr, Object[] filterArgs,
+&nbsp;            SearchControls cons) throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getNameInNamespace() throws NamingException {
+<b class="nc">&nbsp;        throw new OperationNotSupportedException();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

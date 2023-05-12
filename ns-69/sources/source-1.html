@@ -1,0 +1,166 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > KitodoVersion</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.version</a>
+</div>
+
+<h1>Coverage Summary for Class: KitodoVersion (org.kitodo.production.version)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KitodoVersion</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.version;
+&nbsp;
+&nbsp;import java.util.jar.Attributes;
+&nbsp;import java.util.jar.Manifest;
+&nbsp;
+&nbsp;public class KitodoVersion {
+&nbsp;
+<b class="fc">&nbsp;    private static String version = &quot;N/A&quot;;</b>
+<b class="fc">&nbsp;    private static String buildVersion = &quot;N/A&quot;;</b>
+<b class="fc">&nbsp;    private static String buildDate = &quot;N/A&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private KitodoVersion() {
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Setup KitodoVersion form manifest.
+&nbsp;     *
+&nbsp;     * @param manifest as Manifest
+&nbsp;     */
+&nbsp;    public static void setupFromManifest(Manifest manifest) {
+<b class="fc">&nbsp;        Attributes mainAttributes = manifest.getMainAttributes();</b>
+&nbsp;
+<b class="fc">&nbsp;        version = getValueOrThrowException(mainAttributes, &quot;Implementation-Version&quot;);</b>
+<b class="fc">&nbsp;        buildVersion = version;</b>
+<b class="fc">&nbsp;        buildDate = getValueOrThrowException(mainAttributes, &quot;Implementation-Build-Date&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getValueOrThrowException(Attributes attributes, String attributeName) {
+<b class="fc">&nbsp;        String value = attributes.getValue(attributeName);</b>
+<b class="fc">&nbsp;        if (null == value) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(</b>
+&nbsp;                    &quot;Manifest does not contain &quot; + attributeName + &quot;. The build may be corrupted.&quot;);
+&nbsp;        }
+<b class="fc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String getVersion() {
+<b class="fc">&nbsp;        return version;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String getBuildVersion() {
+<b class="fc">&nbsp;        return buildVersion;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String getBuildDate() {
+<b class="fc">&nbsp;        return buildDate;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

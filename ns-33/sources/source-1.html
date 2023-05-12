@@ -1,0 +1,172 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > KitodoJhoveBase</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.longtermpreservationvalidation</a>
+</div>
+
+<h1>Coverage Summary for Class: KitodoJhoveBase (org.kitodo.longtermpreservationvalidation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KitodoJhoveBase</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69,2%
+  </span>
+  <span class="absValue">
+    (9/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.longtermpreservationvalidation;
+&nbsp;
+&nbsp;import edu.harvard.hul.ois.jhove.App;
+&nbsp;import edu.harvard.hul.ois.jhove.JhoveBase;
+&nbsp;import edu.harvard.hul.ois.jhove.JhoveException;
+&nbsp;import edu.harvard.hul.ois.jhove.Module;
+&nbsp;import edu.harvard.hul.ois.jhove.OutputHandler;
+&nbsp;
+&nbsp;import java.lang.reflect.UndeclaredThrowableException;
+&nbsp;import java.util.Collections;
+&nbsp;
+&nbsp;/**
+&nbsp; * A programmatically initializable {@code JHoveBase} class.
+&nbsp; */
+&nbsp;class KitodoJhoveBase extends JhoveBase {
+&nbsp;    /**
+&nbsp;     * Initializes a JhoveBase. This needs access to the {@code protected}
+&nbsp;     * fields, that’s why it’s a subclass.
+&nbsp;     *
+&nbsp;     * @param modules
+&nbsp;     *            modules to initialize
+&nbsp;     * @throws JhoveException
+&nbsp;     *             if thrown from {@code super()} constructor
+&nbsp;     */
+&nbsp;    KitodoJhoveBase(Iterable&lt;String&gt; modules) throws JhoveException {
+<b class="fc">&nbsp;        super();</b>
+<b class="fc">&nbsp;        super._encoding = &quot;utf-8&quot;;</b>
+<b class="fc">&nbsp;        modules.forEach(clas -&gt; {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                Class&lt;?&gt; cl = Class.forName(clas);</b>
+<b class="fc">&nbsp;                Module module = (Module) cl.newInstance();</b>
+<b class="fc">&nbsp;                module.setDefaultParams(Collections.emptyList());</b>
+<b class="fc">&nbsp;                super._moduleMap.put(module.getName().toLowerCase(), module);</b>
+<b class="nc">&nbsp;            } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;                throw e;</b>
+<b class="nc">&nbsp;            } catch (Exception e) {</b>
+<b class="nc">&nbsp;                throw new UndeclaredThrowableException(e);</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        });
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Validates a file.
+&nbsp;     *
+&nbsp;     * @param file
+&nbsp;     *            file to validate
+&nbsp;     * @param moduleName
+&nbsp;     *            name of validation module
+&nbsp;     * @param handler
+&nbsp;     *            handler to write the output to
+&nbsp;     * @throws Exception
+&nbsp;     *             if something goes wrong
+&nbsp;     */
+&nbsp;    void validate(String file, String moduleName, OutputHandler handler) throws Exception {
+<b class="fc">&nbsp;        super.dispatch(App.newAppWithName(&quot;Jhove&quot;), super.getModule(moduleName), null, handler, null,</b>
+&nbsp;            new String[] {file });
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

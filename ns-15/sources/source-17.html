@@ -1,0 +1,773 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Task</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: Task (org.kitodo.data.database.beans)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Task</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (63/70)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    82,2%
+  </span>
+  <span class="absValue">
+    (111/135)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Task$HibernateProxy$pn1i8N7g</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (63/70)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    82,2%
+  </span>
+  <span class="absValue">
+    (111/135)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.beans;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.persistence.CascadeType;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Convert;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.ForeignKey;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.JoinTable;
+&nbsp;import javax.persistence.ManyToMany;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;import javax.persistence.Transient;
+&nbsp;
+&nbsp;import org.kitodo.data.database.converter.TaskEditTypeConverter;
+&nbsp;import org.kitodo.data.database.converter.TaskStatusConverter;
+&nbsp;import org.kitodo.data.database.enums.TaskEditType;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.persistence.TaskDAO;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;task&quot;)
+&nbsp;public class Task extends BaseIndexedBean {
+&nbsp;
+&nbsp;    @Column(name = &quot;title&quot;)
+&nbsp;    private String title;
+&nbsp;
+&nbsp;    @Column(name = &quot;ordering&quot;)
+&nbsp;    private Integer ordering;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;processingStatus&quot;)</b>
+&nbsp;    @Convert(converter = TaskStatusConverter.class)
+&nbsp;    private TaskStatus processingStatus = TaskStatus.LOCKED;
+&nbsp;
+&nbsp;    @Column(name = &quot;processingTime&quot;)
+&nbsp;    private Date processingTime;
+&nbsp;
+&nbsp;    @Column(name = &quot;processingBegin&quot;)
+&nbsp;    private Date processingBegin;
+&nbsp;
+&nbsp;    @Column(name = &quot;processingEnd&quot;)
+&nbsp;    private Date processingEnd;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;editType&quot;)</b>
+&nbsp;    @Convert(converter = TaskEditTypeConverter.class)
+&nbsp;    private TaskEditType editType = TaskEditType.UNNOWKN;
+&nbsp;
+&nbsp;    @Column(name = &quot;homeDirectory&quot;)
+&nbsp;    private short homeDirectory;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;concurrent&quot;)</b>
+&nbsp;    private boolean concurrent = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;last&quot;)</b>
+&nbsp;    private boolean last = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;correction&quot;)</b>
+&nbsp;    private boolean correction = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;typeMetadata&quot;)</b>
+&nbsp;    private boolean typeMetadata = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;typeAutomatic&quot;)</b>
+&nbsp;    private boolean typeAutomatic = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;typeImagesRead&quot;)</b>
+&nbsp;    private boolean typeImagesRead = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;typeImagesWrite&quot;)</b>
+&nbsp;    private boolean typeImagesWrite = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;typeGenerateImages&quot;)</b>
+&nbsp;    private boolean typeGenerateImages = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;typeValidateImages&quot;)</b>
+&nbsp;    private boolean typeValidateImages = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;typeExportDms&quot;)</b>
+&nbsp;    private boolean typeExportDMS = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;typeAcceptClose&quot;)</b>
+&nbsp;    private boolean typeAcceptClose = false;
+&nbsp;
+&nbsp;    @Column(name = &quot;scriptName&quot;)
+&nbsp;    private String scriptName;
+&nbsp;
+&nbsp;    @Column(name = &quot;scriptPath&quot;)
+&nbsp;    private String scriptPath;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;typeCloseVerify&quot;)</b>
+&nbsp;    private boolean typeCloseVerify = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;batchStep&quot;)</b>
+&nbsp;    private boolean batchStep = false;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;repeatOnCorrection&quot;)</b>
+&nbsp;    private boolean repeatOnCorrection = false;
+&nbsp;
+&nbsp;    @Column(name = &quot;workflowId&quot;)
+&nbsp;    private String workflowId;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;workflowCondition_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_task_workflowCondition_id&quot;))
+&nbsp;    private WorkflowCondition workflowCondition;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This field contains information about user, which works on this task.
+&nbsp;     */
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;user_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_task_user_id&quot;))
+&nbsp;    private User processingUser;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;template_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_task_template_id&quot;))
+&nbsp;    private Template template;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;process_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_task_process_id&quot;))
+&nbsp;    private Process process;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This field contains information about user&#39;s roles, which are allowed to
+&nbsp;     * work on this task.
+&nbsp;     */
+&nbsp;    @ManyToMany(cascade = CascadeType.PERSIST)
+&nbsp;    @JoinTable(name = &quot;task_x_role&quot;, joinColumns = {
+&nbsp;        @JoinColumn(name = &quot;task_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_task_x_role_task_id&quot;)) }, inverseJoinColumns = {
+&nbsp;            @JoinColumn(name = &quot;role_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_task_x_user_role_id&quot;)) })
+&nbsp;    private List&lt;Role&gt; roles;
+&nbsp;
+&nbsp;    @Transient
+&nbsp;    private String localizedTitle;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+<b class="fc">&nbsp;    public Task() {</b>
+<b class="fc">&nbsp;        this.title = &quot;&quot;;</b>
+<b class="fc">&nbsp;        this.roles = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.ordering = 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copy constructor.
+&nbsp;     *
+&nbsp;     * @param templateTask
+&nbsp;     *            task to copy
+&nbsp;     */
+<b class="fc">&nbsp;    public Task(Task templateTask) {</b>
+<b class="fc">&nbsp;        this.title = templateTask.getTitle();</b>
+<b class="fc">&nbsp;        this.ordering = templateTask.getOrdering();</b>
+<b class="fc">&nbsp;        this.typeAutomatic = templateTask.isTypeAutomatic();</b>
+<b class="fc">&nbsp;        this.scriptName = templateTask.getScriptName();</b>
+<b class="fc">&nbsp;        this.scriptPath = templateTask.getScriptPath();</b>
+<b class="fc">&nbsp;        this.batchStep = templateTask.isBatchStep();</b>
+<b class="fc">&nbsp;        this.concurrent = templateTask.isConcurrent();</b>
+<b class="fc">&nbsp;        this.last = templateTask.isLast();</b>
+<b class="fc">&nbsp;        this.typeAcceptClose = templateTask.isTypeAcceptClose();</b>
+<b class="fc">&nbsp;        this.typeCloseVerify = templateTask.isTypeCloseVerify();</b>
+<b class="fc">&nbsp;        this.typeExportDMS = templateTask.isTypeExportDMS();</b>
+<b class="fc">&nbsp;        this.typeImagesRead = templateTask.isTypeImagesRead();</b>
+<b class="fc">&nbsp;        this.typeImagesWrite = templateTask.isTypeImagesWrite();</b>
+<b class="fc">&nbsp;        this.typeMetadata = templateTask.isTypeMetadata();</b>
+<b class="fc">&nbsp;        this.typeGenerateImages = templateTask.isTypeGenerateImages();</b>
+<b class="fc">&nbsp;        this.typeValidateImages = templateTask.isTypeValidateImages();</b>
+<b class="fc">&nbsp;        this.repeatOnCorrection = templateTask.isRepeatOnCorrection();</b>
+<b class="fc">&nbsp;        this.processingStatus = templateTask.getProcessingStatus();</b>
+<b class="fc">&nbsp;        this.homeDirectory = templateTask.getHomeDirectory();</b>
+<b class="fc">&nbsp;        this.workflowId = templateTask.getWorkflowId();</b>
+<b class="fc">&nbsp;        this.workflowCondition = templateTask.getWorkflowCondition();</b>
+&nbsp;
+&nbsp;        // necessary to create new ArrayList in other case session problem!
+<b class="fc">&nbsp;        this.roles = new ArrayList&lt;&gt;(templateTask.getRoles());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getTitle() {
+<b class="fc">&nbsp;        return this.title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTitle(String title) {
+<b class="fc">&nbsp;        this.title = title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Integer getOrdering() {
+<b class="fc">&nbsp;        return this.ordering;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setOrdering(Integer ordering) {
+<b class="fc">&nbsp;        this.ordering = ordering;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get editType as {@link TaskEditType}.
+&nbsp;     *
+&nbsp;     * @return current edit type
+&nbsp;     */
+&nbsp;    public TaskEditType getEditType() {
+<b class="fc">&nbsp;        return this.editType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set editType to specific value from {@link TaskEditType}.
+&nbsp;     *
+&nbsp;     * @param inputType
+&nbsp;     *            as {@link TaskEditType}
+&nbsp;     */
+&nbsp;    public void setEditType(TaskEditType inputType) {
+<b class="fc">&nbsp;        this.editType = inputType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processing status to specific value from {@link TaskStatus}.
+&nbsp;     *
+&nbsp;     * @param inputStatus
+&nbsp;     *            as {@link TaskStatus}
+&nbsp;     */
+&nbsp;    public void setProcessingStatus(TaskStatus inputStatus) {
+<b class="fc">&nbsp;        this.processingStatus = inputStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processing status as {@link TaskStatus}.
+&nbsp;     *
+&nbsp;     * @return current processing status
+&nbsp;     */
+&nbsp;    public TaskStatus getProcessingStatus() {
+<b class="fc">&nbsp;        return this.processingStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Date getProcessingTime() {
+<b class="fc">&nbsp;        return this.processingTime;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessingTime(Date processingTime) {
+<b class="fc">&nbsp;        this.processingTime = processingTime;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Date getProcessingBegin() {
+<b class="fc">&nbsp;        return this.processingBegin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessingBegin(Date processingBegin) {
+<b class="fc">&nbsp;        this.processingBegin = processingBegin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Date getProcessingEnd() {
+<b class="fc">&nbsp;        return this.processingEnd;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessingEnd(Date processingEnd) {
+<b class="fc">&nbsp;        this.processingEnd = processingEnd;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public short getHomeDirectory() {
+<b class="fc">&nbsp;        return this.homeDirectory;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setHomeDirectory(short homeDirectory) {
+<b class="nc">&nbsp;        this.homeDirectory = homeDirectory;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get concurrent.
+&nbsp;     *
+&nbsp;     * @return value of concurrent
+&nbsp;     */
+&nbsp;    public boolean isConcurrent() {
+<b class="fc">&nbsp;        return concurrent;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set concurrent.
+&nbsp;     *
+&nbsp;     * @param concurrent
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setConcurrent(boolean concurrent) {
+<b class="fc">&nbsp;        this.concurrent = concurrent;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information if task is the last task in the workflow.
+&nbsp;     *
+&nbsp;     * @return information if task is the last task in the workflow
+&nbsp;     */
+&nbsp;    public boolean isLast() {
+<b class="fc">&nbsp;        return last;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set last information if task is the last task in the workflow.
+&nbsp;     *
+&nbsp;     * @param last
+&nbsp;     *            as true or false
+&nbsp;     */
+&nbsp;    public void setLast(boolean last) {
+<b class="fc">&nbsp;        this.last = last;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get correction.
+&nbsp;     *
+&nbsp;     * @return value of correction
+&nbsp;     */
+&nbsp;    public boolean isCorrection() {
+<b class="fc">&nbsp;        return correction;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set correction.
+&nbsp;     *
+&nbsp;     * @param correction as boolean
+&nbsp;     */
+&nbsp;    public void setCorrection(boolean correction) {
+<b class="fc">&nbsp;        this.correction = correction;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public User getProcessingUser() {
+<b class="fc">&nbsp;        return this.processingUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessingUser(User processingUser) {
+<b class="fc">&nbsp;        this.processingUser = processingUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Process getProcess() {
+<b class="fc">&nbsp;        return this.process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcess(Process process) {
+<b class="fc">&nbsp;        this.process = process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get template.
+&nbsp;     *
+&nbsp;     * @return value of template
+&nbsp;     */
+&nbsp;    public Template getTemplate() {
+<b class="fc">&nbsp;        return this.template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set template.
+&nbsp;     *
+&nbsp;     * @param template
+&nbsp;     *            as Template
+&nbsp;     */
+&nbsp;    public void setTemplate(Template template) {
+<b class="fc">&nbsp;        this.template = template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of roles.
+&nbsp;     *
+&nbsp;     * @return list of Role objects or empty list
+&nbsp;     */
+&nbsp;    public List&lt;Role&gt; getRoles() {
+<b class="fc">&nbsp;        initialize(new TaskDAO(), this.roles);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.roles)) {</b>
+<b class="nc">&nbsp;            this.roles = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.roles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of roles.
+&nbsp;     *
+&nbsp;     * @param roles
+&nbsp;     *            as list of Role objects
+&nbsp;     */
+&nbsp;    public void setRoles(List&lt;Role&gt; roles) {
+<b class="nc">&nbsp;        this.roles = roles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of folders whose contents are to be generated.
+&nbsp;     *
+&nbsp;     * @return list of Folder objects or empty list
+&nbsp;     */
+&nbsp;    public List&lt;Folder&gt; getContentFolders() {
+<b class="nc">&nbsp;        List&lt;Folder&gt; contentFolders = typeGenerateImages</b>
+<b class="nc">&nbsp;                ? process.getProject().getFolders().parallelStream()</b>
+<b class="nc">&nbsp;                        .filter(folder -&gt; folder.getDerivative().isPresent() || folder.getDpi().isPresent()</b>
+<b class="nc">&nbsp;                                || folder.getImageScale().isPresent() || folder.getImageSize().isPresent())</b>
+<b class="nc">&nbsp;                        .collect(Collectors.toList())</b>
+<b class="nc">&nbsp;                : Collections.emptyList();</b>
+<b class="nc">&nbsp;        return contentFolders;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of folders whose contents are to be validated.
+&nbsp;     *
+&nbsp;     * @return list of Folder objects or empty list
+&nbsp;     */
+&nbsp;    public List&lt;Folder&gt; getValidationFolders() {
+<b class="nc">&nbsp;        List&lt;Folder&gt; validationFolders = typeValidateImages</b>
+<b class="nc">&nbsp;                ? process.getProject().getFolders().parallelStream()</b>
+<b class="nc">&nbsp;                        .filter(Folder::isValidateFolder)</b>
+<b class="nc">&nbsp;                        .collect(Collectors.toList())</b>
+<b class="nc">&nbsp;                : Collections.emptyList();</b>
+<b class="nc">&nbsp;        return validationFolders;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isTypeImagesRead() {
+<b class="fc">&nbsp;        return this.typeImagesRead;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTypeImagesRead(boolean typeImagesRead) {
+<b class="fc">&nbsp;        this.typeImagesRead = typeImagesRead;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isTypeImagesWrite() {
+<b class="fc">&nbsp;        return this.typeImagesWrite;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set task type images. If types is true, it also sets type images read to
+&nbsp;     * true.
+&nbsp;     *
+&nbsp;     * @param typeImagesWrite
+&nbsp;     *            true or false
+&nbsp;     */
+&nbsp;    public void setTypeImagesWrite(boolean typeImagesWrite) {
+<b class="fc">&nbsp;        this.typeImagesWrite = typeImagesWrite;</b>
+<b class="fc">&nbsp;        if (typeImagesWrite) {</b>
+<b class="fc">&nbsp;            this.typeImagesRead = true;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get type generate images.
+&nbsp;     *
+&nbsp;     * @return value of typeGenerateImages
+&nbsp;     */
+&nbsp;    public boolean isTypeGenerateImages() {
+<b class="fc">&nbsp;        return typeGenerateImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set type generate images.
+&nbsp;     *
+&nbsp;     * @param generateImages as boolean
+&nbsp;     */
+&nbsp;    public void setTypeGenerateImages(boolean generateImages) {
+<b class="fc">&nbsp;        this.typeGenerateImages = generateImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get type validate images.
+&nbsp;     *
+&nbsp;     * @return value of typeValidateImages
+&nbsp;     */
+&nbsp;    public boolean isTypeValidateImages() {
+<b class="fc">&nbsp;        return typeValidateImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set type validate images.
+&nbsp;     *
+&nbsp;     * @param validateImages as boolean
+&nbsp;     */
+&nbsp;    public void setTypeValidateImages(boolean validateImages) {
+<b class="fc">&nbsp;        this.typeValidateImages = validateImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isTypeExportDMS() {
+<b class="fc">&nbsp;        return this.typeExportDMS;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTypeExportDMS(boolean typeExportDMS) {
+<b class="fc">&nbsp;        this.typeExportDMS = typeExportDMS;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isTypeMetadata() {
+<b class="fc">&nbsp;        return this.typeMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTypeMetadata(boolean typeMetadata) {
+<b class="fc">&nbsp;        this.typeMetadata = typeMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isTypeAcceptClose() {
+<b class="fc">&nbsp;        return this.typeAcceptClose;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTypeAcceptClose(boolean typeAcceptClose) {
+<b class="fc">&nbsp;        this.typeAcceptClose = typeAcceptClose;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isTypeAutomatic() {
+<b class="fc">&nbsp;        return this.typeAutomatic;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTypeAutomatic(boolean typeAutomatic) {
+<b class="fc">&nbsp;        this.typeAutomatic = typeAutomatic;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isTypeCloseVerify() {
+<b class="fc">&nbsp;        return this.typeCloseVerify;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTypeCloseVerify(boolean typeCloseVerify) {
+<b class="fc">&nbsp;        this.typeCloseVerify = typeCloseVerify;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getScriptName() {
+<b class="fc">&nbsp;        return this.scriptName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setScriptName(String scriptName) {
+<b class="fc">&nbsp;        this.scriptName = scriptName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getScriptPath() {
+<b class="fc">&nbsp;        return this.scriptPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setScriptPath(String scriptPath) {
+<b class="fc">&nbsp;        this.scriptPath = scriptPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get workflow id - id of task object in diagram - by this id we can identify
+&nbsp;     * change done to task.
+&nbsp;     *
+&nbsp;     * @return workflow id as String
+&nbsp;     */
+&nbsp;    public String getWorkflowId() {
+<b class="fc">&nbsp;        return workflowId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set workflow id.
+&nbsp;     *
+&nbsp;     * @param workflowId
+&nbsp;     *            id of task object in diagram - by this id we can identify change
+&nbsp;     *            done to task
+&nbsp;     */
+&nbsp;    public void setWorkflowId(String workflowId) {
+<b class="fc">&nbsp;        this.workflowId = workflowId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get workflowCondition.
+&nbsp;     *
+&nbsp;     * @return value of workflowCondition
+&nbsp;     */
+&nbsp;    public WorkflowCondition getWorkflowCondition() {
+<b class="fc">&nbsp;        return workflowCondition;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set workflowCondition.
+&nbsp;     *
+&nbsp;     * @param workflowCondition
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setWorkflowCondition(WorkflowCondition workflowCondition) {
+<b class="fc">&nbsp;        this.workflowCondition = workflowCondition;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isBatchStep() {
+<b class="fc">&nbsp;        return this.batchStep;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setBatchStep(boolean batchStep) {
+<b class="fc">&nbsp;        this.batchStep = batchStep;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information if task should be repeated on correction.
+&nbsp;     *
+&nbsp;     * @return value of repeatOnCorrection
+&nbsp;     */
+&nbsp;    public boolean isRepeatOnCorrection() {
+<b class="fc">&nbsp;        return repeatOnCorrection;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set information if task should be repeated on correction.
+&nbsp;     *
+&nbsp;     * @param repeatOnCorrection as boolean
+&nbsp;     */
+&nbsp;    public void setRepeatOnCorrection(boolean repeatOnCorrection) {
+<b class="fc">&nbsp;        this.repeatOnCorrection = repeatOnCorrection;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get localized title.
+&nbsp;     *
+&nbsp;     * @return localized title as String
+&nbsp;     */
+&nbsp;    public String getLocalizedTitle() {
+<b class="nc">&nbsp;        return this.localizedTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set localized titles as String.
+&nbsp;     *
+&nbsp;     * @param localizedTitle
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setLocalizedTitle(String localizedTitle) {
+<b class="fc">&nbsp;        this.localizedTitle = localizedTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Here will be methods which should be in TaskService but are used by jsp
+&nbsp;    // files
+&nbsp;    /**
+&nbsp;     * Get task title with user full name.
+&nbsp;     *
+&nbsp;     * @return task title with user full name as String
+&nbsp;     */
+&nbsp;    public String getTitleWithUserName() {
+<b class="nc">&nbsp;        String titleWithUserName = this.getTitle();</b>
+<b class="nc">&nbsp;        if (this.getProcessingUser() != null &amp;&amp; this.getProcessingUser().getId() != null</b>
+<b class="nc">&nbsp;                &amp;&amp; this.getProcessingUser().getId() != 0) {</b>
+<b class="nc">&nbsp;            titleWithUserName += &quot; (&quot; + this.getProcessingUser().getFullName() + &quot;)&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return titleWithUserName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object object) {
+<b class="fc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof Task) {</b>
+<b class="fc">&nbsp;            Task task = (Task) object;</b>
+<b class="fc">&nbsp;            return Objects.equals(this.getId(), task.getId());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        return Objects.hash(title, processingTime, processingBegin, processingEnd, process, template);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

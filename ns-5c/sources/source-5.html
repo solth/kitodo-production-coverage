@@ -1,0 +1,1073 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SearchService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data.base</a>
+</div>
+
+<h1>Coverage Summary for Class: SearchService (org.kitodo.production.services.data.base)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SearchService</td>
+<td class="coverageStat">
+  <span class="percent">
+    86%
+  </span>
+  <span class="absValue">
+    (43/50)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,7%
+  </span>
+  <span class="absValue">
+    (135/256)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SearchService$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    86,3%
+  </span>
+  <span class="absValue">
+    (44/51)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,9%
+  </span>
+  <span class="absValue">
+    (136/257)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data.base;
+&nbsp;
+&nbsp;import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+&nbsp;import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
+&nbsp;import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
+&nbsp;import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
+&nbsp;import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import javax.json.JsonObject;
+&nbsp;import javax.ws.rs.HttpMethod;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.elasticsearch.index.query.BoolQueryBuilder;
+&nbsp;import org.elasticsearch.index.query.Operator;
+&nbsp;import org.elasticsearch.index.query.QueryBuilder;
+&nbsp;import org.elasticsearch.search.aggregations.AggregationBuilders;
+&nbsp;import org.elasticsearch.search.aggregations.Aggregations;
+&nbsp;import org.elasticsearch.search.aggregations.BucketOrder;
+&nbsp;import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
+&nbsp;import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+&nbsp;import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+&nbsp;import org.elasticsearch.search.sort.SortBuilder;
+&nbsp;import org.elasticsearch.search.sort.SortBuilders;
+&nbsp;import org.kitodo.data.database.beans.BaseBean;
+&nbsp;import org.kitodo.data.database.beans.BaseIndexedBean;
+&nbsp;import org.kitodo.data.database.enums.IndexAction;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.database.persistence.BaseDAO;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.data.elasticsearch.index.Indexer;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.BaseType;
+&nbsp;import org.kitodo.data.elasticsearch.search.Searcher;
+&nbsp;import org.kitodo.data.elasticsearch.search.enums.SearchCondition;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.dto.BaseDTO;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.data.ProjectService;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;/**
+&nbsp; * Class for implementing methods used by all service classes which search in
+&nbsp; * ElasticSearch index.
+&nbsp; */
+<b class="fc">&nbsp;public abstract class SearchService&lt;T extends BaseIndexedBean, S extends BaseDTO, V extends BaseDAO&lt;T&gt;&gt;</b>
+&nbsp;        extends SearchDatabaseService&lt;T, V&gt; {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(SearchService.class);</b>
+&nbsp;    protected Searcher searcher;
+&nbsp;    protected Indexer indexer;
+&nbsp;    protected BaseType type;
+&nbsp;    protected static final String WILDCARD = &quot;*&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor necessary to use searcher in child classes.
+&nbsp;     *
+&nbsp;     * @param dao
+&nbsp;     *            DAO object for executing operations on database
+&nbsp;     * @param type
+&nbsp;     *            Type object for ElasticSearch
+&nbsp;     * @param indexer
+&nbsp;     *            for executing insert / updates to ElasticSearch
+&nbsp;     * @param searcher
+&nbsp;     *            for executing queries to ElasticSearch
+&nbsp;     */
+&nbsp;    public SearchService(V dao, BaseType type, Indexer indexer, Searcher searcher) {
+<b class="fc">&nbsp;        super(dao);</b>
+<b class="fc">&nbsp;        this.searcher = searcher;</b>
+<b class="fc">&nbsp;        this.indexer = indexer;</b>
+<b class="fc">&nbsp;        this.type = type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method converts JSON object object to DTO. Necessary for displaying in the
+&nbsp;     * frontend.
+&nbsp;     *
+&nbsp;     * @param jsonObject
+&nbsp;     *            return from find methods
+&nbsp;     * @param related
+&nbsp;     *            true or false
+&nbsp;     * @return DTO object
+&nbsp;     */
+&nbsp;    public abstract S convertJSONObjectToDTO(Map&lt;String, Object&gt; jsonObject, boolean related) throws DataException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count all not indexed rows in database. Not indexed means that row has index
+&nbsp;     * action INDEX or NULL.
+&nbsp;     *
+&nbsp;     * @return amount of all not indexed rows
+&nbsp;     */
+&nbsp;    public abstract Long countNotIndexedDatabaseRows() throws DAOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all not indexed objects from database. Not indexed means that row has
+&nbsp;     * index action INDEX or NULL.
+&nbsp;     *
+&nbsp;     * @return list of all not indexed objects
+&nbsp;     */
+&nbsp;    public abstract List&lt;T&gt; getAllNotIndexed();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all not indexed objects from database in given range. Not indexed means
+&nbsp;     * that row has index action INDEX or NULL.
+&nbsp;     *
+&nbsp;     * @param offset
+&nbsp;     *            result - important, numeration starts since 0
+&nbsp;     * @param size
+&nbsp;     *            amount of results
+&nbsp;     * @return list of all not indexed objects from database in given range
+&nbsp;     */
+&nbsp;    public List&lt;T&gt; getAllNotIndexed(int offset, int size) throws DAOException {
+<b class="nc">&nbsp;        return dao.getAllNotIndexed(offset, size);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all DTO objects from index an convert them for frontend with all
+&nbsp;     * relations.
+&nbsp;     *
+&nbsp;     * @return List of DTO objects
+&nbsp;     */
+&nbsp;    public List&lt;S&gt; findAll() throws DataException {
+<b class="fc">&nbsp;        return findAll(false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all DTO objects from index.
+&nbsp;     *
+&nbsp;     * @return List of DTO objects
+&nbsp;     */
+&nbsp;    public List&lt;S&gt; findAll(boolean related) throws DataException {
+<b class="fc">&nbsp;        return convertJSONObjectsToDTOs(findAllDocuments(), related);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all ids from index.
+&nbsp;     *
+&nbsp;     * @return List of ids
+&nbsp;     */
+&nbsp;    public List&lt;Integer&gt; findAllIDs() throws DataException {
+<b class="fc">&nbsp;        List&lt;Integer&gt; allIds = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Map&lt;String, Object&gt; document : findAllDocuments()) {</b>
+<b class="fc">&nbsp;            allIds.add(Integer.parseInt((String) document.get(&quot;id&quot;)));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return allIds;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all ids from index in a given range.
+&nbsp;     *
+&nbsp;     * @return List of ids in given range
+&nbsp;     */
+&nbsp;    public List&lt;Integer&gt; findAllIDs(Long startIndex, int limit) throws DataException {
+<b class="fc">&nbsp;        List&lt;Integer&gt; allIds = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Map&lt;String, Object&gt; document : findAllDocuments(Math.toIntExact(startIndex), limit)) {</b>
+<b class="fc">&nbsp;            allIds.add(Integer.parseInt((String) document.get(&quot;id&quot;)));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return allIds;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method saves document to the index of Elastic Search.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBean
+&nbsp;     *            object
+&nbsp;     * @param forceRefresh
+&nbsp;     *            force index refresh - if true, time of execution is longer but
+&nbsp;     *            object is right after that available for display
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public void saveToIndex(T baseIndexedBean, boolean forceRefresh)
+&nbsp;            throws CustomResponseException, DataException, IOException {
+&nbsp;
+<b class="fc">&nbsp;        indexer.setMethod(HttpMethod.PUT);</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(baseIndexedBean)) {</b>
+<b class="fc">&nbsp;            indexer.performSingleRequest(baseIndexedBean, type, forceRefresh);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method adds all object found in database to Elastic Search index.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBeans
+&nbsp;     *            List of BaseIndexedBean objects
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public void addAllObjectsToIndex(List&lt;T&gt; baseIndexedBeans) throws CustomResponseException, DAOException, IOException {
+<b class="nc">&nbsp;        indexer.setMethod(HttpMethod.PUT);</b>
+<b class="nc">&nbsp;        if (!baseIndexedBeans.isEmpty()) {</b>
+<b class="nc">&nbsp;            indexer.performMultipleRequests(baseIndexedBeans, type, false);</b>
+<b class="nc">&nbsp;            saveAsIndexed(baseIndexedBeans);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method removes document from the index of Elastic Search.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBean
+&nbsp;     *            object
+&nbsp;     * @param forceRefresh
+&nbsp;     *            force index refresh - if true, time of execution is longer but
+&nbsp;     *            object is right after that available for display
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public void removeFromIndex(T baseIndexedBean, boolean forceRefresh)
+&nbsp;            throws CustomResponseException, DataException, IOException {
+<b class="fc">&nbsp;        indexer.setMethod(HttpMethod.DELETE);</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(baseIndexedBean)) {</b>
+<b class="fc">&nbsp;            indexer.performSingleRequest(baseIndexedBean, type, forceRefresh);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method removes document from the index of Elastic Search by given id.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of object
+&nbsp;     * @param forceRefresh
+&nbsp;     *            force index refresh - if true, time of execution is longer but
+&nbsp;     *            object is right after that available for display
+&nbsp;     */
+&nbsp;    public void removeFromIndex(Integer id, boolean forceRefresh) throws CustomResponseException, DataException {
+<b class="fc">&nbsp;        indexer.setMethod(HttpMethod.DELETE);</b>
+<b class="fc">&nbsp;        indexer.performSingleRequest(id, forceRefresh);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method saves relations which can be potentially modified together with
+&nbsp;     * object.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBean
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    protected void manageDependenciesForIndex(T baseIndexedBean)
+&nbsp;            throws CustomResponseException, DAOException, DataException, IOException {
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * calls save method with default updateRelatedObjectsInIndex=false.
+&nbsp;     * @param object the object to save
+&nbsp;     */
+&nbsp;    public void save(T object) throws DataException {
+<b class="fc">&nbsp;        save(object, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method saves object to database and document to the index of Elastic Search.
+&nbsp;     * This method binds three other methods: save to database, save to index and
+&nbsp;     * save dependencies to index.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * First step sets up the flag indexAction to state Index and saves to database.
+&nbsp;     * It informs that object was updated in database but not yet in index. If this
+&nbsp;     * step fails, method breaks. If it is successful, method saves changes to
+&nbsp;     * index, first document and next its dependencies. If one of this steps fails,
+&nbsp;     * method retries up to 5 times operations on index. If it continues to fail,
+&nbsp;     * method breaks. If save to index was successful, indexAction flag is changed
+&nbsp;     * to Done and database is again updated. There is possibility that last step
+&nbsp;     * fails and in that case, even if index is up to date, in some point of the
+&nbsp;     * future it will be reindexed by administrator.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBean
+&nbsp;     *            object
+&nbsp;     *
+&nbsp;     * @param updateRelatedObjectsInIndex if relatedObjects need to be updated in Index
+&nbsp;     */
+&nbsp;    public void save(T baseIndexedBean, boolean updateRelatedObjectsInIndex) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            baseIndexedBean.setIndexAction(IndexAction.INDEX);</b>
+<b class="fc">&nbsp;            saveToDatabase(baseIndexedBean);</b>
+&nbsp;            // TODO: find out why properties lists are save double
+<b class="fc">&nbsp;            T savedBean = getById(baseIndexedBean.getId());</b>
+<b class="fc">&nbsp;            saveToIndex(savedBean, true);</b>
+<b class="fc">&nbsp;            if (updateRelatedObjectsInIndex) {</b>
+<b class="fc">&nbsp;                manageDependenciesForIndex(savedBean);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            savedBean.setIndexAction(IndexAction.DONE);</b>
+<b class="fc">&nbsp;            saveToDatabase(savedBean);</b>
+<b class="fc">&nbsp;        } catch (DAOException e) {</b>
+<b class="fc">&nbsp;            logger.debug(e);</b>
+<b class="fc">&nbsp;            throw new DataException(e);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException | IOException e) {</b>
+<b class="nc">&nbsp;            int count = 0;</b>
+<b class="nc">&nbsp;            int maxTries = 5;</b>
+&nbsp;            while (true) {
+&nbsp;                try {
+<b class="nc">&nbsp;                    saveToIndex(baseIndexedBean, true);</b>
+<b class="nc">&nbsp;                    manageDependenciesForIndex(baseIndexedBean);</b>
+<b class="nc">&nbsp;                    baseIndexedBean.setIndexAction(IndexAction.DONE);</b>
+<b class="nc">&nbsp;                    saveToDatabase(baseIndexedBean);</b>
+<b class="nc">&nbsp;                    break;</b>
+<b class="nc">&nbsp;                } catch (CustomResponseException | IOException ee) {</b>
+<b class="nc">&nbsp;                    logger.debug(ee);</b>
+<b class="nc">&nbsp;                    if (++count &gt;= maxTries) {</b>
+<b class="nc">&nbsp;                        throw new DataException(ee);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                } catch (DAOException daoe) {</b>
+<b class="nc">&nbsp;                    logger.debug(&quot;Index was updated but flag in database not... {}&quot;, daoe.getMessage());</b>
+<b class="nc">&nbsp;                    throw new DataException(daoe);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method removes object from database and document from the index of Elastic
+&nbsp;     * Search.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of object
+&nbsp;     */
+&nbsp;    public void remove(Integer id) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            T baseIndexedBean = getById(id);</b>
+<b class="fc">&nbsp;            remove(baseIndexedBean);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method removes object from database and document from the index of Elastic
+&nbsp;     * Search.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBean
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void remove(T baseIndexedBean) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            baseIndexedBean.setIndexAction(IndexAction.DELETE);</b>
+<b class="fc">&nbsp;            saveToDatabase(baseIndexedBean);</b>
+<b class="fc">&nbsp;            T savedBean = getById(baseIndexedBean.getId());</b>
+<b class="fc">&nbsp;            removeFromIndex(savedBean, true);</b>
+<b class="fc">&nbsp;            manageDependenciesForIndex(savedBean);</b>
+<b class="fc">&nbsp;            removeFromDatabase(savedBean);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            logger.debug(e);</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException | IOException e) {</b>
+<b class="nc">&nbsp;            int count = 0;</b>
+<b class="nc">&nbsp;            int maxTries = 5;</b>
+&nbsp;            while (true) {
+&nbsp;                try {
+<b class="nc">&nbsp;                    removeFromIndex(baseIndexedBean, true);</b>
+<b class="nc">&nbsp;                    removeFromDatabase(baseIndexedBean);</b>
+<b class="nc">&nbsp;                    break;</b>
+<b class="nc">&nbsp;                } catch (CustomResponseException | IOException ee) {</b>
+<b class="nc">&nbsp;                    logger.debug(ee);</b>
+<b class="nc">&nbsp;                    if (++count &gt;= maxTries) {</b>
+<b class="nc">&nbsp;                        throw new DataException(ee);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                } catch (DAOException daoe) {</b>
+<b class="nc">&nbsp;                    logger.debug(&quot;Remove from index was successful but...{}&quot;, daoe.getMessage());</b>
+<b class="nc">&nbsp;                    throw new DataException(daoe);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count all objects in index.
+&nbsp;     *
+&nbsp;     * @return amount of all objects
+&nbsp;     */
+&nbsp;    public Long count() throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return searcher.countDocuments();</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count objects according to given query.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            for index search
+&nbsp;     * @return amount of objects according to given query or 0 if query is null
+&nbsp;     */
+&nbsp;    public Long count(QueryBuilder query) throws DataException {
+<b class="fc">&nbsp;        return countDocuments(query);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Display all documents for exact type.
+&nbsp;     *
+&nbsp;     * @return list of all documents
+&nbsp;     */
+&nbsp;    public List&lt;Map&lt;String, Object&gt;&gt; findAllDocuments() throws DataException {
+<b class="fc">&nbsp;        QueryBuilder queryBuilder = matchAllQuery();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            return searcher.findDocuments(queryBuilder, null, null, Math.toIntExact(count()));</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Display all documents for exact type in a given range.
+&nbsp;     *
+&nbsp;     * @return list of all documents from that range
+&nbsp;     */
+&nbsp;    public List&lt;Map&lt;String, Object&gt;&gt; findAllDocuments(Integer offset, Integer size) throws DataException {
+<b class="fc">&nbsp;        QueryBuilder queryBuilder = matchAllQuery();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            return searcher.findDocuments(queryBuilder, null, offset, size);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find object in ES and convert it to DTO.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            object id
+&nbsp;     * @return DTO object
+&nbsp;     */
+&nbsp;    public S findById(Integer id) throws DataException {
+<b class="fc">&nbsp;        return findById(id, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find object related to previously found object in ES and convert it to DTO.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            related object id
+&nbsp;     * @param related
+&nbsp;     *            this method should ba called only with true, if false call method
+&nbsp;     *            findById(Integer id).
+&nbsp;     * @return related DTO object
+&nbsp;     */
+&nbsp;    public S findById(Integer id, boolean related) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return convertJSONObjectToDTO(searcher.findDocument(id), related);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find list of DTO objects by query.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            as QueryBuilder object
+&nbsp;     * @param related
+&nbsp;     *            determines if converted object is related to some other object (if
+&nbsp;     *            so, objects related to it are not included in conversion)
+&nbsp;     * @return list of found DTO objects
+&nbsp;     */
+&nbsp;    public List&lt;S&gt; findByQuery(QueryBuilder query, boolean related) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return convertJSONObjectsToDTOs(searcher.findDocuments(query), related);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find list of DTO objects by query.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            as QueryBuilder object
+&nbsp;     * @param sort
+&nbsp;     *            as String
+&nbsp;     * @param related
+&nbsp;     *            determines if converted object is related to some other object (if
+&nbsp;     *            so, objects related to it are not included in conversion)
+&nbsp;     * @return list of found DTO objects
+&nbsp;     */
+&nbsp;    public List&lt;S&gt; findByQuery(QueryBuilder query, SortBuilder sort, boolean related) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return convertJSONObjectsToDTOs(searcher.findDocuments(query, sort), related);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find list of sorted DTO objects by query with defined offset and size of
+&nbsp;     * results.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            as QueryBuilder object
+&nbsp;     * @param sort
+&nbsp;     *            as String
+&nbsp;     * @param offset
+&nbsp;     *            as Integer
+&nbsp;     * @param size
+&nbsp;     *            as Integer
+&nbsp;     * @param related
+&nbsp;     *            determines if converted object is related to some other object (if
+&nbsp;     *            so, objects related to it are not included in conversion)
+&nbsp;     * @return list of found DTO objects
+&nbsp;     */
+&nbsp;    public List&lt;S&gt; findByQuery(QueryBuilder query, SortBuilder sort, Integer offset, Integer size, boolean related)
+&nbsp;            throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return convertJSONObjectsToDTOs(searcher.findDocuments(query, sort, offset, size), related);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert list of JSONObject object to list of DTO objects.
+&nbsp;     *
+&nbsp;     * @param jsonObjects
+&nbsp;     *            list of SearchResult objects
+&nbsp;     * @param related
+&nbsp;     *            determines if converted object is related to some other object (if
+&nbsp;     *            so, objects related to it are not included in conversion)
+&nbsp;     * @return list of DTO object
+&nbsp;     */
+&nbsp;    protected List&lt;S&gt; convertJSONObjectsToDTOs(List&lt;Map&lt;String, Object&gt;&gt; jsonObjects, boolean related)
+&nbsp;            throws DataException {
+<b class="fc">&nbsp;        List&lt;S&gt; results = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Map&lt;String, Object&gt; jsonObject : jsonObjects) {</b>
+<b class="fc">&nbsp;            results.add(convertJSONObjectToDTO(jsonObject, related));</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return results;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert related JSONObject object to bean object.
+&nbsp;     *
+&nbsp;     * @param jsonObject
+&nbsp;     *            result from ElasticSearch
+&nbsp;     * @param key
+&nbsp;     *            name of related property
+&nbsp;     * @return bean object
+&nbsp;     */
+&nbsp;    protected &lt;O extends BaseDTO&gt; List&lt;O&gt; convertRelatedJSONObjectToDTO(Map&lt;String, Object&gt; jsonObject, String key,
+&nbsp;            SearchService&lt;?, O, ?&gt; service) throws DataException {
+<b class="fc">&nbsp;        List&lt;Integer&gt; ids = getRelatedPropertyForDTO(jsonObject, key);</b>
+<b class="fc">&nbsp;        if (ids.isEmpty()) {</b>
+<b class="fc">&nbsp;            return new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (service instanceof ProjectService) {</b>
+<b class="fc">&nbsp;            BoolQueryBuilder query = new BoolQueryBuilder();</b>
+<b class="fc">&nbsp;            query.must(createSetQueryForIds(ids));</b>
+<b class="fc">&nbsp;            query.must(((ProjectService)service).getProjectsForCurrentUserQuery());</b>
+<b class="fc">&nbsp;            return service.findByQuery(query, true);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return service.findByQuery(createSetQueryForIds(ids), true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Builds a ElasticSearch query for list of Ids.
+&nbsp;     *
+&nbsp;     * @param ids as a List of Integer
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    public QueryBuilder createSetQueryForIds(List&lt;Integer&gt; ids) {
+<b class="fc">&nbsp;        return termsQuery(&quot;_id&quot;, ids);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get id from JSON object returned form ElasticSearch.
+&nbsp;     *
+&nbsp;     * @param jsonObject
+&nbsp;     *            returned form ElasticSearch
+&nbsp;     * @return id as Integer
+&nbsp;     */
+&nbsp;    public Integer getIdFromJSONObject(Map&lt;String, Object&gt; jsonObject) {
+<b class="fc">&nbsp;        if (jsonObject.containsKey(&quot;id&quot;)) {</b>
+<b class="fc">&nbsp;            String id = (String) jsonObject.get(&quot;id&quot;);</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(id)) {</b>
+<b class="fc">&nbsp;                return Integer.valueOf(id);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected Long countDocuments(QueryBuilder query) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return searcher.countDocuments(query);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create query for set of data.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            JSON key for searched object
+&nbsp;     * @param values
+&nbsp;     *            set of values for searched objects or some objects related to
+&nbsp;     *            searched object
+&nbsp;     * @param contains
+&nbsp;     *            determine if results should contain given value or should not
+&nbsp;     *            contain given value
+&nbsp;     * @return query
+&nbsp;     */
+&nbsp;    protected QueryBuilder createSetQuery(String key, Set&lt;?&gt; values, boolean contains) {
+<b class="fc">&nbsp;        if (contains &amp;&amp; !values.isEmpty()) {</b>
+<b class="fc">&nbsp;            return termsQuery(key, values);</b>
+<b class="fc">&nbsp;        } else if (!contains &amp;&amp; Objects.nonNull(values)) {</b>
+<b class="nc">&nbsp;            BoolQueryBuilder boolQuery = new BoolQueryBuilder();</b>
+<b class="nc">&nbsp;            return boolQuery.mustNot(termsQuery(key, values));</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return matchQuery(key, 0);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    protected QueryBuilder createSetQuery(String key, List&lt;Map&lt;String, Object&gt;&gt; values, boolean contains) {
+<b class="nc">&nbsp;        Set&lt;Integer&gt; valuesIds = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Map&lt;String, Object&gt; value : values) {</b>
+<b class="nc">&nbsp;            valuesIds.add(getIdFromJSONObject(value));</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return createSetQuery(key, valuesIds, contains);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected QueryBuilder createSetQueryForBeans(String key, List&lt;? extends BaseBean&gt; values, boolean contains) {
+<b class="fc">&nbsp;        Set&lt;Integer&gt; valuesIds = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (BaseBean value : values) {</b>
+<b class="fc">&nbsp;            valuesIds.add(value.getId());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return createSetQuery(key, valuesIds, contains);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used for cases where operator is not necessary to create query - checking
+&nbsp;     * only for one parameter.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            JSON key for searched object
+&nbsp;     * @param id
+&nbsp;     *            id value for searched object or some object related to searched
+&nbsp;     *            object
+&nbsp;     * @param contains
+&nbsp;     *            determine if results should contain given value or should not
+&nbsp;     *            contain given value
+&nbsp;     * @return query
+&nbsp;     */
+&nbsp;    protected QueryBuilder createSimpleQuery(String key, Integer id, boolean contains) {
+<b class="fc">&nbsp;        if (contains &amp;&amp; Objects.nonNull(id)) {</b>
+<b class="fc">&nbsp;            return matchQuery(key, id);</b>
+<b class="fc">&nbsp;        } else if (!contains &amp;&amp; Objects.nonNull(id)) {</b>
+<b class="nc">&nbsp;            BoolQueryBuilder boolQuery = new BoolQueryBuilder();</b>
+<b class="nc">&nbsp;            return boolQuery.mustNot(matchQuery(key, id));</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return matchQuery(key, 0);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used for cases where operator is not necessary to create query - checking
+&nbsp;     * only for one parameter.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            JSON key for searched object
+&nbsp;     * @param condition
+&nbsp;     *            id value for searched object or some object related to searched
+&nbsp;     *            object
+&nbsp;     * @param contains
+&nbsp;     *            determine if results should contain given value or should not
+&nbsp;     *            contain given value
+&nbsp;     * @return query
+&nbsp;     */
+&nbsp;    protected QueryBuilder createSimpleQuery(String key, Boolean condition, boolean contains) {
+<b class="fc">&nbsp;        if (contains &amp;&amp; Objects.nonNull(condition)) {</b>
+<b class="fc">&nbsp;            return matchQuery(key, condition);</b>
+<b class="nc">&nbsp;        } else if (!contains &amp;&amp; Objects.nonNull(condition)) {</b>
+<b class="nc">&nbsp;            BoolQueryBuilder boolQuery = new BoolQueryBuilder();</b>
+<b class="nc">&nbsp;            return boolQuery.mustNot(matchQuery(key, condition));</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return matchQuery(key, false);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used for cases where operator is not necessary to create query - checking
+&nbsp;     * only for one parameter.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            JSON key for searched object
+&nbsp;     * @param value
+&nbsp;     *            JSON value for searched object
+&nbsp;     * @param contains
+&nbsp;     *            determine if results should contain given value or should not
+&nbsp;     *            contain given value
+&nbsp;     * @return query
+&nbsp;     */
+&nbsp;    protected QueryBuilder createSimpleQuery(String key, String value, boolean contains) {
+<b class="fc">&nbsp;        if (contains) {</b>
+<b class="fc">&nbsp;            return matchQuery(key, value);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            BoolQueryBuilder boolQuery = new BoolQueryBuilder();</b>
+<b class="nc">&nbsp;            return boolQuery.mustNot(matchQuery(key, value));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used for cases where operator is necessary to create query - checking for
+&nbsp;     * more than one parameter.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            JSON key for searched object
+&nbsp;     * @param value
+&nbsp;     *            JSON value for searched object
+&nbsp;     * @param contains
+&nbsp;     *            determine if results should contain given value or should not
+&nbsp;     *            contain given value
+&nbsp;     * @param operator
+&nbsp;     *            as Operator AND or OR - useful when value contains more than one
+&nbsp;     *            word
+&nbsp;     * @return query
+&nbsp;     */
+&nbsp;    protected QueryBuilder createSimpleQuery(String key, String value, boolean contains, Operator operator) {
+<b class="fc">&nbsp;        if (Objects.isNull(operator)) {</b>
+<b class="nc">&nbsp;            operator = Operator.OR;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (contains) {</b>
+<b class="fc">&nbsp;            return matchQuery(key, value).operator(operator);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            BoolQueryBuilder boolQuery = new BoolQueryBuilder();</b>
+<b class="nc">&nbsp;            return boolQuery.mustNot(matchQuery(key, value).operator(operator));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method for comparing dates.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as String
+&nbsp;     * @param date
+&nbsp;     *            as Date
+&nbsp;     * @param searchCondition
+&nbsp;     *            as SearchCondition - bigger, smaller and so on
+&nbsp;     * @return query for searching for date in exact range
+&nbsp;     */
+&nbsp;    protected QueryBuilder createSimpleCompareDateQuery(String key, Date date, SearchCondition searchCondition) {
+<b class="nc">&nbsp;        QueryBuilder query = null;</b>
+<b class="pc">&nbsp;        switch (searchCondition) {</b>
+&nbsp;            case EQUAL:
+<b class="nc">&nbsp;                query = matchQuery(key, Helper.getDateAsFormattedString(date));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case EQUAL_OR_BIGGER:
+<b class="nc">&nbsp;                query = rangeQuery(key).gte(Helper.getDateAsFormattedString(date));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case EQUAL_OR_SMALLER:
+<b class="nc">&nbsp;                query = rangeQuery(key).lte(Helper.getDateAsFormattedString(date));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case BIGGER:
+<b class="nc">&nbsp;                query = rangeQuery(key).gt(Helper.getDateAsFormattedString(date));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case SMALLER:
+<b class="nc">&nbsp;                query = rangeQuery(key).lt(Helper.getDateAsFormattedString(date));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                assert false : searchCondition;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return query;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method for comparing Integer values.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as String
+&nbsp;     * @param value
+&nbsp;     *            as Integer
+&nbsp;     * @param searchCondition
+&nbsp;     *            as SearchCondition - bigger, smaller and so on
+&nbsp;     * @return query for searching for numbers in exact range
+&nbsp;     */
+&nbsp;    protected QueryBuilder createSimpleCompareQuery(String key, Integer value, SearchCondition searchCondition) {
+<b class="fc">&nbsp;        QueryBuilder query = null;</b>
+<b class="fc">&nbsp;        switch (searchCondition) {</b>
+&nbsp;            case EQUAL:
+<b class="nc">&nbsp;                query = matchQuery(key, value);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case EQUAL_OR_BIGGER:
+<b class="fc">&nbsp;                query = rangeQuery(key).gte(value);</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            case EQUAL_OR_SMALLER:
+<b class="nc">&nbsp;                query = rangeQuery(key).lte(value);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case BIGGER:
+<b class="nc">&nbsp;                query = rangeQuery(key).gt(value);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case SMALLER:
+<b class="nc">&nbsp;                query = rangeQuery(key).lt(value);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                assert false : searchCondition;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return query;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected QueryBuilder createSimpleWildcardQuery(String key, String value) {
+<b class="fc">&nbsp;        return queryStringQuery(key + &quot;.keyword: *&quot; + value + &quot;*&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected Long findCountAggregation(QueryBuilder query, String field) throws DataException {
+&nbsp;        try {
+<b class="nc">&nbsp;            Aggregations jsonObject = searcher.aggregateDocuments(query, AggregationBuilders.count(field).field(field));</b>
+<b class="nc">&nbsp;            JsonObject count = jsonObject.get(field);</b>
+<b class="nc">&nbsp;            return count.getJsonNumber(&quot;value&quot;).longValue();</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    protected Double findSumAggregation(QueryBuilder query, String field) throws DataException {
+&nbsp;        try {
+<b class="nc">&nbsp;            Aggregations jsonObject = searcher.aggregateDocuments(query, AggregationBuilders.count(field).field(field));</b>
+<b class="nc">&nbsp;            JsonObject sum = jsonObject.get(field);</b>
+<b class="nc">&nbsp;            return sum.getJsonNumber(&quot;value&quot;).doubleValue();</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find distinct values sorted by terms. Returned values are stored as Strings.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            for searched values to aggregation
+&nbsp;     * @param field
+&nbsp;     *            by which aggregation is going to be performed
+&nbsp;     * @param sort
+&nbsp;     *            asc true or false
+&nbsp;     * @param size
+&nbsp;     *            number of rows returned by query
+&nbsp;     * @return sorted list of distinct values
+&nbsp;     */
+&nbsp;    protected List&lt;String&gt; findDistinctValues(QueryBuilder query, String field, boolean sort, long size) throws DataException {
+<b class="fc">&nbsp;        List&lt;String&gt; distinctValues = new ArrayList&lt;&gt;();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            TermsAggregationBuilder termsAggregation = AggregationBuilders.terms(field).field(field)</b>
+<b class="fc">&nbsp;                    .order(BucketOrder.aggregation(&quot;_key&quot;, sort));</b>
+<b class="fc">&nbsp;            if (size &gt; 0) {</b>
+<b class="fc">&nbsp;                termsAggregation.size(Math.toIntExact(size));</b>
+&nbsp;            }
+<b class="fc">&nbsp;            Aggregations jsonObject = searcher.aggregateDocuments(query, termsAggregation);</b>
+<b class="fc">&nbsp;            ParsedStringTerms stringTerms = jsonObject.get(field);</b>
+<b class="fc">&nbsp;            List&lt;? extends Terms.Bucket&gt; buckets = stringTerms.getBuckets();</b>
+<b class="fc">&nbsp;            for (Terms.Bucket bucket : buckets) {</b>
+<b class="fc">&nbsp;                distinctValues.add(bucket.getKeyAsString());</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            return distinctValues;</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    protected Map&lt;String, Object&gt; findDocument(QueryBuilder query) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return searcher.findDocument(query);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    protected List&lt;Map&lt;String, Object&gt;&gt; findDocuments(QueryBuilder query) throws DataException {
+<b class="fc">&nbsp;        return findDocuments(query, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected List&lt;Map&lt;String, Object&gt;&gt; findDocuments(QueryBuilder query, SortBuilder sortBuilder) throws DataException {
+<b class="fc">&nbsp;        return findDocuments(query, sortBuilder, null, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected List&lt;Map&lt;String, Object&gt;&gt; findDocuments(QueryBuilder query, SortBuilder sortBuilder, Integer offset, Integer size)
+&nbsp;            throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return searcher.findDocuments(query, sortBuilder, offset, size);</b>
+<b class="nc">&nbsp;        } catch (CustomResponseException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts properties&#39; values returned from ElasticSearch index.
+&nbsp;     *
+&nbsp;     * @param object
+&nbsp;     *            JSONObject
+&nbsp;     * @return display properties as list of Integers
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    private List&lt;Integer&gt; getRelatedPropertyForDTO(Map&lt;String, Object&gt; object, String key) {
+<b class="fc">&nbsp;        if (Objects.nonNull(object)) {</b>
+<b class="fc">&nbsp;            List&lt;Map&lt;String, Object&gt;&gt; jsonArray = (List&lt;Map&lt;String, Object&gt;&gt;) object.get(key);</b>
+<b class="fc">&nbsp;            List&lt;Integer&gt; ids = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;            for (Map&lt;String, Object&gt; singleObject : jsonArray) {</b>
+<b class="fc">&nbsp;                ids.add((Integer) singleObject.get(&quot;id&quot;));</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            return ids;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected SortBuilder getSortBuilder(String sortField, SortOrder sortOrder) {
+<b class="fc">&nbsp;        if (!Objects.equals(sortField, null) &amp;&amp; Objects.equals(sortOrder, SortOrder.ASCENDING)) {</b>
+<b class="fc">&nbsp;            return SortBuilders.fieldSort(sortField).order(org.elasticsearch.search.sort.SortOrder.ASC);</b>
+<b class="fc">&nbsp;        } else if (!Objects.equals(sortField, null) &amp;&amp; Objects.equals(sortOrder, SortOrder.DESCENDING)) {</b>
+<b class="fc">&nbsp;            return SortBuilders.fieldSort(sortField).order(org.elasticsearch.search.sort.SortOrder.DESC);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes all objects from index, which are no longer in Database.
+&nbsp;     * @param baseIndexedBeansId the list of beans to check for missing db eintries.
+&nbsp;     *
+&nbsp;     */
+&nbsp;    public void removeLooseIndexData(List&lt;Integer&gt; baseIndexedBeansId) throws DataException, CustomResponseException {
+<b class="nc">&nbsp;        for (Integer baseIndexedBeanId : baseIndexedBeansId) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                getById(baseIndexedBeanId);</b>
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                removeFromIndex(baseIndexedBeanId,true);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

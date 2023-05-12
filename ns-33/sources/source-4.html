@@ -1,0 +1,228 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LongTermPreservationValidationConfigParameter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.longtermpreservationvalidation</a>
+</div>
+
+<h1>Coverage Summary for Class: LongTermPreservationValidationConfigParameter (org.kitodo.longtermpreservationvalidation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LongTermPreservationValidationConfigParameter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (19/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.longtermpreservationvalidation;
+&nbsp;
+&nbsp;import java.util.stream.Stream;
+&nbsp;
+&nbsp;import org.kitodo.config.enums.ParameterInterface;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implements the ParameterInterface to access the
+&nbsp; * LongTermPreservationValidation mapping.
+&nbsp; */
+<b class="fc">&nbsp;enum LongTermPreservationValidationConfigParameter implements ParameterInterface {</b>
+&nbsp;    /**
+&nbsp;     * Specifies the Kitodo validation result if a JHove file is rated neither
+&nbsp;     * well-formed nor valid.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_RESULT_NOT_WELL_FORMED_NOT_VALID(&quot;LongTermPreservationValidation.mapping.FALSE.FALSE&quot;),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the Kitodo validation result if a JHove file is not well-formed
+&nbsp;     * but valid. Whatever that may be.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_RESULT_NOT_WELL_FORMED_VALID(&quot;LongTermPreservationValidation.mapping.FALSE.TRUE&quot;),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the Kitodo validation result if a file was not well-formed by
+&nbsp;     * JHove and JHove was unable to determine if the file is valid.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_RESULT_NOT_WELL_FORMED_MAYBE_VALID(&quot;LongTermPreservationValidation.mapping.FALSE.UNDETERMINED&quot;),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the Kitodo validation result if a file is judged by JHove to be
+&nbsp;     * well-formed but not valid.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_RESULT_WELL_FORMED_NOT_VALID(&quot;LongTermPreservationValidation.mapping.TRUE.FALSE&quot;),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the Kitodo validation result if a file has been rated as
+&nbsp;     * well-formed and valid by JHove.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_RESULT_WELL_FORMED_VALID(&quot;LongTermPreservationValidation.mapping.TRUE.TRUE&quot;),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the Kitodo validation result if a file was rated well by JHove,
+&nbsp;     * but JHove could not determine if the file is valid.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_RESULT_WELL_FORMED_MAYBE_VALID(&quot;LongTermPreservationValidation.mapping.TRUE.UNDETERMINED&quot;),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the Kitodo validation result if it could not determine if a
+&nbsp;     * file is well-formed, but definitely not valid.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_RESULT_MAYBE_WELL_FORMED_NOT_VALID(&quot;LongTermPreservationValidation.mapping.UNDETERMINED.FALSE&quot;),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the Kitodo validation result if JHove was unable to determine
+&nbsp;     * if a file is well-formed, but definitely valid.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_RESULT_MAYBE_WELL_FORMED_VALID(&quot;LongTermPreservationValidation.mapping.UNDETERMINED.TRUE&quot;),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the Kitodo validation result if JHove is completely undecided
+&nbsp;     * about the contents in a file.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_RESULT_MAYBE_WELL_FORMED_MAYBE_VALID(&quot;LongTermPreservationValidation.mapping.UNDETERMINED.UNDETERMINED&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The constant for the indefinite state.
+&nbsp;     */
+&nbsp;    private static final String UNDETERMINED = &quot;UNDETERMINED&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This is what we call the configuration parameter that is entered in the
+&nbsp;     * configuration file.
+&nbsp;     */
+&nbsp;    private String name;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     *
+&nbsp;     * @param name
+&nbsp;     *            of parameter
+&nbsp;     */
+<b class="fc">&nbsp;    LongTermPreservationValidationConfigParameter(String name) {</b>
+<b class="fc">&nbsp;        this.name = name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the name of the long term preservation validation config
+&nbsp;     * parameter.
+&nbsp;     *
+&nbsp;     * @return the name
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="fc">&nbsp;        return name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves the parameter interface element for a validation result state.
+&nbsp;     *
+&nbsp;     * @param state
+&nbsp;     *            input status
+&nbsp;     * @return one of the above possibilities
+&nbsp;     */
+&nbsp;    public static ParameterInterface valueOf(ValidationResultState state) {
+&nbsp;        Stream&lt;LongTermPreservationValidationConfigParameter&gt; constants = Stream
+<b class="fc">&nbsp;                .of(LongTermPreservationValidationConfigParameter.values()).parallel();</b>
+<b class="fc">&nbsp;        String result = state.toString().replace(TernaryValue.MAYBE.toString(), UNDETERMINED).replace(&#39;/&#39;, &#39;.&#39;);</b>
+<b class="fc">&nbsp;        LongTermPreservationValidationConfigParameter constant = constants</b>
+<b class="fc">&nbsp;                .filter(member -&gt; member.getName().endsWith(result)).findFirst()</b>
+<b class="fc">&nbsp;                .orElseThrow(IllegalStateException::new);</b>
+<b class="fc">&nbsp;        return constant;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

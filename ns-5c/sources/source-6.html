@@ -1,0 +1,235 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TitleSearchService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data.base</a>
+</div>
+
+<h1>Coverage Summary for Class: TitleSearchService (org.kitodo.production.services.data.base)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TitleSearchService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (5/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (6/8)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data.base;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.elasticsearch.index.query.Operator;
+&nbsp;import org.elasticsearch.index.query.QueryBuilder;
+&nbsp;import org.elasticsearch.search.sort.SortBuilder;
+&nbsp;import org.elasticsearch.search.sort.SortBuilders;
+&nbsp;import org.elasticsearch.search.sort.SortOrder;
+&nbsp;import org.kitodo.data.database.beans.BaseIndexedBean;
+&nbsp;import org.kitodo.data.database.persistence.BaseDAO;
+&nbsp;import org.kitodo.data.elasticsearch.index.Indexer;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.BaseType;
+&nbsp;import org.kitodo.data.elasticsearch.search.Searcher;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.dto.BaseDTO;
+&nbsp;
+&nbsp;/**
+&nbsp; * Class for implementing methods used by service classes which search for title
+&nbsp; * in ElasticSearch index.
+&nbsp; */
+&nbsp;public abstract class TitleSearchService&lt;T extends BaseIndexedBean, S extends BaseDTO, V extends BaseDAO&lt;T&gt;&gt;
+&nbsp;        extends SearchService&lt;T, S, V&gt; {
+&nbsp;
+&nbsp;    private static final String TITLE = &quot;title&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor necessary to use searcher in child classes.
+&nbsp;     *
+&nbsp;     * @param dao
+&nbsp;     *            DAO object for executing operations on database
+&nbsp;     * @param type
+&nbsp;     *            Type object for ElasticSearch
+&nbsp;     * @param indexer
+&nbsp;     *            for executing insert / updates to ElasticSearch
+&nbsp;     * @param searcher
+&nbsp;     *            for executing queries to ElasticSearch
+&nbsp;     */
+&nbsp;    public TitleSearchService(V dao, BaseType type, Indexer indexer, Searcher searcher) {
+<b class="fc">&nbsp;        super(dao, type, indexer, searcher);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find object matching to given title.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            of the searched process
+&nbsp;     * @param contains
+&nbsp;     *            if true result should contain given plain text, if false it should
+&nbsp;     *            not contain
+&nbsp;     * @param withKeyword
+&nbsp;     *             if query should be made for keyword
+&nbsp;     * @return list of search result
+&nbsp;     */
+&nbsp;    public List&lt;Map&lt;String, Object&gt;&gt; findByTitle(String title, boolean contains, boolean withKeyword) throws DataException {
+<b class="fc">&nbsp;        return findDocuments(getQueryTitle(title, contains, withKeyword));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find object matching to given title.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            of the searched process
+&nbsp;     * @param contains
+&nbsp;     *            if true result should contain given plain text, if false it should
+&nbsp;     *            not contain
+&nbsp;     * @return list of search result
+&nbsp;     */
+&nbsp;    public List&lt;Map&lt;String, Object&gt;&gt; findByTitle(String title, boolean contains) throws DataException {
+<b class="fc">&nbsp;        return findByTitle(title, contains, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find object matching to given title with wildcard.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            of the searched process
+&nbsp;     * @return list of search result
+&nbsp;     */
+&nbsp;    protected List&lt;Map&lt;String, Object&gt;&gt; findByTitleWithWildcard(String title) throws DataException {
+<b class="nc">&nbsp;        return findDocuments(getWildcardQueryTitle(title));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query to find object matching to given title with keyword (exactMatch).
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            of the searched process
+&nbsp;     * @param contains
+&nbsp;     *            if true result should contain given plain text, if false it should
+&nbsp;     *            not contain
+&nbsp;     * @return query
+&nbsp;     */
+&nbsp;    public QueryBuilder getQueryTitle(String title, boolean contains, boolean withKeyword) {
+<b class="fc">&nbsp;        String titleKey = withKeyword ? TITLE + &quot;.keyword&quot; : TITLE;</b>
+<b class="fc">&nbsp;        return createSimpleQuery(titleKey, title, contains, Operator.AND);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get wildcard query to given title.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            of the searched process
+&nbsp;     * @return query
+&nbsp;     */
+&nbsp;    public QueryBuilder getWildcardQueryTitle(String title) {
+<b class="fc">&nbsp;        return createSimpleWildcardQuery(TITLE, title);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sort results by title.
+&nbsp;     * 
+&nbsp;     * @param sortOrder
+&nbsp;     *            ASC or DESC as SortOrder
+&nbsp;     * @return sort as String
+&nbsp;     */
+&nbsp;    public SortBuilder sortByTitle(SortOrder sortOrder) {
+<b class="nc">&nbsp;        return SortBuilders.fieldSort(TITLE).order(sortOrder);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

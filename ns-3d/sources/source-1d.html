@@ -1,0 +1,766 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessListBaseView</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessListBaseView (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessListBaseView</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    13,5%
+  </span>
+  <span class="absValue">
+    (7/52)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    15,1%
+  </span>
+  <span class="absValue">
+    (28/186)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import com.itextpdf.text.DocumentException;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.export.ExportDms;
+&nbsp;import org.kitodo.production.dto.ProcessDTO;
+&nbsp;import org.kitodo.production.enums.ChartMode;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.WebDav;
+&nbsp;import org.kitodo.production.model.LazyProcessDTOModel;
+&nbsp;import org.kitodo.production.process.ProcessMetadataStatistic;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.dataformat.MetsService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;import org.primefaces.component.datatable.DataTable;
+&nbsp;import org.primefaces.event.data.PageEvent;
+&nbsp;import org.primefaces.model.charts.hbar.HorizontalBarChartModel;
+&nbsp;import org.primefaces.model.charts.pie.PieChartModel;
+&nbsp;
+&nbsp;public class ProcessListBaseView extends BaseForm {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ProcessListBaseView.class);</b>
+&nbsp;    private ChartMode chartMode;
+&nbsp;    private HorizontalBarChartModel stackedBarModel;
+&nbsp;    private PieChartModel pieModel;
+&nbsp;    private Map&lt;String,Integer&gt; statisticResult;
+<b class="fc">&nbsp;    private List&lt;ProcessMetadataStatistic&gt; processMetadataStatistics = new ArrayList&lt;&gt;();</b>
+&nbsp;    private int numberOfGlobalImages;
+&nbsp;    private int numberOfGlobalStructuralElements;
+&nbsp;    private int numberOfGlobalMetadata;
+<b class="fc">&nbsp;    List&lt;? extends Object&gt; selectedProcessesOrProcessDTOs = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private final String doneDirectoryName = ConfigCore.getParameterOrDefaultValue(ParameterCore.DONE_DIRECTORY_NAME);</b>
+<b class="fc">&nbsp;    DeleteProcessDialog deleteProcessDialog = new DeleteProcessDialog();</b>
+&nbsp;
+<b class="fc">&nbsp;    private final HashMap&lt;Integer, Boolean&gt; exportable = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    boolean allSelected = false;</b>
+<b class="fc">&nbsp;    HashSet&lt;Integer&gt; excludedProcessIds = new HashSet&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+&nbsp;    public ProcessListBaseView() {
+<b class="fc">&nbsp;        super();</b>
+<b class="fc">&nbsp;        super.setLazyDTOModel(new LazyProcessDTOModel(ServiceManager.getProcessService()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets excludedProcessIds.
+&nbsp;     *
+&nbsp;     * @return value of excludedProcessIds
+&nbsp;     */
+&nbsp;    public HashSet&lt;Integer&gt; getExcludedProcessIds() {
+<b class="fc">&nbsp;        return excludedProcessIds;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets excludedProcessIds.
+&nbsp;     *
+&nbsp;     * @param excludedProcessIds value of excludedProcessIds
+&nbsp;     */
+&nbsp;    public void setExcludedProcessIds(HashSet&lt;Integer&gt; excludedProcessIds) {
+<b class="nc">&nbsp;        this.excludedProcessIds = excludedProcessIds;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets allSelected.
+&nbsp;     *
+&nbsp;     * @return value of allSelected
+&nbsp;     */
+&nbsp;    public boolean isAllSelected() {
+<b class="nc">&nbsp;        return allSelected;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets allSelected.
+&nbsp;     *
+&nbsp;     * @param allSelected value of allSelected
+&nbsp;     */
+&nbsp;    public void setAllSelected(boolean allSelected) {
+<b class="fc">&nbsp;        this.allSelected = allSelected;</b>
+<b class="fc">&nbsp;        excludedProcessIds.clear();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of the processes currently selected in the user interface.
+&nbsp;     * Converts ProcessDTO instances to Process instances in case of displaying search results.
+&nbsp;     *
+&nbsp;     * @return value of selectedProcesses
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public List&lt;Process&gt; getSelectedProcesses() {
+<b class="fc">&nbsp;        List&lt;Process&gt; selectedProcesses = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        ProcessService processService = ServiceManager.getProcessService();</b>
+<b class="fc">&nbsp;        if (allSelected) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                this.selectedProcessesOrProcessDTOs = processService.findByQuery(processService.getQueryForFilter(</b>
+<b class="fc">&nbsp;                                this.isShowClosedProcesses(), isShowInactiveProjects(), getFilter())</b>
+<b class="fc">&nbsp;                        .mustNot(processService.createSetQueryForIds(new ArrayList&lt;&gt;(excludedProcessIds))), false);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                logger.error(e.getMessage());</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (selectedProcessesOrProcessDTOs.size() &gt; 0) {</b>
+<b class="fc">&nbsp;            if (selectedProcessesOrProcessDTOs.get(0) instanceof ProcessDTO) {</b>
+&nbsp;                // list contains ProcessDTO instances
+&nbsp;                try {
+<b class="fc">&nbsp;                    selectedProcesses = ServiceManager.getProcessService()</b>
+<b class="fc">&nbsp;                            .convertDtosToBeans((List&lt;ProcessDTO&gt;) selectedProcessesOrProcessDTOs);</b>
+<b class="nc">&nbsp;                } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(ERROR_LOADING_MANY,</b>
+<b class="nc">&nbsp;                            new Object[]{ObjectType.PROCESS.getTranslationPlural()}, logger, e);</b>
+<b class="fc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } else if (selectedProcessesOrProcessDTOs.get(0) instanceof Process) {</b>
+&nbsp;                // list contains Process instances
+<b class="nc">&nbsp;                selectedProcesses = (List&lt;Process&gt;) selectedProcessesOrProcessDTOs;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return selectedProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get stackedBarModel.
+&nbsp;     *
+&nbsp;     * @return value of stackedBarModel
+&nbsp;     */
+&nbsp;    public HorizontalBarChartModel getStackedBarModel() {
+<b class="nc">&nbsp;        return stackedBarModel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Shows the state of volumes from the selected processes.
+&nbsp;     */
+&nbsp;    public void showDurationOfTasks() {
+<b class="nc">&nbsp;        chartMode = ChartMode.BAR;</b>
+<b class="nc">&nbsp;        stackedBarModel = ServiceManager.getProcessService().getBarChartModel(getSelectedProcesses());</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;PF(&#39;statisticsDialog&#39;).show();&quot;);</b>
+<b class="nc">&nbsp;        PrimeFaces.current().ajax().update(&quot;statisticsDialog&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Shows the state of volumes from the selected processes.
+&nbsp;     */
+&nbsp;    public void showStateOfVolume() {
+<b class="nc">&nbsp;        chartMode = ChartMode.PIE;</b>
+<b class="nc">&nbsp;        statisticResult = ServiceManager.getProcessService().getProcessTaskStates(getSelectedProcesses());</b>
+<b class="nc">&nbsp;        pieModel = ServiceManager.getProcessService().getPieChardModel(statisticResult);</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;PF(&#39;statisticsDialog&#39;).show();&quot;);</b>
+<b class="nc">&nbsp;        PrimeFaces.current().ajax().update(&quot;statisticsDialog&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Shows the number of images, metadata and structuralElements.
+&nbsp;     */
+&nbsp;    public void showProcessMetadataStatistic() {
+<b class="nc">&nbsp;        chartMode = ChartMode.METADATA_STATISTIC;</b>
+<b class="nc">&nbsp;        processMetadataStatistics = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        resetGlobalStatisticValues();</b>
+&nbsp;        Workpiece workpiece;
+<b class="nc">&nbsp;        for (Process selectedProcess : getSelectedProcesses()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                URI metadataFilePath = ServiceManager.getFileService().getMetadataFilePath(selectedProcess);</b>
+<b class="nc">&nbsp;                workpiece = ServiceManager.getMetsService().loadWorkpiece(metadataFilePath);</b>
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_LOADING_ONE,</b>
+<b class="nc">&nbsp;                        new Object[] {ObjectType.PROCESS.getTranslationSingular(), selectedProcess.getId() }, logger, e);</b>
+&nbsp;                return;
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            int numberOfProcessImages = (int) Workpiece.treeStream(workpiece.getPhysicalStructure())</b>
+<b class="nc">&nbsp;                    .filter(physicalDivision -&gt; Objects.equals(physicalDivision.getType(), PhysicalDivision.TYPE_PAGE)).count();</b>
+<b class="nc">&nbsp;            this.numberOfGlobalImages += numberOfProcessImages;</b>
+<b class="nc">&nbsp;            int numberOfProcessStructuralElements = (int) Workpiece.treeStream(workpiece.getLogicalStructure()).count();</b>
+<b class="nc">&nbsp;            this.numberOfGlobalStructuralElements += numberOfProcessStructuralElements;</b>
+<b class="nc">&nbsp;            int numberOfProcessMetadata = Math</b>
+<b class="nc">&nbsp;                    .toIntExact(MetsService.countLogicalMetadata(workpiece));</b>
+<b class="nc">&nbsp;            this.numberOfGlobalMetadata += numberOfProcessMetadata;</b>
+&nbsp;
+<b class="nc">&nbsp;            processMetadataStatistics.add(new ProcessMetadataStatistic(selectedProcess.getTitle(),</b>
+&nbsp;                    numberOfProcessImages, numberOfProcessStructuralElements, numberOfProcessMetadata));
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;PF(&#39;statisticsDialog&#39;).show();&quot;);</b>
+<b class="nc">&nbsp;        PrimeFaces.current().ajax().update(&quot;statisticsDialog&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return whether to display bar model or not.
+&nbsp;     *
+&nbsp;     * @return whether to display bar model or not
+&nbsp;     */
+&nbsp;    public boolean showBarModel() {
+<b class="nc">&nbsp;        return ChartMode.BAR.equals(chartMode);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return whether to display pie model or not.
+&nbsp;     *
+&nbsp;     * @return whether to display pie model or not
+&nbsp;     */
+&nbsp;    public boolean showPieModel() {
+<b class="nc">&nbsp;        return ChartMode.PIE.equals(chartMode);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return whether to display metadata statistics or not.
+&nbsp;     *
+&nbsp;     * @return whether to display metadata statistics or not
+&nbsp;     */
+&nbsp;    public boolean showProcessMetadataStatisticTable() {
+<b class="nc">&nbsp;        return ChartMode.METADATA_STATISTIC.equals(chartMode);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get statistic result.
+&nbsp;     *
+&nbsp;     * @return statistic result
+&nbsp;     */
+&nbsp;    public Map&lt;String, Integer&gt; getStatisticResult() {
+<b class="nc">&nbsp;        return statisticResult;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get pie model.
+&nbsp;     *
+&nbsp;     * @return pie model
+&nbsp;     */
+&nbsp;    public PieChartModel getPieModel() {
+<b class="nc">&nbsp;        return pieModel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set pie model.
+&nbsp;     *
+&nbsp;     * @param pieModel as org.primefaces.model.charts.piePieChardModel
+&nbsp;     */
+&nbsp;    public void setPieModel(PieChartModel pieModel) {
+<b class="nc">&nbsp;        this.pieModel = pieModel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process metadata statistics.
+&nbsp;     *
+&nbsp;     * @return process metadata statistics
+&nbsp;     */
+&nbsp;    public List&lt;ProcessMetadataStatistic&gt; getProcessMetadataStatistics() {
+<b class="nc">&nbsp;        return processMetadataStatistics;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get relative image amount.
+&nbsp;     *
+&nbsp;     * @param numberOfImages number of images
+&nbsp;     * @return relative image amount
+&nbsp;     */
+&nbsp;    public int getRelativeImageAmount(int numberOfImages) {
+<b class="nc">&nbsp;        return numberOfImages == 0 ? 0 : numberOfImages * 100 / this.numberOfGlobalImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get relative structural element amount.
+&nbsp;     *
+&nbsp;     * @param numberOfStructuralElements number of structural elements
+&nbsp;     * @return relative structural element amount
+&nbsp;     */
+&nbsp;    public int getRelativeStructuralElementAmount(int numberOfStructuralElements) {
+<b class="nc">&nbsp;        return numberOfStructuralElements == 0 ? 0</b>
+<b class="nc">&nbsp;                : numberOfStructuralElements * 100 / this.numberOfGlobalStructuralElements;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get relative metadata amount.
+&nbsp;     *
+&nbsp;     * @param numberOfMetadata number of metadata
+&nbsp;     * @return relative metadata amount
+&nbsp;     */
+&nbsp;    public int getRelativeMetadataAmount(int numberOfMetadata) {
+<b class="nc">&nbsp;        return numberOfMetadata == 0 ? 0 : numberOfMetadata * 100 / this.numberOfGlobalMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return whether closed processes should be displayed or not.
+&nbsp;     *
+&nbsp;     * @return parameter controlling whether closed processes should be displayed or
+&nbsp;     *         not
+&nbsp;     */
+&nbsp;    public boolean isShowClosedProcesses() {
+<b class="fc">&nbsp;        return ((LazyProcessDTOModel)this.lazyDTOModel).isShowClosedProcesses();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether closed processes should be displayed or not.
+&nbsp;     *
+&nbsp;     * @param showClosedProcesses
+&nbsp;     *            boolean flag signaling whether closed processes should be
+&nbsp;     *            displayed or not
+&nbsp;     */
+&nbsp;    public void setShowClosedProcesses(boolean showClosedProcesses) {
+<b class="nc">&nbsp;        ((LazyProcessDTOModel)this.lazyDTOModel).setShowClosedProcesses(showClosedProcesses);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether inactive projects should be displayed or not.
+&nbsp;     *
+&nbsp;     * @param showInactiveProjects
+&nbsp;     *            boolean flag signaling whether inactive projects should be
+&nbsp;     *            displayed or not
+&nbsp;     */
+&nbsp;    public void setShowInactiveProjects(boolean showInactiveProjects) {
+<b class="nc">&nbsp;        ((LazyProcessDTOModel)this.lazyDTOModel).setShowInactiveProjects(showInactiveProjects);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return whether inactive projects should be displayed or not.
+&nbsp;     *
+&nbsp;     * @return parameter controlling whether inactive projects should be displayed
+&nbsp;     *         or not
+&nbsp;     */
+&nbsp;    public boolean isShowInactiveProjects() {
+<b class="fc">&nbsp;        return ((LazyProcessDTOModel)this.lazyDTOModel).isShowInactiveProjects();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Export DMS for selected processes.
+&nbsp;     */
+&nbsp;    public void exportDMSForSelection() {
+<b class="nc">&nbsp;        exportDMSForProcesses(getSelectedProcesses());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate result set.
+&nbsp;     */
+&nbsp;    public void generateResult() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getProcessService().generateResult(this.filter, this.isShowClosedProcesses(),</b>
+<b class="nc">&nbsp;                    this.isShowInactiveProjects());</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_CREATING, new Object[] {Helper.getTranslation(&quot;resultSet&quot;) }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate result as PDF.
+&nbsp;     */
+&nbsp;    public void generateResultAsPdf() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getProcessService().generateResultAsPdf(this.filter, this.isShowClosedProcesses(),</b>
+<b class="nc">&nbsp;                    this.isShowInactiveProjects());</b>
+<b class="nc">&nbsp;        } catch (IOException | DocumentException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_CREATING, new Object[] {Helper.getTranslation(&quot;resultPDF&quot;) }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download to home for selected processes.
+&nbsp;     */
+&nbsp;    public void downloadToHomeForSelection() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ProcessService.downloadToHome(this.getSelectedProcesses());</b>
+<b class="nc">&nbsp;            Helper.setMessage(&quot;createdInUserHomeAll&quot;);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Error downloading processes to home directory!&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Upload selected processes from home.
+&nbsp;     */
+&nbsp;    public void uploadFromHomeForSelection() {
+<b class="nc">&nbsp;        ProcessService.uploadFromHome(this.getSelectedProcesses());</b>
+<b class="nc">&nbsp;        Helper.setMessage(&quot;directoryRemovedSelected&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Upload all processes from home.
+&nbsp;     */
+&nbsp;    public void uploadFromHomeForAll() {
+<b class="nc">&nbsp;        WebDav myDav = new WebDav();</b>
+<b class="nc">&nbsp;        List&lt;URI&gt; folder = myDav.uploadAllFromHome(doneDirectoryName);</b>
+<b class="nc">&nbsp;        myDav.removeAllFromHome(folder, URI.create(doneDirectoryName));</b>
+<b class="nc">&nbsp;        Helper.setMessage(&quot;directoryRemovedAll&quot;, doneDirectoryName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void resetGlobalStatisticValues() {
+<b class="nc">&nbsp;        this.numberOfGlobalStructuralElements = 0;</b>
+<b class="nc">&nbsp;        this.numberOfGlobalImages = 0;</b>
+<b class="nc">&nbsp;        this.numberOfGlobalMetadata = 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void exportDMSForProcesses(List&lt;Process&gt; processes) {
+<b class="nc">&nbsp;        ExportDms export = new ExportDms();</b>
+<b class="nc">&nbsp;        for (Process processToExport : processes) {</b>
+&nbsp;            try {
+&nbsp;
+<b class="nc">&nbsp;                export.startExport(processToExport);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_EXPORTING,</b>
+<b class="nc">&nbsp;                        new Object[] {ObjectType.PROCESS.getTranslationSingular(), processToExport.getId() }, logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If processes are generated with calendar.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *            the process dto to check.
+&nbsp;     * @return true if processes are created with calendar, false otherwise
+&nbsp;     */
+&nbsp;    public boolean createProcessesWithCalendar(ProcessDTO processDTO) {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ProcessService.canCreateProcessWithCalendar(processDTO);</b>
+<b class="nc">&nbsp;        } catch (IOException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_READING, new Object[] {ObjectType.PROCESS.getTranslationSingular() }, logger,</b>
+&nbsp;                    e);
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If a process can be created as child.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *            the process dto to check.
+&nbsp;     * @return true if processes can be created as child, false otherwise
+&nbsp;     */
+&nbsp;    public boolean createProcessAsChildPossible(ProcessDTO processDTO) {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ProcessService.canCreateChildProcess(processDTO);</b>
+<b class="nc">&nbsp;        } catch (IOException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_READING, new Object[] {ObjectType.PROCESS.getTranslationSingular() }, logger,</b>
+&nbsp;                    e);
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download to home for single process. First check if this volume is currently
+&nbsp;     * being edited by another user and placed in his home directory, otherwise
+&nbsp;     * download.
+&nbsp;     */
+&nbsp;    public void downloadToHome(int processId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            ProcessService.downloadToHome(new WebDav(), processId);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Error downloading process &quot; + processId + &quot; to home directory!&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Starts generation of xml logfile for current process.
+&nbsp;     */
+&nbsp;    public void createXML(ProcessDTO processDTO) {
+&nbsp;        try {
+<b class="nc">&nbsp;            ProcessService.createXML(ServiceManager.getProcessService().getById(processDTO.getId()), getUser());</b>
+<b class="nc">&nbsp;        } catch (IOException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Error creating log file in home directory&quot;, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Export METS.
+&nbsp;     */
+&nbsp;    public void exportMets(int processId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            ProcessService.exportMets(processId);</b>
+<b class="nc">&nbsp;        } catch (DAOException | DataException | IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;An error occurred while trying to export METS file for process &quot;</b>
+&nbsp;                    + processId, logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Export DMS.
+&nbsp;     */
+&nbsp;    public void exportDMS(int id) {
+<b class="nc">&nbsp;        ExportDms export = new ExportDms();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            export.startExport(ServiceManager.getProcessService().getById(id));</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_EXPORTING,</b>
+<b class="nc">&nbsp;                    new Object[] {ObjectType.PROCESS.getTranslationSingular(), id }, logger, e);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE,</b>
+<b class="nc">&nbsp;                    new Object[] {ObjectType.PROCESS.getTranslationSingular(), id }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Downloads a docket for process.
+&nbsp;     */
+&nbsp;    public void downloadDocket(int id) {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getProcessService().downloadDocket(ServiceManager.getProcessService().getById(id));</b>
+<b class="nc">&nbsp;        } catch (IOException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Upload from home for single process.
+&nbsp;     */
+&nbsp;    public void uploadFromHome(ProcessDTO processDTO) {
+&nbsp;        try {
+<b class="nc">&nbsp;            WebDav myDav = new WebDav();</b>
+<b class="nc">&nbsp;            myDav.uploadFromHome(ServiceManager.getProcessService().getById(processDTO.getId()));</b>
+<b class="nc">&nbsp;            Helper.setMessage(&quot;directoryRemoved&quot;, processDTO.getTitle());</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE,</b>
+<b class="nc">&nbsp;                    new Object[] {ObjectType.PROCESS.getTranslationSingular(), processDTO.getId() }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete Process.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *            process to delete.
+&nbsp;     */
+&nbsp;    public void delete(ProcessDTO processDTO) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Process process = ServiceManager.getProcessService().getById(processDTO.getId());</b>
+<b class="nc">&nbsp;            if (process.getChildren().isEmpty()) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    ProcessService.deleteProcess(process);</b>
+<b class="nc">&nbsp;                } catch (DataException | IOException e) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(ERROR_DELETING, new Object[] {ObjectType.PROCESS.getTranslationSingular() },</b>
+&nbsp;                            logger, e);
+<b class="nc">&nbsp;                }</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                this.deleteProcessDialog = new DeleteProcessDialog();</b>
+<b class="nc">&nbsp;                this.deleteProcessDialog.setProcess(process);</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;deleteChildrenDialog&#39;).show();&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DELETING, new Object[] {ObjectType.PROCESS.getTranslationSingular() }, logger,</b>
+&nbsp;                    e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return delete process dialog.
+&nbsp;     *
+&nbsp;     * @return delete process dialog
+&nbsp;     */
+&nbsp;    public DeleteProcessDialog getDeleteProcessDialog() {
+<b class="nc">&nbsp;        return this.deleteProcessDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether process with given ID can be exported or not.
+&nbsp;     *
+&nbsp;     * @param processId process ID
+&nbsp;     * @return whether process with given ID can be exported or not
+&nbsp;     */
+&nbsp;    public boolean canBeExported(int processId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!exportable.containsKey(processId)) {</b>
+<b class="nc">&nbsp;                exportable.put(processId, ProcessService.canBeExported(processId));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return exportable.get(processId);</b>
+<b class="nc">&nbsp;        } catch (IOException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of currently selected processes. This list is used both when displaying search results 
+&nbsp;     * and when displaying the process list, which is why it may contain either instances of Process or 
+&nbsp;     * instances of ProcessDTO.
+&nbsp;     * 
+&nbsp;     * @return list of instances of Process or ProcessDTO
+&nbsp;     */
+&nbsp;    public List&lt;? extends Object&gt; getSelectedProcessesOrProcessDTOs() {
+<b class="nc">&nbsp;        return selectedProcessesOrProcessDTOs;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setSelectedProcessesOrProcessDTOs(List&lt;? extends Object&gt; selectedProcessesOrProcessDTOs) {
+<b class="nc">&nbsp;        this.selectedProcessesOrProcessDTOs = selectedProcessesOrProcessDTOs;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update selection and first row to show in datatable on PageEvent.
+&nbsp;     * @param pageEvent PageEvent triggered by data tables paginator
+&nbsp;     */
+&nbsp;    public void onPageChange(PageEvent pageEvent) {
+<b class="nc">&nbsp;        this.setFirstRow(((DataTable) pageEvent.getSource()).getFirst());</b>
+<b class="nc">&nbsp;        if (allSelected) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current()</b>
+<b class="nc">&nbsp;                    .executeScript(&quot;PF(&#39;processesTable&#39;).selectAllRows();&quot;);</b>
+<b class="nc">&nbsp;            excludedProcessIds.forEach(processId -&gt; PrimeFaces.current()</b>
+<b class="nc">&nbsp;                    .executeScript(&quot;PF(&#39;processesTable&#39;).unselectRow($(&#39;tr[data-rk=\&quot;&quot; + processId + &quot;\&quot;]&#39;), true);&quot;));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the number of global images of the process list base view.
+&nbsp;     * 
+&nbsp;     * @return the number of global images
+&nbsp;     */
+&nbsp;    public int getNumberOfGlobalImages() {
+<b class="nc">&nbsp;        return numberOfGlobalImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the number of global structural elements of the process list base
+&nbsp;     * view.
+&nbsp;     * 
+&nbsp;     * @return the number of global structural elements
+&nbsp;     */
+&nbsp;    public int getNumberOfGlobalStructuralElements() {
+<b class="nc">&nbsp;        return numberOfGlobalStructuralElements;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the number of global metadata of the process list base view.
+&nbsp;     * 
+&nbsp;     * @return the number of global metadata
+&nbsp;     */
+&nbsp;    public int getNumberOfGlobalMetadata() {
+<b class="nc">&nbsp;        return numberOfGlobalMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the number of global process metadata statistics of the process
+&nbsp;     * list base view.
+&nbsp;     * 
+&nbsp;     * @return the number of global process metadata statistics
+&nbsp;     */
+&nbsp;    public int getNumberOfGlobalProcessMetadataStatistics() {
+<b class="nc">&nbsp;        return processMetadataStatistics.size();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

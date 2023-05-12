@@ -1,0 +1,555 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetadataValidation</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.validation.metadata</a>
+</div>
+
+<h1>Coverage Summary for Class: MetadataValidation (org.kitodo.validation.metadata)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetadataValidation</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/170)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.validation.metadata;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.UncheckedIOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.concurrent.ConcurrentHashMap;
+&nbsp;import java.util.concurrent.ConcurrentHashMap.KeySetView;
+&nbsp;import java.util.function.Function;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.MetadataGroup;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.ComplexMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewWithValuesInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.SimpleMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.dataformat.mets.MetsXmlElementAccessInterface;
+&nbsp;import org.kitodo.api.filemanagement.FileManagementInterface;
+&nbsp;import org.kitodo.api.validation.State;
+&nbsp;import org.kitodo.api.validation.ValidationResult;
+&nbsp;import org.kitodo.api.validation.metadata.MetadataValidationInterface;
+&nbsp;import org.kitodo.serviceloader.KitodoServiceLoader;
+&nbsp;
+<b class="nc">&nbsp;public class MetadataValidation implements MetadataValidationInterface {</b>
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(MetadataValidation.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Message key if no media is assigned.
+&nbsp;     */
+&nbsp;    private static final String MESSAGE_MEDIA_MISSING = &quot;metadataMediaError&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Message key if media is present but not assigned to a structure.
+&nbsp;     */
+&nbsp;    private static final String MESSAGE_MEDIA_UNASSIGNED = &quot;metadataMediaUnassigned&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Message key if a structure has no media assigned.
+&nbsp;     */
+&nbsp;    private static final String MESSAGE_STRUCTURE_WITHOUT_MEDIA = &quot;metadataStructureWithoutMedia&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Message key if the input is invalid.
+&nbsp;     */
+&nbsp;    private static final String MESSAGE_VALUE_INVALID = &quot;metadataInvalidData&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Message key if the input is missing.
+&nbsp;     */
+&nbsp;    private static final String MESSAGE_VALUE_MISSING = &quot;metadataMandatoryElement&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Message key if there are too many entries of a type.
+&nbsp;     */
+&nbsp;    private static final String MESSAGE_VALUE_TOO_OFTEN = &quot;metadataNotOneElement&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Message key if there are too little entries of a type.
+&nbsp;     */
+&nbsp;    private static final String MESSAGE_VALUE_TOO_RARE = &quot;metadataNotEnoughElements&quot;;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public ValidationResult validate(URI metsFileUri, URI rulesetFileUri, List&lt;LanguageRange&gt; metadataLanguage,
+&nbsp;            Map&lt;String, String&gt; translations) {
+&nbsp;        try {
+<b class="nc">&nbsp;            FileManagementInterface fileManagement = getFileManagement();</b>
+&nbsp;            Workpiece workpiece;
+<b class="nc">&nbsp;            try (InputStream inputStream = fileManagement.read(metsFileUri)) {</b>
+<b class="nc">&nbsp;                workpiece = createMetsXmlElementAccess().read(inputStream);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            RulesetManagementInterface ruleset = getRulesetManagement();</b>
+<b class="nc">&nbsp;            ruleset.load(new File(rulesetFileUri.getPath()));</b>
+&nbsp;
+<b class="nc">&nbsp;            return validate(workpiece, ruleset, metadataLanguage, translations);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            throw new UncheckedIOException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public ValidationResult validate(Workpiece workpiece, RulesetManagementInterface ruleset,
+&nbsp;            List&lt;LanguageRange&gt; metadataLanguage, Map&lt;String, String&gt; translations) {
+&nbsp;
+<b class="nc">&nbsp;        Collection&lt;ValidationResult&gt; results = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        results.add(checkForStructuresWithoutMedia(workpiece, translations));</b>
+<b class="nc">&nbsp;        results.add(checkForUnlinkedMedia(workpiece, translations));</b>
+&nbsp;
+<b class="nc">&nbsp;        for (LogicalDivision logicalDivision : workpiece.getAllLogicalDivisions()) {</b>
+<b class="nc">&nbsp;            results.addAll(checkMetadataRules(logicalDivision.toString(), logicalDivision.getType(),</b>
+<b class="nc">&nbsp;                getMetadata(logicalDivision), ruleset, metadataLanguage, translations));</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        for (PhysicalDivision physicalDivision : workpiece.getAllPhysicalDivisions()) {</b>
+<b class="nc">&nbsp;            results.addAll(checkMetadataRules(physicalDivision.toString(), physicalDivision.getType(), getMetadata(physicalDivision),</b>
+&nbsp;                    ruleset, metadataLanguage, translations));
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return merge(results);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Collection&lt;Metadata&gt; getMetadata(LogicalDivision logicalDivision) {
+<b class="nc">&nbsp;        Collection&lt;Metadata&gt; metadata = new ArrayList&lt;&gt;(logicalDivision.getMetadata());</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(logicalDivision.getLabel())) {</b>
+<b class="nc">&nbsp;            MetadataEntry labelEntry = new MetadataEntry();</b>
+<b class="nc">&nbsp;            labelEntry.setKey(&quot;LABEL&quot;);</b>
+<b class="nc">&nbsp;            labelEntry.setValue(logicalDivision.getLabel());</b>
+<b class="nc">&nbsp;            metadata.add(labelEntry);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(logicalDivision.getOrderlabel())) {</b>
+<b class="nc">&nbsp;            MetadataEntry orderlabelEntry = new MetadataEntry();</b>
+<b class="nc">&nbsp;            orderlabelEntry.setKey(&quot;ORDERLABEL&quot;);</b>
+<b class="nc">&nbsp;            orderlabelEntry.setValue(logicalDivision.getOrderlabel());</b>
+<b class="nc">&nbsp;            metadata.add(orderlabelEntry);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return metadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Collection&lt;Metadata&gt; getMetadata(PhysicalDivision physicalDivision) {
+<b class="nc">&nbsp;        Collection&lt;Metadata&gt; metadata = new ArrayList&lt;&gt;(physicalDivision.getMetadata());</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(physicalDivision.getOrderlabel())) {</b>
+<b class="nc">&nbsp;            MetadataEntry orderlabelEntry = new MetadataEntry();</b>
+<b class="nc">&nbsp;            orderlabelEntry.setKey(&quot;ORDERLABEL&quot;);</b>
+<b class="nc">&nbsp;            orderlabelEntry.setValue(physicalDivision.getOrderlabel());</b>
+<b class="nc">&nbsp;            metadata.add(orderlabelEntry);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return metadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Collection&lt;ValidationResult&gt; checkMetadataRules(String elementString,
+&nbsp;                                                            String type,
+&nbsp;                                                            Collection&lt;Metadata&gt; metadata,
+&nbsp;                                                            RulesetManagementInterface ruleset,
+&nbsp;                                                            List&lt;LanguageRange&gt; metadataLanguage,
+&nbsp;                                                            Map&lt;String, String&gt; translations) {
+<b class="nc">&nbsp;        Collection&lt;ValidationResult&gt; results = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        StructuralElementViewInterface divisionView = ruleset.getStructuralElementView(type, null,</b>
+&nbsp;                metadataLanguage);
+<b class="nc">&nbsp;        results.add(checkForMandatoryQuantitiesOfTheMetadataRecursive(metadata,</b>
+<b class="nc">&nbsp;                divisionView, elementString.concat(&quot;: &quot;), translations));</b>
+<b class="nc">&nbsp;        results.add(checkForDetailsInTheMetadata(metadata,</b>
+<b class="nc">&nbsp;                divisionView, elementString.concat(&quot;: &quot;), translations));</b>
+<b class="nc">&nbsp;        return results;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reports structures that have no assigned physical divisions. These structures
+&nbsp;     * are undesirable because you cannot look at them. It is also checked if
+&nbsp;     * the linked media are even referenced in the document.
+&nbsp;     *
+&nbsp;     * @param workpiece
+&nbsp;     *            workpiece to be examined
+&nbsp;     * @return the validation result
+&nbsp;     */
+&nbsp;    private static ValidationResult checkForStructuresWithoutMedia(Workpiece workpiece,
+&nbsp;            Map&lt;String, String&gt; translations) {
+<b class="nc">&nbsp;        boolean error = false;</b>
+<b class="nc">&nbsp;        boolean warning = false;</b>
+<b class="nc">&nbsp;        Collection&lt;String&gt; messages = new HashSet&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        Collection&lt;String&gt; structuresWithoutMedia = Workpiece.treeStream(workpiece.getLogicalStructure())</b>
+<b class="nc">&nbsp;                .filter(struc -&gt; Objects.nonNull(struc.getType()) &amp;&amp; struc.getViews().isEmpty() &amp;&amp; struc.getChildren().isEmpty())</b>
+<b class="nc">&nbsp;                    .map(structure -&gt; translations.get(MESSAGE_STRUCTURE_WITHOUT_MEDIA) + &#39; &#39; + structure)</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toSet());</b>
+<b class="nc">&nbsp;        if (!structuresWithoutMedia.isEmpty()) {</b>
+<b class="nc">&nbsp;            messages.addAll(structuresWithoutMedia);</b>
+<b class="nc">&nbsp;            warning = true;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (!Workpiece.treeStream(workpiece.getLogicalStructure())</b>
+<b class="nc">&nbsp;                .flatMap(structure -&gt; structure.getViews().stream()).map(View::getPhysicalDivision)</b>
+<b class="nc">&nbsp;                .allMatch(workpiece.getAllPhysicalDivisions()::contains)) {</b>
+<b class="nc">&nbsp;            messages.add(translations.get(MESSAGE_MEDIA_MISSING));</b>
+<b class="nc">&nbsp;            error = true;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return new ValidationResult(error ? State.ERROR : warning ? State.WARNING : State.SUCCESS, messages);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks whether media are referenced in the document that are not assigned
+&nbsp;     * to a structure. Maybe not a mistake but sloppy.
+&nbsp;     *
+&nbsp;     * @param workpiece
+&nbsp;     *            workpiece to be examined
+&nbsp;     * @return the validation result
+&nbsp;     */
+&nbsp;    private static ValidationResult checkForUnlinkedMedia(Workpiece workpiece,
+&nbsp;            Map&lt;String, String&gt; translations) {
+<b class="nc">&nbsp;        boolean warning = false;</b>
+<b class="nc">&nbsp;        Collection&lt;String&gt; messages = new HashSet&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        KeySetView&lt;PhysicalDivision, ?&gt; unassignedPhysicalDivisions = ConcurrentHashMap.newKeySet();</b>
+<b class="nc">&nbsp;        unassignedPhysicalDivisions.addAll(Workpiece.treeStream(workpiece.getPhysicalStructure())</b>
+<b class="nc">&nbsp;                .filter(physicalDivision -&gt; !physicalDivision.getMediaFiles().isEmpty()).collect(Collectors.toList()));</b>
+<b class="nc">&nbsp;        Workpiece.treeStream(workpiece.getLogicalStructure()).flatMap(structure -&gt; structure.getViews().stream())</b>
+<b class="nc">&nbsp;                .map(View::getPhysicalDivision)</b>
+<b class="nc">&nbsp;                .forEach(unassignedPhysicalDivisions::remove);</b>
+<b class="nc">&nbsp;        if (!unassignedPhysicalDivisions.isEmpty()) {</b>
+<b class="nc">&nbsp;            for (PhysicalDivision physicalDivision : unassignedPhysicalDivisions) {</b>
+<b class="nc">&nbsp;                messages.add(translations.get(MESSAGE_MEDIA_UNASSIGNED) + &#39; &#39; + physicalDivision);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            warning = true;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return new ValidationResult(warning ? State.WARNING : State.SUCCESS, messages);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if all description data occur in the given frequency (minimum /
+&nbsp;     * maximum).
+&nbsp;     *
+&nbsp;     * @param containedMetadata
+&nbsp;     *            metadata
+&nbsp;     * @param containingMetadataView
+&nbsp;     *            associated hierarchy node of the rule set
+&nbsp;     * @param location
+&nbsp;     *            specifies which structure element or which metadata group in
+&nbsp;     *            it is checked
+&nbsp;     * @return the validation result
+&nbsp;     */
+&nbsp;    private static ValidationResult checkForMandatoryQuantitiesOfTheMetadataRecursive(
+&nbsp;            Collection&lt;Metadata&gt; containedMetadata, ComplexMetadataViewInterface containingMetadataView,
+&nbsp;            String location, Map&lt;String, String&gt; translations) {
+<b class="nc">&nbsp;        boolean error = false;</b>
+<b class="nc">&nbsp;        boolean warning = false;</b>
+<b class="nc">&nbsp;        Collection&lt;String&gt; messages = new HashSet&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Entry&lt;MetadataViewInterface, Collection&lt;Metadata&gt;&gt; metadataViewWithValues : squash(</b>
+<b class="nc">&nbsp;            containingMetadataView.getSortedVisibleMetadata(containedMetadata, Collections.emptyList())).entrySet()) {</b>
+&nbsp;
+<b class="nc">&nbsp;            MetadataViewInterface metadataView = metadataViewWithValues.getKey();</b>
+<b class="nc">&nbsp;            int min = metadataView.getMinOccurs();</b>
+<b class="nc">&nbsp;            int max = metadataView.getMaxOccurs();</b>
+<b class="nc">&nbsp;            int count = metadataViewWithValues.getValue().size();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (count == 0 &amp;&amp; (min == 1 &amp;&amp; max == 1)) {</b>
+<b class="nc">&nbsp;                messages.add(MessageFormat.format(translations.get(MESSAGE_VALUE_MISSING),</b>
+<b class="nc">&nbsp;                    location.concat(metadataView.getLabel())));</b>
+<b class="nc">&nbsp;                error = true;</b>
+<b class="nc">&nbsp;            } else if (count &lt; min) {</b>
+<b class="nc">&nbsp;                messages.add(MessageFormat.format(translations.get(MESSAGE_VALUE_TOO_RARE),</b>
+<b class="nc">&nbsp;                    location.concat(metadataView.getLabel()), Integer.toString(count), Integer.toString(min)));</b>
+<b class="nc">&nbsp;                error = true;</b>
+<b class="nc">&nbsp;            } else if (count &gt; max) {</b>
+<b class="nc">&nbsp;                messages.add(MessageFormat.format(translations.get(MESSAGE_VALUE_TOO_OFTEN),</b>
+<b class="nc">&nbsp;                    location.concat(metadataView.getLabel()), Integer.toString(count), Integer.toString(min)));</b>
+<b class="nc">&nbsp;                error = true;</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (metadataView instanceof ComplexMetadataViewInterface) {</b>
+<b class="nc">&nbsp;                for (Metadata metadata : metadataViewWithValues.getValue()) {</b>
+<b class="nc">&nbsp;                    if (metadata instanceof MetadataGroup) {</b>
+<b class="nc">&nbsp;                        ValidationResult validationResult = checkForMandatoryQuantitiesOfTheMetadataRecursive(</b>
+<b class="nc">&nbsp;                            ((MetadataGroup) metadata).getMetadata(),</b>
+<b class="nc">&nbsp;                            (ComplexMetadataViewInterface) metadataView, location + metadataView.getLabel() + &quot; - &quot;,</b>
+&nbsp;                            translations);
+<b class="nc">&nbsp;                        if (validationResult.getState().equals(State.ERROR)) {</b>
+<b class="nc">&nbsp;                            error = true;</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                        messages.addAll(validationResult.getResultMessages());</b>
+<b class="nc">&nbsp;                    } else {</b>
+<b class="nc">&nbsp;                        throw new IllegalStateException(&quot;metadataView is a &quot; + metadataView.getClass().getSimpleName()</b>
+<b class="nc">&nbsp;                                + &quot;, but metadata is a &quot; + metadata.getClass().getSimpleName());</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return new ValidationResult(error ? State.ERROR : warning ? State.WARNING : State.SUCCESS, messages);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if all description data meet their individually defined validity
+&nbsp;     * criteria. This essentially checks the data type. Actually, this should
+&nbsp;     * already happen at the input and not get here, but we check it anyway. For
+&nbsp;     * example, corrupt data may have been imported.
+&nbsp;     *
+&nbsp;     * @param containedMetadata
+&nbsp;     *            metadata
+&nbsp;     * @param containingMetadataView
+&nbsp;     *            associated hierarchy node of the rule set
+&nbsp;     * @param location
+&nbsp;     *            specifies which structure element or which metadata group in
+&nbsp;     *            it is checked
+&nbsp;     * @return the validation result
+&nbsp;     */
+&nbsp;    private static ValidationResult checkForDetailsInTheMetadata(
+&nbsp;            Collection&lt;Metadata&gt; containedMetadata, ComplexMetadataViewInterface containingMetadataView,
+&nbsp;            String location, Map&lt;String, String&gt; translations) {
+&nbsp;
+<b class="nc">&nbsp;        return checkForDetailsInTheMetadata( // start recursion</b>
+&nbsp;            containedMetadata, containingMetadataView, location, translations, new LinkedList&lt;&gt;());
+&nbsp;    }
+&nbsp;
+&nbsp;    private static ValidationResult checkForDetailsInTheMetadata(
+&nbsp;            Collection&lt;Metadata&gt; containedMetadata, ComplexMetadataViewInterface containingMetadataView,
+&nbsp;            String location, Map&lt;String, String&gt; translations, LinkedList&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; surroundingMetadata) {
+<b class="nc">&nbsp;        boolean error = false;</b>
+<b class="nc">&nbsp;        Collection&lt;String&gt; messages = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        surroundingMetadata.addLast(containedMetadata.parallelStream().filter(MetadataEntry.class::isInstance)</b>
+<b class="nc">&nbsp;                .map(MetadataEntry.class::cast).collect(Collectors.toMap(Function.identity(), all -&gt; Boolean.FALSE)));</b>
+<b class="nc">&nbsp;        List&lt;MetadataViewWithValuesInterface&gt; metadataViewsWithValues = containingMetadataView</b>
+<b class="nc">&nbsp;                .getSortedVisibleMetadata(containedMetadata, Collections.emptyList());</b>
+<b class="nc">&nbsp;        for (MetadataViewWithValuesInterface metadataViewWithValues : metadataViewsWithValues) {</b>
+<b class="nc">&nbsp;            Optional&lt;MetadataViewInterface&gt; optionalMetadataView = metadataViewWithValues.getMetadata();</b>
+<b class="nc">&nbsp;            if (!optionalMetadataView.isPresent()) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            MetadataViewInterface metadataView = optionalMetadataView.orElseThrow(IllegalStateException::new);</b>
+<b class="nc">&nbsp;            for (Metadata metadata : metadataViewWithValues.getValues()) {</b>
+<b class="nc">&nbsp;                if (metadata instanceof MetadataEntry</b>
+&nbsp;                        &amp;&amp; metadataView instanceof SimpleMetadataViewInterface) {
+<b class="nc">&nbsp;                    String value = ((MetadataEntry) metadata).getValue();</b>
+<b class="nc">&nbsp;                    if (!((SimpleMetadataViewInterface) metadataView).isValid(value, surroundingMetadata)) {</b>
+<b class="nc">&nbsp;                        messages.add(MessageFormat.format(translations.get(MESSAGE_VALUE_INVALID), value,</b>
+<b class="nc">&nbsp;                            location.concat(metadataView.getLabel())));</b>
+<b class="nc">&nbsp;                        error = true;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                } else if (metadata instanceof MetadataGroup</b>
+&nbsp;                        &amp;&amp; metadataView instanceof ComplexMetadataViewInterface) {
+<b class="nc">&nbsp;                    ValidationResult validationResult = checkForDetailsInTheMetadata( // recursive</b>
+<b class="nc">&nbsp;                        ((MetadataGroup) metadata).getMetadata(),</b>
+<b class="nc">&nbsp;                        (ComplexMetadataViewInterface) metadataView, location + metadataView.getLabel() + &quot; - &quot;,</b>
+&nbsp;                        translations, surroundingMetadata);
+<b class="nc">&nbsp;                    if (validationResult.getState().equals(State.ERROR)) {</b>
+<b class="nc">&nbsp;                        error = true;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    messages.addAll(validationResult.getResultMessages());</b>
+<b class="nc">&nbsp;                } else {</b>
+<b class="nc">&nbsp;                    throw new IllegalStateException(&quot;metadataView is a &quot; + metadataView.getClass().getSimpleName()</b>
+<b class="nc">&nbsp;                            + &quot;, but metadata is a &quot; + metadata.getClass().getSimpleName());</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        surroundingMetadata.removeLast();</b>
+&nbsp;
+<b class="nc">&nbsp;        return new ValidationResult(error ? State.ERROR : State.SUCCESS, messages);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // helper methods
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new METS XML element access to read the METS file.
+&nbsp;     *
+&nbsp;     * @return a new METS XML element access
+&nbsp;     */
+&nbsp;    private static MetsXmlElementAccessInterface createMetsXmlElementAccess() {
+<b class="nc">&nbsp;        return new KitodoServiceLoader&lt;MetsXmlElementAccessInterface&gt;(MetsXmlElementAccessInterface.class).loadModule();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a file management to read the METS file.
+&nbsp;     *
+&nbsp;     * @return a file management
+&nbsp;     */
+&nbsp;    private static FileManagementInterface getFileManagement() {
+<b class="nc">&nbsp;        return new KitodoServiceLoader&lt;FileManagementInterface&gt;(FileManagementInterface.class).loadModule();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a ruleset management to validate the METS file.
+&nbsp;     *
+&nbsp;     * @return a ruleset management
+&nbsp;     */
+&nbsp;    private static RulesetManagementInterface getRulesetManagement() {
+<b class="nc">&nbsp;        return new KitodoServiceLoader&lt;RulesetManagementInterface&gt;(RulesetManagementInterface.class).loadModule();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Merges multiple metadata lines of identical type. The output format of
+&nbsp;     * the rule set refers to the display form and therefore generates a
+&nbsp;     * separate line for each metadata value. In the validation we need the
+&nbsp;     * number. To get that, the lines are summarized here.
+&nbsp;     *
+&nbsp;     * @param metadataViewsWithValues
+&nbsp;     *            list of metadata view objects, each with their value
+&nbsp;     * @return merged lines of identical type
+&nbsp;     */
+&nbsp;    private static Map&lt;MetadataViewInterface, Collection&lt;Metadata&gt;&gt; squash(
+&nbsp;            List&lt;MetadataViewWithValuesInterface&gt; metadataViewsWithValues) {
+<b class="nc">&nbsp;        Map&lt;MetadataViewInterface, Collection&lt;Metadata&gt;&gt; squashed = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (MetadataViewWithValuesInterface metadataViewWithValues : metadataViewsWithValues) {</b>
+<b class="nc">&nbsp;            Optional&lt;MetadataViewInterface&gt; optionalMetadataView = metadataViewWithValues.getMetadata();</b>
+<b class="nc">&nbsp;            if (!optionalMetadataView.isPresent()) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            squashed.computeIfAbsent(optionalMetadataView.get(), each -&gt; new ArrayList&lt;&gt;());</b>
+<b class="nc">&nbsp;            squashed.get(optionalMetadataView.get()).addAll(metadataViewWithValues.getValues());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return squashed;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Merges several individual validation results into one validation result.
+&nbsp;     *
+&nbsp;     * @param results
+&nbsp;     *            individual validation results
+&nbsp;     * @return merged validation result
+&nbsp;     */
+&nbsp;    private static ValidationResult merge(Collection&lt;ValidationResult&gt; results) {
+<b class="nc">&nbsp;        boolean error = false;</b>
+<b class="nc">&nbsp;        boolean warning = false;</b>
+<b class="nc">&nbsp;        Collection&lt;String&gt; messages = new HashSet&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        for (ValidationResult result : results) {</b>
+<b class="nc">&nbsp;            if (result.getState().equals(State.ERROR)) {</b>
+<b class="nc">&nbsp;                error = true;</b>
+<b class="nc">&nbsp;            } else if (result.getState().equals(State.WARNING)) {</b>
+<b class="nc">&nbsp;                warning = true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            messages.addAll(result.getResultMessages());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return new ValidationResult(error ? State.ERROR : warning ? State.WARNING : State.SUCCESS, messages);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

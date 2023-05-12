@@ -1,0 +1,444 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > UserDTO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.dto</a>
+</div>
+
+<h1>Coverage Summary for Class: UserDTO (org.kitodo.production.dto)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserDTO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    15,2%
+  </span>
+  <span class="absValue">
+    (5/33)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    28,2%
+  </span>
+  <span class="absValue">
+    (11/39)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.dto;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * User DTO object.
+&nbsp; */
+<b class="fc">&nbsp;public class UserDTO extends BaseDTO {</b>
+&nbsp;
+&nbsp;    private String login;
+&nbsp;    private String name;
+&nbsp;    private String surname;
+&nbsp;    private String fullName;
+&nbsp;    private String location;
+&nbsp;    private String ldapLogin;
+<b class="fc">&nbsp;    private boolean active = true;</b>
+<b class="fc">&nbsp;    private List&lt;FilterDTO&gt; filters = new ArrayList&lt;&gt;();</b>
+&nbsp;    private Integer filtersSize;
+<b class="fc">&nbsp;    private List&lt;RoleDTO&gt; roles = new ArrayList&lt;&gt;();</b>
+&nbsp;    private Integer rolesSize;
+<b class="fc">&nbsp;    private List&lt;ClientDTO&gt; clients = new ArrayList&lt;&gt;();</b>
+&nbsp;    private int clientsSize;
+<b class="fc">&nbsp;    private List&lt;ProjectDTO&gt; projects = new ArrayList&lt;&gt;();</b>
+&nbsp;    private Integer projectsSize;
+<b class="fc">&nbsp;    private List&lt;TaskDTO&gt; processingTasks = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get login.
+&nbsp;     *
+&nbsp;     * @return login as String
+&nbsp;     */
+&nbsp;    public String getLogin() {
+<b class="nc">&nbsp;        return login;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set login.
+&nbsp;     *
+&nbsp;     * @param login
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setLogin(String login) {
+<b class="fc">&nbsp;        this.login = login;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get name.
+&nbsp;     *
+&nbsp;     * @return first name as String
+&nbsp;     */
+&nbsp;    public String getName() {
+<b class="nc">&nbsp;        return name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set name.
+&nbsp;     *
+&nbsp;     * @param name
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setName(String name) {
+<b class="fc">&nbsp;        this.name = name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get surname.
+&nbsp;     *
+&nbsp;     * @return surname as String
+&nbsp;     */
+&nbsp;    public String getSurname() {
+<b class="nc">&nbsp;        return surname;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set surname.
+&nbsp;     *
+&nbsp;     * @param surname
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setSurname(String surname) {
+<b class="fc">&nbsp;        this.surname = surname;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get full name of user.
+&nbsp;     *
+&nbsp;     * @return full name of user as String
+&nbsp;     */
+&nbsp;    public String getFullName() {
+<b class="nc">&nbsp;        return this.fullName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set full name.
+&nbsp;     *
+&nbsp;     * @param fullName
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setFullName(String fullName) {
+<b class="fc">&nbsp;        this.fullName = fullName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get location.
+&nbsp;     *
+&nbsp;     * @return location as String
+&nbsp;     */
+&nbsp;    public String getLocation() {
+<b class="nc">&nbsp;        return location;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set location.
+&nbsp;     *
+&nbsp;     * @param location
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setLocation(String location) {
+<b class="nc">&nbsp;        this.location = location;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get LDAP login.
+&nbsp;     *
+&nbsp;     * @return LDAP login as String
+&nbsp;     */
+&nbsp;    public String getLdapLogin() {
+<b class="nc">&nbsp;        return ldapLogin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set LDAP login.
+&nbsp;     *
+&nbsp;     * @param ldapLogin
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setLdapLogin(String ldapLogin) {
+<b class="nc">&nbsp;        this.ldapLogin = ldapLogin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information if user is active.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isActive() {
+<b class="nc">&nbsp;        return this.active;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set information if user is active.
+&nbsp;     *
+&nbsp;     * @param active
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setActive(boolean active) {
+<b class="nc">&nbsp;        this.active = active;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of filters.
+&nbsp;     *
+&nbsp;     * @return list of filters as FilterDTO
+&nbsp;     */
+&nbsp;    public List&lt;FilterDTO&gt; getFilters() {
+<b class="nc">&nbsp;        return filters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of filters.
+&nbsp;     *
+&nbsp;     * @param filters
+&nbsp;     *            list of filters as FilterDTO
+&nbsp;     */
+&nbsp;    public void setFilters(List&lt;FilterDTO&gt; filters) {
+<b class="nc">&nbsp;        this.filters = filters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get size of filters.
+&nbsp;     *
+&nbsp;     * @return size
+&nbsp;     */
+&nbsp;    public Integer getFiltersSize() {
+<b class="nc">&nbsp;        return filtersSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set size of filters.
+&nbsp;     *
+&nbsp;     * @param filtersSize
+&nbsp;     *            as Integer
+&nbsp;     */
+&nbsp;    public void setFiltersSize(Integer filtersSize) {
+<b class="nc">&nbsp;        this.filtersSize = filtersSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of roles.
+&nbsp;     *
+&nbsp;     * @return list of roles as RoleDTO
+&nbsp;     */
+&nbsp;    public List&lt;RoleDTO&gt; getRoles() {
+<b class="nc">&nbsp;        return roles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of roles.
+&nbsp;     *
+&nbsp;     * @param roles
+&nbsp;     *            list of roles as RoleDTO
+&nbsp;     */
+&nbsp;    public void setRoles(List&lt;RoleDTO&gt; roles) {
+<b class="nc">&nbsp;        this.roles = roles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get size of roles.
+&nbsp;     *
+&nbsp;     * @return size
+&nbsp;     */
+&nbsp;    public int getRolesSize() {
+<b class="nc">&nbsp;        return rolesSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set size of roles.
+&nbsp;     *
+&nbsp;     * @param rolesSize
+&nbsp;     *            as Integer
+&nbsp;     */
+&nbsp;    public void setRolesSize(Integer rolesSize) {
+<b class="nc">&nbsp;        this.rolesSize = rolesSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of clients.
+&nbsp;     *
+&nbsp;     * @return The clients.
+&nbsp;     */
+&nbsp;    public List&lt;ClientDTO&gt; getClients() {
+<b class="nc">&nbsp;        return clients;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of clients.
+&nbsp;     *
+&nbsp;     * @param clients The clients.
+&nbsp;     */
+&nbsp;    public void setClients(List&lt;ClientDTO&gt; clients) {
+<b class="nc">&nbsp;        this.clients = clients;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get size of clients result list.
+&nbsp;     *
+&nbsp;     * @return The clientsSize.
+&nbsp;     */
+&nbsp;    public int getClientsSize() {
+<b class="nc">&nbsp;        return clientsSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets size of clients result list.
+&nbsp;     *
+&nbsp;     * @param clientsSize The clientsSize.
+&nbsp;     */
+&nbsp;    public void setClientsSize(Integer clientsSize) {
+<b class="nc">&nbsp;        this.clientsSize = clientsSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of projects.
+&nbsp;     *
+&nbsp;     * @return list of projects as ProjectDTO
+&nbsp;     */
+&nbsp;    public List&lt;ProjectDTO&gt; getProjects() {
+<b class="nc">&nbsp;        return projects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of projects.
+&nbsp;     *
+&nbsp;     * @param projects
+&nbsp;     *            list of projects as ProjectDTO
+&nbsp;     */
+&nbsp;    public void setProjects(List&lt;ProjectDTO&gt; projects) {
+<b class="nc">&nbsp;        this.projects = projects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get size of projects result list.
+&nbsp;     *
+&nbsp;     * @return result size of projects
+&nbsp;     *
+&nbsp;     */
+&nbsp;    public int getProjectsSize() {
+<b class="nc">&nbsp;        return projectsSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set size of project list.
+&nbsp;     *
+&nbsp;     * @param projectsSize
+&nbsp;     *            size of project list as Integer
+&nbsp;     */
+&nbsp;    public void setProjectsSize(Integer projectsSize) {
+<b class="nc">&nbsp;        this.projectsSize = projectsSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of processing tasks.
+&nbsp;     *
+&nbsp;     * @return list of processing tasks as TaskDTO
+&nbsp;     */
+&nbsp;    public List&lt;TaskDTO&gt; getProcessingTasks() {
+<b class="nc">&nbsp;        return processingTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of processing tasks.
+&nbsp;     *
+&nbsp;     * @param processingTasks
+&nbsp;     *            list of processing tasks as TaskDTO
+&nbsp;     */
+&nbsp;    public void setProcessingTasks(List&lt;TaskDTO&gt; processingTasks) {
+<b class="nc">&nbsp;        this.processingTasks = processingTasks;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

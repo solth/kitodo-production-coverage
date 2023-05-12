@@ -1,0 +1,248 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LoginForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: LoginForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LoginForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/42)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.faces.context.ExternalContext;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.controller.SessionClientController;
+&nbsp;import org.kitodo.production.security.CustomLoginSuccessHandler;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.security.SecurityAccessService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;
+&nbsp;@Named(&quot;LoginForm&quot;)
+&nbsp;@SessionScoped
+<b class="nc">&nbsp;public class LoginForm implements Serializable {</b>
+&nbsp;    private User loggedUser;
+<b class="nc">&nbsp;    private boolean firstVisit = true;</b>
+&nbsp;    private static final String INDEXING_PAGE = &quot;system.jsf?tabIndex=&quot;;
+&nbsp;    private static final String DESKTOP_VIEW = &quot;desktop.jsf&quot;;
+<b class="nc">&nbsp;    private final SecurityAccessService securityAccessService = ServiceManager.getSecurityAccessService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets current authenticated User.
+&nbsp;     *
+&nbsp;     * @return The user object or null if no user is authenticated.
+&nbsp;     */
+&nbsp;    public User getLoggedUser() {
+<b class="nc">&nbsp;        if (Objects.isNull(loggedUser)) {</b>
+<b class="nc">&nbsp;            this.loggedUser = ServiceManager.getUserService().getAuthenticatedUser();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.loggedUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setLoggedUser(User myClass) {
+<b class="nc">&nbsp;        this.loggedUser = myClass;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if user is already logged im.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isAlreadyLoggedIn() {
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks and returns whether this is the first time the user visits a Kitodo
+&nbsp;     * page in the current session or not. Makes use of the fact that &quot;LoginForm&quot; is
+&nbsp;     * a SessionScoped bean.
+&nbsp;     *
+&nbsp;     * @return whether this is the users first visit to Kitodo during the current
+&nbsp;     *         session or not
+&nbsp;     */
+&nbsp;    public boolean isFirstVisit() {
+<b class="nc">&nbsp;        boolean visit = firstVisit;</b>
+<b class="nc">&nbsp;        if (firstVisit) {</b>
+<b class="nc">&nbsp;            firstVisit = false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return visit;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Redirect to desktop if user is already logged in.
+&nbsp;     *
+&nbsp;     * @return path to desktop
+&nbsp;     */
+&nbsp;    public String redirectToDesktop() {
+<b class="nc">&nbsp;        if (Objects.nonNull(this.loggedUser)) {</b>
+<b class="nc">&nbsp;            return &quot;desktop&quot;;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return &quot;login&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if index is up-to-date and if user has multiple clients and display corresponding notification dialogs.
+&nbsp;     */
+&nbsp;    public void performPostLoginChecks() throws DataException, DAOException, IOException {
+&nbsp;
+<b class="nc">&nbsp;        ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();</b>
+<b class="nc">&nbsp;        SessionClientController controller = new SessionClientController();</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;PF(&#39;indexWarningDialog&#39;).hide();&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (ServiceManager.getSecurityAccessService().hasAuthorityToEditIndex()) {</b>
+<b class="nc">&nbsp;            if (controller.getAvailableClientsOfCurrentUser().size() &gt; 1</b>
+<b class="nc">&nbsp;                    &amp;&amp; Objects.isNull(controller.getCurrentSessionClient())) {</b>
+<b class="nc">&nbsp;                controller.showClientSelectDialog();</b>
+<b class="nc">&nbsp;            } else if (ServiceManager.getIndexingService().isIndexCorrupted()) {</b>
+<b class="nc">&nbsp;                context.redirect(INDEXING_PAGE + determineIndexingTab());</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                redirect(context);</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            if (ServiceManager.getIndexingService().isIndexCorrupted()) {</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;indexWarningDialog&#39;).show();&quot;);</b>
+<b class="nc">&nbsp;            } else if (controller.getAvailableClientsOfCurrentUser().size() &gt; 1</b>
+<b class="nc">&nbsp;                    &amp;&amp; Objects.isNull(controller.getCurrentSessionClient())) {</b>
+<b class="nc">&nbsp;                controller.showClientSelectDialog();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                redirect(context);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void redirect(ExternalContext context) throws IOException {
+<b class="nc">&nbsp;        String originalRequest = CustomLoginSuccessHandler.getOriginalRequest(context.getSessionMap()</b>
+<b class="nc">&nbsp;                .get(CustomLoginSuccessHandler.getSavedRequestString()));</b>
+<b class="nc">&nbsp;        if (originalRequest.isEmpty() || originalRequest.contains(&quot;login&quot;)) {</b>
+<b class="nc">&nbsp;            context.redirect(DESKTOP_VIEW);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            context.redirect(context.getRequestContextPath() + originalRequest);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private int determineIndexingTab() {
+<b class="nc">&nbsp;        int indexingTabIndex = 2;</b>
+<b class="nc">&nbsp;        if (!securityAccessService.hasAuthorityToViewTermsPage()) {</b>
+<b class="nc">&nbsp;            indexingTabIndex -= 1;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!securityAccessService.hasAuthorityToViewTaskManagerPage()) {</b>
+<b class="nc">&nbsp;            indexingTabIndex -= 1;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return indexingTabIndex;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

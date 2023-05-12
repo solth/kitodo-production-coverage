@@ -1,0 +1,448 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DataImport</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.externaldatamanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: DataImport (org.kitodo.api.externaldatamanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DataImport</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (30/35)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (30/35)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.externaldatamanagement;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.kitodo.api.schemaconverter.FileFormat;
+&nbsp;import org.kitodo.api.schemaconverter.MetadataFormat;
+&nbsp;
+<b class="fc">&nbsp;public class DataImport {</b>
+&nbsp;
+&nbsp;    private String title;
+&nbsp;    private SearchInterfaceType searchInterfaceType;
+&nbsp;    private FileFormat returnFormat;
+&nbsp;    private MetadataFormat metadataFormat;
+&nbsp;    private String host;
+&nbsp;    private String scheme;
+&nbsp;    private String path;
+&nbsp;    private int port;
+&nbsp;    private Boolean anonymousAccess;
+&nbsp;    private String username;
+&nbsp;    private String password;
+&nbsp;    private String idPrefix;
+&nbsp;    private String idParameter;
+&nbsp;    private Map&lt;String, String&gt; searchFields;
+&nbsp;    private Map&lt;String, String&gt; urlParameters;
+&nbsp;    private String recordIdXPath;
+&nbsp;    private String recordTitleXPath;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get title.
+&nbsp;     *
+&nbsp;     * @return value of title
+&nbsp;     */
+&nbsp;    public String getTitle() {
+<b class="nc">&nbsp;        return title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set title.
+&nbsp;     *
+&nbsp;     * @param title as java.lang.String
+&nbsp;     */
+&nbsp;    public void setTitle(String title) {
+<b class="fc">&nbsp;        this.title = title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get searchInterfaceType.
+&nbsp;     *
+&nbsp;     * @return value of searchInterfaceType
+&nbsp;     */
+&nbsp;    public SearchInterfaceType getSearchInterfaceType() {
+<b class="fc">&nbsp;        return searchInterfaceType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set searchInterfaceType.
+&nbsp;     *
+&nbsp;     * @param searchInterfaceType as org.kitodo.api.externaldatamanagement.SearchInterfaceType
+&nbsp;     */
+&nbsp;    public void setSearchInterfaceType(SearchInterfaceType searchInterfaceType) {
+<b class="fc">&nbsp;        this.searchInterfaceType = searchInterfaceType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get returnFormat.
+&nbsp;     *
+&nbsp;     * @return value of returnFormat
+&nbsp;     */
+&nbsp;    public FileFormat getReturnFormat() {
+<b class="fc">&nbsp;        return returnFormat;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set returnFormat.
+&nbsp;     *
+&nbsp;     * @param returnFormat as org.kitodo.api.schemaconverter.FileFormat
+&nbsp;     */
+&nbsp;    public void setReturnFormat(FileFormat returnFormat) {
+<b class="fc">&nbsp;        this.returnFormat = returnFormat;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get metadataFormat.
+&nbsp;     *
+&nbsp;     * @return value of metadataFormat
+&nbsp;     */
+&nbsp;    public MetadataFormat getMetadataFormat() {
+<b class="fc">&nbsp;        return metadataFormat;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set metadataFormat.
+&nbsp;     *
+&nbsp;     * @param metadataFormat as org.kitodo.api.schemaconverter.MetadataFormat
+&nbsp;     */
+&nbsp;    public void setMetadataFormat(MetadataFormat metadataFormat) {
+<b class="fc">&nbsp;        this.metadataFormat = metadataFormat;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get host.
+&nbsp;     *
+&nbsp;     * @return value of host
+&nbsp;     */
+&nbsp;    public String getHost() {
+<b class="fc">&nbsp;        return host;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set host.
+&nbsp;     *
+&nbsp;     * @param host as java.lang.String
+&nbsp;     */
+&nbsp;    public void setHost(String host) {
+<b class="fc">&nbsp;        this.host = host;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get scheme.
+&nbsp;     *
+&nbsp;     * @return value of scheme
+&nbsp;     */
+&nbsp;    public String getScheme() {
+<b class="fc">&nbsp;        return scheme;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set scheme.
+&nbsp;     *
+&nbsp;     * @param scheme as java.lang.String
+&nbsp;     */
+&nbsp;    public void setScheme(String scheme) {
+<b class="fc">&nbsp;        this.scheme = scheme;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get path.
+&nbsp;     *
+&nbsp;     * @return value of path
+&nbsp;     */
+&nbsp;    public String getPath() {
+<b class="fc">&nbsp;        return path;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set path.
+&nbsp;     *
+&nbsp;     * @param path as java.lang.String
+&nbsp;     */
+&nbsp;    public void setPath(String path) {
+<b class="fc">&nbsp;        this.path = path;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get port.
+&nbsp;     *
+&nbsp;     * @return value of port
+&nbsp;     */
+&nbsp;    public int getPort() {
+<b class="fc">&nbsp;        return port;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set port.
+&nbsp;     *
+&nbsp;     * @param port port of URL
+&nbsp;     */
+&nbsp;    public void setPort(int port) {
+<b class="fc">&nbsp;        this.port = port;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get anonymousAccess.
+&nbsp;     *
+&nbsp;     * @return value of anonymousAccess
+&nbsp;     */
+&nbsp;    public Boolean getAnonymousAccess() {
+<b class="nc">&nbsp;        return anonymousAccess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set anonymousAccess.
+&nbsp;     *
+&nbsp;     * @param anonymousAccess as java.lang.Boolean
+&nbsp;     */
+&nbsp;    public void setAnonymousAccess(Boolean anonymousAccess) {
+<b class="fc">&nbsp;        this.anonymousAccess = anonymousAccess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get username.
+&nbsp;     *
+&nbsp;     * @return value of username
+&nbsp;     */
+&nbsp;    public String getUsername() {
+<b class="fc">&nbsp;        return username;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set username.
+&nbsp;     *
+&nbsp;     * @param username as java.lang.String
+&nbsp;     */
+&nbsp;    public void setUsername(String username) {
+<b class="fc">&nbsp;        this.username = username;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get password.
+&nbsp;     *
+&nbsp;     * @return value of password
+&nbsp;     */
+&nbsp;    public String getPassword() {
+<b class="fc">&nbsp;        return password;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set password.
+&nbsp;     *
+&nbsp;     * @param password as java.lang.String
+&nbsp;     */
+&nbsp;    public void setPassword(String password) {
+<b class="fc">&nbsp;        this.password = password;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get idPrefix.
+&nbsp;     *
+&nbsp;     * @return value of idPrefix
+&nbsp;     */
+&nbsp;    public String getIdPrefix() {
+<b class="fc">&nbsp;        return idPrefix;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set idPrefix.
+&nbsp;     *
+&nbsp;     * @param idPrefix as java.lang.String
+&nbsp;     */
+&nbsp;    public void setIdPrefix(String idPrefix) {
+<b class="fc">&nbsp;        this.idPrefix = idPrefix;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get idParameter.
+&nbsp;     *
+&nbsp;     * @return value of idParameter
+&nbsp;     */
+&nbsp;    public String getIdParameter() {
+<b class="fc">&nbsp;        return idParameter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set idParameter.
+&nbsp;     *
+&nbsp;     * @param idParameter as java.lang.String
+&nbsp;     */
+&nbsp;    public void setIdParameter(String idParameter) {
+<b class="fc">&nbsp;        this.idParameter = idParameter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get searchFields.
+&nbsp;     *
+&nbsp;     * @return value of searchFields
+&nbsp;     */
+&nbsp;    public Map&lt;String, String&gt; getSearchFields() {
+<b class="nc">&nbsp;        return searchFields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set searchFields.
+&nbsp;     *
+&nbsp;     * @param searchFields as Map
+&nbsp;     */
+&nbsp;    public void setSearchFields(Map&lt;String, String&gt; searchFields) {
+<b class="fc">&nbsp;        this.searchFields = searchFields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get urlParameters.
+&nbsp;     *
+&nbsp;     * @return value of urlParameters
+&nbsp;     */
+&nbsp;    public Map&lt;String, String&gt; getUrlParameters() {
+<b class="fc">&nbsp;        return urlParameters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set urlParameters.
+&nbsp;     *
+&nbsp;     * @param urlParameters as Map
+&nbsp;     */
+&nbsp;    public void setUrlParameters(Map&lt;String, String&gt; urlParameters) {
+<b class="fc">&nbsp;        this.urlParameters = urlParameters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get recordIdXPath.
+&nbsp;     *
+&nbsp;     * @return value of recordIdXPath
+&nbsp;     */
+&nbsp;    public String getRecordIdXPath() {
+<b class="nc">&nbsp;        return recordIdXPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set recordIdXPath.
+&nbsp;     *
+&nbsp;     * @param recordIdXPath as java.lang.String
+&nbsp;     */
+&nbsp;    public void setRecordIdXPath(String recordIdXPath) {
+<b class="fc">&nbsp;        this.recordIdXPath = recordIdXPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get recordTitleXPath.
+&nbsp;     *
+&nbsp;     * @return value of recordTitleXPath
+&nbsp;     */
+&nbsp;    public String getRecordTitleXPath() {
+<b class="nc">&nbsp;        return recordTitleXPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set recordTitleXPath.
+&nbsp;     *
+&nbsp;     * @param recordTitleXPath as java.lang.String
+&nbsp;     */
+&nbsp;    public void setRecordTitleXPath(String recordTitleXPath) {
+<b class="fc">&nbsp;        this.recordTitleXPath = recordTitleXPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

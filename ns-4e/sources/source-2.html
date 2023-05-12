@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DataCopier</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.metadata.copier</a>
+</div>
+
+<h1>Coverage Summary for Class: DataCopier (org.kitodo.production.metadata.copier)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DataCopier</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.metadata.copier;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.ConfigurationException;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;
+&nbsp;/**
+&nbsp; * A data copier is a class that can be parametrised to copy data in processes
+&nbsp; * depending on rules.
+&nbsp; */
+&nbsp;public class DataCopier {
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(DataCopier.class);</b>
+&nbsp;
+<b class="nc">&nbsp;    private static final Pattern DATA_COPY_RULES_PARSE_PATTERN = Pattern.compile(&quot;[^\\s\&quot;&#39;]+|\&quot;[^\&quot;]*\&quot;&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Holds the rules this data copier can apply to a set of working data.
+&nbsp;     */
+&nbsp;    private final List&lt;DataCopyrule&gt; rules;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new DataCopier.
+&nbsp;     *
+&nbsp;     * @param program
+&nbsp;     *            a semicolon-separated list of expressions defining rules to
+&nbsp;     *            apply to the metadata
+&nbsp;     * @throws ConfigurationException
+&nbsp;     *             may be thrown if the program is syntactically wrong
+&nbsp;     */
+<b class="nc">&nbsp;    public DataCopier(String program) throws ConfigurationException {</b>
+<b class="nc">&nbsp;        List&lt;List&lt;String&gt;&gt; commands = parseDataCopyRules(program);</b>
+<b class="nc">&nbsp;        rules = new ArrayList&lt;&gt;(commands.size());</b>
+<b class="nc">&nbsp;        for (List&lt;String&gt; command : commands) {</b>
+<b class="nc">&nbsp;            rules.add(new DataCopyrule(command));</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parses a string containing one or more data copy rules. Several rules are
+&nbsp;     * separated by semicolon. This is especially done to handle white space
+&nbsp;     * between quotes correctly.
+&nbsp;     *
+&nbsp;     * @param input
+&nbsp;     *            string of copy data expressions
+&nbsp;     * @return list of rules, where each rule is a list of tokens the rule
+&nbsp;     *         consists of
+&nbsp;     */
+&nbsp;    private static List&lt;List&lt;String&gt;&gt; parseDataCopyRules(String input) {
+<b class="nc">&nbsp;        List&lt;List&lt;String&gt;&gt; output = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;String&gt; sequence = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        Matcher matcher = DATA_COPY_RULES_PARSE_PATTERN.matcher(input);</b>
+<b class="nc">&nbsp;        while (matcher.find()) {</b>
+<b class="nc">&nbsp;            boolean endOfSequence = false;</b>
+<b class="nc">&nbsp;            String token = matcher.group();</b>
+<b class="nc">&nbsp;            if (token.endsWith(&quot;;&quot;)) {</b>
+<b class="nc">&nbsp;                endOfSequence = true;</b>
+<b class="nc">&nbsp;                token = token.substring(0, token.length() - 1);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (!token.isEmpty()) {</b>
+<b class="nc">&nbsp;                sequence.add(token);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            System.out.println(token);</b>
+<b class="nc">&nbsp;            if (endOfSequence) {</b>
+<b class="nc">&nbsp;                output.add(sequence);</b>
+<b class="nc">&nbsp;                sequence = new ArrayList&lt;&gt;();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        if (!sequence.isEmpty()) {</b>
+<b class="nc">&nbsp;            output.add(sequence);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return output;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Applies the rules defined by the “program” passed to the constructor onto
+&nbsp;     * a given dataset.
+&nbsp;     *
+&nbsp;     * @param data
+&nbsp;     *            a data object to work on
+&nbsp;     */
+&nbsp;    public void process(CopierData data) {
+<b class="nc">&nbsp;        for (DataCopyrule rule : rules) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                rule.apply(data);</b>
+<b class="nc">&nbsp;            } catch (RuntimeException notApplicable) {</b>
+<b class="nc">&nbsp;                logger.info(&quot;Rule not applicable for \&quot;{}\&quot;, skipped: {}&quot;, data.getProcess().getTitle(), rule);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a string that textually represents this data copier.
+&nbsp;     *
+&nbsp;     * @return a string representation of this data copier.
+&nbsp;     * @see java.lang.Object#toString()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return rules.toString();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

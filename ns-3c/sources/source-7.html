@@ -1,0 +1,316 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ClientForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: ClientForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ClientForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,7%
+  </span>
+  <span class="absValue">
+    (7/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    44,4%
+  </span>
+  <span class="absValue">
+    (24/54)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Client;
+&nbsp;import org.kitodo.data.database.beans.Role;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.model.LazyDTOModel;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;@Named(&quot;ClientForm&quot;)
+&nbsp;@SessionScoped
+&nbsp;public class ClientForm extends BaseForm {
+&nbsp;    private Client client;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ClientForm.class);</b>
+&nbsp;
+<b class="fc">&nbsp;    private final String clientEditPath = MessageFormat.format(REDIRECT_PATH, &quot;clientEdit&quot;);</b>
+&nbsp;    private Client clientToCopyRoles;
+&nbsp;    private List&lt;Role&gt; rolesForClient;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Empty default constructor that also sets the LazyDTOModel instance of this
+&nbsp;     * bean.
+&nbsp;     */
+&nbsp;    public ClientForm() {
+<b class="fc">&nbsp;        super();</b>
+<b class="fc">&nbsp;        super.setLazyDTOModel(new LazyDTOModel(ServiceManager.getClientService()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save client.
+&nbsp;     *
+&nbsp;     * @return page or empty String
+&nbsp;     */
+&nbsp;    public String save() {
+&nbsp;        try {
+<b class="fc">&nbsp;            ServiceManager.getClientService().saveToDatabase(this.client);</b>
+<b class="fc">&nbsp;            for (Role role : rolesForClient) {</b>
+<b class="fc">&nbsp;                ServiceManager.getRoleService().saveToDatabase(role);</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            rolesForClient = null;</b>
+<b class="fc">&nbsp;            return usersPage;</b>
+<b class="nc">&nbsp;        } catch (DAOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.CLIENT.getTranslationSingular() }, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for client edit form. If &#39;clientId&#39; is &#39;0&#39;,
+&nbsp;     * the form for creating a new client will be displayed.
+&nbsp;     */
+&nbsp;    public void load(int id) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!Objects.equals(id, 0)) {</b>
+<b class="nc">&nbsp;                rolesForClient = null;</b>
+<b class="nc">&nbsp;                this.client = ServiceManager.getClientService().getById(id);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            setSaveDisabled(true);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.CLIENT.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new client.
+&nbsp;     *
+&nbsp;     * @return page address
+&nbsp;     */
+&nbsp;    public String newClient() {
+<b class="nc">&nbsp;        rolesForClient = null;</b>
+<b class="nc">&nbsp;        this.client = new Client();</b>
+<b class="nc">&nbsp;        this.client.setListColumns(ServiceManager.getListColumnService().getAllStandardListColumns());</b>
+<b class="nc">&nbsp;        return clientEditPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets client.
+&nbsp;     *
+&nbsp;     * @return The client.
+&nbsp;     */
+&nbsp;    public Client getClient() {
+<b class="nc">&nbsp;        return client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets client.
+&nbsp;     *
+&nbsp;     * @param client
+&nbsp;     *            The client.
+&nbsp;     */
+&nbsp;    public void setClient(Client client) {
+<b class="fc">&nbsp;        this.client = client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set client by ID.
+&nbsp;     *
+&nbsp;     * @param clientID
+&nbsp;     *          ID of client to set.
+&nbsp;     */
+&nbsp;    public void setClientById(int clientID) {
+&nbsp;        try {
+<b class="nc">&nbsp;            setClient(ServiceManager.getClientService().getById(clientID));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.CLIENT.getTranslationSingular(), clientID }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete client.
+&nbsp;     */
+&nbsp;    public void delete() {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.client.getListColumns().clear();</b>
+<b class="nc">&nbsp;            ServiceManager.getClientService().removeFromDatabase(this.client);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DELETING, new Object[] {ObjectType.CLIENT.getTranslationSingular() }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets all roles for a Client.
+&nbsp;     *
+&nbsp;     * @return a list of roles
+&nbsp;     */
+&nbsp;    public List&lt;Role&gt; getRolesForClient() {
+<b class="fc">&nbsp;        if (Objects.isNull(rolesForClient)) {</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(client) &amp;&amp; Objects.nonNull(client.getId())) {</b>
+<b class="fc">&nbsp;                rolesForClient = ServiceManager.getRoleService().getAllRolesByClientId(client.getId());</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                rolesForClient = new ArrayList&lt;&gt;();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return rolesForClient;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get clientToCopyRoles.
+&nbsp;     *
+&nbsp;     * @return value of clientToCopyRoles
+&nbsp;     */
+&nbsp;    public Client getClientToCopyRoles() {
+<b class="nc">&nbsp;        return clientToCopyRoles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set clientToCopyRoles.
+&nbsp;     *
+&nbsp;     * @param clientToCopyRoles
+&nbsp;     *            as org.kitodo.data.database.beans.Client
+&nbsp;     */
+&nbsp;    public void setClientToCopyRoles(Client clientToCopyRoles) {
+<b class="fc">&nbsp;        this.clientToCopyRoles = clientToCopyRoles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copies all roles from a chosen client to the current client.
+&nbsp;     */
+&nbsp;    public void copyRolesToClient() {
+<b class="fc">&nbsp;        List&lt;Role&gt; allRolesToCopy = ServiceManager.getRoleService().getAllRolesByClientId(clientToCopyRoles.getId());</b>
+<b class="fc">&nbsp;        for (Role role : allRolesToCopy) {</b>
+<b class="fc">&nbsp;            Role newRole = new Role();</b>
+<b class="fc">&nbsp;            newRole.setTitle(role.getTitle());</b>
+<b class="fc">&nbsp;            newRole.setClient(client);</b>
+<b class="fc">&nbsp;            newRole.setAuthorities(new ArrayList&lt;&gt;(role.getAuthorities()));</b>
+<b class="fc">&nbsp;            rolesForClient.add(newRole);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes a givon role from a client.
+&nbsp;     *
+&nbsp;     * @param roleToRemove
+&nbsp;     *            role to remove.
+&nbsp;     */
+&nbsp;    public void deleteRoleFromClient(Role roleToRemove) {
+<b class="nc">&nbsp;        rolesForClient.remove(roleToRemove);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all clients where roles can be copied from.
+&nbsp;     * @return a list of possible clients.
+&nbsp;     * @throws DAOException when Database connection fails.
+&nbsp;     */
+&nbsp;    public List&lt;Client&gt; getPossibleClientsForCopying() throws DAOException {
+<b class="nc">&nbsp;        List&lt;Client&gt; allClients = ServiceManager.getClientService().getAll();</b>
+<b class="nc">&nbsp;        allClients.remove(client);</b>
+<b class="nc">&nbsp;        return allClients;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

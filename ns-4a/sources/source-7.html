@@ -1,0 +1,335 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TaskManager</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.tasks</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskManager (org.kitodo.production.helper.tasks)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskManager</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,6%
+  </span>
+  <span class="absValue">
+    (7/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,5%
+  </span>
+  <span class="absValue">
+    (31/53)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.tasks;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.ConcurrentModificationException;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.concurrent.Executors;
+&nbsp;import java.util.concurrent.ScheduledExecutorService;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.production.helper.tasks.EmptyTask.Behaviour;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class TaskManager serves to handle the execution of threads. It can be
+&nbsp; * user controlled by the “Long running task manager”, backed by
+&nbsp; * {@link org.kitodo.production.forms.TaskManagerForm}.
+&nbsp; */
+&nbsp;public class TaskManager {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field singletonInstance holds the singleton instance of the
+&nbsp;     * TaskManager. Tough the method signatures of TaskManager are static, it is
+&nbsp;     * implemented as singleton internally. All accesses to the instance must be
+&nbsp;     * done by calling the synchronized function singleton() or concurrency
+&nbsp;     * issues may arise.
+&nbsp;     */
+&nbsp;    private static TaskManager singletonInstance;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field taskSitter holds a scheduled executor to repeatedly run the
+&nbsp;     * TaskSitter task which will remove old threads and start new ones as
+&nbsp;     * configured to do.
+&nbsp;     */
+&nbsp;    private final ScheduledExecutorService taskSitter;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field taskList holds the list of threads managed by the task manager.
+&nbsp;     */
+<b class="fc">&nbsp;    final LinkedList&lt;EmptyTask&gt; taskList = new LinkedList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * TaskManager is a singleton so its constructor is private. It will be
+&nbsp;     * called once and just once by the synchronized function singleton() and
+&nbsp;     * set up a housekeeping thread.
+&nbsp;     */
+<b class="fc">&nbsp;    private TaskManager() {</b>
+<b class="fc">&nbsp;        taskSitter = Executors.newSingleThreadScheduledExecutor();</b>
+<b class="fc">&nbsp;        long delay = ConfigCore.getLongParameterOrDefaultValue(ParameterCore.TASK_MANAGER_INSPECTION_INTERVAL_MILLIS);</b>
+<b class="fc">&nbsp;        taskSitter.scheduleWithFixedDelay(new TaskSitter(), delay, delay, TimeUnit.MILLISECONDS);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a task thread to the task list.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            task to add
+&nbsp;     */
+&nbsp;    public static void addTask(EmptyTask task) {
+<b class="fc">&nbsp;        singleton().taskList.addLast(task);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The procedure will add a task to the task list if it
+&nbsp;     * has not yet been added right after the last task that is currently
+&nbsp;     * executing. If this fails for some reason (i.e. the list got concurrently
+&nbsp;     * modified) it will be added in the end.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This is a fallback method that is called by the overloaded start() method
+&nbsp;     * of AbstractTask. Do not use it. Use TaskManager.addTask() to properly add
+&nbsp;     * the tasks you created.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            task to add
+&nbsp;     */
+&nbsp;    static void addTaskIfMissing(EmptyTask task) {
+<b class="fc">&nbsp;        LinkedList&lt;EmptyTask&gt; tasks = singleton().taskList;</b>
+<b class="fc">&nbsp;        if (!tasks.contains(task)) {</b>
+<b class="fc">&nbsp;            int pos = lastIndexOf(TaskState.WORKING) + 1;</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                tasks.add(pos, task);</b>
+<b class="nc">&nbsp;            } catch (IndexOutOfBoundsException e) {</b>
+<b class="nc">&nbsp;                tasks.addLast(task);</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a copy of the task list usable for
+&nbsp;     * displaying. The result object cannot be used to modify the list. Use
+&nbsp;     * removeAllFinishedTasks() to clean up the list or stopAndDeleteAllTasks()
+&nbsp;     * if you wish to do so. To get rid of one specific task, call
+&nbsp;     * abstractTask.interrupt(Behaviour.DELETE_IMMEDIATELY) which will cause it
+&nbsp;     * to be removed by the TaskSitter as soon as it has terminated
+&nbsp;     * successfully.
+&nbsp;     *
+&nbsp;     * @return a copy of the task list
+&nbsp;     */
+&nbsp;    public static List&lt;EmptyTask&gt; getTaskList() {
+<b class="fc">&nbsp;        return new ArrayList&lt;&gt;(singleton().taskList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the index of the last task in the task
+&nbsp;     * list that is in the given TaskState.
+&nbsp;     *
+&nbsp;     * @param state
+&nbsp;     *            state of tasks to look for
+&nbsp;     * @return the index of the last task in that state
+&nbsp;     */
+&nbsp;    private static int lastIndexOf(TaskState state) {
+<b class="fc">&nbsp;        int lastIndex = -1;</b>
+<b class="fc">&nbsp;        int pos = -1;</b>
+<b class="fc">&nbsp;        for (EmptyTask task : singleton().taskList) {</b>
+<b class="fc">&nbsp;            pos++;</b>
+<b class="fc">&nbsp;            if (task.getTaskState().equals(state)) {</b>
+<b class="nc">&nbsp;                lastIndex = pos;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return lastIndex;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be called to remove all
+&nbsp;     * terminated threads from the list.
+&nbsp;     */
+&nbsp;    public static void removeAllFinishedTasks() {
+&nbsp;        boolean redo;
+&nbsp;        do {
+<b class="nc">&nbsp;            redo = false;</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                singleton().taskList.removeIf(emptyTask -&gt; emptyTask.getState().equals(Thread.State.TERMINATED));</b>
+<b class="nc">&nbsp;            } catch (ConcurrentModificationException listModifiedByAnotherThreadWhileIterating) {</b>
+<b class="nc">&nbsp;                redo = true;</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } while (redo);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be called to move a task by one forwards on
+&nbsp;     * the queue.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            task to move forwards
+&nbsp;     */
+&nbsp;    public static void runEarlier(EmptyTask task) {
+<b class="nc">&nbsp;        TaskManager theManager = singleton();</b>
+<b class="nc">&nbsp;        int index = theManager.taskList.indexOf(task);</b>
+<b class="nc">&nbsp;        if (index &gt; 0) {</b>
+<b class="nc">&nbsp;            Collections.swap(theManager.taskList, index - 1, index);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be called to move a task by one backwards on
+&nbsp;     * the queue.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            task to move backwards
+&nbsp;     */
+&nbsp;    public static void runLater(EmptyTask task) {
+<b class="nc">&nbsp;        TaskManager theManager = singleton();</b>
+<b class="nc">&nbsp;        int index = theManager.taskList.indexOf(task);</b>
+<b class="nc">&nbsp;        if (index &gt; -1 &amp;&amp; index + 1 &lt; theManager.taskList.size()) {</b>
+<b class="nc">&nbsp;            Collections.swap(theManager.taskList, index, index + 1);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The synchronized function singleton() must be used to obtain singleton
+&nbsp;     * access to the TaskManager instance.
+&nbsp;     *
+&nbsp;     * @return the singleton TaskManager instance
+&nbsp;     */
+&nbsp;    static synchronized TaskManager singleton() {
+<b class="fc">&nbsp;        if (Objects.isNull(singletonInstance)) {</b>
+<b class="fc">&nbsp;            singletonInstance = new TaskManager();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return singletonInstance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The function will be called by the TaskSitter to gracefully
+&nbsp;     * exit the task manager as well as its managed threads during container
+&nbsp;     * shutdown.
+&nbsp;     */
+&nbsp;    static void shutdownNow() {
+<b class="nc">&nbsp;        stopAndDeleteAllTasks();</b>
+<b class="nc">&nbsp;        singleton().taskSitter.shutdownNow();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be called to both request
+&nbsp;     * interrupt and immediate deletion for all threads that are alive and at
+&nbsp;     * the same time remove all threads that aren’t alive anyhow.
+&nbsp;     */
+&nbsp;    public static void stopAndDeleteAllTasks() {
+&nbsp;        boolean redo;
+&nbsp;        do {
+<b class="fc">&nbsp;            redo = false;</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                Iterator&lt;EmptyTask&gt; inspector = singleton().taskList.iterator();</b>
+<b class="fc">&nbsp;                while (inspector.hasNext()) {</b>
+<b class="fc">&nbsp;                    EmptyTask task = inspector.next();</b>
+<b class="fc">&nbsp;                    if (task.isAlive()) {</b>
+<b class="nc">&nbsp;                        task.interrupt(Behaviour.DELETE_IMMEDIATELY);</b>
+&nbsp;                    } else {
+<b class="fc">&nbsp;                        inspector.remove();</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } catch (ConcurrentModificationException listModifiedByAnotherThreadWhileIterating) {</b>
+<b class="nc">&nbsp;                redo = true;</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;        } while (redo);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

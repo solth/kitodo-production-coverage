@@ -1,0 +1,211 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TasksToWorkflowConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.migration</a>
+</div>
+
+<h1>Coverage Summary for Class: TasksToWorkflowConverter (org.kitodo.production.migration)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TasksToWorkflowConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,7%
+  </span>
+  <span class="absValue">
+    (29/30)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.migration;
+&nbsp;
+&nbsp;import java.io.BufferedWriter;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.io.OutputStreamWriter;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;
+<b class="fc">&nbsp;public class TasksToWorkflowConverter {</b>
+&nbsp;
+&nbsp;    private static final int BOX_DISTANCE = 150;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert given tasks to workflow file.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            for workflow
+&nbsp;     * @param tasks
+&nbsp;     *            for conversion
+&nbsp;     */
+&nbsp;    public void convertTasksToWorkflowFile(String title, List&lt;Task&gt; tasks) throws IOException {
+<b class="fc">&nbsp;        String workflow = createWorkflow(title, tasks);</b>
+<b class="fc">&nbsp;        saveFile(title, workflow);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String createWorkflow(String title, List&lt;Task&gt; tasks) {
+<b class="fc">&nbsp;        tasks.sort(Comparator.comparing(Task::getOrdering));</b>
+&nbsp;
+<b class="fc">&nbsp;        StringBuilder xmlDiagram = new StringBuilder(</b>
+&nbsp;                &quot;&lt;bpmn2:definitions xmlns:xsi=\&quot;http://www.w3.org/2001/XMLSchema-instance\&quot;\n&quot;
+&nbsp;                        + &quot;                   xmlns:bpmn2=\&quot;http://www.omg.org/spec/BPMN/20100524/MODEL\&quot;\n&quot;
+&nbsp;                        + &quot;                   xmlns:bpmndi=\&quot;http://www.omg.org/spec/BPMN/20100524/DI\&quot;\n&quot;
+&nbsp;                        + &quot;                   xmlns:dc=\&quot;http://www.omg.org/spec/DD/20100524/DC\&quot;\n&quot;
+&nbsp;                        + &quot;                   xmlns:di=\&quot;http://www.omg.org/spec/DD/20100524/DI\&quot;\n&quot;
+&nbsp;                        + &quot;                   xmlns:template=\&quot;http://www.kitodo.org/template\&quot; id=\&quot;sample-diagram\&quot;\n&quot;
+&nbsp;                        + &quot;                   targetNamespace=\&quot;http://bpmn.io/schema/bpmn\&quot;\n&quot;
+&nbsp;                        + &quot;                   xsi:schemaLocation=\&quot;http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd\&quot;&gt;\n&quot;
+&nbsp;                        + &quot;    &lt;bpmn2:process id=\&quot;&quot; + title + &quot;\&quot; name=\&quot;&quot; + title + &quot;\&quot; isExecutable=\&quot;false\&quot;\n&quot;
+&nbsp;                        + &quot;                   template:outputName=\&quot;&quot; + title + &quot;\&quot;&gt;\n&quot;
+&nbsp;                        + &quot;        &lt;bpmn2:startEvent id=\&quot;StartEvent_1\&quot;&gt;\n&quot;
+&nbsp;                        + &quot;            &lt;bpmn2:outgoing&gt;SequenceFlow_1&lt;/bpmn2:outgoing&gt;\n&quot;
+&nbsp;                        + &quot;        &lt;/bpmn2:startEvent&gt;\n&quot;);
+&nbsp;
+<b class="fc">&nbsp;        convertTasksToXmlWorkflow(xmlDiagram, tasks);</b>
+<b class="fc">&nbsp;        XmlGenerator.generateEndEvent(xmlDiagram, tasks.size());</b>
+&nbsp;
+<b class="fc">&nbsp;        XmlGenerator.generateBpmnDiagram(xmlDiagram, title);</b>
+<b class="fc">&nbsp;        convertTasksToWorkflowCoordinates(xmlDiagram, tasks);</b>
+<b class="fc">&nbsp;        XmlGenerator.generateCloseBpmnDiagram(xmlDiagram);</b>
+&nbsp;
+<b class="fc">&nbsp;        return xmlDiagram.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void convertTasksToXmlWorkflow(StringBuilder diagram, List&lt;Task&gt; tasks) {
+<b class="fc">&nbsp;        for (int i = 0; i &lt; tasks.size(); i++) {</b>
+<b class="fc">&nbsp;            int diagramOrder = i + 1;</b>
+<b class="fc">&nbsp;            if (i == 0) {</b>
+<b class="fc">&nbsp;                diagram.append(</b>
+<b class="fc">&nbsp;                    XmlGenerator.generateTask(tasks.get(i), &quot;StartEvent_1&quot;, diagramOrder));</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                diagram.append(XmlGenerator.generateTask(tasks.get(i), diagramOrder));</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void convertTasksToWorkflowCoordinates(StringBuilder diagram, List&lt;Task&gt; tasks) {
+<b class="fc">&nbsp;        int diagramStart = 498;</b>
+&nbsp;
+<b class="fc">&nbsp;        for (int i = 1; i &lt;= tasks.size(); i++) {</b>
+<b class="fc">&nbsp;            diagram.append(XmlGenerator.generateTaskShape(i, diagramStart));</b>
+<b class="fc">&nbsp;            diagramStart = diagramStart + BOX_DISTANCE;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        XmlGenerator.generateBpmnEndEvent(diagram, diagramStart);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void saveFile(String title, String fileContent) throws IOException {
+<b class="fc">&nbsp;        FileService fileService = ServiceManager.getFileService();</b>
+<b class="fc">&nbsp;        URI xmlDiagramURI = new File(ConfigCore.getKitodoDiagramDirectory() + title + &quot;.bpmn20.xml&quot;).toURI();</b>
+<b class="fc">&nbsp;        if (fileService.fileExist(xmlDiagramURI)) {</b>
+<b class="nc">&nbsp;            fileService.delete(xmlDiagramURI);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        try (OutputStream outputStream = fileService.write(xmlDiagramURI);</b>
+<b class="fc">&nbsp;                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream))) {</b>
+<b class="fc">&nbsp;            bufferedWriter.write(fileContent);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

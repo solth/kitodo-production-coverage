@@ -1,0 +1,611 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > BatchForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: BatchForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BatchForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/35)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/191)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.faces.event.ValueChangeEvent;
+&nbsp;import javax.faces.view.ViewScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.elasticsearch.index.query.BoolQueryBuilder;
+&nbsp;import org.elasticsearch.index.query.QueryBuilder;
+&nbsp;import org.elasticsearch.search.sort.SortOrder;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Batch;
+&nbsp;import org.kitodo.data.database.beans.Comment;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.enums.CommentType;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.export.ExportDms;
+&nbsp;import org.kitodo.production.dto.ProcessDTO;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.batch.BatchProcessHelper;
+&nbsp;import org.kitodo.production.model.LazyDTOModel;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;@Named(&quot;BatchForm&quot;)
+&nbsp;@ViewScoped
+&nbsp;public class BatchForm extends BaseForm {
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(BatchForm.class);</b>
+&nbsp;
+&nbsp;    private List&lt;Process&gt; currentProcesses;
+<b class="nc">&nbsp;    private List&lt;Process&gt; selectedProcesses = new ArrayList&lt;&gt;();</b>
+&nbsp;    private List&lt;Batch&gt; currentBatches;
+<b class="nc">&nbsp;    private List&lt;Batch&gt; selectedBatches = new ArrayList&lt;&gt;();</b>
+&nbsp;    private int selectedBatchId;
+&nbsp;    private String batchfilter;
+&nbsp;    private String processfilter;
+&nbsp;    private String batchTitle;
+&nbsp;    private transient BatchProcessHelper batchHelper;
+&nbsp;    private static final String NO_BATCH_SELECTED = &quot;noBatchSelected&quot;;
+&nbsp;    private static final String NO_PROCESS_SELECTED = &quot;noProcessSelected&quot;;
+&nbsp;    private static final String TOO_MANY_BATCHES_SELECTED = &quot;tooManyBatchesSelected&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+&nbsp;    public BatchForm() {
+<b class="nc">&nbsp;        super();</b>
+<b class="nc">&nbsp;        super.setLazyDTOModel(new LazyDTOModel(ServiceManager.getBatchService()));</b>
+<b class="nc">&nbsp;        filterAll();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load Batch data.
+&nbsp;     */
+&nbsp;    public void loadBatchData() {
+<b class="nc">&nbsp;        if (this.selectedProcesses.isEmpty()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                this.currentBatches = ServiceManager.getBatchService().getAll();</b>
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {ObjectType.BATCH.getTranslationPlural() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            selectedBatches = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            List&lt;Batch&gt; batchesToSelect = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (Process process : selectedProcesses) {</b>
+<b class="nc">&nbsp;                batchesToSelect.addAll(process.getBatches());</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            selectedBatches.addAll(batchesToSelect);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load Process data.
+&nbsp;     */
+&nbsp;    public void loadProcessData() {
+<b class="nc">&nbsp;        List&lt;Process&gt; processes = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Batch selectedBatch : selectedBatches) {</b>
+<b class="nc">&nbsp;            processes.addAll(selectedBatch.getProcesses());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        currentProcesses = new ArrayList&lt;&gt;(processes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filter processes.
+&nbsp;     */
+&nbsp;    public void filterProcesses() {
+<b class="nc">&nbsp;        List&lt;ProcessDTO&gt; processDTOS = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        QueryBuilder query = new BoolQueryBuilder();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (Objects.nonNull(this.processfilter)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                query = ServiceManager.getFilterService().queryBuilder(this.processfilter, ObjectType.PROCESS, false,</b>
+<b class="nc">&nbsp;                    false);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        int batchMaxSize = ConfigCore.getIntParameter(ParameterCore.BATCH_DISPLAY_LIMIT, -1);</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (batchMaxSize &gt; 0) {</b>
+<b class="nc">&nbsp;                processDTOS = ServiceManager.getProcessService().findByQuery(query,</b>
+<b class="nc">&nbsp;                    ServiceManager.getProcessService().sortByCreationDate(SortOrder.DESC), 0, batchMaxSize, false);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                processDTOS = ServiceManager.getProcessService().findByQuery(query,</b>
+<b class="nc">&nbsp;                    ServiceManager.getProcessService().sortByCreationDate(SortOrder.DESC), false);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            this.currentProcesses = ServiceManager.getProcessService().convertDtosToBeans(processDTOS);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            this.currentProcesses = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filter batches.
+&nbsp;     */
+&nbsp;    public void filterBatches() {
+<b class="nc">&nbsp;        currentBatches = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;Batch&gt; batches = new ArrayList&lt;&gt;();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            batches = ServiceManager.getBatchService().getAll();</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            logger.error(e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(batchfilter) &amp;&amp; batchfilter.isEmpty()) {</b>
+<b class="nc">&nbsp;            currentBatches.addAll(batches);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            for (Batch batch : batches) {</b>
+<b class="nc">&nbsp;                if (ServiceManager.getBatchService().contains(batch, batchfilter)) {</b>
+<b class="nc">&nbsp;                    currentBatches.add(batch);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current processes as select items.
+&nbsp;     *
+&nbsp;     * @return list of processes
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; getCurrentProcesses() {
+<b class="nc">&nbsp;        return currentProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current batches as select items.
+&nbsp;     *
+&nbsp;     * @return list of bacthes
+&nbsp;     */
+&nbsp;    public List&lt;Batch&gt; getCurrentBatches() {
+<b class="nc">&nbsp;        return currentBatches;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getBatchfilter() {
+<b class="nc">&nbsp;        return this.batchfilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setBatchfilter(String batchfilter) {
+<b class="nc">&nbsp;        this.batchfilter = batchfilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get batch title.
+&nbsp;     *
+&nbsp;     * @return batch title as String
+&nbsp;     */
+&nbsp;    public String getBatchTitle() {
+<b class="nc">&nbsp;        return batchTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set batch title.
+&nbsp;     *
+&nbsp;     * @param batchTitle
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setBatchTitle(String batchTitle) {
+<b class="nc">&nbsp;        this.batchTitle = batchTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProcessfilter() {
+<b class="nc">&nbsp;        return this.processfilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProcessfilter(String processfilter) {
+<b class="nc">&nbsp;        this.processfilter = processfilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;Process&gt; getSelectedProcesses() {
+<b class="nc">&nbsp;        return this.selectedProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setSelectedProcesses(List&lt;Process&gt; selectedProcesses) {
+<b class="nc">&nbsp;        this.selectedProcesses = selectedProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;Batch&gt; getSelectedBatches() {
+<b class="nc">&nbsp;        return this.selectedBatches;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setSelectedBatches(List&lt;Batch&gt; selectedBatches) {
+<b class="nc">&nbsp;        this.selectedBatches = selectedBatches;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filter all start.
+&nbsp;     */
+&nbsp;    private void filterAll() {
+<b class="nc">&nbsp;        filterBatches();</b>
+<b class="nc">&nbsp;        filterProcesses();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download docket for all processes assigned to selected batch.
+&nbsp;     */
+&nbsp;    public void downloadDocket() {
+<b class="nc">&nbsp;        logger.debug(&quot;generate docket for process list&quot;);</b>
+<b class="nc">&nbsp;        if (this.selectedBatches.isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(NO_BATCH_SELECTED);</b>
+<b class="nc">&nbsp;        } else if (this.selectedBatches.size() == 1) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getProcessService().downloadDocket(selectedBatches.get(0).getProcesses());</b>
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(TOO_MANY_BATCHES_SELECTED);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The method is called if the user clicks the action link to
+&nbsp;     * delete batches. It runs the deletion of the batches.
+&nbsp;     */
+&nbsp;    public void delete() {
+<b class="nc">&nbsp;        int selectedBatchesSize = this.selectedBatches.size();</b>
+<b class="nc">&nbsp;        if (selectedBatchesSize == 0) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(NO_BATCH_SELECTED);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getBatchService().removeAll(this.selectedBatches);</b>
+<b class="nc">&nbsp;            filterAll();</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.BATCH.getTranslationSingular() }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addCommentsToBatchProcesses(String message) throws DAOException {
+<b class="nc">&nbsp;        List&lt;Comment&gt; commentList = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Process process : this.selectedProcesses) {</b>
+<b class="nc">&nbsp;            Comment comment = new Comment();</b>
+<b class="nc">&nbsp;            comment.setProcess(process);</b>
+<b class="nc">&nbsp;            comment.setAuthor(ServiceManager.getUserService().getCurrentUser());</b>
+<b class="nc">&nbsp;            comment.setMessage(message);</b>
+<b class="nc">&nbsp;            comment.setType(CommentType.INFO);</b>
+<b class="nc">&nbsp;            comment.setCreationDate(new Date());</b>
+<b class="nc">&nbsp;            commentList.add(comment);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        ServiceManager.getCommentService().saveList(commentList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add processes to Batch.
+&nbsp;     */
+&nbsp;    public void addProcessesToBatch() {
+<b class="nc">&nbsp;        if (areSelectedListsEmpty()) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            for (Batch selectedBatch : this.selectedBatches) {</b>
+<b class="nc">&nbsp;                selectedBatch.getProcesses().addAll(this.selectedProcesses);</b>
+<b class="nc">&nbsp;                ServiceManager.getBatchService().save(selectedBatch, true);</b>
+<b class="nc">&nbsp;                if (ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.BATCHES_LOG_CHANGES)) {</b>
+<b class="nc">&nbsp;                    addCommentsToBatchProcesses(Helper.getTranslation(&quot;addToBatch&quot;,</b>
+<b class="nc">&nbsp;                            ServiceManager.getBatchService().getLabel(selectedBatch)));</b>
+<b class="nc">&nbsp;                    ServiceManager.getProcessService().saveList(this.selectedProcesses);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_RELOADING, new Object[] {ObjectType.BATCH.getTranslationSingular() }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorSaveList&quot;, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove processes from Batch.
+&nbsp;     */
+&nbsp;    public void removeProcessesFromBatch() throws DAOException, DataException {
+<b class="nc">&nbsp;        if (areSelectedListsEmpty()) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        for (Batch selectedBatch : this.selectedBatches) {</b>
+<b class="nc">&nbsp;            selectedBatch.getProcesses().removeAll(this.selectedProcesses);</b>
+<b class="nc">&nbsp;            ServiceManager.getBatchService().save(selectedBatch, true);</b>
+<b class="nc">&nbsp;            if (ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.BATCHES_LOG_CHANGES)) {</b>
+<b class="nc">&nbsp;                addCommentsToBatchProcesses(Helper.getTranslation(&quot;removeFromBatch&quot;,</b>
+<b class="nc">&nbsp;                        ServiceManager.getBatchService().getLabel(selectedBatch)));</b>
+<b class="nc">&nbsp;                ServiceManager.getProcessService().saveList(this.selectedProcesses);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        filterAll();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean areSelectedListsEmpty() {
+<b class="nc">&nbsp;        if (this.selectedBatches.isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(NO_BATCH_SELECTED);</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (this.selectedProcesses.isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(NO_PROCESS_SELECTED);</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Rename Batch.
+&nbsp;     */
+&nbsp;    public void rename() {
+<b class="nc">&nbsp;        if (this.selectedBatches.isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(NO_BATCH_SELECTED);</b>
+<b class="nc">&nbsp;        } else if (this.selectedBatches.size() &gt; 1) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(TOO_MANY_BATCHES_SELECTED);</b>
+&nbsp;        } else {
+&nbsp;            try {
+<b class="nc">&nbsp;                Batch selectedBatch = selectedBatches.get(0);</b>
+<b class="nc">&nbsp;                for (Batch batch : currentBatches) {</b>
+<b class="nc">&nbsp;                    if (selectedBatch.getId().equals(batch.getId())) {</b>
+<b class="nc">&nbsp;                        batch.setTitle(Objects.isNull(batchTitle) || batchTitle.trim().isEmpty() ? null : batchTitle);</b>
+<b class="nc">&nbsp;                        ServiceManager.getBatchService().save(batch);</b>
+<b class="nc">&nbsp;                        batchTitle = &quot;&quot;;</b>
+&nbsp;                        return;
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_RELOADING, new Object[] {ObjectType.BATCH.getTranslationSingular() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new Batch.
+&nbsp;     */
+&nbsp;    public void createNew() throws DAOException, DataException {
+<b class="nc">&nbsp;        if (selectedProcesses.isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(NO_PROCESS_SELECTED);</b>
+&nbsp;        } else {
+&nbsp;            Batch batch;
+<b class="nc">&nbsp;            if (Objects.nonNull(batchTitle) &amp;&amp; !batchTitle.trim().isEmpty()) {</b>
+<b class="nc">&nbsp;                batch = new Batch(batchTitle.trim(), selectedProcesses);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                batch = new Batch(selectedProcesses);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            ServiceManager.getBatchService().save(batch, true);</b>
+<b class="nc">&nbsp;            if (ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.BATCHES_LOG_CHANGES)) {</b>
+<b class="nc">&nbsp;                addCommentsToBatchProcesses(Helper.getTranslation(&quot;addToBatch&quot;, ServiceManager.getBatchService().getLabel(batch)));</b>
+<b class="nc">&nbsp;                ServiceManager.getProcessService().saveList(selectedProcesses);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        batchTitle = &quot;&quot;;</b>
+<b class="nc">&nbsp;        filterAll();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Edit properties.
+&nbsp;     */
+&nbsp;    public void editProperties(int id) {
+<b class="nc">&nbsp;        if (this.selectedBatches.isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(NO_BATCH_SELECTED);</b>
+<b class="nc">&nbsp;        } else if (this.selectedBatches.size() &gt; 1) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(TOO_MANY_BATCHES_SELECTED);</b>
+&nbsp;        } else {
+&nbsp;            try {
+<b class="nc">&nbsp;                setBatchHelper(new BatchProcessHelper(ServiceManager.getBatchService().getById(id)));</b>
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_READING, new Object[] {ObjectType.BATCH.getTranslationSingular() }, logger,</b>
+&nbsp;                    e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public BatchProcessHelper getBatchHelper() {
+<b class="nc">&nbsp;        return this.batchHelper;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setBatchHelper(BatchProcessHelper batchHelper) {
+<b class="nc">&nbsp;        this.batchHelper = batchHelper;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a batch export task to export the selected batch. The type of export
+&nbsp;     * task depends on the batch type. If asynchronous tasks have been created, the
+&nbsp;     * user will be redirected to the task manager page where it can observe the
+&nbsp;     * task progressing.
+&nbsp;     *
+&nbsp;     * @return the next page to show as named in a &amp;lt;from-outcome&amp;gt; element in
+&nbsp;     *         faces_config.xml
+&nbsp;     */
+&nbsp;    public String export() {
+<b class="nc">&nbsp;        if (this.selectedBatches.isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(NO_BATCH_SELECTED);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        for (Batch selectedBatch : selectedBatches) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                for (Process process : selectedBatch.getProcesses()) {</b>
+<b class="nc">&nbsp;                    ExportDms dms = new ExportDms(</b>
+<b class="nc">&nbsp;                            ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.EXPORT_WITH_IMAGES));</b>
+<b class="nc">&nbsp;                    dms.startExport(process);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_READING, new Object[] {ObjectType.BATCH.getTranslationSingular() }, logger,</b>
+&nbsp;                    e);
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return &quot;/pages/taskmanager&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Change id of selected batch to first selected batch. Needed for edit batch
+&nbsp;     * properties.
+&nbsp;     *
+&nbsp;     * @param vcEvent
+&nbsp;     *            change event
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public void changeSelectedBatch(ValueChangeEvent vcEvent) {
+<b class="nc">&nbsp;        this.selectedBatches = (List&lt;Batch&gt;) vcEvent.getNewValue();</b>
+<b class="nc">&nbsp;        if (this.selectedBatches.size() == 1) {</b>
+<b class="nc">&nbsp;            this.selectedBatchId = this.selectedBatches.get(0).getId();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            this.selectedBatchId = 0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        List&lt;Process&gt; processes = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Batch batch : this.selectedBatches) {</b>
+<b class="nc">&nbsp;            processes.addAll(batch.getProcesses());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        setSelectedProcesses(processes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selectedBatchId.
+&nbsp;     *
+&nbsp;     * @return value of selectedBatchId
+&nbsp;     */
+&nbsp;    public int getSelectedBatchId() {
+<b class="nc">&nbsp;        return selectedBatchId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selectedBatchId.
+&nbsp;     *
+&nbsp;     * @param selectedBatchId
+&nbsp;     *            as int
+&nbsp;     */
+&nbsp;    public void setSelectedBatchId(int selectedBatchId) {
+<b class="nc">&nbsp;        this.selectedBatchId = selectedBatchId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the label for the batchlist.
+&nbsp;     * @param batch the batch to create the label for.
+&nbsp;     * @return the label.
+&nbsp;     */
+&nbsp;    public String getBatchLabel(Batch batch) {
+<b class="nc">&nbsp;        return ServiceManager.getBatchService().createLabel(batch);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

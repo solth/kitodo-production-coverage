@@ -1,0 +1,471 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ObjectFactory</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.metskitodo</a>
+</div>
+
+<h1>Coverage Summary for Class: ObjectFactory (org.kitodo.dataformat.metskitodo)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ObjectFactory</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    11,9%
+  </span>
+  <span class="absValue">
+    (5/42)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    11,9%
+  </span>
+  <span class="absValue">
+    (5/42)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;//
+&nbsp;// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.0 generiert 
+&nbsp;// Siehe &lt;a href=&quot;https://javaee.github.io/jaxb-v2/&quot;&gt;https://javaee.github.io/jaxb-v2/&lt;/a&gt; 
+&nbsp;// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+&nbsp;// Generiert: 2023.05.12 um 01:28:08 PM CEST 
+&nbsp;//
+&nbsp;
+&nbsp;
+&nbsp;package org.kitodo.dataformat.metskitodo;
+&nbsp;
+&nbsp;import javax.xml.bind.JAXBElement;
+&nbsp;import javax.xml.bind.annotation.XmlElementDecl;
+&nbsp;import javax.xml.bind.annotation.XmlRegistry;
+&nbsp;import javax.xml.namespace.QName;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * This object contains factory methods for each 
+&nbsp; * Java content interface and Java element interface 
+&nbsp; * generated in the org.kitodo.dataformat.metskitodo package. 
+&nbsp; * &lt;p&gt;An ObjectFactory allows you to programatically 
+&nbsp; * construct new instances of the Java representation 
+&nbsp; * for XML content. The Java representation of XML 
+&nbsp; * content can consist of schema derived interfaces 
+&nbsp; * and classes representing the binding of schema 
+&nbsp; * type definitions, element declarations and model 
+&nbsp; * groups.  Factory methods for each of these are 
+&nbsp; * provided in this class.
+&nbsp; * 
+&nbsp; */
+&nbsp;@XmlRegistry
+&nbsp;public class ObjectFactory {
+&nbsp;
+<b class="fc">&nbsp;    private final static QName _Kitodo_QNAME = new QName(&quot;http://meta.kitodo.org/v1/&quot;, &quot;kitodo&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.kitodo.dataformat.metskitodo
+&nbsp;     * 
+&nbsp;     */
+<b class="fc">&nbsp;    public ObjectFactory() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetsType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetsType createMetsType() {
+<b class="nc">&nbsp;        return new MetsType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link FileType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public FileType createFileType() {
+<b class="nc">&nbsp;        return new FileType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link FileType.FContent }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public FileType.FContent createFileTypeFContent() {
+<b class="nc">&nbsp;        return new FileType.FContent();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link StructLinkType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public StructLinkType createStructLinkType() {
+<b class="nc">&nbsp;        return new StructLinkType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link StructLinkType.SmLinkGrp }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public StructLinkType.SmLinkGrp createStructLinkTypeSmLinkGrp() {
+<b class="nc">&nbsp;        return new StructLinkType.SmLinkGrp();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link DivType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public DivType createDivType() {
+<b class="nc">&nbsp;        return new DivType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetsType.FileSec }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetsType.FileSec createMetsTypeFileSec() {
+<b class="fc">&nbsp;        return new MetsType.FileSec();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MdSecType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MdSecType createMdSecType() {
+<b class="nc">&nbsp;        return new MdSecType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MdSecType.MdWrap }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MdSecType.MdWrap createMdSecTypeMdWrap() {
+<b class="nc">&nbsp;        return new MdSecType.MdWrap();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetsType.MetsHdr }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetsType.MetsHdr createMetsTypeMetsHdr() {
+<b class="nc">&nbsp;        return new MetsType.MetsHdr();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link KitodoType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public KitodoType createKitodoType() {
+<b class="nc">&nbsp;        return new KitodoType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetadataType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetadataType createMetadataType() {
+<b class="nc">&nbsp;        return new MetadataType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetadataGroupType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetadataGroupType createMetadataGroupType() {
+<b class="nc">&nbsp;        return new MetadataGroupType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link Mets }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public Mets createMets() {
+<b class="nc">&nbsp;        return new Mets();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link AmdSecType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public AmdSecType createAmdSecType() {
+<b class="nc">&nbsp;        return new AmdSecType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link StructMapType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public StructMapType createStructMapType() {
+<b class="nc">&nbsp;        return new StructMapType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetsType.StructLink }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetsType.StructLink createMetsTypeStructLink() {
+<b class="fc">&nbsp;        return new MetsType.StructLink();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link BehaviorSecType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public BehaviorSecType createBehaviorSecType() {
+<b class="nc">&nbsp;        return new BehaviorSecType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link FileGrpType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public FileGrpType createFileGrpType() {
+<b class="nc">&nbsp;        return new FileGrpType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link ParType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public ParType createParType() {
+<b class="nc">&nbsp;        return new ParType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link SeqType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public SeqType createSeqType() {
+<b class="nc">&nbsp;        return new SeqType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link AreaType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public AreaType createAreaType() {
+<b class="nc">&nbsp;        return new AreaType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link BehaviorType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public BehaviorType createBehaviorType() {
+<b class="nc">&nbsp;        return new BehaviorType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link ObjectType }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public ObjectType createObjectType() {
+<b class="nc">&nbsp;        return new ObjectType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link FileType.FLocat }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public FileType.FLocat createFileTypeFLocat() {
+<b class="nc">&nbsp;        return new FileType.FLocat();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link FileType.Stream }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public FileType.Stream createFileTypeStream() {
+<b class="nc">&nbsp;        return new FileType.Stream();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link FileType.TransformFile }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public FileType.TransformFile createFileTypeTransformFile() {
+<b class="nc">&nbsp;        return new FileType.TransformFile();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link FileType.FContent.XmlData }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public FileType.FContent.XmlData createFileTypeFContentXmlData() {
+<b class="nc">&nbsp;        return new FileType.FContent.XmlData();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link StructLinkType.SmLink }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public StructLinkType.SmLink createStructLinkTypeSmLink() {
+<b class="nc">&nbsp;        return new StructLinkType.SmLink();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link StructLinkType.SmLinkGrp.SmLocatorLink }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public StructLinkType.SmLinkGrp.SmLocatorLink createStructLinkTypeSmLinkGrpSmLocatorLink() {
+<b class="nc">&nbsp;        return new StructLinkType.SmLinkGrp.SmLocatorLink();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link StructLinkType.SmLinkGrp.SmArcLink }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public StructLinkType.SmLinkGrp.SmArcLink createStructLinkTypeSmLinkGrpSmArcLink() {
+<b class="nc">&nbsp;        return new StructLinkType.SmLinkGrp.SmArcLink();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link DivType.Mptr }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public DivType.Mptr createDivTypeMptr() {
+<b class="nc">&nbsp;        return new DivType.Mptr();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link DivType.Fptr }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public DivType.Fptr createDivTypeFptr() {
+<b class="nc">&nbsp;        return new DivType.Fptr();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetsType.FileSec.FileGrp }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetsType.FileSec.FileGrp createMetsTypeFileSecFileGrp() {
+<b class="fc">&nbsp;        return new MetsType.FileSec.FileGrp();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MdSecType.MdRef }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MdSecType.MdRef createMdSecTypeMdRef() {
+<b class="nc">&nbsp;        return new MdSecType.MdRef();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MdSecType.MdWrap.XmlData }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MdSecType.MdWrap.XmlData createMdSecTypeMdWrapXmlData() {
+<b class="nc">&nbsp;        return new MdSecType.MdWrap.XmlData();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetsType.MetsHdr.Agent }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetsType.MetsHdr.Agent createMetsTypeMetsHdrAgent() {
+<b class="nc">&nbsp;        return new MetsType.MetsHdr.Agent();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetsType.MetsHdr.AltRecordID }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetsType.MetsHdr.AltRecordID createMetsTypeMetsHdrAltRecordID() {
+<b class="nc">&nbsp;        return new MetsType.MetsHdr.AltRecordID();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link MetsType.MetsHdr.MetsDocumentID }
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public MetsType.MetsHdr.MetsDocumentID createMetsTypeMetsHdrMetsDocumentID() {
+<b class="nc">&nbsp;        return new MetsType.MetsHdr.MetsDocumentID();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance of {@link JAXBElement }{@code &lt;}{@link KitodoType }{@code &gt;}
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     Java instance representing xml element&#39;s value.
+&nbsp;     * @return
+&nbsp;     *     the new instance of {@link JAXBElement }{@code &lt;}{@link KitodoType }{@code &gt;}
+&nbsp;     */
+&nbsp;    @XmlElementDecl(namespace = &quot;http://meta.kitodo.org/v1/&quot;, name = &quot;kitodo&quot;)
+&nbsp;    public JAXBElement&lt;KitodoType&gt; createKitodo(KitodoType value) {
+<b class="nc">&nbsp;        return new JAXBElement&lt;KitodoType&gt;(_Kitodo_QNAME, KitodoType.class, null, value);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,626 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > OPACConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.config</a>
+</div>
+
+<h1>Coverage Summary for Class: OPACConfig (org.kitodo.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OPACConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/43)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/115)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.config;
+&nbsp;
+&nbsp;import java.io.FileNotFoundException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.ConfigurationException;
+&nbsp;import org.apache.commons.configuration.HierarchicalConfiguration;
+&nbsp;import org.apache.commons.configuration.XMLConfiguration;
+&nbsp;import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+&nbsp;import org.apache.commons.configuration.tree.ConfigurationNode;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.externaldatamanagement.SearchInterfaceType;
+&nbsp;import org.kitodo.config.enums.KitodoConfigFile;
+&nbsp;import org.kitodo.exceptions.ConfigException;
+&nbsp;import org.kitodo.exceptions.MandatoryParameterMissingException;
+&nbsp;import org.kitodo.exceptions.ParameterNotFoundException;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class OPACConfig is currently not used because OPAC configurations are now saved to
+&nbsp; * the database instead of an XML configuration file.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * NOTE: the class is not removed because it will be used to create an &quot;OPAC configuration importer&quot;
+&nbsp; *       that converts existing &quot;kitodo_opac.xml&quot; files to the new format saved to the database.
+&nbsp; */
+&nbsp;public class OPACConfig {
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(OPACConfig.class);</b>
+&nbsp;    private static XMLConfiguration config;
+&nbsp;    private static final String TRUE = &quot;true&quot;;
+&nbsp;    private static final String DEFAULT = &quot;[@default]&quot;;
+&nbsp;    private static final int DEFAULT_IMPORT_DEPTH = 2;
+&nbsp;    private static final String DEFAULT_RETURN_FORMAT = &quot;XML&quot;;
+&nbsp;    private static final String DESCRIPTION = &quot;description&quot;;
+&nbsp;    private static final String NOT_AVAILABLE = &quot;N/A&quot;;
+&nbsp;    private static final String HOST = &quot;host&quot;;
+&nbsp;    private static final String SCHEME = &quot;scheme&quot;;
+&nbsp;    private static final String PATH = &quot;path&quot;;
+&nbsp;    private static final String PORT = &quot;port&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor.
+&nbsp;     */
+&nbsp;    private OPACConfig() {
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return value of configuration parameter with name &#39;parameter&#39;
+&nbsp;     * from configuration of OPAC with name &#39;catalogName&#39;.
+&nbsp;     *
+&nbsp;     * @param catalogName String identifying the catalog by title
+&nbsp;     * @param parameter String identifying the parameter by name
+&nbsp;     * @return value of parameter
+&nbsp;     */
+&nbsp;    public static String getConfigValue(String catalogName, String parameter) throws ParameterNotFoundException {
+<b class="nc">&nbsp;        HierarchicalConfiguration opacConfiguration = getCatalog(catalogName);</b>
+<b class="nc">&nbsp;        if (Objects.isNull(opacConfiguration)) {</b>
+<b class="nc">&nbsp;            throw new ParameterNotFoundException(&quot;No configuration found for catalog &#39;&quot; + catalogName + &quot;&#39;!&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            String parameterValue = opacConfiguration.getString(parameter);</b>
+<b class="nc">&nbsp;            if (StringUtils.isBlank(parameterValue)) {</b>
+<b class="nc">&nbsp;                throw new ParameterNotFoundException(&quot;Parameter &#39;&quot; + parameter</b>
+&nbsp;                        + &quot;&#39; not found in OPAC configuration for catalog &#39;&quot; + catalogName + &quot;&#39;!&quot;);
+&nbsp;            }
+<b class="nc">&nbsp;            return parameterValue;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return the value of the &quot;prestructured&quot; flag of a specific catalog,
+&nbsp;     * controlling whether the import of a process&#39; structure is completely handled by the
+&nbsp;     * import XSLT file or not.
+&nbsp;     *
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return whether the &quot;prestructured&quot; value is set for the given catalog or not
+&nbsp;     */
+&nbsp;    public static boolean isPrestructuredImport(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).containsKey(&quot;prestructured&quot;)</b>
+<b class="nc">&nbsp;                &amp;&amp; getCatalog(catalogName).getBoolean(&quot;prestructured&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the &quot;interfaceType&quot; of the catalog identified by it title.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return String name of interfaceType
+&nbsp;     */
+&nbsp;    public static SearchInterfaceType getInterfaceType(String catalogName) {
+<b class="nc">&nbsp;        String interfaceType = getCatalog(catalogName).getString(&quot;interfaceType&quot;);</b>
+<b class="nc">&nbsp;        for (SearchInterfaceType type : SearchInterfaceType.values()) {</b>
+<b class="nc">&nbsp;            if (type.getTypeString().equals(interfaceType)) {</b>
+<b class="nc">&nbsp;                return type;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the &quot;description&quot; of the catalog identified by its title.
+&nbsp;     * @param catalogName String identifying the catalog by title
+&nbsp;     * @return String description for catalog&#39;s &quot;config&quot;
+&nbsp;     */
+&nbsp;    public static String getOPACDescription(String catalogName) {
+<b class="nc">&nbsp;        HierarchicalConfiguration catalogConfiguration = getCatalog(catalogName);</b>
+<b class="nc">&nbsp;        List&lt;ConfigurationNode&gt; descriptionAttributes = catalogConfiguration.getRoot().getAttributes(DESCRIPTION);</b>
+<b class="nc">&nbsp;        if (descriptionAttributes.isEmpty()) {</b>
+<b class="nc">&nbsp;            return NOT_AVAILABLE;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return descriptionAttributes.stream().map(cn -&gt; cn.getValue().toString())</b>
+<b class="nc">&nbsp;                    .collect(Collectors.joining(System.lineSeparator()));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the &quot;config&quot; of the catalog identified by its title.
+&nbsp;     * @param catalogName String identifying the catalog by title
+&nbsp;     * @return HierarchicalConfiguration for catalog&#39;s &quot;config&quot;
+&nbsp;     */
+&nbsp;    private static HierarchicalConfiguration getOPACConfiguration(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).configurationAt(&quot;config&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getUrlConfigPart(String catalogName, String parameter)
+&nbsp;            throws MandatoryParameterMissingException {
+<b class="nc">&nbsp;        HierarchicalConfiguration config = getOPACConfiguration(catalogName);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(config)) {</b>
+<b class="nc">&nbsp;            for (HierarchicalConfiguration param : config.configurationsAt(&quot;param&quot;)) {</b>
+<b class="nc">&nbsp;                if (parameter.equals(param.getString(&quot;[@name]&quot;))) {</b>
+<b class="nc">&nbsp;                    return param.getString(&quot;[@value]&quot;);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new MandatoryParameterMissingException(parameter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get host parameter of catalog configuration with name &#39;catalogName&#39;.
+&nbsp;     * @param catalogName name of catalog configuration
+&nbsp;     * @return host value as String
+&nbsp;     */
+&nbsp;    public static String getHost(String catalogName) throws MandatoryParameterMissingException {
+<b class="nc">&nbsp;        return getUrlConfigPart(catalogName, HOST);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get scheme parameter of catalog configuration with name &#39;catalogName&#39;.
+&nbsp;     * @param catalogName name of catalog configuration
+&nbsp;     * @return scheme value as String
+&nbsp;     */
+&nbsp;    public static String getScheme(String catalogName) throws MandatoryParameterMissingException {
+<b class="nc">&nbsp;        return getUrlConfigPart(catalogName, SCHEME);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get path parameter of catalog configuration with name &#39;catalogName&#39;.
+&nbsp;     * @param catalogName name of catalog configuration
+&nbsp;     * @return path value as String
+&nbsp;     */
+&nbsp;    public static String getPath(String catalogName) throws MandatoryParameterMissingException {
+<b class="nc">&nbsp;        return getUrlConfigPart(catalogName, PATH);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get port parameter of catalog configuration with name &#39;catalogName&#39;.
+&nbsp;     * @param catalogName name of catalog configuration
+&nbsp;     * @return port value as Integer
+&nbsp;     */
+&nbsp;    public static String getPort(String catalogName) throws MandatoryParameterMissingException {
+<b class="nc">&nbsp;        return getUrlConfigPart(catalogName, PORT);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the &quot;searchFields&quot; of the catalog identified by its title.
+&nbsp;     * @param catalogName String identifying the catalog by title
+&nbsp;     * @return HierarchicalConfiguration for catalog&#39;s &quot;searchFields&quot;
+&nbsp;     */
+&nbsp;    public static HierarchicalConfiguration getSearchFields(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).configurationAt(&quot;searchFields&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the default &quot;searchField&quot; of the catalog identified by its title &#39;catalogName&#39;. If multiple fields are
+&nbsp;     * configured as &quot;default&quot;, the first is returned.
+&nbsp;     * @param catalogName String identifying the catalog by title
+&nbsp;     * @return String name of catalogs default &quot;searchField&quot; if it exists; empty String otherwise
+&nbsp;     */
+&nbsp;    public static String getDefaultSearchField(String catalogName) {
+<b class="nc">&nbsp;        for (HierarchicalConfiguration searchField : getSearchFields(catalogName).configurationsAt(&quot;searchField&quot;)) {</b>
+<b class="nc">&nbsp;            if (TRUE.equals(searchField.getString(DEFAULT))) {</b>
+<b class="nc">&nbsp;                String defaultSearchField = searchField.getString(&quot;[@label]&quot;);</b>
+<b class="nc">&nbsp;                if (StringUtils.isNotBlank(defaultSearchField)) {</b>
+<b class="nc">&nbsp;                    return defaultSearchField;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the name of the default &quot;catalog&quot; configured in &quot;kitodo_opac.xml&quot;. If no catalog is configured as
+&nbsp;     * default catalog, return an empty String.
+&nbsp;     * @return String name of default catalog or empty String if no default catalog is configured.
+&nbsp;     */
+&nbsp;    public static String getDefaultCatalog() {
+<b class="nc">&nbsp;        for (String catalog : getCatalogs()) {</b>
+<b class="nc">&nbsp;            if (TRUE.equals(getCatalog(catalog).getString(DEFAULT))) {</b>
+<b class="nc">&nbsp;                return catalog;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the &quot;urlParameters&quot; of the catalog identified by its title.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return HierarchicalConfiguration for catalog&#39;s &quot;urlParameters&quot;
+&nbsp;     */
+&nbsp;    public static HierarchicalConfiguration getUrlParameters(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).configurationAt(&quot;urlParameters&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getUrlParameter(String catalogName, String parameter)
+&nbsp;            throws MandatoryParameterMissingException {
+<b class="nc">&nbsp;        HierarchicalConfiguration urlParameters = getCatalog(catalogName).configurationAt(&quot;urlParameters&quot;);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(urlParameters)) {</b>
+<b class="nc">&nbsp;            for (HierarchicalConfiguration param : urlParameters.configurationsAt(&quot;param&quot;)) {</b>
+<b class="nc">&nbsp;                if (parameter.equals(param.getString(&quot;[@name]&quot;))) {</b>
+<b class="nc">&nbsp;                    return param.getString(&quot;[@value]&quot;);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new MandatoryParameterMissingException(parameter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String getSruVersion(String catalogName) throws MandatoryParameterMissingException {
+<b class="nc">&nbsp;        return getUrlParameter(catalogName, &quot;version&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String getSruRecordSchema(String catalogName) throws MandatoryParameterMissingException {
+<b class="nc">&nbsp;        return getUrlParameter(catalogName, &quot;recordSchema&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String getOaiMetadataPrefix(String catalogName) throws MandatoryParameterMissingException {
+<b class="nc">&nbsp;        return getUrlParameter(catalogName, &quot;metadataPrefix&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the &quot;fileUpload&quot; configuration of the catalog identified by its title.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return boolean if catalog is configured to use FileUpload
+&nbsp;     */
+&nbsp;    public static boolean getFileUploadConfig(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).containsKey(&quot;fileUpload&quot;)</b>
+<b class="nc">&nbsp;                &amp;&amp; getCatalog(catalogName).getBoolean(&quot;fileUpload&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve list of &quot;mappingFiles&quot; of the catalog identified by its title.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return List of Strings containing mapping files names for catalog
+&nbsp;     */
+&nbsp;    public static List&lt;String&gt; getXsltMappingFiles(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).configurationAt(&quot;mappingFiles&quot;).configurationsAt(&quot;file&quot;).stream()</b>
+<b class="nc">&nbsp;                .map(c -&gt; c.getRoot().getValue().toString()).collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the &quot;parentMappingFile&quot; of the catalog identified by its title.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return String containing given catalogs &quot;parentMappingFile&quot;
+&nbsp;     */
+&nbsp;    public static String getXsltMappingFileForParentInRecord(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;parentMappingFile&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the &quot;queryDelimiter&quot; of the catalog identified by its title.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return configuration for catalog&#39;s &quot;queryDelimiter&quot;
+&nbsp;     */
+&nbsp;    public static String getQueryDelimiter(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;queryDelimiter&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the &quot;parentElement&quot; of the catalog identified by its title.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return HierarchicalConfiguration for catalog&#39;s &quot;parentElement&quot;
+&nbsp;     */
+&nbsp;    public static String getParentIDElement(String catalogName) {
+<b class="nc">&nbsp;        for (HierarchicalConfiguration field : getSearchFields(catalogName).configurationsAt(&quot;searchField&quot;)) {</b>
+<b class="nc">&nbsp;            if (TRUE.equals(field.getString(&quot;[@parentElement]&quot;))) {</b>
+<b class="nc">&nbsp;                String parentIDElement = field.getString(&quot;[@label]&quot;);</b>
+<b class="nc">&nbsp;                if (StringUtils.isNotBlank(parentIDElement)) {</b>
+<b class="nc">&nbsp;                    return parentIDElement;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve &#39;trimMode&#39; attribute value of the &quot;parentElement&quot; node for
+&nbsp;     * the OPAC with the given name &#39;catalogName&#39; from the OPAC configuration file.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return trim mode for the parent
+&nbsp;     */
+&nbsp;    public static String getParentIDTrimMode(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;parentElement[@trimMode]&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the &quot;identifierParameter&quot; of the catalog used to retrieve specific
+&nbsp;     * individual records from that catalog.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return HierarchicalConfiguration for catalog&#39;s &quot;identifierParameter&quot;
+&nbsp;     */
+&nbsp;    public static String getIdentifierParameter(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;identifierParameter[@value]&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the identifier prefix that needs to be prepended to IDs in order retrieving
+&nbsp;     * individual records by ID from the specified catalog.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return String containing identifier prefix
+&nbsp;     */
+&nbsp;    public static String getIdentifierPrefix(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;identifierParameter[@prefix]&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the name of the metadata type that is used to store the catalog ID
+&nbsp;     * of a specific record in the internal metadata format.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return HierarchicalConfiguration for catalog&#39;s &quot;identifierMetadata&quot;
+&nbsp;     */
+&nbsp;    public static String getIdentifierMetadata(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;identifierMetadata[@value]&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the &quot;exemplarField&quot; of the catalog used to retrieve exemplar record information
+&nbsp;     * from individual records of that catalog.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return String XPath for exemplar record information
+&nbsp;     */
+&nbsp;    public static String getExemplarFieldXPath(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;exemplarField[@xpath]&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the &quot;ownerSubPath&quot; of the catalog used to retrieve the owner of a exemplar record
+&nbsp;     * from individual records of that catalog.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return String XPath for owner information about an exemplar record
+&nbsp;     */
+&nbsp;    public static String getExemplarFieldOwnerXPath(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;exemplarField[@ownerSubPath]&quot;, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the &quot;signatureSubPath&quot; of the catalog used to retrieve the signature of a exemplar record
+&nbsp;     * from individual records of that catalog.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return String XPath for signature information about an exemplar record
+&nbsp;     */
+&nbsp;    public static String getExemplarFieldSignatureXPath(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;exemplarField[@signatureSubPath]&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the &quot;ownerMetadata&quot; of the catalog used to store the exemplar record owner
+&nbsp;     * of individual records of that catalog.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return String metadata name for exemplar record owner information
+&nbsp;     */
+&nbsp;    public static String getExemplarFieldOwnerMetadata(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;exemplarField[@ownerMetadata]&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the &quot;signatureMetadata&quot; of the catalog used to store the exemplar record signature
+&nbsp;     * of individual records of that catalog.
+&nbsp;     * @param catalogName String identifying the catalog by its title
+&nbsp;     * @return String metadata name for exemplar record signature information
+&nbsp;     */
+&nbsp;    public static String getExemplarFieldSignatureMetadata(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;exemplarField[@signatureMetadata]&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get username.
+&nbsp;     * @param catalogName OPAC for which to get username.
+&nbsp;     * @return username
+&nbsp;     */
+&nbsp;    public static String getUsername(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).configurationAt(&quot;credentials&quot;).getString(&quot;username&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get FTP password.
+&nbsp;     * @param catalogName OPAC for which to get FTP password.
+&nbsp;     * @return FTP password
+&nbsp;     */
+&nbsp;    public static String getPassword(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).configurationAt(&quot;credentials&quot;).getString(&quot;password&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If a mappingFile for parentInRecord is configured.
+&nbsp;     * @param catalogName OPAC for witch to get the config
+&nbsp;     * @return true, if mapping file is configured
+&nbsp;     */
+&nbsp;    public static boolean isParentInRecord(String catalogName) {
+<b class="nc">&nbsp;        return StringUtils.isNotBlank(getXsltMappingFileForParentInRecord(catalogName));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return default import depth of catalog &#39;catalogName&#39; if configured. Return DEFAULT_IMPORT_DEPTH 2 otherwise.
+&nbsp;     * @param catalogName name of catalog
+&nbsp;     * @return default import depth of catalog
+&nbsp;     */
+&nbsp;    public static int getDefaultImportDepth(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getInt(&quot;defaultImportDepth&quot;, DEFAULT_IMPORT_DEPTH);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return &#39;returnFormat&#39; of catalog &#39;catalogName&#39; if configured. Return DEFAULT_RETURN_FORMAT &quot;XML&quot; otherwise.
+&nbsp;     * @param catalogName name of catalog
+&nbsp;     * @return &#39;returnFormat&#39; of catalog
+&nbsp;     */
+&nbsp;    public static String getReturnFormat(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;returnFormat&quot;, DEFAULT_RETURN_FORMAT);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return &#39;metadataFormat&#39; of catalog &#39;catalogName.
+&nbsp;     * @param catalogName name of catalog
+&nbsp;     * @return &#39;metadataFormat&#39; of catalog
+&nbsp;     */
+&nbsp;    public static String getMetadataFormat(String catalogName) {
+<b class="nc">&nbsp;        return getCatalog(catalogName).getString(&quot;metadataFormat&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the list of catalogs&#39; titles from config file.
+&nbsp;     * @return List of Strings containing all catalog titles.
+&nbsp;     */
+&nbsp;    public static List&lt;String&gt; getCatalogs() {
+<b class="nc">&nbsp;        List&lt;String&gt; catalogueTitles = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        XMLConfiguration conf = getConfig();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt;= conf.getMaxIndex(&quot;catalogue&quot;); i++) {</b>
+<b class="nc">&nbsp;            catalogueTitles.add(conf.getString(&quot;catalogue(&quot; + i + &quot;)[@title]&quot;));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return catalogueTitles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve the configuration for the passed catalog name from config file.
+&nbsp;     * @param catalogName String identifying the catalog by attribute &quot;title&quot;
+&nbsp;     * @return HierarchicalConfiguration for single catalog
+&nbsp;     */
+&nbsp;    public static HierarchicalConfiguration getCatalog(String catalogName) {
+<b class="nc">&nbsp;        XMLConfiguration conf = getConfig();</b>
+<b class="nc">&nbsp;        int countCatalogues = conf.getMaxIndex(&quot;catalogue&quot;);</b>
+<b class="nc">&nbsp;        HierarchicalConfiguration catalog = null;</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt;= countCatalogues; i++) {</b>
+<b class="nc">&nbsp;            String title = conf.getString(&quot;catalogue(&quot; + i + &quot;)[@title]&quot;);</b>
+<b class="nc">&nbsp;            if (title.equals(catalogName)) {</b>
+<b class="nc">&nbsp;                catalog = conf.configurationAt(&quot;catalogue(&quot; + i + &quot;)&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(catalog)) {</b>
+<b class="nc">&nbsp;            return catalog;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new ConfigException(&quot;Unable to find configuration of catalog &#39;&quot; + catalogName + &quot;&#39;!&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static XMLConfiguration getConfig() {
+<b class="nc">&nbsp;        if (config != null) {</b>
+<b class="nc">&nbsp;            return config;</b>
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            config = getKitodoOpacConfiguration();</b>
+<b class="nc">&nbsp;        } catch (ConfigurationException e) {</b>
+<b class="nc">&nbsp;            logger.error(e);</b>
+<b class="nc">&nbsp;            config = new XMLConfiguration();</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        config.setListDelimiter(&#39;&amp;&#39;);</b>
+<b class="nc">&nbsp;        config.setReloadingStrategy(new FileChangedReloadingStrategy());</b>
+<b class="nc">&nbsp;        return config;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return the XML configuration of Kitodo OPACs from the &#39;kitodo_opac.xml&#39; file.
+&nbsp;     * @return XMLConfiguration containing the catalog configurations of the &#39;kitodo_opac.xml&#39; file
+&nbsp;     * @throws ConfigurationException if &#39;kitodo_opac.xml&#39; file does not exist
+&nbsp;     */
+&nbsp;    public static XMLConfiguration getKitodoOpacConfiguration() throws ConfigurationException {
+<b class="nc">&nbsp;        KitodoConfigFile kitodoConfigOpacFile = KitodoConfigFile.OPAC_CONFIGURATION;</b>
+<b class="nc">&nbsp;        if (!kitodoConfigOpacFile.exists()) {</b>
+<b class="nc">&nbsp;            String message = &quot;File not found: &quot; + kitodoConfigOpacFile.getAbsolutePath();</b>
+<b class="nc">&nbsp;            throw new ConfigException(message, new FileNotFoundException(message));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return new XMLConfiguration(kitodoConfigOpacFile.getFile());</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

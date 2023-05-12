@@ -1,0 +1,193 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > HibernateUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.persistence</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateUtil (org.kitodo.data.database.persistence)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,3%
+  </span>
+  <span class="absValue">
+    (18/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.persistence;
+&nbsp;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.hibernate.HibernateException;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.hibernate.boot.Metadata;
+&nbsp;import org.hibernate.boot.MetadataSources;
+&nbsp;import org.hibernate.boot.registry.StandardServiceRegistry;
+&nbsp;import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+&nbsp;
+&nbsp;/**
+&nbsp; * Current version of HibernateUtil.
+&nbsp; */
+&nbsp;public class HibernateUtil {
+&nbsp;    private static StandardServiceRegistry registry;
+&nbsp;    private static SessionFactory sessionFactory;
+<b class="fc">&nbsp;    private static final ThreadLocal&lt;Session&gt; threadSession = new ThreadLocal&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private HibernateUtil() {
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves the current Session.
+&nbsp;     *
+&nbsp;     * @return Session
+&nbsp;     */
+&nbsp;    public static Session getSession() {
+<b class="fc">&nbsp;        Session session = threadSession.get();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.isNull(session)) {</b>
+<b class="fc">&nbsp;            SessionFactory sessionFactory = getSessionFactory();</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(sessionFactory)) {</b>
+<b class="fc">&nbsp;                session = sessionFactory.openSession();</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } else {</b>
+<b class="fc">&nbsp;            if (!session.isOpen()) {</b>
+<b class="fc">&nbsp;                session = sessionFactory.openSession();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        threadSession.set(session);</b>
+&nbsp;
+<b class="fc">&nbsp;        return session;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve current SessionFactory.
+&nbsp;     *
+&nbsp;     * @return SessionFactory
+&nbsp;     */
+&nbsp;    private static SessionFactory getSessionFactory() {
+<b class="fc">&nbsp;        if (Objects.isNull(sessionFactory)) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                registry = new StandardServiceRegistryBuilder().configure().build();</b>
+<b class="fc">&nbsp;                MetadataSources sources = new MetadataSources(registry);</b>
+<b class="fc">&nbsp;                Metadata metadata = sources.getMetadataBuilder().build();</b>
+<b class="fc">&nbsp;                sessionFactory = metadata.getSessionFactoryBuilder().build();</b>
+<b class="nc">&nbsp;            } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;                shutdown();</b>
+<b class="nc">&nbsp;                throw new HibernateException(e.getMessage(), e);</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return sessionFactory;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Destroy session.
+&nbsp;     */
+&nbsp;    private static void shutdown() {
+<b class="nc">&nbsp;        if (Objects.nonNull(registry)) {</b>
+<b class="nc">&nbsp;            StandardServiceRegistryBuilder.destroy(registry);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

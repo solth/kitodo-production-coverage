@@ -1,0 +1,685 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessDTO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.dto</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessDTO (org.kitodo.production.dto)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessDTO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    54,4%
+  </span>
+  <span class="absValue">
+    (31/57)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,7%
+  </span>
+  <span class="absValue">
+    (34/61)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.dto;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;/**
+&nbsp; * Process DTO object.
+&nbsp; */
+<b class="fc">&nbsp;public class ProcessDTO extends BaseTemplateDTO {</b>
+&nbsp;
+&nbsp;    private ProjectDTO project;
+<b class="fc">&nbsp;    private List&lt;BatchDTO&gt; batches = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private List&lt;PropertyDTO&gt; properties = new ArrayList&lt;&gt;();</b>
+&nbsp;    private UserDTO blockedUser;
+&nbsp;    private Double progressClosed;
+&nbsp;    private Double progressInProcessing;
+&nbsp;    private Double progressOpen;
+&nbsp;    private Double progressLocked;
+&nbsp;    private String progressCombined;
+&nbsp;    private String wikiField;
+&nbsp;    private String processBaseUri;
+&nbsp;    private String batchID;
+&nbsp;    private Integer parentID;
+&nbsp;    private boolean hasChildren;
+&nbsp;    private Integer sortHelperArticles;
+&nbsp;    private Integer sortHelperDocstructs;
+&nbsp;    private Integer sortHelperImages;
+&nbsp;    private Integer sortHelperMetadata;
+&nbsp;    private Integer numberOfMetadata;
+&nbsp;    private Integer numberOfImages;
+&nbsp;    private Integer numberOfStructures;
+&nbsp;    private String sortHelperStatus;
+&nbsp;    private String baseType;
+&nbsp;    private String lastEditingUser;
+&nbsp;    private Date processingBeginLastTask;
+&nbsp;    private Date processingEndLastTask;
+&nbsp;    private Integer correctionCommentStatus;
+&nbsp;    private boolean hasComments;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get project.
+&nbsp;     *
+&nbsp;     * @return project as ProjectDTO
+&nbsp;     */
+&nbsp;    public ProjectDTO getProject() {
+<b class="fc">&nbsp;        return project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set project.
+&nbsp;     *
+&nbsp;     * @param project
+&nbsp;     *            as ProjectDTO
+&nbsp;     */
+&nbsp;    public void setProject(ProjectDTO project) {
+<b class="fc">&nbsp;        this.project = project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of batches.
+&nbsp;     *
+&nbsp;     * @return list of batches as BatchDTO
+&nbsp;     */
+&nbsp;    public List&lt;BatchDTO&gt; getBatches() {
+<b class="fc">&nbsp;        return batches;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of batches.
+&nbsp;     *
+&nbsp;     * @param batches
+&nbsp;     *            list of batches as BatchDTO
+&nbsp;     */
+&nbsp;    public void setBatches(List&lt;BatchDTO&gt; batches) {
+<b class="fc">&nbsp;        this.batches = batches;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of properties.
+&nbsp;     *
+&nbsp;     * @return list of properties as PropertyDTO
+&nbsp;     */
+&nbsp;    public List&lt;PropertyDTO&gt; getProperties() {
+<b class="fc">&nbsp;        if (Objects.isNull(this.properties)) {</b>
+<b class="nc">&nbsp;            properties = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return properties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of properties.
+&nbsp;     *
+&nbsp;     * @param properties
+&nbsp;     *            list of properties as PropertyDTO
+&nbsp;     */
+&nbsp;    public void setProperties(List&lt;PropertyDTO&gt; properties) {
+<b class="fc">&nbsp;        this.properties = properties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get blocked user.
+&nbsp;     *
+&nbsp;     * @return blocked user as UserDTO
+&nbsp;     */
+&nbsp;    public UserDTO getBlockedUser() {
+<b class="nc">&nbsp;        return blockedUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set blocked user.
+&nbsp;     *
+&nbsp;     * @param blockedUser
+&nbsp;     *            as UserDTO
+&nbsp;     */
+&nbsp;    public void setBlockedUser(UserDTO blockedUser) {
+<b class="nc">&nbsp;        this.blockedUser = blockedUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get progress of closed tasks.
+&nbsp;     *
+&nbsp;     * @return progress of closed tasks as Double
+&nbsp;     */
+&nbsp;    public Double getProgressClosed() {
+<b class="nc">&nbsp;        return progressClosed;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set progress of closed tasks.
+&nbsp;     *
+&nbsp;     * @param progressClosed
+&nbsp;     *            as Double
+&nbsp;     */
+&nbsp;    public void setProgressClosed(Double progressClosed) {
+<b class="fc">&nbsp;        this.progressClosed = progressClosed;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get progress of processed tasks.
+&nbsp;     *
+&nbsp;     * @return progress of processed tasks as Double
+&nbsp;     */
+&nbsp;    public Double getProgressInProcessing() {
+<b class="nc">&nbsp;        return progressInProcessing;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set progress of processed tasks.
+&nbsp;     *
+&nbsp;     * @param progressInProcessing
+&nbsp;     *            as Double
+&nbsp;     */
+&nbsp;    public void setProgressInProcessing(Double progressInProcessing) {
+<b class="fc">&nbsp;        this.progressInProcessing = progressInProcessing;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get progress of locked tasks.
+&nbsp;     *
+&nbsp;     * @return progress of locked tasks as Double
+&nbsp;     */
+&nbsp;    public Double getProgressLocked() {
+<b class="nc">&nbsp;        return progressLocked;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set progress of locked tasks.
+&nbsp;     *
+&nbsp;     * @param progressLocked
+&nbsp;     *            as Double
+&nbsp;     */
+&nbsp;    public void setProgressLocked(Double progressLocked) {
+<b class="fc">&nbsp;        this.progressLocked = progressLocked;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get wiki field.
+&nbsp;     *
+&nbsp;     * @return wiki field as String
+&nbsp;     */
+&nbsp;    public String getWikiField() {
+<b class="nc">&nbsp;        return wikiField;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set wiki field.
+&nbsp;     *
+&nbsp;     * @param wikiField
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setWikiField(String wikiField) {
+<b class="fc">&nbsp;        this.wikiField = wikiField;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get progress of open tasks.
+&nbsp;     *
+&nbsp;     * @return progress of open tasks as Integer
+&nbsp;     */
+&nbsp;    public Double getProgressOpen() {
+<b class="nc">&nbsp;        return progressOpen;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set progress of open tasks.
+&nbsp;     *
+&nbsp;     * @param progressOpen
+&nbsp;     *            as Double
+&nbsp;     */
+&nbsp;    public void setProgressOpen(Double progressOpen) {
+<b class="fc">&nbsp;        this.progressOpen = progressOpen;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a string representing the combined task status for a process.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;It consists of 3-digit percentage numbers (e.g. 000, 025, 100) 
+&nbsp;     * for each task status (DONE, INWORK, OPEN, LOCKED). For example, the status
+&nbsp;     * &quot;000000025075&quot; means that 25% of tasks are open, and 75% of tasks are locked.&lt;/p&gt;
+&nbsp;     * 
+&nbsp;     * @return the process task progress as string
+&nbsp;     */
+&nbsp;    public String getProgressCombined() {
+<b class="nc">&nbsp;        return progressCombined;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the string representing the combined task status of a process.
+&nbsp;     * 
+&nbsp;     * @param progressCombined the task progress string
+&nbsp;     */
+&nbsp;    public void setProgressCombined(String progressCombined) {
+<b class="fc">&nbsp;        this.progressCombined = progressCombined;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process base URI as String.
+&nbsp;     *
+&nbsp;     * @return process base URI as String.
+&nbsp;     */
+&nbsp;    public String getProcessBaseUri() {
+<b class="nc">&nbsp;        return processBaseUri;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set process base URI as String.
+&nbsp;     *
+&nbsp;     * @param processBaseUri
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setProcessBaseUri(String processBaseUri) {
+<b class="fc">&nbsp;        this.processBaseUri = processBaseUri;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get batch id(label) as String.
+&nbsp;     *
+&nbsp;     * @return batch id(label) as String.
+&nbsp;     */
+&nbsp;    public String getBatchID() {
+<b class="nc">&nbsp;        return batchID;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set batch id(label) as String.
+&nbsp;     *
+&nbsp;     * @param batchID
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setBatchID(String batchID) {
+<b class="fc">&nbsp;        this.batchID = batchID;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get parentID.
+&nbsp;     *
+&nbsp;     * @return value of parentID
+&nbsp;     */
+&nbsp;    public Integer getParentID() {
+<b class="nc">&nbsp;        return parentID;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set parentID.
+&nbsp;     *
+&nbsp;     * @param parentID as java.lang.Integer
+&nbsp;     */
+&nbsp;    public void setParentID(Integer parentID) {
+<b class="fc">&nbsp;        this.parentID = parentID;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get hasChildren.
+&nbsp;     *
+&nbsp;     * @return value of hasChildren
+&nbsp;     */
+&nbsp;    public boolean hasChildren() {
+<b class="nc">&nbsp;        return hasChildren;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set hasChildren.
+&nbsp;     *
+&nbsp;     * @param hasChildren as boolean
+&nbsp;     */
+&nbsp;    public void setHasChildren(boolean hasChildren) {
+<b class="fc">&nbsp;        this.hasChildren = hasChildren;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get sort helper for articles.
+&nbsp;     *
+&nbsp;     * @return sort helper for articles as Integer
+&nbsp;     */
+&nbsp;    public Integer getSortHelperArticles() {
+<b class="nc">&nbsp;        return this.sortHelperArticles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set sort helper for articles.
+&nbsp;     *
+&nbsp;     * @param sortHelperArticles
+&nbsp;     *            as Integer
+&nbsp;     */
+&nbsp;    public void setSortHelperArticles(Integer sortHelperArticles) {
+<b class="fc">&nbsp;        this.sortHelperArticles = sortHelperArticles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get sort helper for document structure.
+&nbsp;     *
+&nbsp;     * @return sort helper for document structure as Integer
+&nbsp;     */
+&nbsp;    public Integer getSortHelperDocstructs() {
+<b class="nc">&nbsp;        return this.sortHelperDocstructs;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set sort helper for document structure.
+&nbsp;     *
+&nbsp;     * @param sortHelperDocstructs
+&nbsp;     *            as Integer
+&nbsp;     */
+&nbsp;    public void setSortHelperDocstructs(Integer sortHelperDocstructs) {
+<b class="fc">&nbsp;        this.sortHelperDocstructs = sortHelperDocstructs;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get sort helper for task status.
+&nbsp;     *
+&nbsp;     * @return sort helper for task status as String
+&nbsp;     */
+&nbsp;    public String getSortHelperStatus() {
+<b class="nc">&nbsp;        return this.sortHelperStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set sort helper for task status.
+&nbsp;     *
+&nbsp;     * @param sortHelperStatus
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setSortHelperStatus(String sortHelperStatus) {
+<b class="fc">&nbsp;        this.sortHelperStatus = sortHelperStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get sort helper for images.
+&nbsp;     *
+&nbsp;     * @return sort helper for images as Integer
+&nbsp;     */
+&nbsp;    public Integer getSortHelperImages() {
+<b class="nc">&nbsp;        return this.sortHelperImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set sort helper for images.
+&nbsp;     *
+&nbsp;     * @param sortHelperImages
+&nbsp;     *            as Integer
+&nbsp;     */
+&nbsp;    public void setSortHelperImages(Integer sortHelperImages) {
+<b class="fc">&nbsp;        this.sortHelperImages = sortHelperImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get sort helper for metadata.
+&nbsp;     *
+&nbsp;     * @return sort helper for metadata as Integer
+&nbsp;     */
+&nbsp;    public Integer getSortHelperMetadata() {
+<b class="nc">&nbsp;        return this.sortHelperMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set sort helper for metadata.
+&nbsp;     *
+&nbsp;     * @param sortHelperMetadata
+&nbsp;     *            as Integer
+&nbsp;     */
+&nbsp;    public void setSortHelperMetadata(Integer sortHelperMetadata) {
+<b class="fc">&nbsp;        this.sortHelperMetadata = sortHelperMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get baseType.
+&nbsp;     *
+&nbsp;     * @return value of baseType
+&nbsp;     */
+&nbsp;    public String getBaseType() {
+<b class="nc">&nbsp;        return baseType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set baseType.
+&nbsp;     *
+&nbsp;     * @param baseType as java.lang.String
+&nbsp;     */
+&nbsp;    public void setBaseType(String baseType) {
+<b class="fc">&nbsp;        this.baseType = baseType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get numberOfMetadata .
+&nbsp;     *
+&nbsp;     * @return value of numberOfMetadata
+&nbsp;     */
+&nbsp;    public Integer getNumberOfMetadata() {
+<b class="nc">&nbsp;        return numberOfMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set numberOfMetadata.
+&nbsp;     *
+&nbsp;     * @param numberOfMetadata as Integer
+&nbsp;     */
+&nbsp;    public void setNumberOfMetadata(Integer numberOfMetadata) {
+<b class="fc">&nbsp;        this.numberOfMetadata = numberOfMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get numberOfImages.
+&nbsp;     *
+&nbsp;     * @return value of numberOfImages
+&nbsp;     */
+&nbsp;    public Integer getNumberOfImages() {
+<b class="nc">&nbsp;        return numberOfImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set numberOfImages.
+&nbsp;     *
+&nbsp;     * @param numberOfImages as Integer
+&nbsp;     */
+&nbsp;    public void setNumberOfImages(Integer numberOfImages) {
+<b class="fc">&nbsp;        this.numberOfImages = numberOfImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get numberOfStructures.
+&nbsp;     *
+&nbsp;     * @return value of numberOfStructures
+&nbsp;     */
+&nbsp;    public Integer getNumberOfStructures() {
+<b class="nc">&nbsp;        return numberOfStructures;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set numberOfStructures.
+&nbsp;     *
+&nbsp;     * @param numberOfStructures as Integer
+&nbsp;     */
+&nbsp;    public void setNumberOfStructures(Integer numberOfStructures) {
+<b class="fc">&nbsp;        this.numberOfStructures = numberOfStructures;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the user name of the user that was last handling a task of this process.
+&nbsp;     *
+&nbsp;     * @return name of last user handling task
+&nbsp;     */
+&nbsp;    public String getLastEditingUser() {
+<b class="nc">&nbsp;        return this.lastEditingUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the user name of the user that was last handling a task of this process.
+&nbsp;     *
+&nbsp;     * @param lastEditingUser
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setLastEditingUser(String lastEditingUser) {
+<b class="fc">&nbsp;        this.lastEditingUser = lastEditingUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get date of begin of last processing task.
+&nbsp;     *
+&nbsp;     * @return date of begin of last processing task
+&nbsp;     */
+&nbsp;    public Date getProcessingBeginLastTask() {
+<b class="nc">&nbsp;        return this.processingBeginLastTask;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set date of begin of last processing task.
+&nbsp;     *
+&nbsp;     * @param processingBeginLastTask
+&nbsp;     *            as Date
+&nbsp;     */
+&nbsp;    public void setProcessingBeginLastTask(Date processingBeginLastTask) {
+<b class="fc">&nbsp;        this.processingBeginLastTask = processingBeginLastTask;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get date of end of last processing task.
+&nbsp;     *
+&nbsp;     * @return date of end of last processing task
+&nbsp;     */
+&nbsp;    public Date getProcessingEndLastTask() {
+<b class="nc">&nbsp;        return this.processingEndLastTask;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set date of end of last processing task.
+&nbsp;     *
+&nbsp;     * @param processingEndLastTask
+&nbsp;     *            as Date
+&nbsp;     */
+&nbsp;    public void setProcessingEndLastTask(Date processingEndLastTask) {
+<b class="fc">&nbsp;        this.processingEndLastTask = processingEndLastTask;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the correction comment status, see CorrectionComments enum, as int value.
+&nbsp;     * 
+&nbsp;     * @return the correction comment status as integer
+&nbsp;     */
+&nbsp;    public Integer getCorrectionCommentStatus() {
+<b class="nc">&nbsp;        return this.correctionCommentStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set the correction comment status as int value.
+&nbsp;     * 
+&nbsp;     * @param status the status as integer
+&nbsp;     */
+&nbsp;    public void setCorrectionCommentStatus(Integer status) {
+<b class="fc">&nbsp;        this.correctionCommentStatus = status;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get hasComments. Value is true when the process has any comments.
+&nbsp;     *
+&nbsp;     * @return value of hasComments
+&nbsp;     */
+&nbsp;    public boolean hasComments() {
+<b class="nc">&nbsp;        return hasComments;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set hasComments. Value should be set to true when the process has any comments.
+&nbsp;     *
+&nbsp;     * @param hasComments as boolean
+&nbsp;     */
+&nbsp;    public void setHasComments(boolean hasComments) {
+<b class="fc">&nbsp;        this.hasComments = hasComments;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

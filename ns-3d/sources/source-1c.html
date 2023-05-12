@@ -1,0 +1,1288 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    2%
+  </span>
+  <span class="absValue">
+    (2/98)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    3,2%
+  </span>
+  <span class="absValue">
+    (11/345)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.net.URI;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.annotation.PostConstruct;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.faces.context.ExternalContext;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;import javax.faces.model.SelectItemGroup;
+&nbsp;import javax.inject.Inject;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Docket;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.database.beans.Role;
+&nbsp;import org.kitodo.data.database.beans.Ruleset;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.Workflow;
+&nbsp;import org.kitodo.data.database.enums.PropertyType;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.InvalidImagesException;
+&nbsp;import org.kitodo.exceptions.MediaNotFoundException;
+&nbsp;import org.kitodo.production.controller.SecurityAccessController;
+&nbsp;import org.kitodo.production.dto.ProcessDTO;
+&nbsp;import org.kitodo.production.dto.TaskDTO;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.filters.FilterMenu;
+&nbsp;import org.kitodo.production.helper.CustomListColumnInitializer;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.process.ProcessValidator;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.command.KitodoScriptService;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;import org.primefaces.event.SelectEvent;
+&nbsp;import org.primefaces.event.ToggleSelectEvent;
+&nbsp;import org.primefaces.event.UnselectEvent;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;@Named(&quot;ProcessForm&quot;)
+&nbsp;@SessionScoped
+&nbsp;public class ProcessForm extends TemplateBaseForm {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ProcessForm.class);</b>
+<b class="fc">&nbsp;    private Process process = new Process();</b>
+<b class="fc">&nbsp;    private Task task = new Task();</b>
+&nbsp;    private Property templateProperty;
+&nbsp;    private Property workpieceProperty;
+&nbsp;    private String kitodoScriptSelection;
+&nbsp;    private String kitodoScriptAll;
+&nbsp;    private String newProcessTitle;
+&nbsp;    private List&lt;Property&gt; properties;
+&nbsp;    private List&lt;Property&gt; templates;
+&nbsp;    private List&lt;Property&gt; workpieces;
+&nbsp;    private Property property;
+<b class="fc">&nbsp;    private final FilterMenu filterMenu = new FilterMenu(this);</b>
+<b class="fc">&nbsp;    private final transient FileService fileService = ServiceManager.getFileService();</b>
+<b class="fc">&nbsp;    private final transient WorkflowControllerService workflowControllerService = new WorkflowControllerService();</b>
+<b class="fc">&nbsp;    private final String processEditPath = MessageFormat.format(REDIRECT_PATH, &quot;processEdit&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;    private String processEditReferer = DEFAULT_LINK;</b>
+<b class="fc">&nbsp;    private String taskEditReferer = DEFAULT_LINK;</b>
+&nbsp;
+&nbsp;    private List&lt;SelectItem&gt; customColumns;
+&nbsp;
+&nbsp;    private static final String CREATE_PROCESS_PATH = &quot;/pages/processFromTemplate.jsf?faces-redirect=true&quot;;
+&nbsp;    private static final String PROCESS_TABLE_VIEW_ID = &quot;/pages/processes.xhtml&quot;;
+&nbsp;    private static final String PROCESS_TABLE_ID = &quot;processesTabView:processesForm:processesTable&quot;;
+&nbsp;
+&nbsp;    @Inject
+&nbsp;    private CustomListColumnInitializer initializer;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+&nbsp;    public ProcessForm() {
+<b class="fc">&nbsp;        super();</b>
+<b class="fc">&nbsp;        ProcessService.emptyCache();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize SelectItems used for configuring displayed columns in process
+&nbsp;     * list.
+&nbsp;     */
+&nbsp;    @PostConstruct
+&nbsp;    public void init() {
+<b class="nc">&nbsp;        columns = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;        SelectItemGroup processColumnGroup;
+&nbsp;        try {
+<b class="nc">&nbsp;            processColumnGroup = ServiceManager.getListColumnService()</b>
+<b class="nc">&nbsp;                    .getListColumnsForListAsSelectItemGroup(&quot;process&quot;);</b>
+<b class="nc">&nbsp;            columns.add(processColumnGroup);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // Read process properties to display from configuration
+<b class="nc">&nbsp;        customColumns = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        SelectItemGroup customColumnGroup = new SelectItemGroup(Helper.getTranslation(&quot;process&quot;));</b>
+<b class="nc">&nbsp;        customColumnGroup.setSelectItems(ServiceManager.getListColumnService().getAllCustomListColumns().stream()</b>
+<b class="nc">&nbsp;                .map(listColumn -&gt; new SelectItem(listColumn, listColumn.getTitle())).toArray(SelectItem[]::new));</b>
+<b class="nc">&nbsp;        customColumns.add(customColumnGroup);</b>
+&nbsp;
+<b class="nc">&nbsp;        selectedColumns =</b>
+<b class="nc">&nbsp;                ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;process&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of process properties configured as custom list columns in kitodo
+&nbsp;     * configuration.
+&nbsp;     *
+&nbsp;     * @return list of process property names
+&nbsp;     */
+&nbsp;    public String[] getProcessPropertyNames() {
+<b class="nc">&nbsp;        return initializer.getProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return process property value of property with given name
+&nbsp;     * &#39;propertyName&#39; from given ProcessDTO &#39;process&#39;.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            the ProcessDTO object from which the property value is retrieved
+&nbsp;     * @param propertyName
+&nbsp;     *            name of the property for the property value is retrieved
+&nbsp;     * @return property value if process has property with name &#39;propertyName&#39;,
+&nbsp;     *         empty String otherwise
+&nbsp;     */
+&nbsp;    public static String getPropertyValue(ProcessDTO process, String propertyName) {
+<b class="nc">&nbsp;        return ProcessService.getPropertyValue(process, propertyName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculate and return age of given process as a String.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *            ProcessDTO object whose duration/age is calculated
+&nbsp;     * @return process age of given process
+&nbsp;     */
+&nbsp;    public static String getProcessDuration(ProcessDTO processDTO) {
+<b class="nc">&nbsp;        return ProcessService.getProcessDuration(processDTO);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save process and redirect to list view.
+&nbsp;     *
+&nbsp;     * @return url to list view
+&nbsp;     */
+&nbsp;    public String save() {
+<b class="nc">&nbsp;        if (Objects.nonNull(process) &amp;&amp; Objects.nonNull(newProcessTitle)) {</b>
+<b class="nc">&nbsp;            if (!process.getTitle().equals(newProcessTitle)</b>
+<b class="nc">&nbsp;                    &amp;&amp; !renameAfterProcessTitleChanged()) {</b>
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getProcessService().save(this.process, true);</b>
+<b class="nc">&nbsp;                return processesPage;</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.PROCESS.getTranslationSingular() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_INCOMPLETE_DATA, &quot;processTitleEmpty&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create Child for given Process.
+&nbsp;     * @param processDTO the process to create a child for.
+&nbsp;     * @return path to createProcessForm
+&nbsp;     */
+&nbsp;    public String createProcessAsChild(ProcessDTO processDTO) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Process process = ServiceManager.getProcessService().getById(processDTO.getId());</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(process.getTemplate()) &amp;&amp; Objects.nonNull(process.getProject())) {</b>
+<b class="nc">&nbsp;                return CREATE_PROCESS_PATH + &quot;&amp;templateId=&quot; + process.getTemplate().getId() + &quot;&amp;projectId=&quot;</b>
+<b class="nc">&nbsp;                        + process.getProject().getId() + &quot;&amp;parentId=&quot; + process.getId();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_READING, new Object[] {ObjectType.PROCESS.getTranslationSingular() }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return &quot;processes&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get diagram image for current template.
+&nbsp;     *
+&nbsp;     * @return diagram image file
+&nbsp;     */
+&nbsp;    public InputStream getTasksDiagram() {
+<b class="nc">&nbsp;        Workflow workflow = this.process.getTemplate().getWorkflow();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(workflow)) {</b>
+<b class="nc">&nbsp;            return ServiceManager.getTemplateService().getTasksDiagram(workflow.getTitle());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return ServiceManager.getTemplateService().getTasksDiagram(&quot;&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get translation of task status title.
+&nbsp;     *
+&nbsp;     * @param taskStatusTitle
+&nbsp;     *            &#39;statusDone&#39;, &#39;statusLocked&#39; and so on
+&nbsp;     * @return translated message for given task status title
+&nbsp;     */
+&nbsp;    public String getTaskStatusTitle(String taskStatusTitle) {
+<b class="nc">&nbsp;        return Helper.getTranslation(taskStatusTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove content.
+&nbsp;     *
+&nbsp;     * @return String
+&nbsp;     */
+&nbsp;    public String deleteContent() {
+&nbsp;        try {
+<b class="nc">&nbsp;            URI ocr = fileService.getOcrDirectory(this.process);</b>
+<b class="nc">&nbsp;            if (fileService.fileExist(ocr)) {</b>
+<b class="nc">&nbsp;                fileService.delete(ocr);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            URI images = fileService.getImagesDirectory(this.process);</b>
+<b class="nc">&nbsp;            if (fileService.fileExist(images)) {</b>
+<b class="nc">&nbsp;                fileService.delete(images);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorDirectoryDeleting&quot;, new Object[] {Helper.getTranslation(&quot;metadata&quot;) }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        Helper.setMessage(&quot;Content deleted&quot;);</b>
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean renameAfterProcessTitleChanged() {
+<b class="nc">&nbsp;        String validateRegEx = ConfigCore.getParameterOrDefaultValue(ParameterCore.VALIDATE_PROCESS_TITLE_REGEX);</b>
+<b class="nc">&nbsp;        if (!ProcessValidator.isProcessTitleCorrect(newProcessTitle)) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;processTitleInvalid&quot;, new Object[] {validateRegEx });</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            renamePropertiesValuesForProcessTitle(this.process.getProperties());</b>
+<b class="nc">&nbsp;            renamePropertiesValuesForProcessTitle(this.process.getTemplates());</b>
+<b class="nc">&nbsp;            removePropertiesWithEmptyTitle(this.process.getWorkpieces());</b>
+&nbsp;
+&nbsp;            try {
+<b class="nc">&nbsp;                renameImageDirectories();</b>
+<b class="nc">&nbsp;                renameOcrDirectories();</b>
+<b class="nc">&nbsp;                renameDefinedDirectories();</b>
+<b class="nc">&nbsp;            } catch (IOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;errorRenaming&quot;, new Object[] {Helper.getTranslation(&quot;directory&quot;) }, logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            this.process.setTitle(this.newProcessTitle);</b>
+&nbsp;
+&nbsp;            // remove Tiffwriter file
+<b class="nc">&nbsp;            ServiceManager.getKitodoScriptService().deleteTiffHeaderFile(List.of(process));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void renamePropertiesValuesForProcessTitle(List&lt;Property&gt; properties) {
+<b class="nc">&nbsp;        for (Property property : properties) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(property.getValue()) &amp;&amp; property.getValue().contains(this.process.getTitle())) {</b>
+<b class="nc">&nbsp;                property.setValue(property.getValue().replaceAll(this.process.getTitle(), this.newProcessTitle));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void renameImageDirectories() throws IOException {
+<b class="nc">&nbsp;        URI imageDirectory = fileService.getImagesDirectory(process);</b>
+<b class="nc">&nbsp;        renameDirectories(imageDirectory);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void renameOcrDirectories() throws IOException {
+<b class="nc">&nbsp;        URI ocrDirectory = fileService.getOcrDirectory(process);</b>
+<b class="nc">&nbsp;        renameDirectories(ocrDirectory);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void renameDirectories(URI directory) throws IOException {
+<b class="nc">&nbsp;        if (fileService.isDirectory(directory)) {</b>
+<b class="nc">&nbsp;            List&lt;URI&gt; subDirs = fileService.getSubUris(directory);</b>
+<b class="nc">&nbsp;            for (URI imageDir : subDirs) {</b>
+<b class="nc">&nbsp;                if (fileService.isDirectory(imageDir)) {</b>
+<b class="nc">&nbsp;                    fileService.renameFile(imageDir, imageDir.toString().replace(process.getTitle(), newProcessTitle));</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void renameDefinedDirectories() {
+<b class="nc">&nbsp;        String[] processDirs = ConfigCore.getStringArrayParameter(ParameterCore.PROCESS_DIRS);</b>
+<b class="nc">&nbsp;        for (String processDir : processDirs) {</b>
+&nbsp;            // TODO: check it out
+<b class="nc">&nbsp;            URI processDirAbsolute = ServiceManager.getProcessService().getProcessDataDirectory(process)</b>
+<b class="nc">&nbsp;                    .resolve(processDir.replace(&quot;(processtitle)&quot;, process.getTitle()));</b>
+&nbsp;
+<b class="nc">&nbsp;            File dir = new File(processDirAbsolute);</b>
+&nbsp;            boolean renamed;
+<b class="nc">&nbsp;            if (dir.isDirectory()) {</b>
+<b class="nc">&nbsp;                renamed = dir.renameTo(new File(dir.getAbsolutePath().replace(process.getTitle(), newProcessTitle)));</b>
+<b class="nc">&nbsp;                if (!renamed) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(&quot;errorRenaming&quot;, new Object[] {dir.getName() });</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove template properties.
+&nbsp;     */
+&nbsp;    public void deleteTemplateProperty() {
+<b class="nc">&nbsp;        this.templateProperty.getProcesses().clear();</b>
+<b class="nc">&nbsp;        this.process.getTemplates().remove(this.templateProperty);</b>
+<b class="nc">&nbsp;        loadTemplateProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove workpiece properties.
+&nbsp;     */
+&nbsp;    public void deleteWorkpieceProperty() {
+<b class="nc">&nbsp;        this.workpieceProperty.getProcesses().clear();</b>
+<b class="nc">&nbsp;        this.process.getWorkpieces().remove(this.workpieceProperty);</b>
+<b class="nc">&nbsp;        loadWorkpieceProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new template property.
+&nbsp;     */
+&nbsp;    public void createTemplateProperty() {
+<b class="nc">&nbsp;        if (Objects.isNull(this.templates)) {</b>
+<b class="nc">&nbsp;            this.templates = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Property newProperty = new Property();</b>
+<b class="nc">&nbsp;        newProperty.setDataType(PropertyType.STRING);</b>
+<b class="nc">&nbsp;        this.templates.add(newProperty);</b>
+<b class="nc">&nbsp;        this.templateProperty = newProperty;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new workpiece property.
+&nbsp;     */
+&nbsp;    public void createWorkpieceProperty() {
+<b class="nc">&nbsp;        if (Objects.isNull(this.workpieces)) {</b>
+<b class="nc">&nbsp;            this.workpieces = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Property newProperty = new Property();</b>
+<b class="nc">&nbsp;        newProperty.setDataType(PropertyType.STRING);</b>
+<b class="nc">&nbsp;        this.workpieces.add(newProperty);</b>
+<b class="nc">&nbsp;        this.workpieceProperty = newProperty;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save template property.
+&nbsp;     */
+&nbsp;    public void saveTemplateProperty() {
+<b class="nc">&nbsp;        if (!this.process.getTemplates().contains(this.templateProperty)) {</b>
+<b class="nc">&nbsp;            this.process.getTemplates().add(this.templateProperty);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        loadTemplateProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save workpiece property.
+&nbsp;     */
+&nbsp;    public void saveWorkpieceProperty() {
+<b class="nc">&nbsp;        if (!this.process.getWorkpieces().contains(this.workpieceProperty)) {</b>
+<b class="nc">&nbsp;            this.process.getWorkpieces().add(this.workpieceProperty);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        loadWorkpieceProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save task and redirect to processEdit view.
+&nbsp;     *
+&nbsp;     * @return url to processEdit view
+&nbsp;     */
+&nbsp;    public String saveTaskAndRedirect() {
+<b class="nc">&nbsp;        saveTask(this.task, this.process, ObjectType.PROCESS.getTranslationSingular(), ServiceManager.getTaskService());</b>
+<b class="nc">&nbsp;        return processEditPath + &quot;&amp;id=&quot; + (Objects.isNull(this.process.getId()) ? 0 : this.process.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove task.
+&nbsp;     */
+&nbsp;    public void removeTask() {
+<b class="nc">&nbsp;        this.process.getTasks().remove(this.task);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;Role&gt; roles = this.task.getRoles();</b>
+<b class="nc">&nbsp;        for (Role role : roles) {</b>
+<b class="nc">&nbsp;            role.getTasks().remove(this.task);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        ProcessService.deleteSymlinksFromUserHomes(this.task);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove role from the task.
+&nbsp;     *
+&nbsp;     * @return stay on the same page
+&nbsp;     */
+&nbsp;    public String deleteRole() {
+<b class="nc">&nbsp;        String idParameter = Helper.getRequestParameter(ID_PARAMETER);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(idParameter)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                int roleId = Integer.parseInt(idParameter);</b>
+<b class="nc">&nbsp;                this.task.getRoles().removeIf(role -&gt; role.getId().equals(roleId));</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add role to the task.
+&nbsp;     *
+&nbsp;     * @return stay on the same page
+&nbsp;     */
+&nbsp;    public String addRole() {
+<b class="nc">&nbsp;        String idParameter = Helper.getRequestParameter(ID_PARAMETER);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(idParameter)) {</b>
+<b class="nc">&nbsp;            int roleId = 0;</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                roleId = Integer.parseInt(idParameter);</b>
+<b class="nc">&nbsp;                Role role = ServiceManager.getRoleService().getById(roleId);</b>
+&nbsp;
+<b class="nc">&nbsp;                if (!this.task.getRoles().contains(role)) {</b>
+<b class="nc">&nbsp;                    this.task.getRoles().add(role);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_DATABASE_READING,</b>
+<b class="nc">&nbsp;                        new Object[] {ObjectType.ROLE.getTranslationSingular(), roleId }, logger, e);</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Export PDF.
+&nbsp;     */
+&nbsp;    public void exportPdf() {
+<b class="nc">&nbsp;        Helper.setErrorMessage(&quot;Not implemented&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download to home for all found processes.
+&nbsp;     */
+&nbsp;    public void downloadToHomeForAll() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ProcessService.downloadToHome(getProcessesForActions());</b>
+<b class="nc">&nbsp;            Helper.setMessage(&quot;createdInUserHomeAll&quot;);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Error downloading all processes to home directory!&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set up processing status selection.
+&nbsp;     */
+&nbsp;    public void setTaskStatusUpForSelection() {
+<b class="nc">&nbsp;        workflowControllerService.setTaskStatusUpForProcesses(getSelectedProcesses());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set up processing status for all found processes.
+&nbsp;     */
+&nbsp;    public void setTaskStatusUpForAll() {
+<b class="nc">&nbsp;        workflowControllerService.setTaskStatusUpForProcesses(getProcessesForActions());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set down processing status selection.
+&nbsp;     */
+&nbsp;    public void setTaskStatusDownForSelection() {
+<b class="nc">&nbsp;        workflowControllerService.setTaskStatusDownForProcesses(getSelectedProcesses());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set down processing status hits.
+&nbsp;     */
+&nbsp;    public void setTaskStatusDownForAll() {
+<b class="nc">&nbsp;        workflowControllerService.setTaskStatusDownForProcesses(getProcessesForActions());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Task status up.
+&nbsp;     */
+&nbsp;    public void setTaskStatusUp() throws DataException, IOException, DAOException {
+<b class="nc">&nbsp;        workflowControllerService.setTaskStatusUp(this.task);</b>
+<b class="nc">&nbsp;        ProcessService.deleteSymlinksFromUserHomes(this.task);</b>
+<b class="nc">&nbsp;        refreshParent();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Task status down.
+&nbsp;     */
+&nbsp;    public void setTaskStatusDown() {
+<b class="nc">&nbsp;        workflowControllerService.setTaskStatusDown(this.task);</b>
+<b class="nc">&nbsp;        ProcessService.deleteSymlinksFromUserHomes(this.task);</b>
+<b class="nc">&nbsp;        refreshParent();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void refreshParent() {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (Objects.nonNull(process.getParent())) {</b>
+<b class="nc">&nbsp;                this.process.setParent(ServiceManager.getProcessService().getById(process.getParent().getId()));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE,</b>
+<b class="nc">&nbsp;                new Object[] {ObjectType.PROCESS.getTranslationSingular(), process.getParent().getId() }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process object.
+&nbsp;     *
+&nbsp;     * @return process object
+&nbsp;     */
+&nbsp;    public Process getProcess() {
+<b class="nc">&nbsp;        return this.process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set process by ID.
+&nbsp;     *
+&nbsp;     * @param processID
+&nbsp;     *            ID of process to set.
+&nbsp;     */
+&nbsp;    public void setProcessByID(int processID) {
+&nbsp;        try {
+<b class="nc">&nbsp;            setProcess(ServiceManager.getProcessService().getById(processID));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE,</b>
+<b class="nc">&nbsp;                new Object[] {ObjectType.PROCESS.getTranslationSingular(), processID }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            Process object
+&nbsp;     */
+&nbsp;    public void setProcess(Process process) {
+<b class="nc">&nbsp;        this.process = process;</b>
+<b class="nc">&nbsp;        this.newProcessTitle = process.getTitle();</b>
+<b class="nc">&nbsp;        loadProcessProperties();</b>
+<b class="nc">&nbsp;        loadTemplateProperties();</b>
+<b class="nc">&nbsp;        loadWorkpieceProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get task object.
+&nbsp;     *
+&nbsp;     * @return Task object
+&nbsp;     */
+&nbsp;    public Task getTask() {
+<b class="nc">&nbsp;        return this.task;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set task.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            Task object
+&nbsp;     */
+&nbsp;    public void setTask(Task task) {
+<b class="nc">&nbsp;        this.task = task;</b>
+<b class="nc">&nbsp;        this.task.setLocalizedTitle(ServiceManager.getTaskService().getLocalizedTitle(task.getTitle()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Property getTemplateProperty() {
+<b class="nc">&nbsp;        return this.templateProperty;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTemplateProperty(Property templateProperty) {
+<b class="nc">&nbsp;        this.templateProperty = templateProperty;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Property getWorkpieceProperty() {
+<b class="nc">&nbsp;        return this.workpieceProperty;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setWorkpieceProperty(Property workpieceProperty) {
+<b class="nc">&nbsp;        this.workpieceProperty = workpieceProperty;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Execute Kitodo script for hits list.
+&nbsp;     */
+&nbsp;    public void executeKitodoScriptAll() {
+<b class="nc">&nbsp;        executeKitodoScriptForProcesses(getProcessesForActions(), this.kitodoScriptAll);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Execute Kitodo script for selected processes.
+&nbsp;     */
+&nbsp;    public void executeKitodoScriptSelection() {
+<b class="nc">&nbsp;        executeKitodoScriptForProcesses(getSelectedProcesses(), this.kitodoScriptSelection);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void executeKitodoScriptForProcesses(List&lt;Process&gt; processes, String kitodoScript) {
+<b class="nc">&nbsp;        KitodoScriptService service = ServiceManager.getKitodoScriptService();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            service.execute(processes, kitodoScript);</b>
+<b class="nc">&nbsp;        } catch (DataException | IOException | InvalidImagesException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        } catch (MediaNotFoundException e) {</b>
+<b class="nc">&nbsp;            Helper.setWarnMessage(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Process&gt; getProcessesForActions() {
+&nbsp;        // TODO: find a way to pass filters
+<b class="nc">&nbsp;        List&lt;ProcessDTO&gt; filteredProcesses = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Object object : lazyDTOModel.load(0, 100000, &quot;&quot;,</b>
+&nbsp;                SortOrder.ASCENDING, null)) {
+<b class="nc">&nbsp;            if (object instanceof ProcessDTO) {</b>
+<b class="nc">&nbsp;                filteredProcesses.add((ProcessDTO) object);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        List&lt;Process&gt; processesForActions = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            processesForActions = ServiceManager.getProcessService().convertDtosToBeans(filteredProcesses);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {ObjectType.PROCESS.getTranslationPlural() },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return processesForActions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get kitodo script for selected results.
+&nbsp;     *
+&nbsp;     * @return kitodo script for selected results
+&nbsp;     */
+&nbsp;    public String getKitodoScriptSelection() {
+<b class="nc">&nbsp;        return this.kitodoScriptSelection;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set kitodo script for selected results.
+&nbsp;     *
+&nbsp;     * @param kitodoScriptSelection
+&nbsp;     *            the kitodoScript
+&nbsp;     */
+&nbsp;    public void setKitodoScriptSelection(String kitodoScriptSelection) {
+<b class="nc">&nbsp;        this.kitodoScriptSelection = kitodoScriptSelection;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get kitodo script for all results.
+&nbsp;     *
+&nbsp;     * @return kitodo script for all results
+&nbsp;     */
+&nbsp;    public String getKitodoScriptAll() {
+<b class="nc">&nbsp;        return this.kitodoScriptAll;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set kitodo script for all results.
+&nbsp;     *
+&nbsp;     * @param kitodoScriptAll
+&nbsp;     *            the kitodoScript
+&nbsp;     */
+&nbsp;    public void setKitodoScriptAll(String kitodoScriptAll) {
+<b class="nc">&nbsp;        this.kitodoScriptAll = kitodoScriptAll;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getNewProcessTitle() {
+<b class="nc">&nbsp;        return this.newProcessTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setNewProcessTitle(String newProcessTitle) {
+<b class="nc">&nbsp;        this.newProcessTitle = newProcessTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get property for process.
+&nbsp;     *
+&nbsp;     * @return property for process
+&nbsp;     */
+&nbsp;    public Property getProperty() {
+<b class="nc">&nbsp;        return this.property;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set property for process.
+&nbsp;     *
+&nbsp;     * @param property
+&nbsp;     *            for process as Property object
+&nbsp;     */
+&nbsp;    public void setProperty(Property property) {
+<b class="nc">&nbsp;        this.property = property;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of properties for process.
+&nbsp;     *
+&nbsp;     * @return list of process properties
+&nbsp;     */
+&nbsp;    public List&lt;Property&gt; getProperties() {
+<b class="nc">&nbsp;        return this.properties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of properties for process.
+&nbsp;     *
+&nbsp;     * @param properties
+&nbsp;     *            for process as Property objects
+&nbsp;     */
+&nbsp;    public void setProperties(List&lt;Property&gt; properties) {
+<b class="nc">&nbsp;        this.properties = properties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of templates for process.
+&nbsp;     *
+&nbsp;     * @return list of templates for process
+&nbsp;     */
+&nbsp;    public List&lt;Property&gt; getTemplates() {
+<b class="nc">&nbsp;        return this.templates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of templates for process.
+&nbsp;     *
+&nbsp;     * @param templates
+&nbsp;     *            for process as Property objects
+&nbsp;     */
+&nbsp;    public void setTemplates(List&lt;Property&gt; templates) {
+<b class="nc">&nbsp;        this.templates = templates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of workpieces for process.
+&nbsp;     *
+&nbsp;     * @return list of workpieces for process
+&nbsp;     */
+&nbsp;    public List&lt;Property&gt; getWorkpieces() {
+<b class="nc">&nbsp;        return this.workpieces;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of workpieces for process.
+&nbsp;     *
+&nbsp;     * @param workpieces
+&nbsp;     *            for process as Property objects
+&nbsp;     */
+&nbsp;    public void setWorkpieces(List&lt;Property&gt; workpieces) {
+<b class="nc">&nbsp;        this.workpieces = workpieces;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void loadProcessProperties() {
+<b class="nc">&nbsp;        this.properties = this.process.getProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void loadTemplateProperties() {
+<b class="nc">&nbsp;        this.templates = this.process.getTemplates();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void loadWorkpieceProperties() {
+<b class="nc">&nbsp;        this.workpieces = this.process.getWorkpieces();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new property.
+&nbsp;     */
+&nbsp;    public void createNewProperty() {
+<b class="nc">&nbsp;        if (Objects.isNull(this.properties)) {</b>
+<b class="nc">&nbsp;            this.properties = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Property newProperty = new Property();</b>
+<b class="nc">&nbsp;        newProperty.setDataType(PropertyType.STRING);</b>
+<b class="nc">&nbsp;        this.properties.add(newProperty);</b>
+<b class="nc">&nbsp;        this.property = newProperty;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save current property.
+&nbsp;     */
+&nbsp;    public void saveCurrentProperty() {
+<b class="nc">&nbsp;        if (!this.process.getProperties().contains(this.property)) {</b>
+<b class="nc">&nbsp;            this.process.getProperties().add(this.property);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        loadProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete property.
+&nbsp;     */
+&nbsp;    public void deleteProperty() {
+<b class="nc">&nbsp;        this.property.getProcesses().clear();</b>
+<b class="nc">&nbsp;        this.process.getProperties().remove(this.property);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;Property&gt; propertiesToFilterTitle = this.process.getProperties();</b>
+<b class="nc">&nbsp;        removePropertiesWithEmptyTitle(propertiesToFilterTitle);</b>
+<b class="nc">&nbsp;        loadProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Duplicate property.
+&nbsp;     */
+&nbsp;    public void duplicateProperty() {
+<b class="nc">&nbsp;        Property newProperty = ServiceManager.getPropertyService().transfer(this.property);</b>
+<b class="nc">&nbsp;        newProperty.getProcesses().add(this.process);</b>
+<b class="nc">&nbsp;        this.process.getProperties().add(newProperty);</b>
+<b class="nc">&nbsp;        loadProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // TODO: is it really a case that title is empty?
+&nbsp;    private void removePropertiesWithEmptyTitle(List&lt;Property&gt; properties) {
+<b class="nc">&nbsp;        for (Property processProperty : properties) {</b>
+<b class="nc">&nbsp;            if (Objects.isNull(processProperty.getTitle()) || processProperty.getTitle().isEmpty()) {</b>
+<b class="nc">&nbsp;                processProperty.getProcesses().clear();</b>
+<b class="nc">&nbsp;                this.process.getProperties().remove(processProperty);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get dockets for select list.
+&nbsp;     *
+&nbsp;     * @return list of dockets
+&nbsp;     */
+&nbsp;    public List&lt;Docket&gt; getDockets() {
+<b class="nc">&nbsp;        return ServiceManager.getDocketService().getAllForSelectedClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of projects.
+&nbsp;     *
+&nbsp;     * @return list of projects
+&nbsp;     */
+&nbsp;    public List&lt;Project&gt; getProjects() {
+<b class="nc">&nbsp;        return ServiceManager.getProjectService().getAllForSelectedClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get rulesets for select list.
+&nbsp;     *
+&nbsp;     * @return list of rulesets
+&nbsp;     */
+&nbsp;    public List&lt;Ruleset&gt; getRulesets() {
+<b class="nc">&nbsp;        return ServiceManager.getRulesetService().getAllForSelectedClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get task statuses for select list.
+&nbsp;     *
+&nbsp;     * @return list of task statuses
+&nbsp;     */
+&nbsp;    public TaskStatus[] getTaskStatuses() {
+<b class="nc">&nbsp;        return TaskStatus.values();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for process edit form. If the given
+&nbsp;     * parameter &#39;id&#39; is &#39;0&#39;, the form for creating a new process will be
+&nbsp;     * displayed.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            ID of the process to load
+&nbsp;     */
+&nbsp;    public void load(int id) {
+<b class="nc">&nbsp;        SecurityAccessController securityAccessController = new SecurityAccessController();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!securityAccessController.hasAuthorityToEditProcess(id)</b>
+<b class="nc">&nbsp;                    &amp;&amp; !securityAccessController.hasAuthorityToViewProcess(id)) {</b>
+<b class="nc">&nbsp;                ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();</b>
+<b class="nc">&nbsp;                context.redirect(DEFAULT_LINK);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException | DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.PROCESS.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (id != 0) {</b>
+<b class="nc">&nbsp;                setProcess(ServiceManager.getProcessService().getById(id));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            setSaveDisabled(true);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.PROCESS.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for task form.
+&nbsp;     */
+&nbsp;    public void loadTask(int id) {
+<b class="nc">&nbsp;        SecurityAccessController securityAccessController = new SecurityAccessController();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!securityAccessController.hasAuthorityToEditTask(id)) {</b>
+<b class="nc">&nbsp;                ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();</b>
+<b class="nc">&nbsp;                context.redirect(DEFAULT_LINK);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException | DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.TASK.getTranslationSingular(), id },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (id != 0) {</b>
+<b class="nc">&nbsp;                setTask(ServiceManager.getTaskService().getById(id));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            setSaveDisabled(true);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.TASK.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set referring view which will be returned when the user clicks &quot;save&quot; or
+&nbsp;     * &quot;cancel&quot; on the task edit page.
+&nbsp;     *
+&nbsp;     * @param referer
+&nbsp;     *            the referring view
+&nbsp;     */
+&nbsp;    public void setTaskEditReferer(String referer) {
+<b class="nc">&nbsp;        if (referer.equals(&quot;tasks&quot;) || referer.equals(&quot;processEdit?id=&quot; + this.task.getProcess().getId())) {</b>
+<b class="nc">&nbsp;            this.taskEditReferer = referer;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            this.taskEditReferer = DEFAULT_LINK;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get task edit page referring view.
+&nbsp;     *
+&nbsp;     * @return task eit page referring view
+&nbsp;     */
+&nbsp;    public String getTaskEditReferer() {
+<b class="nc">&nbsp;        return this.taskEditReferer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set referring view which will be returned when the user clicks &quot;save&quot; or
+&nbsp;     * &quot;cancel&quot; on the process edit page.
+&nbsp;     *
+&nbsp;     * @param referer
+&nbsp;     *            the referring view
+&nbsp;     */
+&nbsp;    public void setProcessEditReferer(String referer) {
+<b class="nc">&nbsp;        if (!referer.isEmpty()) {</b>
+<b class="nc">&nbsp;            if (&quot;processes&quot;.equals(referer)) {</b>
+<b class="nc">&nbsp;                this.processEditReferer = referer;</b>
+<b class="nc">&nbsp;            } else if (&quot;searchResult&quot;.equals(referer)) {</b>
+<b class="nc">&nbsp;                this.processEditReferer = &quot;searchResult.jsf&quot;;</b>
+<b class="nc">&nbsp;            } else if (!referer.contains(&quot;taskEdit&quot;) || this.processEditReferer.isEmpty()) {</b>
+<b class="nc">&nbsp;                this.processEditReferer = DEFAULT_LINK;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process edit page referring view.
+&nbsp;     *
+&nbsp;     * @return process edit page referring view
+&nbsp;     */
+&nbsp;    public String getProcessEditReferer() {
+<b class="nc">&nbsp;        return this.processEditReferer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Changes the filter of the ProcessForm and reloads it.
+&nbsp;     *
+&nbsp;     * @param filter
+&nbsp;     *            the filter to apply.
+&nbsp;     * @return reloadpath of th page.
+&nbsp;     */
+&nbsp;    public String changeFilter(String filter) {
+<b class="nc">&nbsp;        filterMenu.parseFilters(filter);</b>
+<b class="nc">&nbsp;        setFilter(filter);</b>
+<b class="nc">&nbsp;        return filterList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String filterList() {
+<b class="nc">&nbsp;        this.selectedProcessesOrProcessDTOs.clear();</b>
+<b class="nc">&nbsp;        return processesPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void setFilter(String filter) {
+<b class="nc">&nbsp;        super.filter = filter;</b>
+<b class="nc">&nbsp;        this.lazyDTOModel.setFilterString(filter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a String containing titles of all current tasks of the given process, e.g. &quot;OPEN&quot; tasks and tasks
+&nbsp;     * &quot;INWORK&quot;.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *          process for which current task titles are returned
+&nbsp;     * @return String containing titles of current tasks of given process
+&nbsp;     */
+&nbsp;    public String getCurrentTaskTitles(ProcessDTO processDTO) {
+<b class="nc">&nbsp;        return ServiceManager.getProcessService().createProgressTooltip(processDTO);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all parent processes recursively for the given process.
+&nbsp;     *
+&nbsp;     * @return List of Processes
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; getAllParentProcesses(int processId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ProcessService.getAllParentProcesses(ServiceManager.getProcessService().getById(processId));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.PROCESS.getTranslationSingular(), processId }, logger, e);</b>
+<b class="nc">&nbsp;            return new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get number of direct child processes for the given process.
+&nbsp;     *
+&nbsp;     * @param processId
+&nbsp;     *          process id for given process
+&nbsp;     * @return number of child processes
+&nbsp;     */
+&nbsp;    public int getNumberOfChildProcesses(int processId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getProcessService().getNumberOfChildren(processId);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.PROCESS.getTranslationSingular(), processId }, logger, e);</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return path to processes page.
+&nbsp;     * @return path to processes page
+&nbsp;     */
+&nbsp;    public String getProcessesPage() {
+<b class="nc">&nbsp;        return this.processesPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the provided date as string in the format of &quot;yyyy-MM-dd HH:mm:ss&quot;.
+&nbsp;     * @param date the date to be converted
+&nbsp;     * @return the converted date as string
+&nbsp;     */
+&nbsp;    public String convertProcessingDate(Date date) {
+<b class="nc">&nbsp;        return Helper.getDateAsFormattedString(date);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all tasks of given process which should be visible to the user.
+&nbsp;     * @param processDTO process as DTO object
+&nbsp;     * @return List of filtered tasks as DTO objects
+&nbsp;     */
+&nbsp;    public List&lt;TaskDTO&gt; getCurrentTasksForUser(ProcessDTO processDTO) {
+<b class="nc">&nbsp;        return ServiceManager.getProcessService().getCurrentTasksForUser(processDTO, ServiceManager.getUserService().getCurrentUser());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the amount of processes for the current filter.
+&nbsp;     * @return amount of processes
+&nbsp;     */
+&nbsp;    public String getAmount() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getProcessService().count(ServiceManager.getProcessService()</b>
+<b class="nc">&nbsp;                    .getQueryForFilter(isShowClosedProcesses(), isShowInactiveProjects(), filter)).toString();</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Resets the process list multi view state such that the sort order and pagination is reset to their defaults.
+&nbsp;     */
+&nbsp;    public void resetProcessListMultiViewState() {
+<b class="nc">&nbsp;        if (Objects.nonNull(FacesContext.getCurrentInstance())) {</b>
+&nbsp;            // check whether there is a multi view state registered (to avoid warning log message in case there is not)
+<b class="nc">&nbsp;            Object mvs = PrimeFaces.current().multiViewState().get(PROCESS_TABLE_VIEW_ID, PROCESS_TABLE_ID, false, null);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(mvs)) {</b>
+&nbsp;                // clear multi view state only if there is a state available
+<b class="nc">&nbsp;                PrimeFaces.current().multiViewState().clear(PROCESS_TABLE_VIEW_ID, PROCESS_TABLE_ID);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Navigates to processes list and optionally resets table view state.
+&nbsp;     *
+&nbsp;     * @param resetTableViewState whether to reset table view state
+&nbsp;     */
+&nbsp;    public String navigateToProcessesList(boolean resetTableViewState) {
+<b class="nc">&nbsp;        if (resetTableViewState) {</b>
+<b class="nc">&nbsp;            setFirstRow(0);</b>
+<b class="nc">&nbsp;            resetProcessListMultiViewState();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;/pages/processes?tabIndex=0&amp;faces-redirect=true&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Callback function triggered when a process is unselected in the data table.
+&nbsp;     *
+&nbsp;     * @param unselectEvent as UnUnselectEvent
+&nbsp;     */
+&nbsp;    public void onRowUnselect(UnselectEvent unselectEvent) {
+<b class="nc">&nbsp;        if (allSelected) {</b>
+<b class="nc">&nbsp;            excludedProcessIds.add(getProcessId(unselectEvent.getObject()));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Callback function triggered when a process is selected in the data table.
+&nbsp;     *
+&nbsp;     * @param selectEvent as SelectEvent
+&nbsp;     */
+&nbsp;    public void onRowSelect(SelectEvent selectEvent) {
+<b class="nc">&nbsp;        if (allSelected) {</b>
+<b class="nc">&nbsp;            excludedProcessIds.remove(getProcessId(selectEvent.getObject()));</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;processesTable&#39;).selection=new Array(&#39;@all&#39;)&quot;);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;$(PF(&#39;processesTable&#39;).selectionHolder).val(&#39;@all&#39;)&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Callback function triggered when all processes are selected or unselected in the data table.
+&nbsp;     *
+&nbsp;     * @param toggleSelectEvent as ToggleSelectEvent
+&nbsp;     */
+&nbsp;    public void selectAll(ToggleSelectEvent toggleSelectEvent) {
+<b class="nc">&nbsp;        setAllSelected(false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private int getProcessId(Object process) {
+<b class="nc">&nbsp;        if (process instanceof Process) {</b>
+<b class="nc">&nbsp;            return ((Process) process).getId();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return ((ProcessDTO) process).getId();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get filterMenu.
+&nbsp;     *
+&nbsp;     * @return value of filterMenu
+&nbsp;     */
+&nbsp;    public FilterMenu getFilterMenu() {
+<b class="nc">&nbsp;        return filterMenu;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

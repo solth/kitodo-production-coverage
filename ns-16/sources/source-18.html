@@ -1,0 +1,380 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Template</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: Template (org.kitodo.data.database.beans)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Template</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,7%
+  </span>
+  <span class="absValue">
+    (18/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (36/40)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Template$HibernateProxy$kVW9CZm7</td>
+  </tr>
+  <tr>
+    <td class="name">Template$HibernateProxy$OUF19621</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    94,7%
+  </span>
+  <span class="absValue">
+    (18/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (36/40)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.beans;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.persistence.CascadeType;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.ForeignKey;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.JoinTable;
+&nbsp;import javax.persistence.ManyToMany;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.OneToMany;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;import org.kitodo.data.database.persistence.TemplateDAO;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;template&quot;)
+&nbsp;public class Template extends BaseTemplateBean {
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;active&quot;)</b>
+<b class="fc">&nbsp;    private Boolean active = true;</b>
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;client_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_template_client_id&quot;))
+&nbsp;    private Client client;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;docket_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_template_docket_id&quot;))
+&nbsp;    private Docket docket;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;ruleset_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_template_ruleset_id&quot;))
+&nbsp;    private Ruleset ruleset;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;workflow_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_template_workflow_id&quot;))
+&nbsp;    private Workflow workflow;
+&nbsp;
+&nbsp;    @OneToMany(mappedBy = &quot;template&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+&nbsp;    private List&lt;Process&gt; processes;
+&nbsp;
+&nbsp;    @OneToMany(mappedBy = &quot;template&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+&nbsp;    private List&lt;Task&gt; tasks;
+&nbsp;
+&nbsp;    @ManyToMany(cascade = CascadeType.PERSIST)
+&nbsp;    @JoinTable(name = &quot;project_x_template&quot;, joinColumns = {
+&nbsp;        @JoinColumn(name = &quot;template_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_x_template_template_id&quot;)) },
+&nbsp;            inverseJoinColumns = {
+&nbsp;                @JoinColumn(name = &quot;project_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_project_x_template_project_id&quot;)) })
+&nbsp;    private List&lt;Project&gt; projects;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+<b class="fc">&nbsp;    public Template() {</b>
+<b class="fc">&nbsp;        this.title = &quot;&quot;;</b>
+<b class="fc">&nbsp;        this.tasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.creationDate = new Date();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if template is active.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isActive() {
+<b class="fc">&nbsp;        if (Objects.isNull(this.active)) {</b>
+<b class="nc">&nbsp;            this.active = true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.active;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set workflow as active.
+&nbsp;     *
+&nbsp;     * @param active as Boolean
+&nbsp;     */
+&nbsp;    public void setActive(boolean active) {
+<b class="fc">&nbsp;        this.active = active;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get client.
+&nbsp;     *
+&nbsp;     * @return the client bean
+&nbsp;     */
+&nbsp;    public Client getClient() {
+<b class="fc">&nbsp;        return client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set client.
+&nbsp;     *
+&nbsp;     * @param client
+&nbsp;     *            bean
+&nbsp;     */
+&nbsp;    public void setClient(Client client) {
+<b class="fc">&nbsp;        this.client = client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get docket.
+&nbsp;     *
+&nbsp;     * @return value of docket
+&nbsp;     */
+&nbsp;    public Docket getDocket() {
+<b class="fc">&nbsp;        return docket;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set docket.
+&nbsp;     *
+&nbsp;     * @param docket as Docket object
+&nbsp;     */
+&nbsp;    public void setDocket(Docket docket) {
+<b class="fc">&nbsp;        this.docket = docket;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get ruleset.
+&nbsp;     *
+&nbsp;     * @return value of ruleset
+&nbsp;     */
+&nbsp;    public Ruleset getRuleset() {
+<b class="fc">&nbsp;        return this.ruleset;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set ruleset.
+&nbsp;     *
+&nbsp;     * @param ruleset as Ruleset object
+&nbsp;     */
+&nbsp;    public void setRuleset(Ruleset ruleset) {
+<b class="fc">&nbsp;        this.ruleset = ruleset;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get workflow.
+&nbsp;     *
+&nbsp;     * @return value of workflow
+&nbsp;     */
+&nbsp;    public Workflow getWorkflow() {
+<b class="fc">&nbsp;        return workflow;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set workflow.
+&nbsp;     *
+&nbsp;     * @param workflow as Workflow object
+&nbsp;     */
+&nbsp;    public void setWorkflow(Workflow workflow) {
+<b class="fc">&nbsp;        this.workflow = workflow;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get projects list.
+&nbsp;     *
+&nbsp;     * @return list of projects
+&nbsp;     */
+&nbsp;    public List&lt;Project&gt; getProjects() {
+<b class="fc">&nbsp;        initialize(new TemplateDAO(), this.projects);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.projects)) {</b>
+<b class="fc">&nbsp;            this.projects = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.projects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of projects.
+&nbsp;     *
+&nbsp;     * @param projects as Project list
+&nbsp;     */
+&nbsp;    public void setProjects(List&lt;Project&gt; projects) {
+<b class="fc">&nbsp;        this.projects = projects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processes.
+&nbsp;     *
+&nbsp;     * @return value of processes
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; getProcesses() {
+<b class="fc">&nbsp;        initialize(new TemplateDAO(), this.processes);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.processes)) {</b>
+<b class="fc">&nbsp;            this.processes = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processes.
+&nbsp;     *
+&nbsp;     * @param processes as Lis of Process
+&nbsp;     */
+&nbsp;    public void setProcesses(List&lt;Process&gt; processes) {
+<b class="nc">&nbsp;        this.processes = processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of task.
+&nbsp;     *
+&nbsp;     * @return list of Task objects or empty list
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getTasks() {
+<b class="fc">&nbsp;        initialize(new TemplateDAO(), this.tasks);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.tasks)) {</b>
+<b class="nc">&nbsp;            this.tasks = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.tasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set tasks.
+&nbsp;     *
+&nbsp;     * @param tasks as list of task
+&nbsp;     */
+&nbsp;    public void setTasks(List&lt;Task&gt; tasks) {
+<b class="fc">&nbsp;        this.tasks = tasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines whether or not two processes are equal. Two instances of
+&nbsp;     * {@code Template} are equal if the values of their {@code Id} member fields are the same.
+&nbsp;     *
+&nbsp;     * @param object
+&nbsp;     *            An object to be compared with this {@code Template}.
+&nbsp;     * @return {@code true} if the object to be compared is an instance of
+&nbsp;     *         {@code Template} and has the same values; {@code false} otherwise.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object object) {
+<b class="fc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof Template) {</b>
+<b class="fc">&nbsp;            Template template = (Template) object;</b>
+<b class="fc">&nbsp;            return Objects.equals(this.getId(), template.getId());</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        return Objects.hash(client, docket, ruleset, workflow);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

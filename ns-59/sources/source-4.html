@@ -1,0 +1,267 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > EditDataScript</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.command</a>
+</div>
+
+<h1>Coverage Summary for Class: EditDataScript (org.kitodo.production.services.command)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EditDataScript</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,9%
+  </span>
+  <span class="absValue">
+    (46/49)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.command;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.helper.VariableReplacer;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyMetsModsDigitalDocumentHelper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+<b class="fc">&nbsp;public abstract class EditDataScript {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(EditDataScript.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Processes the given script for the given process.
+&nbsp;     * @param metadataFile - the file to be changed
+&nbsp;     * @param process - the process to run the script on
+&nbsp;     * @param script - the script to run
+&nbsp;     */
+&nbsp;    public void process(LegacyMetsModsDigitalDocumentHelper metadataFile, Process process, String script) {
+<b class="fc">&nbsp;        List&lt;MetadataScript&gt; scripts = parseScript(script);</b>
+<b class="fc">&nbsp;        for (MetadataScript metadataScript : scripts) {</b>
+<b class="fc">&nbsp;            executeScript(metadataFile, process, metadataScript);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Executes the given script on the given file for the given process.
+&nbsp;     * @param metadataFile the file to edit
+&nbsp;     * @param process the related process
+&nbsp;     * @param metadataScript the script to execute
+&nbsp;     */
+&nbsp;    public abstract void executeScript(LegacyMetsModsDigitalDocumentHelper metadataFile, Process process,
+&nbsp;                                       MetadataScript metadataScript);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parses the given input to MetadataScripts.
+&nbsp;     * @param script the input, entered in frontend.
+&nbsp;     * @return the correlating MetadataScripts.
+&nbsp;     */
+&nbsp;    public List&lt;MetadataScript&gt; parseScript(String script) {
+<b class="fc">&nbsp;        String[] commands = script.split(&quot;;&quot;);</b>
+<b class="fc">&nbsp;        List&lt;MetadataScript&gt; metadataScripts = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (String command : commands) {</b>
+<b class="fc">&nbsp;            metadataScripts.add(new MetadataScript(command));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return metadataScripts;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates the script value when a metadata source is given.
+&nbsp;     * @param metadataScript the script to set the value
+&nbsp;     * @param metadataCollection the metadata collection to extract the value from
+&nbsp;     * @param process the process to replace variables
+&nbsp;     * @param metadataFile the metadatafile to read metadata
+&nbsp;     */
+&nbsp;    public void generateValueForMetadataScript(MetadataScript metadataScript, Collection&lt;Metadata&gt; metadataCollection,
+&nbsp;            Process process, LegacyMetsModsDigitalDocumentHelper metadataFile) {
+<b class="fc">&nbsp;        if (metadataScript.getValues().isEmpty() &amp;&amp; Objects.nonNull(metadataScript.getValueSource())</b>
+<b class="fc">&nbsp;                || Objects.nonNull(metadataScript.getVariable())) {</b>
+<b class="fc">&nbsp;            if (StringUtils.isNotBlank(metadataScript.getValueSource())) {</b>
+<b class="fc">&nbsp;                for (Metadata metadata : metadataCollection) {</b>
+<b class="fc">&nbsp;                    if (metadata.getKey().equals(metadataScript.getValueSource())) {</b>
+<b class="fc">&nbsp;                        metadataScript.getValues().add(((MetadataEntry) metadata).getValue());</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;            } else if (StringUtils.isNotBlank(metadataScript.getVariable())) {</b>
+<b class="fc">&nbsp;                VariableReplacer replacer = new VariableReplacer(metadataFile.getWorkpiece(), process, null);</b>
+&nbsp;
+<b class="fc">&nbsp;                String replaced = replacer.replace(metadataScript.getVariable());</b>
+<b class="fc">&nbsp;                metadataScript.getValues().add(replaced);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Saves the changed workpiece and process.
+&nbsp;     * @param workpiece the workpiece to save
+&nbsp;     * @param process the process to save
+&nbsp;     */
+&nbsp;    public void saveChanges(Workpiece workpiece, Process process) {
+<b class="fc">&nbsp;        try (OutputStream out = ServiceManager.getFileService()</b>
+<b class="fc">&nbsp;                .write(ServiceManager.getFileService().getMetadataFilePath(process))) {</b>
+<b class="fc">&nbsp;            ServiceManager.getMetsService().save(workpiece, out);</b>
+<b class="fc">&nbsp;            ServiceManager.getProcessService().saveToIndex(process, false);</b>
+<b class="fc">&nbsp;        } catch (IOException | CustomResponseException | DataException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates the value of the MetadatScript and from the parentProcess.
+&nbsp;     * @param metadataScript the script to generate the value for
+&nbsp;     * @param parentProcess the process to take the value from
+&nbsp;     */
+&nbsp;    public void generateValueFromParent(MetadataScript metadataScript, Process parentProcess) throws IOException {
+<b class="fc">&nbsp;        LegacyMetsModsDigitalDocumentHelper metadataFile = ServiceManager.getProcessService()</b>
+<b class="fc">&nbsp;                .readMetadataFile(parentProcess);</b>
+<b class="fc">&nbsp;        Workpiece workpiece = metadataFile.getWorkpiece();</b>
+&nbsp;
+<b class="fc">&nbsp;        Collection&lt;Metadata&gt; metadataCollection = workpiece.getLogicalStructure().getMetadata();</b>
+<b class="fc">&nbsp;        generateValueForMetadataScript(metadataScript, metadataCollection, parentProcess, metadataFile);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the metadataCollection where the metadata should be edited.
+&nbsp;     * May be specified by type in the script.
+&nbsp;     * @param metadataScript the metadataScript
+&nbsp;     * @param workpiece the workpiece to get the collection from.
+&nbsp;     * @return the metadataCollection.
+&nbsp;     */
+&nbsp;    public Collection&lt;Metadata&gt; getMetadataCollection(MetadataScript metadataScript, Workpiece workpiece) {
+&nbsp;        Collection&lt;Metadata&gt; metadataCollection;
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.nonNull(metadataScript.getTypeTarget())) {</b>
+<b class="fc">&nbsp;            LogicalDivision structuralElement = getLogicalDivisionWithType(metadataScript.getTypeTarget(),</b>
+<b class="fc">&nbsp;                workpiece.getLogicalStructure());</b>
+<b class="fc">&nbsp;            metadataCollection = Objects.isNull(structuralElement) ? null : structuralElement.getMetadata();</b>
+<b class="fc">&nbsp;        } else {</b>
+<b class="fc">&nbsp;            metadataCollection = workpiece.getLogicalStructure().getMetadata();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return metadataCollection;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private LogicalDivision getLogicalDivisionWithType(String typeTarget, LogicalDivision structuralElement) {
+<b class="fc">&nbsp;        if (typeTarget.equals(structuralElement.getType())) {</b>
+<b class="fc">&nbsp;            return structuralElement;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            for (LogicalDivision structuralElementChild : structuralElement.getChildren()) {</b>
+<b class="fc">&nbsp;                LogicalDivision structuralElementWithType = getLogicalDivisionWithType(typeTarget,</b>
+&nbsp;                    structuralElementChild);
+<b class="fc">&nbsp;                if (Objects.nonNull(structuralElementWithType)) {</b>
+<b class="fc">&nbsp;                    return structuralElementWithType;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,923 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CurrentTaskForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: CurrentTaskForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CurrentTaskForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    12,5%
+  </span>
+  <span class="absValue">
+    (8/64)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    11,4%
+  </span>
+  <span class="absValue">
+    (25/220)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Stream;
+&nbsp;
+&nbsp;import javax.annotation.PostConstruct;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.inject.Inject;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Batch;
+&nbsp;import org.kitodo.data.database.beans.Folder;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.enums.TaskEditType;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.export.ExportDms;
+&nbsp;import org.kitodo.export.TiffHeader;
+&nbsp;import org.kitodo.production.dto.TaskDTO;
+&nbsp;import org.kitodo.production.enums.GenerationMode;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.filters.FilterMenu;
+&nbsp;import org.kitodo.production.helper.CustomListColumnInitializer;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.WebDav;
+&nbsp;import org.kitodo.production.helper.batch.BatchTaskHelper;
+&nbsp;import org.kitodo.production.helper.tasks.TaskManager;
+&nbsp;import org.kitodo.production.metadata.MetadataLock;
+&nbsp;import org.kitodo.production.model.LazyTaskDTOModel;
+&nbsp;import org.kitodo.production.model.Subfolder;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.data.TaskService;
+&nbsp;import org.kitodo.production.services.file.SubfolderFactoryService;
+&nbsp;import org.kitodo.production.services.image.ImageGenerator;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;import org.kitodo.production.thread.TaskImageGeneratorThread;
+&nbsp;
+&nbsp;@Named(&quot;CurrentTaskForm&quot;)
+&nbsp;@SessionScoped
+&nbsp;public class CurrentTaskForm extends BaseForm {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(CurrentTaskForm.class);</b>
+<b class="fc">&nbsp;    private Process myProcess = new Process();</b>
+<b class="fc">&nbsp;    private Task currentTask = new Task();</b>
+<b class="fc">&nbsp;    private List&lt;TaskDTO&gt; selectedTasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private final WebDav myDav = new WebDav();</b>
+&nbsp;    private String scriptPath;
+&nbsp;    private transient BatchTaskHelper batchHelper;
+<b class="fc">&nbsp;    private final WorkflowControllerService workflowControllerService = new WorkflowControllerService();</b>
+&nbsp;    private List&lt;Property&gt; properties;
+&nbsp;    private Property property;
+<b class="fc">&nbsp;    private final String tasksPath = MessageFormat.format(REDIRECT_PATH, &quot;tasks&quot;);</b>
+<b class="fc">&nbsp;    private final String taskEditPath = MessageFormat.format(REDIRECT_PATH, &quot;currentTasksEdit&quot;);</b>
+<b class="fc">&nbsp;    private final String taskBatchEditPath = MessageFormat.format(REDIRECT_PATH, &quot;taskBatchEdit&quot;);</b>
+&nbsp;
+&nbsp;    private List&lt;String&gt; taskFilters;
+&nbsp;    private List&lt;String&gt; selectedTaskFilters;
+<b class="fc">&nbsp;    private FilterMenu filterMenu = new FilterMenu(this);</b>
+&nbsp;
+&nbsp;    private List&lt;TaskStatus&gt; taskStatus;
+&nbsp;    private List&lt;TaskStatus&gt; selectedTaskStatus;
+&nbsp;
+&nbsp;    private static final String AUTOMATIC_TASKS_FILTER = &quot;automaticTasks&quot;;
+&nbsp;    private static final String CORRECTION_TASKS_FILTER = &quot;correctionTasks&quot;;
+&nbsp;    private static final String OTHER_USERS_TASKS_FILTER = &quot;otherUsersTasks&quot;;
+&nbsp;
+&nbsp;    @Inject
+&nbsp;    private CustomListColumnInitializer initializer;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+&nbsp;    public CurrentTaskForm() {
+<b class="fc">&nbsp;        super();</b>
+<b class="fc">&nbsp;        super.setLazyDTOModel(new LazyTaskDTOModel(ServiceManager.getTaskService()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize the list of displayed list columns.
+&nbsp;     */
+&nbsp;    @PostConstruct
+&nbsp;    public void init() {
+<b class="nc">&nbsp;        columns = new ArrayList&lt;&gt;();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;task&quot;));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        selectedColumns = ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;task&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        taskFilters = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        taskFilters.add(AUTOMATIC_TASKS_FILTER);</b>
+<b class="nc">&nbsp;        taskFilters.add(CORRECTION_TASKS_FILTER);</b>
+<b class="nc">&nbsp;        taskFilters.add(OTHER_USERS_TASKS_FILTER);</b>
+&nbsp;
+<b class="nc">&nbsp;        selectedTaskFilters = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        selectedTaskFilters.add(CORRECTION_TASKS_FILTER);</b>
+<b class="nc">&nbsp;        selectedTaskFilters.add(OTHER_USERS_TASKS_FILTER);</b>
+&nbsp;
+<b class="nc">&nbsp;        taskStatus = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        taskStatus.add(TaskStatus.OPEN);</b>
+<b class="nc">&nbsp;        taskStatus.add(TaskStatus.INWORK);</b>
+&nbsp;
+<b class="nc">&nbsp;        selectedTaskStatus = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        selectedTaskStatus.add(TaskStatus.OPEN);</b>
+<b class="nc">&nbsp;        selectedTaskStatus.add(TaskStatus.INWORK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Take over task by user which calls this method.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String takeOverTask() {
+<b class="fc">&nbsp;        if (this.currentTask.getProcessingStatus() != TaskStatus.OPEN) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;stepInWorkError&quot;);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        } else {
+&nbsp;            try {
+<b class="fc">&nbsp;                if (this.currentTask.isTypeAcceptClose()) {</b>
+<b class="fc">&nbsp;                    this.workflowControllerService.close(this.currentTask);</b>
+<b class="fc">&nbsp;                    return tasksPath;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    this.workflowControllerService.assignTaskToUser(this.currentTask);</b>
+<b class="nc">&nbsp;                    ServiceManager.getTaskService().save(this.currentTask);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (DataException | IOException | DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.TASK.getTranslationSingular() }, logger,</b>
+&nbsp;                    e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return taskEditPath + &quot;&amp;id=&quot; + getTaskIdForPath();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Edit task.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String editTask() {
+<b class="nc">&nbsp;        return taskEditPath + &quot;&amp;id=&quot; + getTaskIdForPath();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Take over batch of tasks - all tasks assigned to the same batch with the same
+&nbsp;     * title.
+&nbsp;     *
+&nbsp;     * @return page for edit one task, page for edit many or stay on the same page
+&nbsp;     */
+&nbsp;    public String takeOverBatchTasks() {
+<b class="nc">&nbsp;        String taskTitle = this.currentTask.getTitle();</b>
+<b class="nc">&nbsp;        List&lt;Batch&gt; batches = this.currentTask.getProcess().getBatches();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (batches.isEmpty()) {</b>
+<b class="nc">&nbsp;            return takeOverTask();</b>
+<b class="nc">&nbsp;        } else if (batches.size() == 1) {</b>
+<b class="nc">&nbsp;            Integer batchId = batches.get(0).getId();</b>
+<b class="nc">&nbsp;            List&lt;Task&gt; currentTasksOfBatch = ServiceManager.getTaskService().getCurrentTasksOfBatch(taskTitle, batchId);</b>
+<b class="nc">&nbsp;            if (currentTasksOfBatch.isEmpty()) {</b>
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;            } else if (currentTasksOfBatch.size() == 1) {</b>
+<b class="nc">&nbsp;                return takeOverTask();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                for (Task task : currentTasksOfBatch) {</b>
+<b class="nc">&nbsp;                    processTask(task);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;
+<b class="nc">&nbsp;                this.setBatchHelper(new BatchTaskHelper(currentTasksOfBatch));</b>
+<b class="nc">&nbsp;                return taskBatchEditPath;</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;multipleBatchesAssigned&quot;);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update task which are available to take.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            which is part of the batch
+&nbsp;     */
+&nbsp;    private void processTask(Task task) {
+<b class="nc">&nbsp;        if (task.getProcessingStatus().equals(TaskStatus.OPEN)) {</b>
+<b class="nc">&nbsp;            task.setProcessingStatus(TaskStatus.INWORK);</b>
+<b class="nc">&nbsp;            task.setEditType(TaskEditType.MANUAL_MULTI);</b>
+<b class="nc">&nbsp;            task.setProcessingTime(new Date());</b>
+<b class="nc">&nbsp;            User user = getUser();</b>
+<b class="nc">&nbsp;            ServiceManager.getTaskService().replaceProcessingUser(task, user);</b>
+<b class="nc">&nbsp;            if (Objects.isNull(task.getProcessingBegin())) {</b>
+<b class="nc">&nbsp;                task.setProcessingBegin(new Date());</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (task.isTypeImagesRead() || task.isTypeImagesWrite()) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    URI imagesOrigDirectory = ServiceManager.getProcessService().getImagesOriginDirectory(false,</b>
+<b class="nc">&nbsp;                        task.getProcess());</b>
+<b class="nc">&nbsp;                    if (!ServiceManager.getFileService().fileExist(imagesOrigDirectory)) {</b>
+<b class="nc">&nbsp;                        Helper.setErrorMessage(&quot;errorDirectoryNotFound&quot;, new Object[] {imagesOrigDirectory });</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                } catch (Exception e) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(&quot;errorDirectoryRetrieve&quot;, new Object[] {&quot;image&quot; }, logger, e);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                task.setProcessingTime(new Date());</b>
+<b class="nc">&nbsp;                this.myDav.downloadToHome(task.getProcess(), !task.isTypeImagesWrite());</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getTaskService().save(task);</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.TASK.getTranslationSingular() }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Edit batch of tasks - all tasks assigned to the same batch with the same
+&nbsp;     * title.
+&nbsp;     *
+&nbsp;     * @return page for edit one task, page for edit many or stay on the same page
+&nbsp;     */
+&nbsp;    public String editBatchTasks() {
+<b class="nc">&nbsp;        String taskTitle = this.currentTask.getTitle();</b>
+<b class="nc">&nbsp;        List&lt;Batch&gt; batches = this.currentTask.getProcess().getBatches();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (batches.isEmpty()) {</b>
+<b class="nc">&nbsp;            return taskEditPath + &quot;&amp;id=&quot; + getTaskIdForPath();</b>
+<b class="nc">&nbsp;        } else if (batches.size() == 1) {</b>
+<b class="nc">&nbsp;            Integer batchId = batches.get(0).getId();</b>
+<b class="nc">&nbsp;            List&lt;Task&gt; currentTasksOfBatch = ServiceManager.getTaskService().getCurrentTasksOfBatch(taskTitle, batchId);</b>
+<b class="nc">&nbsp;            if (currentTasksOfBatch.isEmpty()) {</b>
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;            } else if (currentTasksOfBatch.size() == 1) {</b>
+<b class="nc">&nbsp;                return taskEditPath + &quot;&amp;id=&quot; + getTaskIdForPath();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                this.setBatchHelper(new BatchTaskHelper(currentTasksOfBatch));</b>
+<b class="nc">&nbsp;                return taskBatchEditPath;</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;multipleBatchesAssigned&quot;);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Release task - set up task status to open and make available for other users
+&nbsp;     * to take over.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String releaseTask() {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.workflowControllerService.unassignTaskFromUser(this.currentTask);</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.TASK.getTranslationSingular() }, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return tasksPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Close method task called by user action.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String closeTaskByUser() {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.workflowControllerService.closeTaskByUser(this.currentTask);</b>
+<b class="nc">&nbsp;        } catch (DataException | IOException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.TASK.getTranslationSingular() }, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return tasksPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Unlock the current task&#39;s process.
+&nbsp;     *
+&nbsp;     * @return stay on the current page
+&nbsp;     */
+&nbsp;    public String releaseLock() {
+<b class="nc">&nbsp;        MetadataLock.setFree(this.currentTask.getProcess().getId());</b>
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate all images.
+&nbsp;     */
+&nbsp;    public void generateAllImages() {
+<b class="nc">&nbsp;        generateImages(GenerationMode.ALL, &quot;regenerateAllImagesStarted&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate missing and damaged images.
+&nbsp;     */
+&nbsp;    public void generateMissingAndDamagedImages() {
+<b class="nc">&nbsp;        generateImages(GenerationMode.MISSING_OR_DAMAGED, &quot;regenerateMissingAndDamagedImagesStarted&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate missing images.
+&nbsp;     */
+&nbsp;    public void generateMissingImages() {
+<b class="nc">&nbsp;        generateImages(GenerationMode.MISSING, &quot;regenerateMissingImagesStarted&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Action that creates images.
+&nbsp;     *
+&nbsp;     * @param mode
+&nbsp;     *            which function should be executed
+&nbsp;     * @param messageKey
+&nbsp;     *            message displayed to the user (key for resourcebundle)
+&nbsp;     */
+&nbsp;    private void generateImages(GenerationMode mode, String messageKey) {
+<b class="nc">&nbsp;        Folder generatorSource = myProcess.getProject().getGeneratorSource();</b>
+<b class="nc">&nbsp;        List&lt;Folder&gt; contentFolders = currentTask.getContentFolders();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(generatorSource)) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;noSourceFolderConfiguredInProject&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.isNull(contentFolders)) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;noImageFolderConfiguredInProject&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;        Subfolder sourceFolder = new Subfolder(myProcess, generatorSource);</b>
+<b class="nc">&nbsp;        if (sourceFolder.listContents().isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;emptySourceFolder&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            List&lt;Subfolder&gt; outputs = SubfolderFactoryService.createAll(myProcess, contentFolders);</b>
+<b class="nc">&nbsp;            ImageGenerator imageGenerator = new ImageGenerator(sourceFolder, mode, outputs);</b>
+<b class="nc">&nbsp;            TaskManager.addTask(new TaskImageGeneratorThread(myProcess.getTitle(), imageGenerator));</b>
+<b class="nc">&nbsp;            Helper.setMessage(messageKey);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getScriptPath() {
+<b class="nc">&nbsp;        return this.scriptPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setScriptPath(String scriptPath) {
+<b class="nc">&nbsp;        this.scriptPath = scriptPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Execute script.
+&nbsp;     */
+&nbsp;    public void executeScript() throws DAOException, DataException {
+<b class="nc">&nbsp;        Task task = ServiceManager.getTaskService().getById(this.currentTask.getId());</b>
+<b class="nc">&nbsp;        if (ServiceManager.getTaskService().executeScript(task, this.scriptPath, false)) {</b>
+<b class="nc">&nbsp;            Helper.setMessageWithoutDescription(</b>
+<b class="nc">&nbsp;                    Helper.getTranslation(&quot;scriptExecutionSuccessful&quot;, this.currentTask.getScriptName()));</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessagesWithoutDescription(</b>
+<b class="nc">&nbsp;                    Helper.getTranslation(&quot;scriptExecutionError&quot;, this.currentTask.getScriptName()));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current task.
+&nbsp;     *
+&nbsp;     * @return task
+&nbsp;     */
+&nbsp;    public Task getCurrentTask() {
+<b class="nc">&nbsp;        return this.currentTask;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set current task with edit mode set to empty String.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            Object
+&nbsp;     */
+&nbsp;    public void setCurrentTask(Task task) {
+<b class="fc">&nbsp;        this.currentTask = task;</b>
+<b class="fc">&nbsp;        this.currentTask.setLocalizedTitle(ServiceManager.getTaskService().getLocalizedTitle(task.getTitle()));</b>
+<b class="fc">&nbsp;        this.myProcess = this.currentTask.getProcess();</b>
+<b class="fc">&nbsp;        loadProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set task for given id.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            passed as int
+&nbsp;     */
+&nbsp;    public void setTaskById(int id) {
+<b class="fc">&nbsp;        loadTaskById(id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of selected Tasks.
+&nbsp;     *
+&nbsp;     * @return List of selected Tasks
+&nbsp;     */
+&nbsp;    public List&lt;TaskDTO&gt; getSelectedTasks() {
+<b class="nc">&nbsp;        return this.selectedTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selected tasks: Set tasks in old list to false and set new list to true.
+&nbsp;     *
+&nbsp;     * @param selectedTasks
+&nbsp;     *            provided by data table
+&nbsp;     */
+&nbsp;    public void setSelectedTasks(List&lt;TaskDTO&gt; selectedTasks) {
+<b class="nc">&nbsp;        this.selectedTasks = selectedTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Downloads.
+&nbsp;     */
+&nbsp;    public void downloadTiffHeader() throws IOException {
+<b class="nc">&nbsp;        TiffHeader tiff = new TiffHeader(this.currentTask.getProcess());</b>
+<b class="nc">&nbsp;        tiff.exportStart();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Export DMS.
+&nbsp;     */
+&nbsp;    public void exportDMS() {
+<b class="nc">&nbsp;        ExportDms export = new ExportDms();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            export.startExport(this.currentTask.getProcess());</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorExport&quot;, new Object[] {this.currentTask.getProcess().getTitle() }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTaskStatusRestriction(List&lt;TaskStatus&gt; taskStatus) {
+<b class="nc">&nbsp;        ((LazyTaskDTOModel)this.lazyDTOModel).setTaskStatusRestriction(taskStatus);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set shown only tasks owned by currently logged user.
+&nbsp;     *
+&nbsp;     * @param onlyOwnTasks
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setOnlyOwnTasks(boolean onlyOwnTasks) {
+<b class="nc">&nbsp;        ((LazyTaskDTOModel)this.lazyDTOModel).setOnlyOwnTasks(onlyOwnTasks);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get task filters.
+&nbsp;     *
+&nbsp;     * @return task filters
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getTaskFilters() {
+<b class="nc">&nbsp;        return this.taskFilters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set task filters.
+&nbsp;     *
+&nbsp;     * @param filters task filters
+&nbsp;     */
+&nbsp;    public void setTaskFilters(List&lt;String&gt; filters) {
+<b class="nc">&nbsp;        this.taskFilters = filters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selected task filters.
+&nbsp;     *
+&nbsp;     * @return selected task filters
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getSelectedTaskFilters() {
+<b class="nc">&nbsp;        return this.selectedTaskFilters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selected task filters.
+&nbsp;     *
+&nbsp;     * @param selectedFilters selected task filters
+&nbsp;     */
+&nbsp;    public void setSelectedTaskFilters(List&lt;String&gt; selectedFilters) {
+<b class="nc">&nbsp;        this.selectedTaskFilters = selectedFilters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Event listener for task filter changed event.
+&nbsp;     */
+&nbsp;    public void taskFiltersChanged() {
+<b class="nc">&nbsp;        this.setShowAutomaticTasks(this.selectedTaskFilters.contains(AUTOMATIC_TASKS_FILTER));</b>
+<b class="nc">&nbsp;        this.setHideCorrectionTasks(!this.selectedTaskFilters.contains(CORRECTION_TASKS_FILTER));</b>
+<b class="nc">&nbsp;        this.setOnlyOwnTasks(!this.selectedTaskFilters.contains(OTHER_USERS_TASKS_FILTER));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get task status.
+&nbsp;     *
+&nbsp;     * @return task status
+&nbsp;     */
+&nbsp;    public List&lt;TaskStatus&gt; getTaskStatus() {
+<b class="nc">&nbsp;        return this.taskStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set task status.
+&nbsp;     *
+&nbsp;     * @param status task status
+&nbsp;     */
+&nbsp;    public void setTaskStatus(List&lt;TaskStatus&gt; status) {
+<b class="nc">&nbsp;        this.taskStatus = status;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selected task status.
+&nbsp;     *
+&nbsp;     * @return selected task status
+&nbsp;     */
+&nbsp;    public List&lt;TaskStatus&gt; getSelectedTaskStatus() {
+<b class="nc">&nbsp;        return this.selectedTaskStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selected task status.
+&nbsp;     *
+&nbsp;     * @param selectedStatus selected task status
+&nbsp;     */
+&nbsp;    public void setSelectedTaskStatus(List&lt;TaskStatus&gt; selectedStatus) {
+<b class="nc">&nbsp;        this.selectedTaskStatus = selectedStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Event listener for task status changed event.
+&nbsp;     */
+&nbsp;    public void taskStatusChanged() {
+<b class="nc">&nbsp;        this.setTaskStatusRestriction(this.selectedTaskStatus);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if the task type is &quot;generateImages&quot; and thus the generate images links are shown.
+&nbsp;     *
+&nbsp;     * @return whether action links should be displayed
+&nbsp;     */
+&nbsp;    public boolean isShowingGenerationActions() {
+<b class="nc">&nbsp;        return currentTask.isTypeGenerateImages();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if folders for generation are configured in the project.
+&nbsp;     * @return whether the folders are configured.
+&nbsp;     */
+&nbsp;    public boolean isImageGenerationPossible() {
+<b class="nc">&nbsp;        return TaskService.generatableFoldersFromProjects(Stream.of(currentTask.getProcess().getProject()))</b>
+<b class="nc">&nbsp;                .findAny().isPresent();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set show automatic tasks.
+&nbsp;     *
+&nbsp;     * @param showAutomaticTasks
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setShowAutomaticTasks(boolean showAutomaticTasks) {
+<b class="nc">&nbsp;        ((LazyTaskDTOModel)this.lazyDTOModel).setShowAutomaticTasks(showAutomaticTasks);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if it should hide correction tasks.
+&nbsp;     *
+&nbsp;     * @return boolean
+&nbsp;     */
+&nbsp;    public boolean isHideCorrectionTasks() {
+<b class="nc">&nbsp;        return ((LazyTaskDTOModel)this.lazyDTOModel).isHideCorrectionTasks();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set hide correction tasks.
+&nbsp;     *
+&nbsp;     * @param hideCorrectionTasks
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setHideCorrectionTasks(boolean hideCorrectionTasks) {
+<b class="nc">&nbsp;        ((LazyTaskDTOModel)this.lazyDTOModel).setHideCorrectionTasks(hideCorrectionTasks);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get property for process.
+&nbsp;     *
+&nbsp;     * @return property for process
+&nbsp;     */
+&nbsp;    public Property getProperty() {
+<b class="nc">&nbsp;        return this.property;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set property for process.
+&nbsp;     *
+&nbsp;     * @param property
+&nbsp;     *            for process as Property object
+&nbsp;     */
+&nbsp;    public void setProperty(Property property) {
+<b class="nc">&nbsp;        this.property = property;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of process properties.
+&nbsp;     *
+&nbsp;     * @return list of process properties
+&nbsp;     */
+&nbsp;    public List&lt;Property&gt; getProperties() {
+<b class="nc">&nbsp;        return this.properties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of process properties.
+&nbsp;     *
+&nbsp;     * @param properties
+&nbsp;     *            for process as Property objects
+&nbsp;     */
+&nbsp;    public void setProperties(List&lt;Property&gt; properties) {
+<b class="fc">&nbsp;        this.properties = properties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void loadProcessProperties() {
+<b class="fc">&nbsp;        setProperties(this.myProcess.getProperties());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save current property.
+&nbsp;     */
+&nbsp;    public void saveCurrentProperty() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getPropertyService().saveToDatabase(this.property);</b>
+<b class="nc">&nbsp;            if (!this.myProcess.getProperties().contains(this.property)) {</b>
+<b class="nc">&nbsp;                this.myProcess.getProperties().add(this.property);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            ServiceManager.getProcessService().save(this.myProcess);</b>
+<b class="nc">&nbsp;            Helper.setMessage(&quot;propertiesSaved&quot;);</b>
+<b class="nc">&nbsp;        } catch (DataException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.PROPERTY.getTranslationPlural() }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        loadProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Duplicate property.
+&nbsp;     */
+&nbsp;    public void duplicateProperty() {
+<b class="nc">&nbsp;        Property newProperty = ServiceManager.getPropertyService().transfer(this.property);</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            newProperty.getProcesses().add(this.myProcess);</b>
+<b class="nc">&nbsp;            this.myProcess.getProperties().add(newProperty);</b>
+<b class="nc">&nbsp;            ServiceManager.getPropertyService().saveToDatabase(newProperty);</b>
+<b class="nc">&nbsp;            Helper.setMessage(&quot;propertySaved&quot;);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.PROPERTY.getTranslationPlural() }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        loadProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get batch helper.
+&nbsp;     *
+&nbsp;     * @return batch helper as BatchHelper object
+&nbsp;     */
+&nbsp;    public BatchTaskHelper getBatchHelper() {
+<b class="nc">&nbsp;        return this.batchHelper;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set batch helper.
+&nbsp;     *
+&nbsp;     * @param batchHelper
+&nbsp;     *            as BatchHelper object
+&nbsp;     */
+&nbsp;    public void setBatchHelper(BatchTaskHelper batchHelper) {
+<b class="nc">&nbsp;        this.batchHelper = batchHelper;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for CurrentTaskForm.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            ID of the task to load
+&nbsp;     */
+&nbsp;    public void loadTaskById(int id) {
+&nbsp;        try {
+<b class="fc">&nbsp;            setCurrentTask(ServiceManager.getTaskService().getById(id));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.TASK.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return the list of tasks that are assigned to the user that are
+&nbsp;     * currently in progress.
+&nbsp;     *
+&nbsp;     * @return list of tasks that are currently assigned to the user that are
+&nbsp;     *         currently in progress.
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getTasksInProgress() {
+<b class="nc">&nbsp;        return ServiceManager.getUserService().getTasksInProgress(this.user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get taskListPath.
+&nbsp;     *
+&nbsp;     * @return value of taskListPath
+&nbsp;     */
+&nbsp;    public String getTaskListPath() {
+<b class="nc">&nbsp;        return tasksPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private int getTaskIdForPath() {
+<b class="nc">&nbsp;        return Objects.isNull(this.currentTask.getId()) ? 0 : this.currentTask.getId();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return array of task custom column names.
+&nbsp;     * @return array of task custom column names
+&nbsp;     */
+&nbsp;    public String[] getTaskCustomColumnNames() {
+<b class="nc">&nbsp;        return initializer.getTaskProcessProperties();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return process property value of property with given name &#39;propertyName&#39; from process of given
+&nbsp;     * TaskDTO &#39;task&#39;.
+&nbsp;     * @param task the TaskDTO object from which the property value is retrieved
+&nbsp;     * @param propertyName name of the property for the property value is retrieved
+&nbsp;     * @return property value if process has property with name &#39;propertyName&#39;, empty String otherwise
+&nbsp;     */
+&nbsp;    public static String getTaskProcessPropertyValue(TaskDTO task, String propertyName) {
+<b class="nc">&nbsp;        return ProcessService.getPropertyValue(task.getProcess(), propertyName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the id of the template task corresponding to the given task.
+&nbsp;     * The corresponding template task was the blueprint when creating the given task.
+&nbsp;     * @param task task to find the corresponding template task for
+&nbsp;     * @return id of the template task or -1 if no matching task could be found
+&nbsp;     */
+&nbsp;    public static int getCorrespondingTemplateTaskId(Task task) {
+<b class="nc">&nbsp;        return TaskService.getCorrespondingTemplateTaskId(task);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculate and return age of given tasks process as a String.
+&nbsp;     *
+&nbsp;     * @param task TaskDTO object whose process is used
+&nbsp;     * @return process age of given tasks process
+&nbsp;     */
+&nbsp;    public String getProcessDuration(TaskDTO task) {
+<b class="nc">&nbsp;        return ProcessService.getProcessDuration(task.getProcess());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Changes the filter of the CurrentTaskForm and reloads it.
+&nbsp;     *
+&nbsp;     * @param filter
+&nbsp;     *            the filter to apply
+&nbsp;     * @return path of the page
+&nbsp;     */
+&nbsp;    public String changeFilter(String filter) {
+<b class="nc">&nbsp;        filterMenu.parseFilters(filter);</b>
+<b class="nc">&nbsp;        setFilter(filter);</b>
+<b class="nc">&nbsp;        return filterList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String filterList() {
+<b class="nc">&nbsp;        this.selectedTasks.clear();</b>
+<b class="nc">&nbsp;        return tasksPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void setFilter(String filter) {
+<b class="nc">&nbsp;        super.filter = filter;</b>
+<b class="nc">&nbsp;        this.lazyDTOModel.setFilterString(filter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download to home for single process. First check if this volume is currently
+&nbsp;     * being edited by another user and placed in his home directory, otherwise
+&nbsp;     * download.
+&nbsp;     */
+&nbsp;    public void downloadToHome(int processId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            ProcessService.downloadToHome(new WebDav(), processId);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Error downloading process &quot; + processId + &quot; to home directory!&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get filterMenu.
+&nbsp;     *
+&nbsp;     * @return value of filterMenu
+&nbsp;     */
+&nbsp;    public FilterMenu getFilterMenu() {
+<b class="nc">&nbsp;        return filterMenu;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

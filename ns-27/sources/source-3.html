@@ -1,0 +1,289 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DivisionDeclaration</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset</a>
+</div>
+
+<h1>Coverage Summary for Class: DivisionDeclaration (org.kitodo.dataeditor.ruleset)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DivisionDeclaration</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,9%
+  </span>
+  <span class="absValue">
+    (52/56)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset;
+&nbsp;
+&nbsp;import java.time.Month;
+&nbsp;import java.time.MonthDay;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Division;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Key;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Ruleset;
+&nbsp;
+&nbsp;/**
+&nbsp; * The division declaration provides access to a division in the rule set.
+&nbsp; */
+&nbsp;public class DivisionDeclaration extends KeyDeclaration {
+&nbsp;    /**
+&nbsp;     * A reference to the division, if there is any.
+&nbsp;     */
+&nbsp;    private Optional&lt;Division&gt; optionalDivision;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new division declaration.
+&nbsp;     *
+&nbsp;     * @param ruleset
+&nbsp;     *            the ruleset
+&nbsp;     * @param division
+&nbsp;     *            the division
+&nbsp;     */
+&nbsp;    public DivisionDeclaration(Ruleset ruleset, Division division) {
+<b class="fc">&nbsp;        super(ruleset, division.getId(), division.getLabels(), false);</b>
+<b class="fc">&nbsp;        this.optionalDivision = Optional.of(division);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new division declaration for an unknown division.
+&nbsp;     *
+&nbsp;     * @param ruleset
+&nbsp;     *            the ruleset
+&nbsp;     * @param id
+&nbsp;     *            the identifier of the division
+&nbsp;     */
+&nbsp;    DivisionDeclaration(Ruleset ruleset, String id) {
+<b class="fc">&nbsp;        super(ruleset, id, Collections.emptyList(), true);</b>
+<b class="fc">&nbsp;        this.optionalDivision = Optional.empty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of allowed sub-divisions. Usually this is the passed
+&nbsp;     * list filtered by the rule. Only the exception that a division might have
+&nbsp;     * a subdivision by date is treated here. In that case, the only allowed
+&nbsp;     * sub-division is the one that is next in the date hierarchy (except for
+&nbsp;     * the last one, which is normal again).
+&nbsp;     *
+&nbsp;     * @param filteredSubdivisions
+&nbsp;     *            the passed list filtered by the rule
+&nbsp;     * @return the list of allowed sub-divisions
+&nbsp;     */
+&nbsp;    Map&lt;String, String&gt; getAllowedSubdivisions(Map&lt;String, String&gt; filteredSubdivisions) {
+<b class="fc">&nbsp;        if (optionalDivision.isPresent()) {</b>
+<b class="fc">&nbsp;            List&lt;Division&gt; subdivisions = optionalDivision.get().getDivisions();</b>
+<b class="fc">&nbsp;            if (!subdivisions.isEmpty()) {</b>
+<b class="fc">&nbsp;                Map&lt;String, String&gt; allowedSubdivisions = new HashMap&lt;&gt;(2);</b>
+<b class="fc">&nbsp;                String divisionId = subdivisions.get(0).getId();</b>
+<b class="fc">&nbsp;                allowedSubdivisions.put(divisionId, filteredSubdivisions.get(divisionId));</b>
+<b class="fc">&nbsp;                return allowedSubdivisions;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        for (Division division : ruleset.getDivisions()) {</b>
+<b class="fc">&nbsp;            List&lt;Division&gt; divisions = division.getDivisions();</b>
+<b class="fc">&nbsp;            for (int i = 0; i &lt; divisions.size() - 1; i++) {</b>
+<b class="fc">&nbsp;                if (divisions.get(i).getId().equals(id)) {</b>
+<b class="fc">&nbsp;                    Map&lt;String, String&gt; allowedSubdivisions = new HashMap&lt;&gt;(2);</b>
+<b class="fc">&nbsp;                    String divisionId = divisions.get(i + 1).getId();</b>
+<b class="fc">&nbsp;                    allowedSubdivisions.put(divisionId, filteredSubdivisions.get(divisionId));</b>
+<b class="fc">&nbsp;                    return allowedSubdivisions;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return filteredSubdivisions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    Optional&lt;KeyDeclaration&gt; getDatesKey() {
+<b class="fc">&nbsp;        if (optionalDivision.isPresent()) {</b>
+<b class="fc">&nbsp;            Division division = optionalDivision.get();</b>
+<b class="fc">&nbsp;            Optional&lt;String&gt; optionalDatesKeyId = division.getDates();</b>
+<b class="fc">&nbsp;            if (optionalDatesKeyId.isPresent()) {</b>
+<b class="fc">&nbsp;                Optional&lt;Key&gt; optionalKey = ruleset.getKey(optionalDatesKeyId.get());</b>
+<b class="fc">&nbsp;                if (optionalKey.isPresent()) {</b>
+<b class="fc">&nbsp;                    return Optional.of(new KeyDeclaration(ruleset, optionalKey.get()));</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return Optional.empty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the sequence description to form a process title.
+&nbsp;     *
+&nbsp;     * @return the key used to store the date
+&nbsp;     */
+&nbsp;    public Optional&lt;String&gt; getProcessTitle() {
+<b class="fc">&nbsp;        return optionalDivision.isPresent() ? optionalDivision.get().getProcessTitle() : Optional.empty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns division declarations for the subdivisions by date.
+&nbsp;     *
+&nbsp;     * @return division declarations for the subdivisions by date
+&nbsp;     */
+&nbsp;    public List&lt;DivisionDeclaration&gt; getAllowedDivisionDeclarations() {
+<b class="fc">&nbsp;        if (optionalDivision.isPresent()) {</b>
+<b class="fc">&nbsp;            return optionalDivision.get().getDivisions().stream()</b>
+<b class="fc">&nbsp;                    .map(division -&gt; new DivisionDeclaration(ruleset, division)).collect(Collectors.toList());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    String getScheme() {
+<b class="fc">&nbsp;        if (optionalDivision.isPresent()) {</b>
+<b class="fc">&nbsp;            return optionalDivision.get().getScheme();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    MonthDay getYearBegin() {
+<b class="fc">&nbsp;        if (optionalDivision.isPresent()) {</b>
+<b class="fc">&nbsp;            for (Division division : ruleset.getDivisions()) {</b>
+<b class="fc">&nbsp;                List&lt;Division&gt; divisions = division.getDivisions();</b>
+<b class="fc">&nbsp;                if (!divisions.isEmpty() &amp;&amp; divisions.get(0).getId().equals(id)) {</b>
+<b class="fc">&nbsp;                    String yearBegin = division.getYearBegin();</b>
+<b class="fc">&nbsp;                    if (yearBegin != null) {</b>
+<b class="fc">&nbsp;                        return MonthDay.parse(yearBegin);</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return MonthDay.of(Month.JANUARY, 1);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Finds out whether the division has subdivisions by date.
+&nbsp;     *
+&nbsp;     * @return whether the division has subdivisions by date
+&nbsp;     */
+&nbsp;    boolean hasSubdivisionByDate() {
+<b class="fc">&nbsp;        if (optionalDivision.isPresent() &amp;&amp; !optionalDivision.get().getDivisions().isEmpty()) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            for (Division division : ruleset.getDivisions()) {</b>
+<b class="fc">&nbsp;                List&lt;Division&gt; divisions = division.getDivisions();</b>
+<b class="fc">&nbsp;                for (int i = 0; i &lt; divisions.size() - 1; i++) {</b>
+<b class="fc">&nbsp;                    if (divisions.get(i).getId().equals(id)) {</b>
+<b class="fc">&nbsp;                        return true;</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the division.
+&nbsp;     *
+&nbsp;     * @return the division
+&nbsp;     */
+&nbsp;    public Division getDivision() {
+<b class="fc">&nbsp;        return optionalDivision.orElseGet(Division::new);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

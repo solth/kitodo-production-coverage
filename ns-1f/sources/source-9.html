@@ -1,0 +1,148 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TemplateType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.elasticsearch.index.type</a>
+</div>
+
+<h1>Coverage Summary for Class: TemplateType (org.kitodo.data.elasticsearch.index.type)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TemplateType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (18/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.elasticsearch.index.type;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.ProjectTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.TemplateTypeField;
+&nbsp;
+<b class="fc">&nbsp;public class TemplateType extends BaseType&lt;Template&gt; {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Map&lt;String, Object&gt; getJsonObject(Template template) {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; jsonObject = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.TITLE.getKey(), template.getTitle());</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.CREATION_DATE.getKey(), getFormattedDate(template.getCreationDate()));</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.ACTIVE.getKey(), template.isActive());</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.SORT_HELPER_STATUS.getKey(),</b>
+<b class="fc">&nbsp;            preventNull(template.getSortHelperStatus()));</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.CLIENT_ID.getKey(), getId(template.getClient()));</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.CLIENT_NAME.getKey(), getTitle(template.getClient()));</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.DOCKET.getKey(), getId(template.getDocket()));</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.RULESET_ID.getKey(), getId(template.getRuleset()));</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.RULESET_TITLE.getKey(), getTitle(template.getRuleset()));</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.WORKFLOW_TITLE.getKey(), getTitle(template.getWorkflow()));</b>
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.PROJECTS.getKey(), addObjectRelation(template.getProjects(), true));</b>
+<b class="fc">&nbsp;        if (template.getProjects().isEmpty()) {</b>
+<b class="fc">&nbsp;            jsonObject.put(TemplateTypeField.PROJECTS + &quot;.&quot; + ProjectTypeField.CLIENT_ID, 0);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        jsonObject.put(TemplateTypeField.TASKS.getKey(), addObjectRelation(template.getTasks(), true));</b>
+&nbsp;
+<b class="fc">&nbsp;        return jsonObject;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

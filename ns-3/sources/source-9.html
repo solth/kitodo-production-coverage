@@ -1,0 +1,118 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetadataViewWithValuesInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataeditor.rulesetmanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: MetadataViewWithValuesInterface (org.kitodo.api.dataeditor.rulesetmanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">MetadataViewWithValuesInterface</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataeditor.rulesetmanagement;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;
+&nbsp;/**
+&nbsp; * Return value of the function
+&nbsp; * {@code ComplexMetadataViewInterface.getSortedVisibleMetadatas()}. The
+&nbsp; * function returns a sorted list consisting of objects of this type. It always
+&nbsp; * contains the key and the list of values if values have already been defined
+&nbsp; * for this key. If the key is a multiple choice, the values are grouped, hence
+&nbsp; * the list, otherwise the length of the list is always only one. Effectively,
+&nbsp; * the return type of
+&nbsp; * {@link ComplexMetadataViewInterface#getSortedVisibleMetadatas(Collection, Collection)}
+&nbsp; * is {@code List&lt;Pair&lt;MetadataViewInterface, Collection&lt;T&gt;&gt;&gt;}. Since the key
+&nbsp; * must be repeatable if there is more than one value but the key is not a
+&nbsp; * multiple choice, a map would be an inappropriate choice at this point.
+&nbsp; */
+&nbsp;public interface MetadataViewWithValuesInterface {
+&nbsp;    /**
+&nbsp;     * Returns the key to be displayed at this point. The interface can return
+&nbsp;     * entries where the key is {@code null} with values if there were values
+&nbsp;     * for excluded keys.
+&nbsp;     *
+&nbsp;     * @return the key
+&nbsp;     */
+&nbsp;    Optional&lt;MetadataViewInterface&gt; getMetadata();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the values for the key. The list is empty if there were none for
+&nbsp;     * this key in the passed values, otherwise the object is in it. If it is a
+&nbsp;     * key that represents a multiple choice, multiple values for that key are
+&nbsp;     * grouped in the list. Otherwise the list always has the length 1 (or 0).
+&nbsp;     *
+&nbsp;     * @return the values for the key
+&nbsp;     */
+&nbsp;    Collection&lt;Metadata&gt; getValues();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

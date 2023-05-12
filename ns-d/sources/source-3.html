@@ -1,0 +1,141 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileFormat</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.schemaconverter</a>
+</div>
+
+<h1>Coverage Summary for Class: FileFormat (org.kitodo.api.schemaconverter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileFormat</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.schemaconverter;
+&nbsp;
+&nbsp;import java.util.UnknownFormatConversionException;
+&nbsp;
+<b class="fc">&nbsp;public enum FileFormat {</b>
+<b class="fc">&nbsp;    XML,</b>
+<b class="fc">&nbsp;    JSON,</b>
+<b class="fc">&nbsp;    CSV;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determine and return the adequate FileFormat for given String &#39;formatString&#39;.
+&nbsp;     *
+&nbsp;     * @param formatString
+&nbsp;     *          String for which an adequate FileFormat will be determined and returned
+&nbsp;     * @return FileFormat
+&nbsp;     *          Adequate FileFormat for given String
+&nbsp;     */
+&nbsp;    public static FileFormat getFileFormat(String formatString) {
+<b class="fc">&nbsp;        for (FileFormat format : FileFormat.values()) {</b>
+<b class="fc">&nbsp;            if (formatString.compareToIgnoreCase(format.toString()) == 0) {</b>
+<b class="fc">&nbsp;                return format;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        throw new UnknownFormatConversionException(&quot;Unable to find FileFormat for given String &#39;&quot;</b>
+&nbsp;                + formatString + &quot;&#39;!&quot;);
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

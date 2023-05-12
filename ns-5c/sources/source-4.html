@@ -1,0 +1,332 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SearchDatabaseService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data.base</a>
+</div>
+
+<h1>Coverage Summary for Class: SearchDatabaseService (org.kitodo.production.services.data.base)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SearchDatabaseService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,3%
+  </span>
+  <span class="absValue">
+    (11/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (15/20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data.base;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.BaseBean;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.database.persistence.BaseDAO;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;public abstract class SearchDatabaseService&lt;T extends BaseBean, S extends BaseDAO&lt;T&gt;&gt; {
+&nbsp;
+&nbsp;    protected S dao;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor necessary to use searcher in child classes.
+&nbsp;     *
+&nbsp;     * @param dao
+&nbsp;     *            for executing queries
+&nbsp;     */
+<b class="fc">&nbsp;    public SearchDatabaseService(S dao) {</b>
+<b class="fc">&nbsp;        this.dao = dao;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load data for frontend lists. Data can be loaded from database or index.
+&nbsp;     * 
+&nbsp;     * @param first
+&nbsp;     *            searched objects
+&nbsp;     * @param pageSize
+&nbsp;     *            size of page
+&nbsp;     * @param sortField
+&nbsp;     *            field by which data should be sorted
+&nbsp;     * @param sortOrder
+&nbsp;     *            order ascending or descending
+&nbsp;     * @param filters
+&nbsp;     *            for search query
+&nbsp;     *
+&nbsp;     * @return loaded data
+&nbsp;     */
+&nbsp;    public abstract List loadData(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters)
+&nbsp;            throws DataException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method saves object to database.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBean
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void saveToDatabase(T baseIndexedBean) throws DAOException {
+<b class="fc">&nbsp;        dao.save(baseIndexedBean);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method saves objects to database.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBeans
+&nbsp;     *            beans object to store as indexed
+&nbsp;     */
+&nbsp;    public void saveAsIndexed(List&lt;T&gt; baseIndexedBeans) throws DAOException {
+<b class="nc">&nbsp;        dao.saveAsIndexed(baseIndexedBeans);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method removes object from database.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBean
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void removeFromDatabase(T baseIndexedBean) throws DAOException {
+<b class="fc">&nbsp;        dao.remove(baseIndexedBean);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method removes object from database by given id.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of object
+&nbsp;     */
+&nbsp;    public void removeFromDatabase(Integer id) throws DAOException {
+<b class="fc">&nbsp;        dao.remove(id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count all rows in database.
+&nbsp;     *
+&nbsp;     * @return amount of all rows
+&nbsp;     */
+&nbsp;    public abstract Long countDatabaseRows() throws DAOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count rows in database according to given query.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            for database search
+&nbsp;     * @return amount of rows in database according to given query
+&nbsp;     */
+&nbsp;    public Long countDatabaseRows(String query) throws DAOException {
+<b class="fc">&nbsp;        return dao.count(query);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count rows in database according to given query.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            for database search
+&nbsp;     * @param parameters
+&nbsp;     *            for query
+&nbsp;     * @return amount of rows in database according to given query
+&nbsp;     */
+&nbsp;    public Long countDatabaseRows(String query, Map&lt;String, Object&gt; parameters) throws DAOException {
+<b class="nc">&nbsp;        return dao.count(query, parameters);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This function is used for count amount of results for frontend lists.
+&nbsp;     *
+&nbsp;     * @param filters
+&nbsp;     *            Map of parameters used for filtering
+&nbsp;     * @return amount of results
+&nbsp;     * @throws DAOException
+&nbsp;     *             that can be caused by Hibernate
+&nbsp;     * @throws DataException
+&nbsp;     *             that can be caused by ElasticSearch
+&nbsp;     */
+&nbsp;    public abstract Long countResults(Map filters) throws DAOException, DataException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method necessary for get from database object by id. It is used in removeById
+&nbsp;     * method.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of object
+&nbsp;     * @return object
+&nbsp;     */
+&nbsp;    public T getById(Integer id) throws DAOException {
+<b class="fc">&nbsp;        return dao.getById(id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method necessary for conversion of JSON objects to exact bean objects called
+&nbsp;     * from database.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            as String
+&nbsp;     * @return list of exact bean objects
+&nbsp;     */
+&nbsp;    public List&lt;T&gt; getByQuery(String query) {
+<b class="fc">&nbsp;        return dao.getByQuery(query);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves BaseBean objects from database by given query.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            as String
+&nbsp;     * @param parameters
+&nbsp;     *            for query
+&nbsp;     * @return list of beans objects
+&nbsp;     */
+&nbsp;    public List&lt;T&gt; getByQuery(String query, Map&lt;String, Object&gt; parameters) {
+<b class="fc">&nbsp;        return dao.getByQuery(query, parameters);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of all objects from database.
+&nbsp;     *
+&nbsp;     * @return list of all objects from database
+&nbsp;     */
+&nbsp;    public List&lt;T&gt; getAll() throws DAOException {
+<b class="fc">&nbsp;        return dao.getAll();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of all objects from database in given range.
+&nbsp;     *
+&nbsp;     * @param offset
+&nbsp;     *            result - important, numeration starts since 0
+&nbsp;     * @param size
+&nbsp;     *            amount of results
+&nbsp;     * @return list of all objects from database in given range
+&nbsp;     */
+&nbsp;    public List&lt;T&gt; getAll(int offset, int size) throws DAOException {
+<b class="fc">&nbsp;        return dao.getAll(offset, size);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Evict given bean object.
+&nbsp;     *
+&nbsp;     * @param baseBean
+&nbsp;     *            bean to evict
+&nbsp;     */
+&nbsp;    public void evict(T baseBean) {
+<b class="nc">&nbsp;        this.dao.evict(baseBean);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Refresh given bean object.
+&nbsp;     *
+&nbsp;     * @param baseBean
+&nbsp;     *            bean object
+&nbsp;     */
+&nbsp;    public void refresh(T baseBean) {
+<b class="nc">&nbsp;        this.dao.refresh(baseBean);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected String getSort(String sortField, SortOrder sortOrder) {
+<b class="fc">&nbsp;        if (!Objects.equals(sortField, null) &amp;&amp; Objects.equals(sortOrder, SortOrder.ASCENDING)) {</b>
+<b class="fc">&nbsp;            return &quot; ORDER BY &quot; + sortField + &quot; ASC&quot;;</b>
+<b class="fc">&nbsp;        } else if (!Objects.equals(sortField, null) &amp;&amp; Objects.equals(sortOrder, SortOrder.DESCENDING)) {</b>
+<b class="fc">&nbsp;            return &quot; ORDER BY &quot; + sortField + &quot; DESC&quot;;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

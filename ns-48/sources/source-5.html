@@ -1,0 +1,152 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LegacyInnerPhysicalDocStructTypePageHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.metadata.legacytypeimplementations</a>
+</div>
+
+<h1>Coverage Summary for Class: LegacyInnerPhysicalDocStructTypePageHelper (org.kitodo.production.helper.metadata.legacytypeimplementations)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LegacyInnerPhysicalDocStructTypePageHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.metadata.legacytypeimplementations;
+&nbsp;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents the only existing legacy doc struct type from the physical map
+&nbsp; * named “page”. This is a soldering class to keep legacy code operational which
+&nbsp; * is about to be removed. Do not use this class.
+&nbsp; */
+&nbsp;public class LegacyInnerPhysicalDocStructTypePageHelper extends LegacyLogicalDocStructTypeHelper {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The sole doc struct type instance “page”.
+&nbsp;     */
+&nbsp;    @Deprecated
+<b class="nc">&nbsp;    public static final LegacyLogicalDocStructTypeHelper INSTANCE = new LegacyInnerPhysicalDocStructTypePageHelper();</b>
+&nbsp;
+&nbsp;    private LegacyInnerPhysicalDocStructTypePageHelper() {
+<b class="nc">&nbsp;        super(null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public String getName() {
+<b class="nc">&nbsp;        return PhysicalDivision.TYPE_PAGE;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Deprecated
+&nbsp;    public String getNameByLanguage(String language) {
+<b class="nc">&nbsp;        switch (language) {</b>
+&nbsp;            case &quot;de&quot;:
+<b class="nc">&nbsp;                return &quot;Seite&quot;;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                return &quot;Page&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

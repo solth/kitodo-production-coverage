@@ -1,0 +1,361 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > WebDav</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: WebDav (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WebDav</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (5/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    19,4%
+  </span>
+  <span class="absValue">
+    (18/93)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.io.BufferedWriter;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FilenameFilter;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStreamWriter;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.io.UnsupportedEncodingException;
+&nbsp;import java.net.URI;
+&nbsp;import java.net.URLEncoder;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.filemanagement.filters.FileNameEndsWithFilter;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.export.TiffHeader;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.UserService;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;
+&nbsp;public class WebDav implements Serializable {
+&nbsp;
+<b class="fc">&nbsp;    private final FileService fileService = ServiceManager.getFileService();</b>
+<b class="fc">&nbsp;    private final UserService userService = ServiceManager.getUserService();</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(WebDav.class);</b>
+&nbsp;    private static final String ERROR_UPLOADING = &quot;errorUploading&quot;;
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Kopieren bzw. symbolische Links für einen Prozess in das Benutzerhome
+&nbsp;     */
+&nbsp;    private String doneDirectoryName;
+&nbsp;
+<b class="fc">&nbsp;    public WebDav() {</b>
+<b class="fc">&nbsp;        doneDirectoryName = ConfigCore.getParameterOrDefaultValue(ParameterCore.DONE_DIRECTORY_NAME);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve all folders from one directory.
+&nbsp;     */
+&nbsp;    public List&lt;URI&gt; uploadAllFromHome(String inVerzeichnis) {
+<b class="nc">&nbsp;        User currentUser = userService.getAuthenticatedUser();</b>
+<b class="nc">&nbsp;        List&lt;URI&gt; files = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        FilenameFilter filter = new FileNameEndsWithFilter(&quot;]&quot;);</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            URI directoryName = userService.getHomeDirectory(currentUser).resolve(inVerzeichnis);</b>
+<b class="nc">&nbsp;            files = fileService.getSubUris(filter, directoryName);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_UPLOADING, new Object[] {&quot;Home&quot; }, logger, e);</b>
+<b class="nc">&nbsp;            return files;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        for (URI data : files) {</b>
+<b class="nc">&nbsp;            String dataString = data.toString();</b>
+<b class="nc">&nbsp;            if (dataString.endsWith(&quot;/&quot;) || dataString.endsWith(&quot;\\&quot;)) {</b>
+<b class="nc">&nbsp;                data = URI.create(dataString.substring(0, dataString.length() - 1));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (data.toString().contains(&quot;/&quot;)) {</b>
+&nbsp;                // TODO: check what happens here
+<b class="nc">&nbsp;                data = URI.create(dataString.substring(dataString.lastIndexOf(&#39;/&#39;)));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return files;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove Folders from Directory.
+&nbsp;     *
+&nbsp;     * @param uris
+&nbsp;     *            list of URI
+&nbsp;     * @param directory
+&nbsp;     *            URI
+&nbsp;     */
+&nbsp;    public void removeAllFromHome(List&lt;URI&gt; uris, URI directory) {
+&nbsp;        URI verzeichnisAlle;
+<b class="nc">&nbsp;        User currentUser = userService.getAuthenticatedUser();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            verzeichnisAlle = userService.getHomeDirectory(currentUser).resolve(directory);</b>
+<b class="nc">&nbsp;            for (URI name : uris) {</b>
+<b class="nc">&nbsp;                fileService.deleteSymLink(verzeichnisAlle.resolve(name));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (IOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_UPLOADING, new Object[] {&quot;Home&quot; }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Upload from home.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            Process object
+&nbsp;     */
+&nbsp;    public void uploadFromHome(Process process) {
+<b class="nc">&nbsp;        User currentUser = userService.getAuthenticatedUser();</b>
+<b class="nc">&nbsp;        uploadFromHome(currentUser, process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Upload from home.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            User object
+&nbsp;     * @param process
+&nbsp;     *            Process object
+&nbsp;     */
+&nbsp;    public void uploadFromHome(User user, Process process) {
+&nbsp;        URI destination;
+&nbsp;        try {
+<b class="fc">&nbsp;            destination = userService.getHomeDirectory(user);</b>
+<b class="fc">&nbsp;            if (user.isWithMassDownload()) {</b>
+<b class="nc">&nbsp;                String destinationPath = new File(destination).getPath();</b>
+<b class="nc">&nbsp;                destination = Paths.get(destinationPath, process.getProject().getTitle()).toUri();</b>
+<b class="nc">&nbsp;                destinationPath = new File(destination).getPath().replaceAll(&quot; &quot;, &quot;__&quot;);</b>
+<b class="nc">&nbsp;                destination = Paths.get(destinationPath).toUri();</b>
+<b class="nc">&nbsp;                if (!fileService.fileExist(destination)</b>
+<b class="nc">&nbsp;                        &amp;&amp; !fileService.isDirectory(fileService.createResource(destination.toString()))) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(&quot;errorMassDownloadProjectCreation&quot;, new Object[] {destinationPath });</b>
+<b class="nc">&nbsp;                    logger.error(&quot;Can not create project directory {}&quot;, Paths.get(destinationPath).toUri());</b>
+&nbsp;                    return;
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;            destination = Paths.get(new File(destination).getPath(), getEncodedProcessLinkName(process)).toUri();</b>
+<b class="fc">&nbsp;            fileService.deleteSymLink(destination);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_UPLOADING, new Object[] {&quot;Home&quot; }, logger, e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download to home.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            Process object
+&nbsp;     * @param onlyRead
+&nbsp;     *            boolean
+&nbsp;     */
+&nbsp;    public void downloadToHome(Process process, boolean onlyRead) {
+<b class="nc">&nbsp;        saveTiffHeader(process);</b>
+<b class="nc">&nbsp;        User currentUser = userService.getAuthenticatedUser();</b>
+&nbsp;        URI source;
+&nbsp;        URI userHome;
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            source = fileService.getImagesDirectory(process);</b>
+<b class="nc">&nbsp;            userHome = userService.getHomeDirectory(currentUser);</b>
+&nbsp;
+&nbsp;            // for mass download, the project and directory must exist
+<b class="nc">&nbsp;            if (currentUser.isWithMassDownload()) {</b>
+<b class="nc">&nbsp;                URI project = Paths.get(userHome.getPath() + process.getProject().getTitle()).toUri();</b>
+<b class="nc">&nbsp;                fileService.createDirectoryForUser(project, currentUser.getLogin());</b>
+&nbsp;
+<b class="nc">&nbsp;                project = Paths.get(userHome.getPath() + doneDirectoryName).toUri();</b>
+<b class="nc">&nbsp;                fileService.createDirectoryForUser(project, currentUser.getLogin());</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            URI destination = userHome;</b>
+<b class="nc">&nbsp;            if (currentUser.isWithMassDownload() &amp;&amp; Objects.nonNull(process.getProject())) {</b>
+<b class="nc">&nbsp;                destination = Paths.get(new File(destination).getPath(), process.getProject().getTitle()).toUri();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            destination = Paths.get(new File(destination).getPath(), getEncodedProcessLinkName(process)).toUri();</b>
+&nbsp;
+<b class="nc">&nbsp;            fileService.createSymLink(source, destination, onlyRead, currentUser);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorDownloading&quot;, new Object[] {&quot;Home&quot; }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method creates process link name and next encodes it for URI creation.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @return encoded process link name
+&nbsp;     */
+&nbsp;    private String getEncodedProcessLinkName(Process process) {
+&nbsp;        String encodedProcessLinkName;
+&nbsp;        try {
+<b class="fc">&nbsp;            encodedProcessLinkName = URLEncoder.encode(getProcessLinkName(process), StandardCharsets.UTF_8.name());</b>
+<b class="nc">&nbsp;        } catch (UnsupportedEncodingException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return encodedProcessLinkName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create the process link name.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *          Process object to create the link name for
+&nbsp;     * @return
+&nbsp;     *          process link name as java.lang.String
+&nbsp;     */
+&nbsp;    private String getProcessLinkName(Process process) {
+<b class="fc">&nbsp;        String processPropertySymlinkName = ConfigCore.getParameterOrDefaultValue(ParameterCore.PROCESS_PROPERTY_SYMLINK_NAME);</b>
+<b class="fc">&nbsp;        String propertyValue = &quot;&quot;;</b>
+<b class="fc">&nbsp;        if (!processPropertySymlinkName.isEmpty()) {</b>
+<b class="nc">&nbsp;            for (Property property : process.getProperties()) {</b>
+<b class="nc">&nbsp;                if (processPropertySymlinkName.equals(property.getTitle())) {</b>
+<b class="nc">&nbsp;                    propertyValue = property.getValue();</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (propertyValue.isEmpty()) {</b>
+<b class="fc">&nbsp;            return Helper.getNormalizedTitle(process.getTitle()).replaceAll(&quot;[^A-Za-z0-9]&quot;, &quot;_&quot;) + &quot;__[&quot; + process.getId() + &quot;]&quot;;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return Helper.getNormalizedTitle(propertyValue.replaceAll(&quot;[^A-Za-z0-9]&quot;, &quot;_&quot;) + &quot;_&quot; + process.getId());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method checks if tiff header already exists. If yes method breaks, if not
+&nbsp;     * method creates it and saves to it.
+&nbsp;     *
+&nbsp;     * @param inProcess
+&nbsp;     *            process object
+&nbsp;     */
+&nbsp;    private void saveTiffHeader(Process inProcess) {
+&nbsp;        try {
+<b class="nc">&nbsp;            URI imagesDirectory = fileService.getImagesDirectory(inProcess);</b>
+<b class="nc">&nbsp;            String path = ConfigCore.getKitodoDataDirectory() + imagesDirectory;</b>
+<b class="nc">&nbsp;            URI tiffWriterURI = Paths.get(new File(path).getAbsolutePath(), &quot;tiffwriter.conf&quot;).toUri();</b>
+<b class="nc">&nbsp;            if (new File(tiffWriterURI).exists()) {</b>
+&nbsp;                return;
+&nbsp;            }
+<b class="nc">&nbsp;            TiffHeader tif = new TiffHeader(inProcess);</b>
+<b class="nc">&nbsp;            try (BufferedWriter outfile = new BufferedWriter(</b>
+<b class="nc">&nbsp;                    new OutputStreamWriter(fileService.write(tiffWriterURI), StandardCharsets.UTF_8))) {</b>
+<b class="nc">&nbsp;                outfile.write(tif.getTiffAlles());</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (IOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorDownloading&quot;, new Object[] {&quot;Home&quot; }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,212 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Granularity</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model.bibliography.course</a>
+</div>
+
+<h1>Coverage Summary for Class: Granularity (org.kitodo.production.model.bibliography.course)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Granularity</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,7%
+  </span>
+  <span class="absValue">
+    (7/15)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Granularity$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (1/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    43,8%
+  </span>
+  <span class="absValue">
+    (7/16)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model.bibliography.course;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;
+&nbsp;import org.kitodo.exceptions.NotImplementedException;
+&nbsp;
+&nbsp;/**
+&nbsp; * The Granularity indicates one out of six options how a course of appearance
+&nbsp; * of a newspaper can be broken into processes. These are as follows:
+&nbsp; *
+&nbsp; * &lt;dl&gt;
+&nbsp; * &lt;dt&gt;ISSUES&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;Each issue is scanned in an individual process.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;DAYS&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;All issues of one day are scanned in one process.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;WEEKS&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;All issues of a week are scanned in one process. A week starts on
+&nbsp; * Mondays. Keep in mind that week borders do not necessarily match month and
+&nbsp; * not even year borders.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;MONTHS&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;All issues of a month are scanned in one process.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;MONTHS&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;All issues of a quarter of a year are scanned in one process.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;YEARS&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;All issues of a year are scanned in one process.&lt;/dd&gt;
+&nbsp; * &lt;/dl&gt;
+&nbsp; */
+<b class="fc">&nbsp;public enum Granularity {</b>
+<b class="fc">&nbsp;    ISSUES,</b>
+<b class="fc">&nbsp;    DAYS,</b>
+<b class="fc">&nbsp;    WEEKS,</b>
+<b class="fc">&nbsp;    MONTHS,</b>
+<b class="fc">&nbsp;    QUARTERS,</b>
+<b class="fc">&nbsp;    YEARS;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts a given LocalDate to a String representation of the date in the
+&nbsp;     * given granularity. For the 1st January 2000 it will return:
+&nbsp;     * &lt;ul&gt;
+&nbsp;     * &lt;li&gt;for DAYS: 2000-01-01
+&nbsp;     * &lt;li&gt;for WEEKS: 1999-W52
+&nbsp;     * &lt;li&gt;for MONTHS: 2000-01
+&nbsp;     * &lt;li&gt;for QUARTERS: 2000/Q1
+&nbsp;     * &lt;li&gt;for YEARS: 2000
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The remaining cases are undefined and will throw NotImplementedException.
+&nbsp;     *
+&nbsp;     * @param date
+&nbsp;     *            date to format
+&nbsp;     * @return an expression of the date in the given granularity
+&nbsp;     */
+&nbsp;    public String format(LocalDate date) {
+<b class="nc">&nbsp;        switch (this) {</b>
+&nbsp;            case DAYS:
+<b class="nc">&nbsp;                return DateTimeFormatter.ISO_LOCAL_DATE.format(date);</b>
+&nbsp;            case MONTHS:
+<b class="nc">&nbsp;                return DateTimeFormatter.ofPattern(&quot;yyyy-MM&quot;).format(date);</b>
+&nbsp;            case QUARTERS:
+<b class="nc">&nbsp;                return DateTimeFormatter.ofPattern(&quot;yyyy&quot;).format(date) + &quot;/Q&quot;</b>
+<b class="nc">&nbsp;                        + ((date.getMonthValue() - 1) / 3) + 1;</b>
+&nbsp;            case WEEKS:
+<b class="nc">&nbsp;                return DateTimeFormatter.ofPattern(&quot;yyyy-&#39;W&#39;ww&quot;).format(date);</b>
+&nbsp;            case YEARS:
+<b class="nc">&nbsp;                return DateTimeFormatter.ofPattern(&quot;yyyy&quot;).format(date);</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new NotImplementedException();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

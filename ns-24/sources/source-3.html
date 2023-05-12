@@ -1,0 +1,207 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MediaFile</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: MediaFile (org.kitodo.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MediaFile</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (4/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,6%
+  </span>
+  <span class="absValue">
+    (7/11)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;
+&nbsp;import org.kitodo.dataeditor.enums.FileLocationType;
+&nbsp;
+&nbsp;/**
+&nbsp; * Data class to hold the information of media files which added as file group in mets document.
+&nbsp; */
+&nbsp;public class MediaFile {
+&nbsp;    private URI filePath;
+&nbsp;    private String mimeType;
+&nbsp;    private FileLocationType locationType;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The constructor for setting fields.
+&nbsp;     *
+&nbsp;     * @param filePath
+&nbsp;     *            The file path as URI object.
+&nbsp;     * @param locationType
+&nbsp;     *            The location type.
+&nbsp;     * @param mimeType
+&nbsp;     *            The MIME-type
+&nbsp;     */
+<b class="fc">&nbsp;    public MediaFile(URI filePath, FileLocationType locationType, String mimeType) {</b>
+<b class="fc">&nbsp;        this.filePath = filePath;</b>
+<b class="fc">&nbsp;        this.mimeType = mimeType;</b>
+<b class="fc">&nbsp;        this.locationType = locationType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The empty constructor.
+&nbsp;     */
+<b class="nc">&nbsp;    public MediaFile() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets filePath.
+&nbsp;     *
+&nbsp;     * @return The filePath.
+&nbsp;     */
+&nbsp;    public URI getFilePath() {
+<b class="fc">&nbsp;        return filePath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets filePath.
+&nbsp;     *
+&nbsp;     * @param filePath
+&nbsp;     *            The filePath.
+&nbsp;     */
+&nbsp;    public void setFilePath(URI filePath) {
+<b class="nc">&nbsp;        this.filePath = filePath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets mimeType.
+&nbsp;     *
+&nbsp;     * @return The mimeType.
+&nbsp;     */
+&nbsp;    public String getMimeType() {
+<b class="fc">&nbsp;        return mimeType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets mimeType.
+&nbsp;     *
+&nbsp;     * @param mimeType
+&nbsp;     *            The mimeType.
+&nbsp;     */
+&nbsp;    public void setMimeType(String mimeType) {
+<b class="nc">&nbsp;        this.mimeType = mimeType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets locationType.
+&nbsp;     *
+&nbsp;     * @return The locationType.
+&nbsp;     */
+&nbsp;    public FileLocationType getLocationType() {
+<b class="fc">&nbsp;        return locationType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets locationType.
+&nbsp;     *
+&nbsp;     * @param locationType
+&nbsp;     *            The locationType.
+&nbsp;     */
+&nbsp;    public void setLocationType(FileLocationType locationType) {
+<b class="nc">&nbsp;        this.locationType = locationType;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,353 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LogicalStructMapType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.entities</a>
+</div>
+
+<h1>Coverage Summary for Class: LogicalStructMapType (org.kitodo.dataeditor.entities)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LogicalStructMapType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98,6%
+  </span>
+  <span class="absValue">
+    (71/72)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">LogicalStructMapType$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (17/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98,6%
+  </span>
+  <span class="absValue">
+    (72/73)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.entities;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.dataeditor.MetsKitodoObjectFactory;
+&nbsp;import org.kitodo.dataeditor.enums.PositionOfNewDiv;
+&nbsp;import org.kitodo.dataformat.metskitodo.DivType;
+&nbsp;import org.kitodo.dataformat.metskitodo.StructMapType;
+&nbsp;
+&nbsp;public class LogicalStructMapType extends StructMapType {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(LogicalStructMapType.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor to copy the data from parent class.
+&nbsp;     *
+&nbsp;     * @param structMapType
+&nbsp;     *            The structMapType object.
+&nbsp;     */
+<b class="fc">&nbsp;    public LogicalStructMapType(StructMapType structMapType) {</b>
+<b class="fc">&nbsp;        super.div = structMapType.getDiv();</b>
+<b class="fc">&nbsp;        super.id = structMapType.getID();</b>
+<b class="fc">&nbsp;        super.label = structMapType.getLABEL();</b>
+<b class="fc">&nbsp;        super.type = structMapType.getTYPE();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Moves a given DivType object by removing it from logical structMap and
+&nbsp;     * inserting it as a child of a new parent div.
+&nbsp;     *
+&nbsp;     * @param movedDiv
+&nbsp;     *            The DivType object which has to be moved.
+&nbsp;     * @param parentDiv
+&nbsp;     *            The DivType object which is the new parent div.
+&nbsp;     * @param index
+&nbsp;     *            The index position where the moved div needs to be inserted.
+&nbsp;     */
+&nbsp;    public void moveDivToDivAtIndex(DivType movedDiv, DivType parentDiv, int index) {
+<b class="fc">&nbsp;        removeDiv(movedDiv);</b>
+<b class="fc">&nbsp;        parentDiv.getDiv().add(index, movedDiv);</b>
+<b class="fc">&nbsp;        generateIdsForDivs();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removed the given DivType object from current logical structMap.
+&nbsp;     *
+&nbsp;     * @param divToRemove
+&nbsp;     *            The DivType object which should be removed.
+&nbsp;     */
+&nbsp;    public void removeDiv(DivType divToRemove) {
+<b class="fc">&nbsp;        removeDivFromStructMap(divToRemove);</b>
+<b class="fc">&nbsp;        generateIdsForDivs();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a new DivType object which specified type and position to the given
+&nbsp;     * DivType object.
+&nbsp;     *
+&nbsp;     * @param presentDiv
+&nbsp;     *            The DivType object to which the new DivType should be added to.
+&nbsp;     * @param type
+&nbsp;     *            The type of the DivType object.
+&nbsp;     * @param position
+&nbsp;     *            The position in relation to the given DivType object.
+&nbsp;     */
+&nbsp;    public void addNewDiv(DivType presentDiv, String type, PositionOfNewDiv position) {
+<b class="fc">&nbsp;        addNewLogicalDivToExistingDiv(presentDiv, type, position);</b>
+<b class="fc">&nbsp;        generateIdsForDivs();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a new logical div to an existing div of a structMap.
+&nbsp;     *
+&nbsp;     * @param existingDiv
+&nbsp;     *            The existing div.
+&nbsp;     * @param type
+&nbsp;     *            The type of the new div.
+&nbsp;     * @param position
+&nbsp;     *            The position of the new added div.
+&nbsp;     */
+&nbsp;    private void addNewLogicalDivToExistingDiv(DivType existingDiv, String type,
+&nbsp;                                               PositionOfNewDiv position) {
+<b class="fc">&nbsp;        MetsKitodoObjectFactory objectFactory = new MetsKitodoObjectFactory();</b>
+<b class="fc">&nbsp;        DivType newDiv = objectFactory.createDivType();</b>
+<b class="fc">&nbsp;        newDiv.setTYPE(type);</b>
+<b class="fc">&nbsp;        switch (position) {</b>
+&nbsp;            case LAST_CHILD_OF_ELEMENT:
+<b class="fc">&nbsp;                addDivToDivAsLastChild(existingDiv, newDiv);</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            case FIRST_CHILD_OF_ELEMENT:
+<b class="fc">&nbsp;                addDivToDivAsFirstChild(existingDiv, newDiv);</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            case BEFORE_ELEMENT:
+<b class="fc">&nbsp;                addDivBeforeExistingDiv(existingDiv, newDiv);</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            case AFTER_ELEMENT:
+<b class="fc">&nbsp;                addDivAfterExistingDiv(existingDiv, newDiv);</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalArgumentException(&quot;Position of new div element is not supported&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addDivToDivAsLastChild(DivType existingDiv, DivType newDiv) {
+<b class="fc">&nbsp;        existingDiv.getDiv().add(newDiv);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addDivToDivAsFirstChild(DivType existingDiv, DivType newDiv) {
+<b class="fc">&nbsp;        existingDiv.getDiv().add(0, newDiv);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addDivBeforeExistingDiv(DivType existingDiv, DivType newDiv) {
+<b class="fc">&nbsp;        DivType parentDiv = getParentDivOfDiv(existingDiv);</b>
+<b class="fc">&nbsp;        int count = parentDiv.getDiv().size();</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; count; i++) {</b>
+<b class="fc">&nbsp;            if (Objects.equals(parentDiv.getDiv().get(i).getID(), existingDiv.getID())) {</b>
+<b class="fc">&nbsp;                parentDiv.getDiv().add(i, newDiv);</b>
+&nbsp;                return;
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addDivAfterExistingDiv(DivType existingDiv, DivType newDiv) {
+<b class="fc">&nbsp;        DivType parentDiv = getParentDivOfDiv(existingDiv);</b>
+<b class="fc">&nbsp;        int count = parentDiv.getDiv().size();</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; count; i++) {</b>
+<b class="fc">&nbsp;            if (Objects.equals(parentDiv.getDiv().get(i).getID(), existingDiv.getID())) {</b>
+<b class="fc">&nbsp;                parentDiv.getDiv().add(i + 1, newDiv);</b>
+&nbsp;                return;
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private DivType getParentDivOfDiv(DivType div) {
+<b class="fc">&nbsp;        DivType currentParentDiv = this.getDiv();</b>
+<b class="fc">&nbsp;        if (currentParentDiv.getDiv().contains(div)) {</b>
+<b class="fc">&nbsp;            return currentParentDiv;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return getParentDivOfChildDivFromDivList(div, currentParentDiv.getDiv());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private DivType getParentDivOfChildDivFromDivList(DivType childDiv, List&lt;DivType&gt; divTypeList) {
+<b class="fc">&nbsp;        if (childDiv.getID().contains(&quot;ROOT&quot;)) {</b>
+<b class="fc">&nbsp;            throw new UnsupportedOperationException(&quot;Root element cannot have a parent!&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (DivType div : divTypeList) {</b>
+<b class="fc">&nbsp;            if (div.getDiv().contains(childDiv)) {</b>
+<b class="fc">&nbsp;                return div;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (!div.getDiv().isEmpty()) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    return getParentDivOfChildDivFromDivList(childDiv, div.getDiv());</b>
+<b class="fc">&nbsp;                } catch (NoSuchElementException e) {</b>
+&nbsp;                    // this method is calling recursive its self for handling a complex structure of nested divs
+&nbsp;                    // we need to catch the below exception internally that the for loop can run farther
+<b class="fc">&nbsp;                    logger.debug(&quot;Div element with Id {} does not contain div element with Id: {}&quot;, div.getID(),</b>
+<b class="fc">&nbsp;                        childDiv.getID());</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        throw new NoSuchElementException(&quot;Child div element not found&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generating and setting of ids of all div elements in given StructMapType
+&nbsp;     * object.
+&nbsp;     */
+&nbsp;    private void generateIdsForDivs() {
+<b class="fc">&nbsp;        if (Objects.nonNull(super.getDiv())) {</b>
+<b class="fc">&nbsp;            List&lt;DivType&gt; divTypes = super.getDiv().getDiv();</b>
+<b class="fc">&nbsp;            if (!divTypes.isEmpty()) {</b>
+<b class="fc">&nbsp;                int index = 1;</b>
+<b class="fc">&nbsp;                setIdsOfDivTypes(divTypes, &quot;LOG_&quot;, index);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private int setIdsOfDivTypes(List&lt;DivType&gt; divTypes, String prefix, int startingIndex) {
+<b class="fc">&nbsp;        for (DivType div : divTypes) {</b>
+<b class="fc">&nbsp;            div.setID(prefix + String.format(&quot;%04d&quot;, startingIndex));</b>
+<b class="fc">&nbsp;            startingIndex++;</b>
+<b class="fc">&nbsp;            if (!div.getDiv().isEmpty()) {</b>
+<b class="fc">&nbsp;                startingIndex = setIdsOfDivTypes(div.getDiv(), prefix, startingIndex);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return startingIndex;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removed a div element from a structMap. Does nothing if the given div does
+&nbsp;     * not exist at structMap.
+&nbsp;     *
+&nbsp;     * @param divToRemove
+&nbsp;     *            The divType object to remove.
+&nbsp;     */
+&nbsp;    public void removeDivFromStructMap(DivType divToRemove) {
+<b class="fc">&nbsp;        removeDivFromDivList(divToRemove, this.getDiv().getDiv());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void removeDivFromDivList(DivType divToRemove, List&lt;DivType&gt; divList) {
+<b class="fc">&nbsp;        if (!divList.remove(divToRemove)) {</b>
+<b class="fc">&nbsp;            for (DivType div : divList) {</b>
+<b class="fc">&nbsp;                if (!div.getDiv().isEmpty()) {</b>
+<b class="fc">&nbsp;                    removeDivFromDivList(divToRemove, div.getDiv());</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

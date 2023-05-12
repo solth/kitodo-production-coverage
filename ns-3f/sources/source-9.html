@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > GalleryStripe</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: GalleryStripe (org.kitodo.production.forms.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GalleryStripe</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.dataeditor;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;
+&nbsp;/**
+&nbsp; * One media stripe in the structured gallery view.
+&nbsp; */
+&nbsp;public class GalleryStripe {
+&nbsp;    /**
+&nbsp;     * Label of the stripe.
+&nbsp;     */
+&nbsp;    private final String label;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Medias in this stripe.
+&nbsp;     */
+<b class="nc">&nbsp;    private final List&lt;GalleryMediaContent&gt; medias = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Structure this gallery stripe is related to.
+&nbsp;     */
+&nbsp;    private final LogicalDivision structure;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Stores the primefaces tree node id of the corresponding tree node of the logical structure 
+&nbsp;     * tree. This id can be used in the user interface to identify which gallery stripe corresponds 
+&nbsp;     * to which tree node in the logical structure tree.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;It consists of a sequence of numbers separated by underscore, e.g. &quot;0_1_4&quot;. Each number
+&nbsp;     * describes the position of a child amongst its siblings at that level. For example, &quot;0_1_4&quot; 
+&nbsp;     * references the node that is reached when moving from root node to leaf node using the first 
+&nbsp;     * child, then the second child, and then the fifth child.&lt;/p&gt;
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;The root node itself is never referenced, as it is not visualized anyway.&lt;/p&gt;
+&nbsp;     */
+&nbsp;    private final String logicalTreeNodeId;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new gallery stripe.
+&nbsp;     *
+&nbsp;     * @param panel
+&nbsp;     *            gallery panel this gallery stripe belongs to
+&nbsp;     * @param structure
+&nbsp;     *            structure this gallery stripe is related to
+&nbsp;     */
+<b class="nc">&nbsp;    GalleryStripe(GalleryPanel panel, LogicalDivision structure, String logicalTreeNodeId) {</b>
+<b class="nc">&nbsp;        this.structure = structure;</b>
+<b class="nc">&nbsp;        this.logicalTreeNodeId = logicalTreeNodeId;</b>
+<b class="nc">&nbsp;        this.label = getLabel(panel, structure);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the label for the stripe, which is the label of the structure.
+&nbsp;     *
+&nbsp;     * @return the label
+&nbsp;     */
+&nbsp;    public String getLabel() {
+<b class="nc">&nbsp;        return label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the translated label for a structure.
+&nbsp;     *
+&nbsp;     * @param panel
+&nbsp;     *            panel providing the ruleset and its configuration settings
+&nbsp;     * @param structure
+&nbsp;     *            structure whose label is to return
+&nbsp;     * @return the label
+&nbsp;     */
+&nbsp;    private String getLabel(GalleryPanel panel, LogicalDivision structure) {
+<b class="nc">&nbsp;        RulesetManagementInterface ruleset = panel.getRuleset();</b>
+<b class="nc">&nbsp;        StructuralElementViewInterface divisionView = ruleset.getStructuralElementView(structure.getType(),</b>
+<b class="nc">&nbsp;            panel.getAcquisitionStage(), panel.getPriorityList());</b>
+<b class="nc">&nbsp;        return divisionView.getLabel();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the medias of the stripe.
+&nbsp;     *
+&nbsp;     * @return the medias
+&nbsp;     */
+&nbsp;    public List&lt;GalleryMediaContent&gt; getMedias() {
+<b class="nc">&nbsp;        return medias;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the structure of the stripe.
+&nbsp;     *
+&nbsp;     * @return structure
+&nbsp;     */
+&nbsp;    public LogicalDivision getStructure() {
+<b class="nc">&nbsp;        return structure;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the logical tree node id corresponding to this stripe.
+&nbsp;     * @return the logical tree node id
+&nbsp;     */
+&nbsp;    public String getLogicalTreeNodeId() {
+<b class="nc">&nbsp;        return logicalTreeNodeId;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

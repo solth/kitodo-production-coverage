@@ -1,0 +1,1458 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DivType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.metskitodo</a>
+</div>
+
+<h1>Coverage Summary for Class: DivType (org.kitodo.dataformat.metskitodo)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DivType</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,5%
+  </span>
+  <span class="absValue">
+    (19/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,6%
+  </span>
+  <span class="absValue">
+    (51/87)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DivType$Fptr</td>
+<td class="coverageStat">
+  <span class="percent">
+    20%
+  </span>
+  <span class="absValue">
+    (3/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    8,3%
+  </span>
+  <span class="absValue">
+    (4/48)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">DivType$Mptr</td>
+<td class="coverageStat">
+  <span class="percent">
+    29,2%
+  </span>
+  <span class="absValue">
+    (7/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    9%
+  </span>
+  <span class="absValue">
+    (7/78)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    48,3%
+  </span>
+  <span class="absValue">
+    (29/60)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    29,1%
+  </span>
+  <span class="absValue">
+    (62/213)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;//
+&nbsp;// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.0 generiert 
+&nbsp;// Siehe &lt;a href=&quot;https://javaee.github.io/jaxb-v2/&quot;&gt;https://javaee.github.io/jaxb-v2/&lt;/a&gt; 
+&nbsp;// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+&nbsp;// Generiert: 2023.05.12 um 01:28:08 PM CEST 
+&nbsp;//
+&nbsp;
+&nbsp;
+&nbsp;package org.kitodo.dataformat.metskitodo;
+&nbsp;
+&nbsp;import java.math.BigInteger;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAnyAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlID;
+&nbsp;import javax.xml.bind.annotation.XmlIDREF;
+&nbsp;import javax.xml.bind.annotation.XmlSchemaType;
+&nbsp;import javax.xml.bind.annotation.XmlType;
+&nbsp;import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+&nbsp;import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+&nbsp;import javax.xml.namespace.QName;
+&nbsp;import org.jvnet.jaxb2_commons.lang.Equals2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.EqualsStrategy2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+&nbsp;import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+&nbsp;import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * divType: Complex Type for Divisions
+&nbsp; * 					The METS standard represents a document structurally as a series of nested div elements, that is, as a hierarchy (e.g., a book, which is composed of chapters, which are composed of subchapters, which are composed of text).  Every div node in the structural map hierarchy may be connected (via subsidiary mptr or fptr elements) to content files which represent that div&#39;s portion of the whole document.
+&nbsp; * 
+&nbsp; * SPECIAL NOTE REGARDING DIV ATTRIBUTE VALUES:
+&nbsp; * to clarify the differences between the ORDER, ORDERLABEL, and LABEL attributes for the &lt;div&gt; element, imagine a text with 10 roman numbered pages followed by 10 arabic numbered pages. Page iii would have an ORDER of &quot;3&quot;, an ORDERLABEL of &quot;iii&quot; and a LABEL of &quot;Page iii&quot;, while page 3 would have an ORDER of &quot;13&quot;, an ORDERLABEL of &quot;3&quot; and a LABEL of &quot;Page 3&quot;.
+&nbsp; * 			
+&nbsp; * 
+&nbsp; * &lt;p&gt;Java-Klasse für divType complex type.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * &amp;lt;complexType name=&quot;divType&quot;&amp;gt;
+&nbsp; *   &amp;lt;complexContent&amp;gt;
+&nbsp; *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *       &amp;lt;sequence&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;mptr&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;0&quot;&amp;gt;
+&nbsp; *           &amp;lt;complexType&amp;gt;
+&nbsp; *             &amp;lt;complexContent&amp;gt;
+&nbsp; *               &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *                 &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}simpleLink&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}LOCATION&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;CONTENTIDS&quot; type=&quot;{http://www.loc.gov/METS/}URIs&quot; /&amp;gt;
+&nbsp; *               &amp;lt;/restriction&amp;gt;
+&nbsp; *             &amp;lt;/complexContent&amp;gt;
+&nbsp; *           &amp;lt;/complexType&amp;gt;
+&nbsp; *         &amp;lt;/element&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;fptr&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;0&quot;&amp;gt;
+&nbsp; *           &amp;lt;complexType&amp;gt;
+&nbsp; *             &amp;lt;complexContent&amp;gt;
+&nbsp; *               &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *                 &amp;lt;choice&amp;gt;
+&nbsp; *                   &amp;lt;element name=&quot;par&quot; type=&quot;{http://www.loc.gov/METS/}parType&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp; *                   &amp;lt;element name=&quot;seq&quot; type=&quot;{http://www.loc.gov/METS/}seqType&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp; *                   &amp;lt;element name=&quot;area&quot; type=&quot;{http://www.loc.gov/METS/}areaType&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;/choice&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;FILEID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREF&quot; /&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;CONTENTIDS&quot; type=&quot;{http://www.loc.gov/METS/}URIs&quot; /&amp;gt;
+&nbsp; *                 &amp;lt;anyAttribute processContents=&#39;lax&#39; namespace=&#39;##other&#39;/&amp;gt;
+&nbsp; *               &amp;lt;/restriction&amp;gt;
+&nbsp; *             &amp;lt;/complexContent&amp;gt;
+&nbsp; *           &amp;lt;/complexType&amp;gt;
+&nbsp; *         &amp;lt;/element&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;div&quot; type=&quot;{http://www.loc.gov/METS/}divType&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp; *       &amp;lt;/sequence&amp;gt;
+&nbsp; *       &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}ORDERLABELS&quot;/&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;DMDID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREFS&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;ADMID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREFS&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;TYPE&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;CONTENTIDS&quot; type=&quot;{http://www.loc.gov/METS/}URIs&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}label&quot;/&amp;gt;
+&nbsp; *     &amp;lt;/restriction&amp;gt;
+&nbsp; *   &amp;lt;/complexContent&amp;gt;
+&nbsp; * &amp;lt;/complexType&amp;gt;
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * 
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;@XmlType(name = &quot;divType&quot;, propOrder = {
+&nbsp;    &quot;mptr&quot;,
+&nbsp;    &quot;fptr&quot;,
+&nbsp;    &quot;div&quot;
+&nbsp;})
+<b class="fc">&nbsp;public class DivType implements Equals2</b>
+&nbsp;{
+&nbsp;
+&nbsp;    protected List&lt;DivType.Mptr&gt; mptr;
+&nbsp;    protected List&lt;DivType.Fptr&gt; fptr;
+&nbsp;    protected List&lt;DivType&gt; div;
+&nbsp;    @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;    @XmlID
+&nbsp;    @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;    protected String id;
+&nbsp;    @XmlAttribute(name = &quot;DMDID&quot;)
+&nbsp;    @XmlIDREF
+&nbsp;    @XmlSchemaType(name = &quot;IDREFS&quot;)
+&nbsp;    protected List&lt;Object&gt; dmdid;
+&nbsp;    @XmlAttribute(name = &quot;ADMID&quot;)
+&nbsp;    @XmlIDREF
+&nbsp;    @XmlSchemaType(name = &quot;IDREFS&quot;)
+&nbsp;    protected List&lt;Object&gt; admid;
+&nbsp;    @XmlAttribute(name = &quot;TYPE&quot;)
+&nbsp;    protected String type;
+&nbsp;    @XmlAttribute(name = &quot;CONTENTIDS&quot;)
+&nbsp;    protected List&lt;String&gt; contentids;
+&nbsp;    @XmlAttribute(name = &quot;label&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;    protected String xlinkLabel;
+&nbsp;    @XmlAttribute(name = &quot;ORDER&quot;)
+&nbsp;    protected BigInteger order;
+&nbsp;    @XmlAttribute(name = &quot;ORDERLABEL&quot;)
+&nbsp;    protected String orderlabel;
+&nbsp;    @XmlAttribute(name = &quot;LABEL&quot;)
+&nbsp;    protected String label;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the mptr property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the mptr property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getMptr().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link DivType.Mptr }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;DivType.Mptr&gt; getMptr() {
+<b class="fc">&nbsp;        if (mptr == null) {</b>
+<b class="fc">&nbsp;            mptr = new ArrayList&lt;DivType.Mptr&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.mptr;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the fptr property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the fptr property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getFptr().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link DivType.Fptr }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;DivType.Fptr&gt; getFptr() {
+<b class="fc">&nbsp;        if (fptr == null) {</b>
+<b class="fc">&nbsp;            fptr = new ArrayList&lt;DivType.Fptr&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.fptr;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the div property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the div property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getDiv().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link DivType }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;DivType&gt; getDiv() {
+<b class="fc">&nbsp;        if (div == null) {</b>
+<b class="fc">&nbsp;            div = new ArrayList&lt;DivType&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.div;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getID() {
+<b class="fc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der id-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setID(String value) {
+<b class="fc">&nbsp;        this.id = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the dmdid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the dmdid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getDMDID().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link Object }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;Object&gt; getDMDID() {
+<b class="fc">&nbsp;        if (dmdid == null) {</b>
+<b class="fc">&nbsp;            dmdid = new ArrayList&lt;Object&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.dmdid;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the admid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the admid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getADMID().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link Object }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;Object&gt; getADMID() {
+<b class="fc">&nbsp;        if (admid == null) {</b>
+<b class="fc">&nbsp;            admid = new ArrayList&lt;Object&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.admid;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der type-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getTYPE() {
+<b class="fc">&nbsp;        return type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der type-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setTYPE(String value) {
+<b class="fc">&nbsp;        this.type = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the contentids property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the contentids property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getCONTENTIDS().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link String }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getCONTENTIDS() {
+<b class="fc">&nbsp;        if (contentids == null) {</b>
+<b class="fc">&nbsp;            contentids = new ArrayList&lt;String&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.contentids;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * xlink:label - an xlink label to be referred to by an smLink element
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getXlinkLabel() {
+<b class="nc">&nbsp;        return xlinkLabel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der xlinkLabel-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setXlinkLabel(String value) {
+<b class="nc">&nbsp;        this.xlinkLabel = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der order-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link BigInteger }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public BigInteger getORDER() {
+<b class="fc">&nbsp;        return order;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der order-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link BigInteger }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setORDER(BigInteger value) {
+<b class="fc">&nbsp;        this.order = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der orderlabel-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getORDERLABEL() {
+<b class="fc">&nbsp;        return orderlabel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der orderlabel-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setORDERLABEL(String value) {
+<b class="fc">&nbsp;        this.orderlabel = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der label-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getLABEL() {
+<b class="fc">&nbsp;        return label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der label-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setLABEL(String value) {
+<b class="fc">&nbsp;        this.label = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="fc">&nbsp;        if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (this == object) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        final DivType that = ((DivType) object);</b>
+&nbsp;        {
+&nbsp;            List&lt;DivType.Mptr&gt; lhsMptr;
+<b class="fc">&nbsp;            lhsMptr = (((this.mptr!= null)&amp;&amp;(!this.mptr.isEmpty()))?this.getMptr():null);</b>
+&nbsp;            List&lt;DivType.Mptr&gt; rhsMptr;
+<b class="fc">&nbsp;            rhsMptr = (((that.mptr!= null)&amp;&amp;(!that.mptr.isEmpty()))?that.getMptr():null);</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mptr&quot;, lhsMptr), LocatorUtils.property(thatLocator, &quot;mptr&quot;, rhsMptr), lhsMptr, rhsMptr, ((this.mptr!= null)&amp;&amp;(!this.mptr.isEmpty())), ((that.mptr!= null)&amp;&amp;(!that.mptr.isEmpty())))) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            List&lt;DivType.Fptr&gt; lhsFptr;
+<b class="fc">&nbsp;            lhsFptr = (((this.fptr!= null)&amp;&amp;(!this.fptr.isEmpty()))?this.getFptr():null);</b>
+&nbsp;            List&lt;DivType.Fptr&gt; rhsFptr;
+<b class="fc">&nbsp;            rhsFptr = (((that.fptr!= null)&amp;&amp;(!that.fptr.isEmpty()))?that.getFptr():null);</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;fptr&quot;, lhsFptr), LocatorUtils.property(thatLocator, &quot;fptr&quot;, rhsFptr), lhsFptr, rhsFptr, ((this.fptr!= null)&amp;&amp;(!this.fptr.isEmpty())), ((that.fptr!= null)&amp;&amp;(!that.fptr.isEmpty())))) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            List&lt;DivType&gt; lhsDiv;
+<b class="fc">&nbsp;            lhsDiv = (((this.div!= null)&amp;&amp;(!this.div.isEmpty()))?this.getDiv():null);</b>
+&nbsp;            List&lt;DivType&gt; rhsDiv;
+<b class="fc">&nbsp;            rhsDiv = (((that.div!= null)&amp;&amp;(!that.div.isEmpty()))?that.getDiv():null);</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;div&quot;, lhsDiv), LocatorUtils.property(thatLocator, &quot;div&quot;, rhsDiv), lhsDiv, rhsDiv, ((this.div!= null)&amp;&amp;(!this.div.isEmpty())), ((that.div!= null)&amp;&amp;(!that.div.isEmpty())))) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsID;
+<b class="fc">&nbsp;            lhsID = this.getID();</b>
+&nbsp;            String rhsID;
+<b class="fc">&nbsp;            rhsID = that.getID();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            List&lt;Object&gt; lhsDMDID;
+<b class="nc">&nbsp;            lhsDMDID = (((this.dmdid!= null)&amp;&amp;(!this.dmdid.isEmpty()))?this.getDMDID():null);</b>
+&nbsp;            List&lt;Object&gt; rhsDMDID;
+<b class="nc">&nbsp;            rhsDMDID = (((that.dmdid!= null)&amp;&amp;(!that.dmdid.isEmpty()))?that.getDMDID():null);</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;dmdid&quot;, lhsDMDID), LocatorUtils.property(thatLocator, &quot;dmdid&quot;, rhsDMDID), lhsDMDID, rhsDMDID, ((this.dmdid!= null)&amp;&amp;(!this.dmdid.isEmpty())), ((that.dmdid!= null)&amp;&amp;(!that.dmdid.isEmpty())))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            List&lt;Object&gt; lhsADMID;
+<b class="nc">&nbsp;            lhsADMID = (((this.admid!= null)&amp;&amp;(!this.admid.isEmpty()))?this.getADMID():null);</b>
+&nbsp;            List&lt;Object&gt; rhsADMID;
+<b class="nc">&nbsp;            rhsADMID = (((that.admid!= null)&amp;&amp;(!that.admid.isEmpty()))?that.getADMID():null);</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;admid&quot;, lhsADMID), LocatorUtils.property(thatLocator, &quot;admid&quot;, rhsADMID), lhsADMID, rhsADMID, ((this.admid!= null)&amp;&amp;(!this.admid.isEmpty())), ((that.admid!= null)&amp;&amp;(!that.admid.isEmpty())))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsTYPE;
+<b class="nc">&nbsp;            lhsTYPE = this.getTYPE();</b>
+&nbsp;            String rhsTYPE;
+<b class="nc">&nbsp;            rhsTYPE = that.getTYPE();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;type&quot;, lhsTYPE), LocatorUtils.property(thatLocator, &quot;type&quot;, rhsTYPE), lhsTYPE, rhsTYPE, (this.type!= null), (that.type!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            List&lt;String&gt; lhsCONTENTIDS;
+<b class="nc">&nbsp;            lhsCONTENTIDS = (((this.contentids!= null)&amp;&amp;(!this.contentids.isEmpty()))?this.getCONTENTIDS():null);</b>
+&nbsp;            List&lt;String&gt; rhsCONTENTIDS;
+<b class="nc">&nbsp;            rhsCONTENTIDS = (((that.contentids!= null)&amp;&amp;(!that.contentids.isEmpty()))?that.getCONTENTIDS():null);</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;contentids&quot;, lhsCONTENTIDS), LocatorUtils.property(thatLocator, &quot;contentids&quot;, rhsCONTENTIDS), lhsCONTENTIDS, rhsCONTENTIDS, ((this.contentids!= null)&amp;&amp;(!this.contentids.isEmpty())), ((that.contentids!= null)&amp;&amp;(!that.contentids.isEmpty())))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsXlinkLabel;
+<b class="nc">&nbsp;            lhsXlinkLabel = this.getXlinkLabel();</b>
+&nbsp;            String rhsXlinkLabel;
+<b class="nc">&nbsp;            rhsXlinkLabel = that.getXlinkLabel();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;xlinkLabel&quot;, lhsXlinkLabel), LocatorUtils.property(thatLocator, &quot;xlinkLabel&quot;, rhsXlinkLabel), lhsXlinkLabel, rhsXlinkLabel, (this.xlinkLabel!= null), (that.xlinkLabel!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            BigInteger lhsORDER;
+<b class="nc">&nbsp;            lhsORDER = this.getORDER();</b>
+&nbsp;            BigInteger rhsORDER;
+<b class="nc">&nbsp;            rhsORDER = that.getORDER();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;order&quot;, lhsORDER), LocatorUtils.property(thatLocator, &quot;order&quot;, rhsORDER), lhsORDER, rhsORDER, (this.order!= null), (that.order!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsORDERLABEL;
+<b class="nc">&nbsp;            lhsORDERLABEL = this.getORDERLABEL();</b>
+&nbsp;            String rhsORDERLABEL;
+<b class="nc">&nbsp;            rhsORDERLABEL = that.getORDERLABEL();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;orderlabel&quot;, lhsORDERLABEL), LocatorUtils.property(thatLocator, &quot;orderlabel&quot;, rhsORDERLABEL), lhsORDERLABEL, rhsORDERLABEL, (this.orderlabel!= null), (that.orderlabel!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsLABEL;
+<b class="nc">&nbsp;            lhsLABEL = this.getLABEL();</b>
+&nbsp;            String rhsLABEL;
+<b class="nc">&nbsp;            rhsLABEL = that.getLABEL();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;label&quot;, lhsLABEL), LocatorUtils.property(thatLocator, &quot;label&quot;, rhsLABEL), lhsLABEL, rhsLABEL, (this.label!= null), (that.label!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(Object object) {
+<b class="fc">&nbsp;        final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="fc">&nbsp;        return equals(null, null, object, strategy);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;Java-Klasse für anonymous complex type.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp;     * 
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * &amp;lt;complexType&amp;gt;
+&nbsp;     *   &amp;lt;complexContent&amp;gt;
+&nbsp;     *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;     *       &amp;lt;choice&amp;gt;
+&nbsp;     *         &amp;lt;element name=&quot;par&quot; type=&quot;{http://www.loc.gov/METS/}parType&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp;     *         &amp;lt;element name=&quot;seq&quot; type=&quot;{http://www.loc.gov/METS/}seqType&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp;     *         &amp;lt;element name=&quot;area&quot; type=&quot;{http://www.loc.gov/METS/}areaType&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;/choice&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;FILEID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREF&quot; /&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;CONTENTIDS&quot; type=&quot;{http://www.loc.gov/METS/}URIs&quot; /&amp;gt;
+&nbsp;     *       &amp;lt;anyAttribute processContents=&#39;lax&#39; namespace=&#39;##other&#39;/&amp;gt;
+&nbsp;     *     &amp;lt;/restriction&amp;gt;
+&nbsp;     *   &amp;lt;/complexContent&amp;gt;
+&nbsp;     * &amp;lt;/complexType&amp;gt;
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    @XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;    @XmlType(name = &quot;&quot;, propOrder = {
+&nbsp;        &quot;par&quot;,
+&nbsp;        &quot;seq&quot;,
+&nbsp;        &quot;area&quot;
+&nbsp;    })
+<b class="fc">&nbsp;    public static class Fptr implements Equals2</b>
+&nbsp;    {
+&nbsp;
+&nbsp;        protected ParType par;
+&nbsp;        protected SeqType seq;
+&nbsp;        protected AreaType area;
+&nbsp;        @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;        @XmlID
+&nbsp;        @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;        protected String id;
+&nbsp;        @XmlAttribute(name = &quot;FILEID&quot;)
+&nbsp;        @XmlIDREF
+&nbsp;        @XmlSchemaType(name = &quot;IDREF&quot;)
+&nbsp;        protected Object fileid;
+&nbsp;        @XmlAttribute(name = &quot;CONTENTIDS&quot;)
+&nbsp;        protected List&lt;String&gt; contentids;
+<b class="fc">&nbsp;        @XmlAnyAttribute</b>
+&nbsp;        private Map&lt;QName, String&gt; otherAttributes = new HashMap&lt;QName, String&gt;();
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der par-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link ParType }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public ParType getPar() {
+<b class="nc">&nbsp;            return par;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der par-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link ParType }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setPar(ParType value) {
+<b class="nc">&nbsp;            this.par = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der seq-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link SeqType }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public SeqType getSeq() {
+<b class="nc">&nbsp;            return seq;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der seq-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link SeqType }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setSeq(SeqType value) {
+<b class="nc">&nbsp;            this.seq = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der area-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link AreaType }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public AreaType getArea() {
+<b class="nc">&nbsp;            return area;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der area-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link AreaType }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setArea(AreaType value) {
+<b class="nc">&nbsp;            this.area = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getID() {
+<b class="nc">&nbsp;            return id;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der id-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setID(String value) {
+<b class="nc">&nbsp;            this.id = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der fileid-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link Object }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public Object getFILEID() {
+<b class="fc">&nbsp;            return fileid;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der fileid-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link Object }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setFILEID(Object value) {
+<b class="fc">&nbsp;            this.fileid = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Gets the value of the contentids property.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * This accessor method returns a reference to the live list,
+&nbsp;         * not a snapshot. Therefore any modification you make to the
+&nbsp;         * returned list will be present inside the JAXB object.
+&nbsp;         * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the contentids property.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * For example, to add a new item, do as follows:
+&nbsp;         * &lt;pre&gt;
+&nbsp;         *    getCONTENTIDS().add(newItem);
+&nbsp;         * &lt;/pre&gt;
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * Objects of the following type(s) are allowed in the list
+&nbsp;         * {@link String }
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         */
+&nbsp;        public List&lt;String&gt; getCONTENTIDS() {
+<b class="nc">&nbsp;            if (contentids == null) {</b>
+<b class="nc">&nbsp;                contentids = new ArrayList&lt;String&gt;();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return this.contentids;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Gets a map that contains attributes that aren&#39;t bound to any typed property on this class.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * the map is keyed by the name of the attribute and 
+&nbsp;         * the value is the string value of the attribute.
+&nbsp;         * 
+&nbsp;         * the map returned by this method is live, and you can add new attribute
+&nbsp;         * by updating the map directly. Because of this design, there&#39;s no setter.
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     always non-null
+&nbsp;         */
+&nbsp;        public Map&lt;QName, String&gt; getOtherAttributes() {
+<b class="nc">&nbsp;            return otherAttributes;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="nc">&nbsp;            if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (this == object) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            final DivType.Fptr that = ((DivType.Fptr) object);</b>
+&nbsp;            {
+&nbsp;                ParType lhsPar;
+<b class="nc">&nbsp;                lhsPar = this.getPar();</b>
+&nbsp;                ParType rhsPar;
+<b class="nc">&nbsp;                rhsPar = that.getPar();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;par&quot;, lhsPar), LocatorUtils.property(thatLocator, &quot;par&quot;, rhsPar), lhsPar, rhsPar, (this.par!= null), (that.par!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                SeqType lhsSeq;
+<b class="nc">&nbsp;                lhsSeq = this.getSeq();</b>
+&nbsp;                SeqType rhsSeq;
+<b class="nc">&nbsp;                rhsSeq = that.getSeq();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;seq&quot;, lhsSeq), LocatorUtils.property(thatLocator, &quot;seq&quot;, rhsSeq), lhsSeq, rhsSeq, (this.seq!= null), (that.seq!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                AreaType lhsArea;
+<b class="nc">&nbsp;                lhsArea = this.getArea();</b>
+&nbsp;                AreaType rhsArea;
+<b class="nc">&nbsp;                rhsArea = that.getArea();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;area&quot;, lhsArea), LocatorUtils.property(thatLocator, &quot;area&quot;, rhsArea), lhsArea, rhsArea, (this.area!= null), (that.area!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsID;
+<b class="nc">&nbsp;                lhsID = this.getID();</b>
+&nbsp;                String rhsID;
+<b class="nc">&nbsp;                rhsID = that.getID();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                Object lhsFILEID;
+<b class="nc">&nbsp;                lhsFILEID = this.getFILEID();</b>
+&nbsp;                Object rhsFILEID;
+<b class="nc">&nbsp;                rhsFILEID = that.getFILEID();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;fileid&quot;, lhsFILEID), LocatorUtils.property(thatLocator, &quot;fileid&quot;, rhsFILEID), lhsFILEID, rhsFILEID, (this.fileid!= null), (that.fileid!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                List&lt;String&gt; lhsCONTENTIDS;
+<b class="nc">&nbsp;                lhsCONTENTIDS = (((this.contentids!= null)&amp;&amp;(!this.contentids.isEmpty()))?this.getCONTENTIDS():null);</b>
+&nbsp;                List&lt;String&gt; rhsCONTENTIDS;
+<b class="nc">&nbsp;                rhsCONTENTIDS = (((that.contentids!= null)&amp;&amp;(!that.contentids.isEmpty()))?that.getCONTENTIDS():null);</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;contentids&quot;, lhsCONTENTIDS), LocatorUtils.property(thatLocator, &quot;contentids&quot;, rhsCONTENTIDS), lhsCONTENTIDS, rhsCONTENTIDS, ((this.contentids!= null)&amp;&amp;(!this.contentids.isEmpty())), ((that.contentids!= null)&amp;&amp;(!that.contentids.isEmpty())))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(Object object) {
+<b class="nc">&nbsp;            final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;            return equals(null, null, object, strategy);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;Java-Klasse für anonymous complex type.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp;     * 
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * &amp;lt;complexType&amp;gt;
+&nbsp;     *   &amp;lt;complexContent&amp;gt;
+&nbsp;     *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;     *       &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}simpleLink&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}LOCATION&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;CONTENTIDS&quot; type=&quot;{http://www.loc.gov/METS/}URIs&quot; /&amp;gt;
+&nbsp;     *     &amp;lt;/restriction&amp;gt;
+&nbsp;     *   &amp;lt;/complexContent&amp;gt;
+&nbsp;     * &amp;lt;/complexType&amp;gt;
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    @XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;    @XmlType(name = &quot;&quot;)
+<b class="fc">&nbsp;    public static class Mptr implements Equals2</b>
+&nbsp;    {
+&nbsp;
+&nbsp;        @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;        @XmlID
+&nbsp;        @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;        protected String id;
+&nbsp;        @XmlAttribute(name = &quot;CONTENTIDS&quot;)
+&nbsp;        protected List&lt;String&gt; contentids;
+&nbsp;        @XmlAttribute(name = &quot;type&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String type;
+&nbsp;        @XmlAttribute(name = &quot;href&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        @XmlSchemaType(name = &quot;anyURI&quot;)
+&nbsp;        protected String href;
+&nbsp;        @XmlAttribute(name = &quot;role&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String role;
+&nbsp;        @XmlAttribute(name = &quot;arcrole&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String arcrole;
+&nbsp;        @XmlAttribute(name = &quot;title&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String title;
+&nbsp;        @XmlAttribute(name = &quot;show&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String show;
+&nbsp;        @XmlAttribute(name = &quot;actuate&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String actuate;
+&nbsp;        @XmlAttribute(name = &quot;LOCTYPE&quot;, required = true)
+&nbsp;        protected String loctype;
+&nbsp;        @XmlAttribute(name = &quot;OTHERLOCTYPE&quot;)
+&nbsp;        protected String otherloctype;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getID() {
+<b class="nc">&nbsp;            return id;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der id-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setID(String value) {
+<b class="nc">&nbsp;            this.id = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Gets the value of the contentids property.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * This accessor method returns a reference to the live list,
+&nbsp;         * not a snapshot. Therefore any modification you make to the
+&nbsp;         * returned list will be present inside the JAXB object.
+&nbsp;         * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the contentids property.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * For example, to add a new item, do as follows:
+&nbsp;         * &lt;pre&gt;
+&nbsp;         *    getCONTENTIDS().add(newItem);
+&nbsp;         * &lt;/pre&gt;
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * Objects of the following type(s) are allowed in the list
+&nbsp;         * {@link String }
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         */
+&nbsp;        public List&lt;String&gt; getCONTENTIDS() {
+<b class="nc">&nbsp;            if (contentids == null) {</b>
+<b class="nc">&nbsp;                contentids = new ArrayList&lt;String&gt;();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return this.contentids;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der type-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getType() {
+<b class="nc">&nbsp;            if (type == null) {</b>
+<b class="nc">&nbsp;                return &quot;simple&quot;;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return type;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der type-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setType(String value) {
+<b class="nc">&nbsp;            this.type = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der href-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getHref() {
+<b class="fc">&nbsp;            return href;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der href-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setHref(String value) {
+<b class="fc">&nbsp;            this.href = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der role-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getRole() {
+<b class="nc">&nbsp;            return role;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der role-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setRole(String value) {
+<b class="nc">&nbsp;            this.role = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der arcrole-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getArcrole() {
+<b class="nc">&nbsp;            return arcrole;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der arcrole-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setArcrole(String value) {
+<b class="nc">&nbsp;            this.arcrole = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der title-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getTitle() {
+<b class="nc">&nbsp;            return title;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der title-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setTitle(String value) {
+<b class="nc">&nbsp;            this.title = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der show-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getShow() {
+<b class="nc">&nbsp;            return show;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der show-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setShow(String value) {
+<b class="nc">&nbsp;            this.show = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der actuate-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getActuate() {
+<b class="nc">&nbsp;            return actuate;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der actuate-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setActuate(String value) {
+<b class="nc">&nbsp;            this.actuate = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der loctype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getLOCTYPE() {
+<b class="fc">&nbsp;            return loctype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der loctype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setLOCTYPE(String value) {
+<b class="fc">&nbsp;            this.loctype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der otherloctype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getOTHERLOCTYPE() {
+<b class="fc">&nbsp;            return otherloctype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der otherloctype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setOTHERLOCTYPE(String value) {
+<b class="fc">&nbsp;            this.otherloctype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="nc">&nbsp;            if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (this == object) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            final DivType.Mptr that = ((DivType.Mptr) object);</b>
+&nbsp;            {
+&nbsp;                String lhsID;
+<b class="nc">&nbsp;                lhsID = this.getID();</b>
+&nbsp;                String rhsID;
+<b class="nc">&nbsp;                rhsID = that.getID();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                List&lt;String&gt; lhsCONTENTIDS;
+<b class="nc">&nbsp;                lhsCONTENTIDS = (((this.contentids!= null)&amp;&amp;(!this.contentids.isEmpty()))?this.getCONTENTIDS():null);</b>
+&nbsp;                List&lt;String&gt; rhsCONTENTIDS;
+<b class="nc">&nbsp;                rhsCONTENTIDS = (((that.contentids!= null)&amp;&amp;(!that.contentids.isEmpty()))?that.getCONTENTIDS():null);</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;contentids&quot;, lhsCONTENTIDS), LocatorUtils.property(thatLocator, &quot;contentids&quot;, rhsCONTENTIDS), lhsCONTENTIDS, rhsCONTENTIDS, ((this.contentids!= null)&amp;&amp;(!this.contentids.isEmpty())), ((that.contentids!= null)&amp;&amp;(!that.contentids.isEmpty())))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsType;
+<b class="nc">&nbsp;                lhsType = this.getType();</b>
+&nbsp;                String rhsType;
+<b class="nc">&nbsp;                rhsType = that.getType();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;type&quot;, lhsType), LocatorUtils.property(thatLocator, &quot;type&quot;, rhsType), lhsType, rhsType, (this.type!= null), (that.type!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsHref;
+<b class="nc">&nbsp;                lhsHref = this.getHref();</b>
+&nbsp;                String rhsHref;
+<b class="nc">&nbsp;                rhsHref = that.getHref();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;href&quot;, lhsHref), LocatorUtils.property(thatLocator, &quot;href&quot;, rhsHref), lhsHref, rhsHref, (this.href!= null), (that.href!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsRole;
+<b class="nc">&nbsp;                lhsRole = this.getRole();</b>
+&nbsp;                String rhsRole;
+<b class="nc">&nbsp;                rhsRole = that.getRole();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;role&quot;, lhsRole), LocatorUtils.property(thatLocator, &quot;role&quot;, rhsRole), lhsRole, rhsRole, (this.role!= null), (that.role!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsArcrole;
+<b class="nc">&nbsp;                lhsArcrole = this.getArcrole();</b>
+&nbsp;                String rhsArcrole;
+<b class="nc">&nbsp;                rhsArcrole = that.getArcrole();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;arcrole&quot;, lhsArcrole), LocatorUtils.property(thatLocator, &quot;arcrole&quot;, rhsArcrole), lhsArcrole, rhsArcrole, (this.arcrole!= null), (that.arcrole!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsTitle;
+<b class="nc">&nbsp;                lhsTitle = this.getTitle();</b>
+&nbsp;                String rhsTitle;
+<b class="nc">&nbsp;                rhsTitle = that.getTitle();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;title&quot;, lhsTitle), LocatorUtils.property(thatLocator, &quot;title&quot;, rhsTitle), lhsTitle, rhsTitle, (this.title!= null), (that.title!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsShow;
+<b class="nc">&nbsp;                lhsShow = this.getShow();</b>
+&nbsp;                String rhsShow;
+<b class="nc">&nbsp;                rhsShow = that.getShow();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;show&quot;, lhsShow), LocatorUtils.property(thatLocator, &quot;show&quot;, rhsShow), lhsShow, rhsShow, (this.show!= null), (that.show!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsActuate;
+<b class="nc">&nbsp;                lhsActuate = this.getActuate();</b>
+&nbsp;                String rhsActuate;
+<b class="nc">&nbsp;                rhsActuate = that.getActuate();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;actuate&quot;, lhsActuate), LocatorUtils.property(thatLocator, &quot;actuate&quot;, rhsActuate), lhsActuate, rhsActuate, (this.actuate!= null), (that.actuate!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsLOCTYPE;
+<b class="nc">&nbsp;                lhsLOCTYPE = this.getLOCTYPE();</b>
+&nbsp;                String rhsLOCTYPE;
+<b class="nc">&nbsp;                rhsLOCTYPE = that.getLOCTYPE();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;loctype&quot;, lhsLOCTYPE), LocatorUtils.property(thatLocator, &quot;loctype&quot;, rhsLOCTYPE), lhsLOCTYPE, rhsLOCTYPE, (this.loctype!= null), (that.loctype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsOTHERLOCTYPE;
+<b class="nc">&nbsp;                lhsOTHERLOCTYPE = this.getOTHERLOCTYPE();</b>
+&nbsp;                String rhsOTHERLOCTYPE;
+<b class="nc">&nbsp;                rhsOTHERLOCTYPE = that.getOTHERLOCTYPE();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;otherloctype&quot;, lhsOTHERLOCTYPE), LocatorUtils.property(thatLocator, &quot;otherloctype&quot;, rhsOTHERLOCTYPE), lhsOTHERLOCTYPE, rhsOTHERLOCTYPE, (this.otherloctype!= null), (that.otherloctype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(Object object) {
+<b class="nc">&nbsp;            final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;            return equals(null, null, object, strategy);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

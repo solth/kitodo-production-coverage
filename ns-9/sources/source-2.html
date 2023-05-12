@@ -1,0 +1,310 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileManagementInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.filemanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: FileManagementInterface (org.kitodo.api.filemanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">FileManagementInterface</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.filemanagement;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FilenameFilter;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Manages the handling of files.
+&nbsp; */
+&nbsp;public interface FileManagementInterface {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a resource (file/folder) with a given name. Important is that
+&nbsp;     * resource will be created only in case when parent folder exists.
+&nbsp;     *
+&nbsp;     * @param parentFolderUri
+&nbsp;     *            the location to create the resource
+&nbsp;     * @param name
+&nbsp;     *            the name of the new resource
+&nbsp;     * @param file
+&nbsp;     *            if true it creates the file, if false it created directory
+&nbsp;     * @return the URI of the new resource
+&nbsp;     */
+&nbsp;    URI create(URI parentFolderUri, String name, boolean file) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Opens an OutputStream to a given uri.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            the uri to write to
+&nbsp;     * @return an writable OutputStream
+&nbsp;     */
+&nbsp;    OutputStream write(URI uri) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Opens an InputStream to a given uri.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            the uri to write from
+&nbsp;     * @return a readable InputStream
+&nbsp;     */
+&nbsp;    InputStream read(URI uri) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copy resource.
+&nbsp;     *
+&nbsp;     * @param sourceResource
+&nbsp;     *            source file as uri
+&nbsp;     * @param targetResource
+&nbsp;     *            destination file as uri
+&nbsp;     */
+&nbsp;    void copy(URI sourceResource, URI targetResource) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete content at a given URI.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            the URI to delete
+&nbsp;     * @return true if successful, false otherwise
+&nbsp;     */
+&nbsp;    boolean delete(URI uri) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Moves a resource from a given URI to a given URI.
+&nbsp;     *
+&nbsp;     * @param sourceUri
+&nbsp;     *            the source URI
+&nbsp;     * @param targetUri
+&nbsp;     *            the target URI
+&nbsp;     * @throws IOException
+&nbsp;     *             if directory cannot be accessed
+&nbsp;     */
+&nbsp;    void move(URI sourceUri, URI targetUri) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Renames a resource at a given URI.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            the URI to the resource to rename
+&nbsp;     * @param newName
+&nbsp;     *            the new name of the resource
+&nbsp;     * @return URI of renamed resource
+&nbsp;     */
+&nbsp;    URI rename(URI uri, String newName) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculate all files with given file extension at specified directory
+&nbsp;     * recursively.
+&nbsp;     *
+&nbsp;     * @param directory
+&nbsp;     *            the directory to run through
+&nbsp;     * @return number of files as Integer
+&nbsp;     */
+&nbsp;    Integer getNumberOfFiles(FilenameFilter filter, URI directory);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get size of directory.
+&nbsp;     *
+&nbsp;     * @param directory
+&nbsp;     *            URI to get size
+&nbsp;     * @return size of directory as Long
+&nbsp;     */
+&nbsp;    Long getSizeOfDirectory(URI directory) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the name of a file with extension at a given URI.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            the URI, to get the filename from
+&nbsp;     * @return the name of the file with extension
+&nbsp;     */
+&nbsp;    String getFileNameWithExtension(URI uri);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks, if a file exists.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            the URI, to check, if there is a file.
+&nbsp;     * @return true, if the file exists, false otherwise
+&nbsp;     */
+&nbsp;    boolean fileExist(URI uri);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if a resource at a given uri is a file.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            the uri to check, if there is a file.
+&nbsp;     * @return true, if it is a file, false otherwise
+&nbsp;     */
+&nbsp;    boolean isFile(URI uri);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks, if a URI leads to a directory.
+&nbsp;     *
+&nbsp;     * @param directory
+&nbsp;     *            the URI to check
+&nbsp;     * @return true, if it is a directory
+&nbsp;     */
+&nbsp;    boolean isDirectory(URI directory);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if an URI is readable.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            the URI to check
+&nbsp;     * @return true, if it&#39;s readable, false otherwise
+&nbsp;     */
+&nbsp;    boolean canRead(URI uri);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all sub URIs of an given URI.
+&nbsp;     *
+&nbsp;     * @param filter
+&nbsp;     *            the filter to filter the sub URIs
+&nbsp;     * @param uri
+&nbsp;     *            the URI, to get the sub URIs from
+&nbsp;     * @return a List of sub URIs
+&nbsp;     */
+&nbsp;    List&lt;URI&gt; getSubUris(FilenameFilter filter, URI uri);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the FolderStructure needed for a process in kitodo.
+&nbsp;     *
+&nbsp;     * @param processId
+&nbsp;     *            the id of the process
+&nbsp;     * @return the URI to the process Location
+&nbsp;     */
+&nbsp;    URI createProcessLocation(String processId) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the URI, if a process and it&#39;s location already exists, so no process
+&nbsp;     * location needs to be created. This method is for migration purposes, because
+&nbsp;     * when this interface is used, there will be already processes in the
+&nbsp;     * filesystem.
+&nbsp;     *
+&nbsp;     * @param processId
+&nbsp;     *            the id of the process.
+&nbsp;     * @return The uri of the process location.
+&nbsp;     */
+&nbsp;    URI createUriForExistingProcess(String processId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the uri to a given subtype of a process.
+&nbsp;     *
+&nbsp;     * @param processUri
+&nbsp;     *            the base uri of the process.
+&nbsp;     * @param subType
+&nbsp;     *            the subtype.
+&nbsp;     * @param resourceName
+&nbsp;     *            the id of a specific element at the subtype
+&nbsp;     * @return the URI to the requested resource.
+&nbsp;     */
+&nbsp;    URI getProcessSubTypeUri(URI processUri, String processTitle, ProcessSubType subType, String resourceName);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a symbolic link.
+&nbsp;     *
+&nbsp;     * @param homeUri
+&nbsp;     *            the home URI
+&nbsp;     * @param targetUri
+&nbsp;     *            the target URI for the link
+&nbsp;     * @param onlyRead
+&nbsp;     *            boolean, true if user has only read rights, false otherwise
+&nbsp;     * @param userLogin
+&nbsp;     *            login of the user
+&nbsp;     * @return true, if link creation was successful.
+&nbsp;     */
+&nbsp;    boolean createSymLink(URI homeUri, URI targetUri, boolean onlyRead, String userLogin);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete a symbolic link.
+&nbsp;     *
+&nbsp;     * @param homeUri
+&nbsp;     *            the uri of the home folder, where the link should be deleted.
+&nbsp;     * @return true, if deletion was successful.
+&nbsp;     */
+&nbsp;    boolean deleteSymLink(URI homeUri);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Temporal method until UGH is used.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            URI
+&nbsp;     * @return File
+&nbsp;     */
+&nbsp;    File getFile(URI uri);
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,521 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Rule</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset</a>
+</div>
+
+<h1>Coverage Summary for Class: Rule (org.kitodo.dataeditor.ruleset)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Rule</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (16/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,4%
+  </span>
+  <span class="absValue">
+    (90/154)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.function.Function;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Condition;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.ConditionsMapInterface;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.RestrictivePermit;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Ruleset;
+&nbsp;import org.kitodo.dataeditor.ruleset.xml.Unspecified;
+&nbsp;
+&nbsp;/**
+&nbsp; * A rule that may be in place or not. If there is no corresponding rule element
+&nbsp; * in the ruleset, the rule behaves as if there is a rule that declares no
+&nbsp; * restrictions.
+&nbsp; */
+&nbsp;public class Rule {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(Rule.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Maybe a rule, but maybe not.
+&nbsp;     */
+&nbsp;    private Optional&lt;RestrictivePermit&gt; optionalRestrictivePermit;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The ruleset.
+&nbsp;     */
+&nbsp;    private Ruleset ruleset;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor for a new rule. May come with a restrictive permit or
+&nbsp;     * without.
+&nbsp;     *
+&nbsp;     * @param ruleset
+&nbsp;     *            the ruleset
+&nbsp;     * @param optionalRestrictivePermit
+&nbsp;     *            there may be a restrictive permit, or not
+&nbsp;     */
+<b class="fc">&nbsp;    public Rule(Ruleset ruleset, Optional&lt;RestrictivePermit&gt; optionalRestrictivePermit) {</b>
+<b class="fc">&nbsp;        this.ruleset = ruleset;</b>
+<b class="fc">&nbsp;        this.optionalRestrictivePermit = optionalRestrictivePermit;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns only the allowed sub-divisions by rule, possibly only resorted.
+&nbsp;     *
+&nbsp;     * @param divisions
+&nbsp;     *            list input
+&nbsp;     * @return exit
+&nbsp;     */
+&nbsp;    Map&lt;String, String&gt; getAllowedSubdivisions(Map&lt;String, String&gt; divisions) {
+<b class="fc">&nbsp;        if (!optionalRestrictivePermit.isPresent()) {</b>
+<b class="fc">&nbsp;            return divisions;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Map&lt;String, String&gt; filteredPossibilities = new LinkedHashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        RestrictivePermit restrictivePermit = optionalRestrictivePermit.get();</b>
+<b class="nc">&nbsp;        for (RestrictivePermit permit : restrictivePermit.getPermits()) {</b>
+<b class="nc">&nbsp;            Optional&lt;String&gt; getterResult = permit.getDivision();</b>
+<b class="nc">&nbsp;            if (getterResult.isPresent()) {</b>
+<b class="nc">&nbsp;                String entry = getterResult.get();</b>
+<b class="nc">&nbsp;                if (divisions.containsKey(entry)) {</b>
+<b class="nc">&nbsp;                    filteredPossibilities.put(entry, divisions.get(entry));</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        if (restrictivePermit.getUnspecified().equals(Unspecified.UNRESTRICTED)) {</b>
+<b class="nc">&nbsp;            for (Entry&lt;String, String&gt; entryPair : divisions.entrySet()) {</b>
+<b class="nc">&nbsp;                if (!filteredPossibilities.containsKey(entryPair.getKey())) {</b>
+<b class="nc">&nbsp;                    filteredPossibilities.put(entryPair.getKey(), entryPair.getValue());</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return filteredPossibilities;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the key declarations explicitly allowed in the rule. This is done
+&nbsp;     * by looking into rule and making explicit key declarations for it.
+&nbsp;     *
+&nbsp;     * @return the key declarations explicitly allowed
+&nbsp;     */
+&nbsp;    LinkedList&lt;KeyDeclaration&gt; getExplicitlyPermittedKeys(KeyDeclaration keyDeclaration) {
+<b class="fc">&nbsp;        LinkedList&lt;KeyDeclaration&gt; explicitlyPermittedKeys = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (optionalRestrictivePermit.isPresent()) {</b>
+<b class="fc">&nbsp;            for (RestrictivePermit permit : optionalRestrictivePermit.get().getPermits()) {</b>
+<b class="fc">&nbsp;                Optional&lt;String&gt; optionalKey = permit.getKey();</b>
+<b class="fc">&nbsp;                if (optionalKey.isPresent()) {</b>
+<b class="fc">&nbsp;                    explicitlyPermittedKeys.add(keyDeclaration.getSubkeyDeclaration(optionalKey.get()));</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return explicitlyPermittedKeys;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the maximum count, or maximum if undefined. This is not possible
+&nbsp;     * anyway, otherwise you have to switch to a long.
+&nbsp;     *
+&nbsp;     * @return maximum count
+&nbsp;     */
+&nbsp;    int getMaxOccurs() {
+<b class="nc">&nbsp;        if (optionalRestrictivePermit.isPresent() &amp;&amp; optionalRestrictivePermit.get().getMaxOccurs() != null) {</b>
+<b class="nc">&nbsp;            return optionalRestrictivePermit.get().getMaxOccurs();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return Integer.MAX_VALUE;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the minimum count, or zero if undefined.
+&nbsp;     *
+&nbsp;     * @return minimum count
+&nbsp;     */
+&nbsp;    int getMinOccurs() {
+<b class="fc">&nbsp;        if (optionalRestrictivePermit.isPresent() &amp;&amp; optionalRestrictivePermit.get().getMinOccurs() != null) {</b>
+<b class="fc">&nbsp;            return optionalRestrictivePermit.get().getMinOccurs();</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return 0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a permit rule for a key.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            key for which a permit rule is to be returned
+&nbsp;     * @return permit rule for the key
+&nbsp;     */
+&nbsp;    Rule getRuleForKey(String keyId, boolean division) {
+<b class="fc">&nbsp;        Rule permitRuleForKey = optionalRestrictivePermit.isPresent()</b>
+<b class="fc">&nbsp;                ? new Rule(ruleset,</b>
+<b class="fc">&nbsp;                        optionalRestrictivePermit.get().getPermits().parallelStream()</b>
+<b class="fc">&nbsp;                                .filter(rule -&gt; keyId.equals(rule.getKey().orElse(null))).findAny())</b>
+<b class="fc">&nbsp;                : new Rule(ruleset, Optional.empty());</b>
+<b class="fc">&nbsp;        if (division) {</b>
+<b class="fc">&nbsp;            permitRuleForKey.merge(ruleset.getRuleForKey(keyId));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return permitRuleForKey;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selection items allowed by the rule.
+&nbsp;     *
+&nbsp;     * @param selectItems
+&nbsp;     *            the selection items
+&nbsp;     * @param metadata
+&nbsp;     *            metadata, for conditional select items
+&nbsp;     * @return the selection items
+&nbsp;     */
+&nbsp;    Map&lt;String, String&gt; getSelectItems(Map&lt;String, String&gt; selectItems, List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; metadata) {
+<b class="fc">&nbsp;        if (!optionalRestrictivePermit.isPresent()) {</b>
+<b class="nc">&nbsp;            return selectItems;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Map&lt;String, String&gt; filteredPossibilities = new LinkedHashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        RestrictivePermit restrictivePermit = optionalRestrictivePermit.get();</b>
+<b class="fc">&nbsp;        for (RestrictivePermit permit : getConditionalPermits(restrictivePermit, metadata)) {</b>
+<b class="fc">&nbsp;            Optional&lt;String&gt; getterResult = permit.getValue();</b>
+<b class="fc">&nbsp;            if (getterResult.isPresent()) {</b>
+<b class="fc">&nbsp;                String entry = getterResult.get();</b>
+<b class="fc">&nbsp;                if (selectItems.containsKey(entry)) {</b>
+<b class="fc">&nbsp;                    filteredPossibilities.put(entry, selectItems.get(entry));</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (restrictivePermit.getUnspecified().equals(Unspecified.UNRESTRICTED)) {</b>
+<b class="fc">&nbsp;            for (Entry&lt;String, String&gt; entryPair : selectItems.entrySet()) {</b>
+<b class="fc">&nbsp;                if (!filteredPossibilities.containsKey(entryPair.getKey())) {</b>
+<b class="fc">&nbsp;                    filteredPossibilities.put(entryPair.getKey(), entryPair.getValue());</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return filteredPossibilities;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Collection&lt;RestrictivePermit&gt; getConditionalPermits(RestrictivePermit restrictivePermit,
+&nbsp;            List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; metadata) {
+&nbsp;
+<b class="fc">&nbsp;        Collection&lt;RestrictivePermit&gt; result = new ArrayList&lt;&gt;(restrictivePermit.getPermits());</b>
+<b class="fc">&nbsp;        Map&lt;String, Optional&lt;MetadataEntry&gt;&gt; metadataCache = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        getConditionalPermits(restrictivePermit, metadataCache, metadata, result); // start recursion</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void getConditionalPermits(ConditionsMapInterface conditionsMapInterface,
+&nbsp;            Map&lt;String, Optional&lt;MetadataEntry&gt;&gt; metadataCache, List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; metadata,
+&nbsp;            Collection&lt;RestrictivePermit&gt; result) {
+&nbsp;
+<b class="fc">&nbsp;        for (String conditionKey : conditionsMapInterface.getConditionKeys()) {</b>
+<b class="nc">&nbsp;            Optional&lt;MetadataEntry&gt; possibleMetadata = metadataCache.computeIfAbsent(conditionKey,</b>
+<b class="nc">&nbsp;                key -&gt; getMetadataEntryForKey(key, metadata));</b>
+<b class="nc">&nbsp;            if (possibleMetadata.isPresent()) {</b>
+<b class="nc">&nbsp;                Condition condition = conditionsMapInterface.getCondition(conditionKey, possibleMetadata.get().getValue());</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(condition)) {</b>
+<b class="nc">&nbsp;                    result.addAll(condition.getPermits());</b>
+<b class="nc">&nbsp;                    getConditionalPermits(condition, metadataCache, metadata, result); // recursive</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Optional&lt;MetadataEntry&gt; getMetadataEntryForKey(final String key,
+&nbsp;            final List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; metadata) {
+<b class="nc">&nbsp;        String effectiveKey = key;</b>
+<b class="nc">&nbsp;        int metadataIndex = metadata.size() - 1;</b>
+<b class="nc">&nbsp;        while (effectiveKey.startsWith(&quot;../&quot;)) {</b>
+<b class="nc">&nbsp;            effectiveKey = effectiveKey.substring(3);</b>
+<b class="nc">&nbsp;            metadataIndex--;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (metadataIndex &lt; 0) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;&lt;condition key=\&quot;{}\&quot;&gt; can never be met because metadata has only {} layers&quot;, key,</b>
+<b class="nc">&nbsp;                metadata.size());</b>
+<b class="nc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;MetadataEntry, Boolean&gt; effectiveMetadata = metadata.get(metadataIndex);</b>
+<b class="nc">&nbsp;        MetadataEntry found = null;</b>
+<b class="nc">&nbsp;        for (Entry&lt;MetadataEntry, Boolean&gt; mapEntry : effectiveMetadata.entrySet()) {</b>
+<b class="nc">&nbsp;            MetadataEntry metadataEntry = mapEntry.getKey();</b>
+<b class="nc">&nbsp;            if (metadataEntry.getKey().equals(effectiveKey)) {</b>
+<b class="nc">&nbsp;                found = metadataEntry;</b>
+<b class="nc">&nbsp;                mapEntry.setValue(Boolean.TRUE);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return Optional.ofNullable(found);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns if after rule this is repeatable. (That’s if it’s not a rule, or
+&nbsp;     * says more than 1.)
+&nbsp;     *
+&nbsp;     * @return whether this is repeatable
+&nbsp;     */
+&nbsp;    boolean isRepeatable() {
+<b class="fc">&nbsp;        return !optionalRestrictivePermit.isPresent() || optionalRestrictivePermit.get().getMaxOccurs() == null</b>
+<b class="fc">&nbsp;                || optionalRestrictivePermit.get().getMaxOccurs() &gt; 1;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether unspecified is unrestricted.
+&nbsp;     *
+&nbsp;     * @return whether unspecified is unrestricted
+&nbsp;     */
+&nbsp;    boolean isUnspecifiedUnrestricted() {
+<b class="fc">&nbsp;        return !optionalRestrictivePermit.isPresent()</b>
+<b class="fc">&nbsp;                || optionalRestrictivePermit.get().getUnspecified().equals(Unspecified.UNRESTRICTED);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Combines two rules. The function happens in separate, this is just
+&nbsp;     * wrapping.
+&nbsp;     *
+&nbsp;     * @param other
+&nbsp;     *            the other rule
+&nbsp;     */
+&nbsp;    void merge(Rule other) {
+<b class="fc">&nbsp;        if (optionalRestrictivePermit.isPresent()) {</b>
+<b class="fc">&nbsp;            if (other.optionalRestrictivePermit.isPresent()) {</b>
+<b class="fc">&nbsp;                optionalRestrictivePermit = Optional</b>
+<b class="fc">&nbsp;                        .of(merge(optionalRestrictivePermit.get(), other.optionalRestrictivePermit.get()));</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            optionalRestrictivePermit = other.optionalRestrictivePermit;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Combines two rules into each other. The first rule, if in doubt, is more
+&nbsp;     * specific to the order of elements, otherwise it’s the same as around.
+&nbsp;     * This is so if rule is nesting, and additional rule is found for key, then
+&nbsp;     * merged and nesting rule is first and thus more specific to the case but
+&nbsp;     * other rule otherwise considered as well. This is important but difficult
+&nbsp;     * to implement and so it is done now.
+&nbsp;     *
+&nbsp;     * @param one
+&nbsp;     *            a rule
+&nbsp;     * @param another
+&nbsp;     *            the other rule
+&nbsp;     * @return merged rule
+&nbsp;     */
+&nbsp;    private static RestrictivePermit merge(RestrictivePermit one, RestrictivePermit another) {
+<b class="fc">&nbsp;        RestrictivePermit merged = new RestrictivePermit();</b>
+&nbsp;
+&nbsp;        // we assume that both rules to merge are rules on the same entity
+<b class="fc">&nbsp;        merged.setDivision(one.getDivision());</b>
+<b class="fc">&nbsp;        merged.setKey(one.getKey());</b>
+<b class="fc">&nbsp;        merged.setValue(one.getValue());</b>
+&nbsp;
+<b class="fc">&nbsp;        mergeQuantities(one, another, merged);</b>
+&nbsp;
+&nbsp;        // if one of both is forbidden, then it is forbidden
+<b class="fc">&nbsp;        merged.setUnspecified(</b>
+<b class="fc">&nbsp;            one.getUnspecified().equals(Unspecified.FORBIDDEN) || another.getUnspecified().equals(Unspecified.FORBIDDEN)</b>
+<b class="fc">&nbsp;                    ? Unspecified.FORBIDDEN</b>
+<b class="fc">&nbsp;                    : Unspecified.UNRESTRICTED);</b>
+&nbsp;
+<b class="fc">&nbsp;        mergeConditions(one.getConditions(), another.getConditions(), merged.getConditions());</b>
+<b class="fc">&nbsp;        mergePermits(one.getPermits(), another.getPermits(), merged.getPermits());</b>
+<b class="fc">&nbsp;        return merged;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This is taken out because otherwise checkstyle is unfortunate because
+&nbsp;     * function is length 59 and should only be 50 lines. This is part of the
+&nbsp;     * {@link #merge(RestrictivePermit, RestrictivePermit)} function and connects the quantities. Merge is
+&nbsp;     * with strictness here, that is, the stricter value of both becomes valid.
+&nbsp;     *
+&nbsp;     * @param one
+&nbsp;     *            one rule
+&nbsp;     * @param another
+&nbsp;     *            another rule
+&nbsp;     * @param merged
+&nbsp;     *            merged rule
+&nbsp;     */
+&nbsp;    private static void mergeQuantities(RestrictivePermit one, RestrictivePermit another, RestrictivePermit merged) {
+<b class="fc">&nbsp;        if (one.getMinOccurs() == null) {</b>
+<b class="fc">&nbsp;            merged.setMinOccurs(another.getMinOccurs());</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            if (another.getMinOccurs() == null) {</b>
+<b class="fc">&nbsp;                merged.setMinOccurs(one.getMinOccurs());</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                merged.setMinOccurs(Math.max(one.getMinOccurs(), another.getMinOccurs()));</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (one.getMaxOccurs() == null) {</b>
+<b class="fc">&nbsp;            merged.setMaxOccurs(another.getMaxOccurs());</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            if (another.getMaxOccurs() == null) {</b>
+<b class="nc">&nbsp;                merged.setMaxOccurs(one.getMaxOccurs());</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                merged.setMaxOccurs(Math.min(one.getMaxOccurs(), another.getMaxOccurs()));</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void mergeConditions(List&lt;Condition&gt; one, List&lt;Condition&gt; another, List&lt;Condition&gt; merged) {
+&nbsp;        // if both have no conditions, there are no conditions
+<b class="fc">&nbsp;        boolean oneHasNoConditions = one.isEmpty();</b>
+<b class="fc">&nbsp;        boolean anotherHasNoConditions = another.isEmpty();</b>
+<b class="fc">&nbsp;        if (oneHasNoConditions &amp;&amp; anotherHasNoConditions) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        // if just one side has conditions, apply them
+<b class="nc">&nbsp;        if (!oneHasNoConditions &amp;&amp; anotherHasNoConditions) {</b>
+<b class="nc">&nbsp;            merged.addAll(one);</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;        if (oneHasNoConditions &amp;&amp; !anotherHasNoConditions) {</b>
+<b class="nc">&nbsp;            merged.addAll(another);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        // if both have conditions, they must both apply
+<b class="nc">&nbsp;        Map&lt;Pair&lt;String, String&gt;, Condition&gt; anotherMap = another.stream().collect(</b>
+<b class="nc">&nbsp;            Collectors.toMap(condition -&gt; Pair.of(condition.getKey(), condition.getEquals()), Function.identity()));</b>
+<b class="nc">&nbsp;        for (Condition oneCondition : one) {</b>
+<b class="nc">&nbsp;            Condition anotherCondition = anotherMap.get(Pair.of(oneCondition.getKey(), oneCondition.getEquals()));</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(anotherCondition)) {</b>
+<b class="nc">&nbsp;                merged.add(mergeCondition(oneCondition, anotherCondition));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Condition mergeCondition(Condition one, Condition another) {
+<b class="nc">&nbsp;        Condition result = new Condition();</b>
+&nbsp;
+&nbsp;        // we assume that both conditions are on the same entity
+<b class="nc">&nbsp;        result.setKey(one.getKey());</b>
+<b class="nc">&nbsp;        result.setEquals(one.getEquals());</b>
+&nbsp;
+<b class="nc">&nbsp;        mergeConditions(one.getConditions(), another.getConditions(), result.getConditions());</b>
+<b class="nc">&nbsp;        mergePermits(one.getPermits(), another.getPermits(), result.getPermits());</b>
+<b class="nc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void mergePermits(List&lt;RestrictivePermit&gt; one, List&lt;RestrictivePermit&gt; another, List&lt;RestrictivePermit&gt; mergedPermits) {
+<b class="fc">&nbsp;        HashMap&lt;RestrictivePermit, RestrictivePermit&gt; anotherPermits = new LinkedHashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (RestrictivePermit anotherPermit : another) {</b>
+<b class="fc">&nbsp;            anotherPermits.put(anotherPermit, anotherPermit);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        for (RestrictivePermit onePermit : one) {</b>
+<b class="fc">&nbsp;            if (anotherPermits.containsKey(onePermit)) {</b>
+<b class="fc">&nbsp;                mergedPermits.add(merge(onePermit, anotherPermits.get(onePermit)));</b>
+<b class="fc">&nbsp;                anotherPermits.remove(onePermit);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                mergedPermits.add(onePermit);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        mergedPermits.addAll(anotherPermits.values());</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

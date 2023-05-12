@@ -1,0 +1,195 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetadataScript</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.command</a>
+</div>
+
+<h1>Coverage Summary for Class: MetadataScript (org.kitodo.production.services.command)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetadataScript</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.command;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.text.StrTokenizer;
+&nbsp;
+&nbsp;public class MetadataScript {
+&nbsp;
+&nbsp;    private final String metadataKey;
+&nbsp;    private final String valueSource;
+&nbsp;    private final String typeTarget;
+&nbsp;    private final String variable;
+<b class="fc">&nbsp;    private final List&lt;String&gt; values = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a MetadataScript with given command.
+&nbsp;     * @param command the given command.
+&nbsp;     */
+<b class="fc">&nbsp;    public MetadataScript(String command) {</b>
+<b class="fc">&nbsp;        Map&lt;String, String&gt; parameters = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        StrTokenizer tokenizer = new StrTokenizer(command, &#39; &#39;, &#39;\&quot;&#39;);</b>
+<b class="fc">&nbsp;        while (tokenizer.hasNext()) {</b>
+<b class="fc">&nbsp;            String tok = tokenizer.nextToken();</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(tok) &amp;&amp; tok.contains(&quot;:&quot;)) {</b>
+<b class="fc">&nbsp;                String key = tok.substring(0, tok.indexOf(&#39;:&#39;));</b>
+<b class="fc">&nbsp;                String value = tok.substring(tok.indexOf(&#39;:&#39;) + 1);</b>
+<b class="fc">&nbsp;                parameters.put(key, value);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        metadataKey = parameters.get(&quot;key&quot;);</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(parameters.get(&quot;value&quot;))) {</b>
+<b class="fc">&nbsp;            values.add(parameters.get(&quot;value&quot;));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        valueSource = parameters.get(&quot;source&quot;);</b>
+<b class="fc">&nbsp;        typeTarget = parameters.get(&quot;type&quot;);</b>
+<b class="fc">&nbsp;        variable = parameters.get(&quot;variable&quot;);</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get goal.
+&nbsp;     * @return goal.
+&nbsp;     */
+&nbsp;    public String getMetadataKey() {
+<b class="fc">&nbsp;        return metadataKey;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get source of value.
+&nbsp;     * @return source.
+&nbsp;     */
+&nbsp;    public String getValueSource() {
+<b class="fc">&nbsp;        return valueSource;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get values.
+&nbsp;     * @return values.
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getValues() {
+<b class="fc">&nbsp;        return values;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get typeTarget.
+&nbsp;     * @return typeTarget
+&nbsp;     */
+&nbsp;    public String getTypeTarget() {
+<b class="fc">&nbsp;        return typeTarget;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getVariable() {
+<b class="fc">&nbsp;        return variable;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

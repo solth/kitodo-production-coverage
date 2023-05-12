@@ -1,0 +1,257 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileFormat</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.config.xml.fileformats</a>
+</div>
+
+<h1>Coverage Summary for Class: FileFormat (org.kitodo.config.xml.fileformats)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileFormat</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.config.xml.fileformats;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;import javax.xml.bind.annotation.XmlType;
+&nbsp;
+&nbsp;import org.kitodo.api.imagemanagement.ImageFileFormat;
+&nbsp;import org.kitodo.api.validation.longtermpreservation.FileType;
+&nbsp;
+&nbsp;/**
+&nbsp; * A file format supported by Production. Files of this format can be uploaded
+&nbsp; * to, stored in, and exported from Production. It may be possible to generate
+&nbsp; * or validate them. This class corresponds to the {@code &lt;fileFormat&gt;} tag in
+&nbsp; * {@code kitodo_fileFormats.xml}.
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;@XmlType(name = &quot;&quot;, propOrder = {&quot;label&quot; })
+<b class="fc">&nbsp;public class FileFormat {</b>
+&nbsp;    /**
+&nbsp;     * The undefined language.
+&nbsp;     */
+&nbsp;    private static final String UNDEFINED_LANGUAGE = &quot;und&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The undefined language range.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final List&lt;LanguageRange&gt; UNDEFINED_LANGUAGE_RANGE = LanguageRange.parse(UNDEFINED_LANGUAGE);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The undefined locale.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Locale UNDEFINED_LOCALE = Locale.forLanguageTag(UNDEFINED_LANGUAGE);</b>
+&nbsp;
+&nbsp;    @XmlAttribute(name = &quot;extension&quot;, required = true)
+&nbsp;    protected String extension;
+&nbsp;
+&nbsp;    @XmlAttribute(name = &quot;fileType&quot;, required = true)
+&nbsp;    protected String fileType;
+&nbsp;
+&nbsp;    @XmlAttribute(name = &quot;formatName&quot;)
+&nbsp;    protected String formatName;
+&nbsp;
+&nbsp;    @XmlAttribute(name = &quot;imageFileFormat&quot;)
+&nbsp;    protected String imageFileFormat;
+&nbsp;
+&nbsp;    @XmlElement(required = true)
+&nbsp;    protected List&lt;Label&gt; label;
+&nbsp;
+&nbsp;    @XmlAttribute(name = &quot;mimeType&quot;)
+&nbsp;    protected String mimeType;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the file extension.
+&nbsp;     *
+&nbsp;     * @param withDot
+&nbsp;     *            whether to return the extension with leading dot
+&nbsp;     * @return the extension
+&nbsp;     */
+&nbsp;    public String getExtension(boolean withDot) {
+<b class="fc">&nbsp;        return withDot ? &quot;.&quot;.concat(extension) : extension;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the Internet MIME type.
+&nbsp;     *
+&nbsp;     * @return the MIME type
+&nbsp;     */
+&nbsp;    public String getMimeType() {
+<b class="fc">&nbsp;        return mimeType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the long time preservation validation file type of this file
+&nbsp;     * format, if any.
+&nbsp;     *
+&nbsp;     * @return the validation file type
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the configured value dose not match a member of the
+&nbsp;     *             enumeration
+&nbsp;     */
+&nbsp;    public Optional&lt;FileType&gt; getFileType() {
+<b class="fc">&nbsp;        return fileType == null ? Optional.empty() : Optional.of(FileType.valueOf(fileType));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the image management file format of this file format, if any.
+&nbsp;     *
+&nbsp;     * @return the image management file format
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the configured value dose not match a member of the
+&nbsp;     *             enumeration
+&nbsp;     */
+&nbsp;    public Optional&lt;ImageFileFormat&gt; getImageFileFormat() {
+<b class="fc">&nbsp;        return imageFileFormat == null ? Optional.empty() : Optional.of(ImageFileFormat.valueOf(imageFileFormat));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the Java ImageIO writer format name of this file format, if any.
+&nbsp;     *
+&nbsp;     * @return the writer format name
+&nbsp;     */
+&nbsp;    public Optional&lt;String&gt; getFormatName() {
+<b class="fc">&nbsp;        return Optional.ofNullable(formatName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the label for an undefined language range. Returns the MIME type,
+&nbsp;     * if no label is defined for no language.
+&nbsp;     *
+&nbsp;     * @return the label for an undefined language range
+&nbsp;     */
+&nbsp;    public String getLabel() {
+<b class="fc">&nbsp;        return getLabel(UNDEFINED_LANGUAGE_RANGE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the label. Returns the MIME type, if no label is defined in the
+&nbsp;     * given language.
+&nbsp;     *
+&nbsp;     * @param languageRanges
+&nbsp;     *            user language preferences
+&nbsp;     * @return the label
+&nbsp;     */
+&nbsp;    public String getLabel(List&lt;LanguageRange&gt; languageRanges) {
+<b class="fc">&nbsp;        Map&lt;Locale, String&gt; labels = label.stream()</b>
+<b class="fc">&nbsp;                .collect(Collectors.toMap(locale -&gt; locale.getLanguage().orElse(UNDEFINED_LOCALE), Label::getValue));</b>
+<b class="fc">&nbsp;        Locale lookup = Locale.lookup(languageRanges, labels.keySet());</b>
+<b class="fc">&nbsp;        if (Objects.isNull(lookup) &amp;&amp; !languageRanges.equals(UNDEFINED_LANGUAGE_RANGE)) {</b>
+<b class="fc">&nbsp;            lookup = Locale.lookup(UNDEFINED_LANGUAGE_RANGE, labels.keySet());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return Optional.ofNullable(labels.get(lookup)).orElse(mimeType);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

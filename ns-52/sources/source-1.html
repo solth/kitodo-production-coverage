@@ -1,0 +1,492 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CountableMetadata</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model.bibliography.course.metadata</a>
+</div>
+
+<h1>Coverage Summary for Class: CountableMetadata (org.kitodo.production.model.bibliography.course.metadata)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CountableMetadata</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/104)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model.bibliography.course.metadata;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.MonthDay;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.commons.lang3.tuple.Triple;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.production.forms.CalendarForm;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessDetail;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessTextMetadata;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.metadata.pagination.Paginator;
+&nbsp;import org.kitodo.production.model.bibliography.course.Block;
+&nbsp;import org.kitodo.production.model.bibliography.course.Granularity;
+&nbsp;import org.kitodo.production.model.bibliography.course.IndividualIssue;
+&nbsp;import org.kitodo.production.model.bibliography.course.Issue;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.calendar.CalendarService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Generic metadata that is created using a counter.
+&nbsp; */
+<b class="nc">&nbsp;public class CountableMetadata {</b>
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(CountableMetadata.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Block this metadata counter belongs to. The block is needed to have
+&nbsp;     * access to the other issues, which—together with the start value and step
+&nbsp;     * size—define the value of the counter on a given day.
+&nbsp;     */
+&nbsp;    private Block block;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Date and issue this counter appears the first time,
+&nbsp;     * boolean to check if this metadata counter is only associated to issue or not.
+&nbsp;     */
+&nbsp;    private Triple&lt;LocalDate, Issue, Boolean&gt; create;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Date and issue this counter does no longer appear on. May be null, indicating that no end issue has been set.
+&nbsp;     */
+&nbsp;    private Pair&lt;LocalDate, Issue&gt; delete;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata type to create with this counter.
+&nbsp;     */
+&nbsp;    private String metadataType;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Value to start counting with.
+&nbsp;     */
+<b class="nc">&nbsp;    private String startValue = &quot;&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Step size of the counter (for each issue, or for each day, or for each
+&nbsp;     * week, etc.) May be null for metadata constants which are not
+&nbsp;     * incremented.
+&nbsp;     */
+&nbsp;    private Granularity stepSize;
+&nbsp;
+&nbsp;    private ProcessDetail metadataDetail;
+&nbsp;
+<b class="nc">&nbsp;    private List&lt;ProcessDetail&gt; allMetadataTypes = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new countable metadata.
+&nbsp;     *
+&nbsp;     * @param block
+&nbsp;     *            Block this metadata counter is defined in
+&nbsp;     * @param create as a Pair
+&nbsp;     *            first issue to be counted
+&nbsp;     */
+<b class="nc">&nbsp;    public CountableMetadata(Block block, Pair&lt;LocalDate, Issue&gt; create) {</b>
+<b class="nc">&nbsp;        this.block = block;</b>
+<b class="nc">&nbsp;        this.create = Triple.of(create.getLeft(), create.getRight(), false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new countable metadata.
+&nbsp;     *
+&nbsp;     * @param block
+&nbsp;     *            Block this metadata counter is defined in
+&nbsp;     * @param create as a Triple
+&nbsp;     *            first issue to be counted
+&nbsp;     */
+<b class="nc">&nbsp;    public CountableMetadata(Block block, Triple&lt;LocalDate, Issue, Boolean&gt; create) {</b>
+<b class="nc">&nbsp;        this.block = block;</b>
+<b class="nc">&nbsp;        this.create = create;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the edit mode for the given issue, or {@code null} if the
+&nbsp;     * metadata is not at this issue.
+&nbsp;     *
+&nbsp;     * @param selectedIssue
+&nbsp;     *            issue to return the edit mode for
+&nbsp;     * @return the edit mode for that issue
+&nbsp;     */
+&nbsp;    public MetadataEditMode getEditMode(Pair&lt;LocalDate, Issue&gt; selectedIssue) {
+<b class="nc">&nbsp;        int creation = new IssueComparator(block).compare(selectedIssue, Pair.of(this.create.getLeft(), this.create.getMiddle()));</b>
+<b class="nc">&nbsp;        if (creation &lt; 0) {</b>
+<b class="nc">&nbsp;            return MetadataEditMode.HIDDEN;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (creation == 0) {</b>
+<b class="nc">&nbsp;            return MetadataEditMode.DEFINE;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int deletion = new IssueComparator(block).compare(selectedIssue, delete);</b>
+<b class="nc">&nbsp;        if (deletion &lt; 0) {</b>
+<b class="nc">&nbsp;            return MetadataEditMode.CONTINUE;</b>
+<b class="nc">&nbsp;        } else if (deletion == 0) {</b>
+<b class="nc">&nbsp;            if (Objects.isNull(block.getMetadata(metadataType, selectedIssue, true))) {</b>
+<b class="nc">&nbsp;                return MetadataEditMode.DELETE;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return MetadataEditMode.HIDDEN;</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            return MetadataEditMode.HIDDEN;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets create.
+&nbsp;     *
+&nbsp;     * @return value of create
+&nbsp;     */
+&nbsp;    public Triple&lt;LocalDate, Issue, Boolean&gt; getCreate() {
+<b class="nc">&nbsp;        return create;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get create.
+&nbsp;     *
+&nbsp;     * @return value of create as java.lang.String
+&nbsp;     */
+&nbsp;    public String getCreateAsString() {
+<b class="nc">&nbsp;        return CalendarService.dateIssueToString(Pair.of(this.create.getLeft(), this.create.getMiddle()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get delete.
+&nbsp;     *
+&nbsp;     * @return value of delete as java.lang.String
+&nbsp;     */
+&nbsp;    public String getDelete() {
+<b class="nc">&nbsp;        if (Objects.isNull(delete)) {</b>
+<b class="nc">&nbsp;            return DateTimeFormatter.ISO_DATE.format(block.getLastAppearance());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return CalendarService.dateIssueToString(delete);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the metadata type of this metadata.
+&nbsp;     *
+&nbsp;     * @return the metadata type of this metadata
+&nbsp;     */
+&nbsp;    public String getMetadataType() {
+<b class="nc">&nbsp;        return metadataType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the start value of the countable metadata.
+&nbsp;     *
+&nbsp;     * @return the start value
+&nbsp;     */
+&nbsp;    public String getStartValue() {
+<b class="nc">&nbsp;        return startValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the step size for counting this metadata.
+&nbsp;     *
+&nbsp;     * @return the step size
+&nbsp;     */
+&nbsp;    public Granularity getStepSize() {
+<b class="nc">&nbsp;        return stepSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the counter value for a given issue.
+&nbsp;     *
+&nbsp;     * @param selectedIssue
+&nbsp;     *            issue to return the counter value for
+&nbsp;     * @param yearStart
+&nbsp;     *            first day of the year
+&nbsp;     * @return the counter value for that issue
+&nbsp;     */
+&nbsp;    public String getValue(Pair&lt;LocalDate, Issue&gt; selectedIssue, MonthDay yearStart) {
+<b class="nc">&nbsp;        assert new IssueComparator(block).compare(selectedIssue, Pair.of(this.create.getLeft(), this.create.getMiddle())) &gt;= 0;</b>
+<b class="nc">&nbsp;        Paginator values = new Paginator(startValue);</b>
+<b class="nc">&nbsp;        int breakMark = 0;</b>
+<b class="nc">&nbsp;        for (LocalDate i = create.getLeft(); i.compareTo(selectedIssue.getLeft()) &lt;= 0; i = i.plusDays(1)) {</b>
+<b class="nc">&nbsp;            boolean first = i.equals(create.getLeft());</b>
+<b class="nc">&nbsp;            for (IndividualIssue issue : block.getIndividualIssues(i)) {</b>
+<b class="nc">&nbsp;                if (first &amp;&amp; block.getIssueIndex(issue.getIssue()) &lt; block.getIssueIndex(create.getMiddle())) {</b>
+<b class="nc">&nbsp;                    continue;</b>
+<b class="nc">&nbsp;                } else if (first) {</b>
+<b class="nc">&nbsp;                    if (stepSize != null) {</b>
+<b class="nc">&nbsp;                        first = false;</b>
+<b class="nc">&nbsp;                        breakMark = issue.getBreakMark(stepSize, yearStart);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                } else if (stepSize != null) {</b>
+<b class="nc">&nbsp;                    int currentBreakMark = issue.getBreakMark(stepSize, yearStart);</b>
+<b class="nc">&nbsp;                    if (breakMark != currentBreakMark) {</b>
+<b class="nc">&nbsp;                        values.next();</b>
+<b class="nc">&nbsp;                        breakMark = currentBreakMark;</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="nc">&nbsp;                if (new IssueComparator(block).compare(selectedIssue, Pair.of(i, issue.getIssue())) == 0) {</b>
+<b class="nc">&nbsp;                    return values.next();</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new IllegalStateException(&quot;Issue “&quot; + selectedIssue.getRight().getHeading() + &quot;” not found on &quot;</b>
+<b class="nc">&nbsp;                + DateTimeFormatter.ISO_LOCAL_DATE.format(selectedIssue.getLeft()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns true, if the given metadataType and time point of creation or
+&nbsp;     * deletion match.
+&nbsp;     *
+&nbsp;     * @param metadataType
+&nbsp;     *            metadata type to compare, null will be true with any
+&nbsp;     *            metadata type
+&nbsp;     * @param issue
+&nbsp;     *            issue time point
+&nbsp;     * @param create
+&nbsp;     *            if true, compare create time, else compare delete time
+&nbsp;     * @return true, if the given metadataType and time point of creation match
+&nbsp;     */
+&nbsp;    public boolean matches(String metadataType, Pair&lt;LocalDate, Issue&gt; issue, Boolean create) {
+<b class="nc">&nbsp;        if (Objects.isNull(metadataType) || metadataType.equals(this.metadataType)) {</b>
+<b class="nc">&nbsp;            if (this.create.getRight()) {</b>
+<b class="nc">&nbsp;                return  Objects.nonNull(issue) &amp;&amp; Objects.equals(this.create.getMiddle(), issue.getRight());</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return (Objects.isNull(create)</b>
+<b class="nc">&nbsp;                        &amp;&amp; new IssueComparator(block).compare(Pair.of(this.create.getLeft(), this.create.getMiddle()), issue) &lt;= 0</b>
+<b class="nc">&nbsp;                        &amp;&amp; (Objects.isNull(delete) || new IssueComparator(block).compare(issue, delete) &lt; 0)</b>
+<b class="nc">&nbsp;                        || Boolean.TRUE.equals(create) &amp;&amp; Pair.of(this.create.getLeft(), this.create.getMiddle()).equals(issue)</b>
+<b class="nc">&nbsp;                        || Boolean.FALSE.equals(create)</b>
+<b class="nc">&nbsp;                        &amp;&amp; (Objects.isNull(issue) &amp;&amp; Objects.isNull(this.delete) || issue.equals(this.delete)));</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the delete of the countable metadata.
+&nbsp;     *
+&nbsp;     * @param delete
+&nbsp;     *            the delete to set
+&nbsp;     */
+&nbsp;    public void setDelete(Pair&lt;LocalDate, Issue&gt; delete) {
+<b class="nc">&nbsp;        this.delete = delete;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the metadata type of the countable metadata.
+&nbsp;     *
+&nbsp;     * @param metadataView
+&nbsp;     *            the metadata type to set
+&nbsp;     */
+&nbsp;    public void setMetadataType(String metadataView) {
+<b class="nc">&nbsp;        this.metadataType = metadataView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the step size of the countable metadata.
+&nbsp;     *
+&nbsp;     * @param stepSize
+&nbsp;     *            the step size to set
+&nbsp;     */
+&nbsp;    public void setStepSize(Granularity stepSize) {
+<b class="nc">&nbsp;        this.stepSize = stepSize;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the start value of the countable metadata.
+&nbsp;     *
+&nbsp;     * @param startValue
+&nbsp;     *            the start value to set
+&nbsp;     */
+&nbsp;    public void setStartValue(String startValue) {
+<b class="nc">&nbsp;        ((ProcessTextMetadata) metadataDetail).setValue(startValue);</b>
+<b class="nc">&nbsp;        this.startValue = startValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets metadataDetail.
+&nbsp;     *
+&nbsp;     * @return value of metadataDetail
+&nbsp;     */
+&nbsp;    public ProcessDetail getMetadataDetail() {
+<b class="nc">&nbsp;        return metadataDetail;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets metadataDetail.
+&nbsp;     *
+&nbsp;     * @param metadataDetail value of metadataDetail
+&nbsp;     */
+&nbsp;    public void setMetadataDetail(ProcessDetail metadataDetail) {
+<b class="nc">&nbsp;        this.metadataDetail = metadataDetail;</b>
+<b class="nc">&nbsp;        this.metadataType = this.metadataDetail.getMetadataID();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of selectable metadata types.
+&nbsp;     *
+&nbsp;     * @return the map of metadata types
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDetail&gt; getAllMetadataTypes() {
+<b class="nc">&nbsp;        if (Objects.isNull(allMetadataTypes)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                Process process = ServiceManager.getProcessService().getById(CalendarForm.getParentId());</b>
+<b class="nc">&nbsp;                allMetadataTypes = new ArrayList&lt;&gt;(CalendarService.getAddableMetadataTable(process));</b>
+&nbsp;
+<b class="nc">&nbsp;            } catch (DAOException | DataException | IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;Unable to load metadata types: &quot; + e.getMessage());</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(metadataDetail)) {</b>
+<b class="nc">&nbsp;            for (int i = 0; i &lt; allMetadataTypes.size(); i++) {</b>
+<b class="nc">&nbsp;                if (allMetadataTypes.get(i).getMetadataID().equals(metadataDetail.getMetadataID())) {</b>
+<b class="nc">&nbsp;                    allMetadataTypes.set(i, metadataDetail);</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return allMetadataTypes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a human-readable concise description of this countable metadata.
+&nbsp;     *
+&nbsp;     * @return a human-readable description of this metadata
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        StringBuilder stringBuilder = new StringBuilder();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            for (Metadata metadata : metadataDetail.getMetadataWithFilledValues()) {</b>
+<b class="nc">&nbsp;                stringBuilder.append(metadata);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        stringBuilder.append(&quot; from &quot;);</b>
+<b class="nc">&nbsp;        stringBuilder.append(DateTimeFormatter.ISO_DATE.format(create.getLeft()));</b>
+<b class="nc">&nbsp;        stringBuilder.append(&quot;, &quot;);</b>
+<b class="nc">&nbsp;        stringBuilder.append(create.getMiddle().getHeading());</b>
+<b class="nc">&nbsp;        if (delete == null) {</b>
+<b class="nc">&nbsp;            stringBuilder.append(&quot; infinitely&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            stringBuilder.append(&quot; to &quot;);</b>
+<b class="nc">&nbsp;            stringBuilder.append(DateTimeFormatter.ISO_DATE.format(delete.getLeft()));</b>
+<b class="nc">&nbsp;            stringBuilder.append(&quot;, &quot;);</b>
+<b class="nc">&nbsp;            stringBuilder.append(delete.getRight().getHeading());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(stepSize)) {</b>
+<b class="nc">&nbsp;            stringBuilder.append(&quot;, step size &quot;);</b>
+<b class="nc">&nbsp;            stringBuilder.append(stepSize);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return stringBuilder.toString();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

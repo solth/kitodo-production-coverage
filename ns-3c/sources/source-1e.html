@@ -1,0 +1,939 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProjectForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: ProjectForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProjectForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/55)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/249)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.TreeMap;
+&nbsp;import java.util.function.Function;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.annotation.PostConstruct;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.faces.context.ExternalContext;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;import javax.inject.Named;
+&nbsp;import javax.xml.bind.JAXBException;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.xml.fileformats.FileFormat;
+&nbsp;import org.kitodo.config.xml.fileformats.FileFormatsConfig;
+&nbsp;import org.kitodo.data.database.beans.Folder;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.ProjectDeletionException;
+&nbsp;import org.kitodo.forms.FolderGenerator;
+&nbsp;import org.kitodo.production.controller.SecurityAccessController;
+&nbsp;import org.kitodo.production.dto.ProjectDTO;
+&nbsp;import org.kitodo.production.dto.TemplateDTO;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.model.LazyDTOModel;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ProjectService;
+&nbsp;
+&nbsp;@Named(&quot;ProjectForm&quot;)
+&nbsp;@SessionScoped
+&nbsp;public class ProjectForm extends BaseForm {
+&nbsp;    public static final String MIMETYPE_PREFIX_AUDIO = &quot;audio&quot;;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(ProjectForm.class);</b>
+&nbsp;    public static final String MIMETYPE_PREFIX_VIDEO = &quot;video&quot;;
+&nbsp;    private Project project;
+<b class="nc">&nbsp;    private List&lt;Template&gt; deletedTemplates = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;    private boolean locked = true;</b>
+&nbsp;    private static final String TITLE_USED = &quot;projectTitleAlreadyInUse&quot;;
+&nbsp;    private Boolean hasProcesses;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * An encapsulation of the content generator properties of the folder in a
+&nbsp;     * way suitable to the JSF design.
+&nbsp;     */
+<b class="nc">&nbsp;    private FolderGenerator generator = new FolderGenerator(this.myFolder);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize the list of displayed list columns.
+&nbsp;     */
+&nbsp;    @PostConstruct
+&nbsp;    public void init() {
+&nbsp;        // Lists of available list columns
+<b class="nc">&nbsp;        columns = new ArrayList&lt;&gt;();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;project&quot;));</b>
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;template&quot;));</b>
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;workflow&quot;));</b>
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;docket&quot;));</b>
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;ruleset&quot;));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // Lists of selected list columns
+<b class="nc">&nbsp;        selectedColumns = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        selectedColumns.addAll(ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;project&quot;));</b>
+<b class="nc">&nbsp;        selectedColumns</b>
+<b class="nc">&nbsp;                .addAll(ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;template&quot;));</b>
+<b class="nc">&nbsp;        selectedColumns</b>
+<b class="nc">&nbsp;                .addAll(ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;workflow&quot;));</b>
+<b class="nc">&nbsp;        selectedColumns.addAll(ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;docket&quot;));</b>
+<b class="nc">&nbsp;        selectedColumns.addAll(ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;ruleset&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The folder currently under edit in the pop-up dialog.
+&nbsp;     */
+&nbsp;    /*
+&nbsp;     * This is a hack. The clean solution would be to have an inner class bean
+&nbsp;     * for the data table row a dialog, but this approach was introduced
+&nbsp;     * decades ago and has been maintained until today.
+&nbsp;     */
+&nbsp;    private Folder myFolder;
+&nbsp;    private Project baseProject;
+&nbsp;
+&nbsp;    // lists accepting the preliminary actions of adding and deleting folders
+&nbsp;    // it needs the execution of commit folders to make these changes
+&nbsp;    // permanent
+<b class="nc">&nbsp;    private List&lt;Integer&gt; newFolders = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;    private List&lt;Integer&gt; deletedFolders = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    private boolean copyTemplates;
+&nbsp;
+<b class="nc">&nbsp;    private final String projectEditPath = MessageFormat.format(REDIRECT_PATH, &quot;projectEdit&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;    private String projectEditReferer = DEFAULT_LINK;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Cash for the list of possible MIME types. So that the list does not have
+&nbsp;     * to be read from file several times for one page load.
+&nbsp;     */
+<b class="nc">&nbsp;    private Map&lt;String, String&gt; mimeTypes = Collections.emptyMap();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Empty default constructor that also sets the LazyDTOModel instance of
+&nbsp;     * this bean.
+&nbsp;     */
+&nbsp;    public ProjectForm() {
+<b class="nc">&nbsp;        super();</b>
+<b class="nc">&nbsp;        super.setLazyDTOModel(new LazyDTOModel(ServiceManager.getProjectService()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method deletes folders by their IDs in the list.
+&nbsp;     *
+&nbsp;     * @param folderIds
+&nbsp;     *            IDs of folders to delete
+&nbsp;     */
+&nbsp;    private void removeFoldersFromProject(List&lt;Integer&gt; folderIds) {
+<b class="nc">&nbsp;        if (Objects.nonNull(project)) {</b>
+<b class="nc">&nbsp;            for (Integer id : folderIds) {</b>
+<b class="nc">&nbsp;                for (Folder f : project.getFolders()) {</b>
+<b class="nc">&nbsp;                    if (Objects.isNull(f.getId()) ? Objects.isNull(id) : f.getId().equals(id)) {</b>
+<b class="nc">&nbsp;                        project.getFolders().remove(f);</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * this method flushes the newFolders list, thus makes them permanent and
+&nbsp;     * deletes those marked for deleting, making the removal permanent.
+&nbsp;     */
+&nbsp;    private void commitFolders() throws DAOException {
+&nbsp;        // resetting the list of new folders
+<b class="nc">&nbsp;        newFolders = new ArrayList&lt;&gt;();</b>
+&nbsp;        // deleting the folders marked for deletion
+<b class="nc">&nbsp;        removeFoldersFromProject(deletedFolders);</b>
+&nbsp;        // resetting the list of folders marked for deletion
+<b class="nc">&nbsp;        deletedFolders = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This needs to be executed in order to rollback adding of folders.
+&nbsp;     */
+&nbsp;    public void cancel() {
+&nbsp;        // flushing new folders
+<b class="nc">&nbsp;        removeFoldersFromProject(newFolders);</b>
+&nbsp;        // resetting the list of new folders
+<b class="nc">&nbsp;        newFolders = new ArrayList&lt;&gt;();</b>
+&nbsp;        // resetting the List of folders marked for deletion
+<b class="nc">&nbsp;        deletedFolders = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new project.
+&nbsp;     *
+&nbsp;     * @return page address
+&nbsp;     */
+&nbsp;    public String newProject() {
+<b class="nc">&nbsp;        this.project = new Project();</b>
+<b class="nc">&nbsp;        this.locked = false;</b>
+<b class="nc">&nbsp;        this.project.setClient(ServiceManager.getUserService().getSessionClientOfAuthenticatedUser());</b>
+<b class="nc">&nbsp;        return projectEditPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Duplicate the selected project.
+&nbsp;     *
+&nbsp;     * @param itemId
+&nbsp;     *            ID of the project to duplicate
+&nbsp;     * @return page address; either redirect to the edit project page or return
+&nbsp;     *         &#39;null&#39; if the project could not be retrieved, which will prompt
+&nbsp;     *         JSF to remain on the same page and reuse the bean.
+&nbsp;     */
+&nbsp;    public String duplicate(Integer itemId) {
+<b class="nc">&nbsp;        setCopyTemplates(true);</b>
+<b class="nc">&nbsp;        this.locked = false;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            this.baseProject = ServiceManager.getProjectService().getById(itemId);</b>
+<b class="nc">&nbsp;            this.project = ServiceManager.getProjectService().duplicateProject(baseProject);</b>
+<b class="nc">&nbsp;            this.setSaveDisabled(false);</b>
+<b class="nc">&nbsp;            return projectEditPath + &quot;&amp;referer=projects&quot;;</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DUPLICATE, new Object[] {ObjectType.PROJECT.getTranslationSingular() }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Saves current project if title is not empty and redirects to projects
+&nbsp;     * page.
+&nbsp;     *
+&nbsp;     * @return page or null
+&nbsp;     */
+&nbsp;    public String save() {
+<b class="nc">&nbsp;        ServiceManager.getProjectService().evict(project);</b>
+<b class="nc">&nbsp;        if (isTitleValid()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                addFirstUserToNewProject();</b>
+&nbsp;
+<b class="nc">&nbsp;                commitTemplates();</b>
+<b class="nc">&nbsp;                commitFolders();</b>
+&nbsp;
+<b class="nc">&nbsp;                ServiceManager.getProjectService().save(project, true);</b>
+&nbsp;
+<b class="nc">&nbsp;                return projectsPage;</b>
+<b class="nc">&nbsp;            } catch (DAOException | DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.PROJECT.getTranslationSingular() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void commitTemplates() throws DAOException {
+<b class="nc">&nbsp;        if (copyTemplates) {</b>
+<b class="nc">&nbsp;            for (Template template : baseProject.getTemplates()) {</b>
+<b class="nc">&nbsp;                template.getProjects().add(project);</b>
+<b class="nc">&nbsp;                project.getTemplates().add(template);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            setCopyTemplates(false);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        for (Template template : project.getTemplates()) {</b>
+<b class="nc">&nbsp;            ServiceManager.getTemplateService().saveToDatabase(template);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        for (Template template : deletedTemplates) {</b>
+<b class="nc">&nbsp;            ServiceManager.getTemplateService().saveToDatabase(template);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        deletedTemplates = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isTitleValid() {
+<b class="nc">&nbsp;        String projectTitle = this.project.getTitle();</b>
+<b class="nc">&nbsp;        if (StringUtils.isNotBlank(projectTitle)) {</b>
+<b class="nc">&nbsp;            List&lt;Project&gt; projects = ServiceManager.getProjectService().getProjectsWithTitleAndClient(projectTitle,</b>
+<b class="nc">&nbsp;                    this.project.getClient().getId());</b>
+<b class="nc">&nbsp;            int count = projects.size();</b>
+<b class="nc">&nbsp;            if (count &gt; 1) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_OCCURRED, TITLE_USED);</b>
+<b class="nc">&nbsp;                return false;</b>
+<b class="nc">&nbsp;            } else if (count == 1) {</b>
+<b class="nc">&nbsp;                Integer projectId = this.project.getId();</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(projectId) &amp;&amp; projects.get(0).getId().equals(projectId)) {</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_OCCURRED, TITLE_USED);</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Helper.setErrorMessage(ERROR_INCOMPLETE_DATA, &quot;errorProjectNoTitleGiven&quot;);</b>
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addFirstUserToNewProject() throws DAOException {
+<b class="nc">&nbsp;        if (this.project.getUsers().isEmpty()) {</b>
+<b class="nc">&nbsp;            User user = ServiceManager.getUserService().getCurrentUser();</b>
+<b class="nc">&nbsp;            user.getProjects().add(this.project);</b>
+<b class="nc">&nbsp;            this.project.getUsers().add(user);</b>
+<b class="nc">&nbsp;            ServiceManager.getProjectService().saveToDatabase(this.project);</b>
+<b class="nc">&nbsp;            ServiceManager.getUserService().saveToDatabase(user);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove.
+&nbsp;     */
+&nbsp;    public void delete(int projectId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            ProjectService.delete(projectId);</b>
+<b class="nc">&nbsp;        } catch (DAOException | DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DELETING, new Object[] {ObjectType.PROJECT.getTranslationSingular() }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;        } catch (ProjectDeletionException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add folder.
+&nbsp;     *
+&nbsp;     * @return String
+&nbsp;     */
+&nbsp;    public String addFolder() {
+<b class="nc">&nbsp;        this.myFolder = new Folder();</b>
+<b class="nc">&nbsp;        this.myFolder.setProject(this.project);</b>
+<b class="nc">&nbsp;        this.generator = new FolderGenerator(myFolder);</b>
+<b class="nc">&nbsp;        this.newFolders.add(this.myFolder.getId());</b>
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save folder.
+&nbsp;     */
+&nbsp;    public void saveFolder() {
+<b class="nc">&nbsp;        if (!this.project.getFolders().contains(this.myFolder)) {</b>
+<b class="nc">&nbsp;            this.project.getFolders().add(this.myFolder);</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getProjectService().saveToDatabase(this.project);</b>
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.PROJECT.getTranslationSingular() },</b>
+&nbsp;                        logger, e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            List&lt;Folder&gt; folders = this.project.getFolders();</b>
+<b class="nc">&nbsp;            for (Folder folder : folders) {</b>
+<b class="nc">&nbsp;                if (this.myFolder.getFileGroup().equals(folder.getFileGroup()) &amp;&amp; folder != myFolder) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(&quot;errorDuplicateFilegroup&quot;,</b>
+<b class="nc">&nbsp;                        new Object[] {ObjectType.FOLDER.getTranslationPlural() });</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete folder.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String deleteFolder() {
+<b class="nc">&nbsp;        if (Objects.isNull(myFolder.getId())) {</b>
+<b class="nc">&nbsp;            project.getFolders().remove(myFolder);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            deletedFolders.add(this.myFolder.getId());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of templates assignable to this project. Templates are
+&nbsp;     * assignable when they are not assigned already to this project and they
+&nbsp;     * belong to the same client as the project and user which edits this
+&nbsp;     * project.
+&nbsp;     *
+&nbsp;     * @return list of assignable templates
+&nbsp;     */
+&nbsp;    public List&lt;TemplateDTO&gt; getTemplates() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getTemplateService().findAllAvailableForAssignToProject(this.project.getId());</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {ObjectType.TEMPLATE.getTranslationPlural() },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;            return new LinkedList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get import configurations.
+&nbsp;     *
+&nbsp;     * @return import configurations
+&nbsp;     */
+&nbsp;    public List&lt;ImportConfiguration&gt; getImportConfigurations() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getImportConfigurationService().getAll();</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add template to project.
+&nbsp;     *
+&nbsp;     * @return stay on the same page
+&nbsp;     */
+&nbsp;    public String addTemplate() {
+<b class="nc">&nbsp;        int templateId = 0;</b>
+<b class="nc">&nbsp;        String templateIdString = Helper.getRequestParameter(ID_PARAMETER);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(templateIdString)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                templateId = Integer.parseInt(templateIdString);</b>
+<b class="nc">&nbsp;                Template template = ServiceManager.getTemplateService().getById(templateId);</b>
+<b class="nc">&nbsp;                if (!this.project.getTemplates().contains(template)) {</b>
+<b class="nc">&nbsp;                    this.project.getTemplates().add(template);</b>
+<b class="nc">&nbsp;                    template.getProjects().add(this.project);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_DATABASE_READING,</b>
+<b class="nc">&nbsp;                        new Object[] {ObjectType.TEMPLATE.getTranslationSingular(), templateId }, logger, e);</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove template from project.
+&nbsp;     *
+&nbsp;     * @return stay on the same page
+&nbsp;     */
+&nbsp;    public String deleteTemplate() {
+<b class="nc">&nbsp;        String templateIdString = Helper.getRequestParameter(ID_PARAMETER);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(templateIdString)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                int templateId = Integer.parseInt(templateIdString);</b>
+<b class="nc">&nbsp;                for (Template template : this.project.getTemplates()) {</b>
+<b class="nc">&nbsp;                    if (template.getId().equals(templateId)) {</b>
+<b class="nc">&nbsp;                        this.project.getTemplates().remove(template);</b>
+<b class="nc">&nbsp;                        template.getProjects().remove(this.project);</b>
+<b class="nc">&nbsp;                        this.deletedTemplates.add(template);</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Switch the lock status of the form.
+&nbsp;     */
+&nbsp;    public void switchLock() {
+<b class="nc">&nbsp;        locked = !locked;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the locked status of the form.
+&nbsp;     *
+&nbsp;     * @return te value of locked
+&nbsp;     */
+&nbsp;    public boolean isLocked() {
+<b class="nc">&nbsp;        return locked;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get project.
+&nbsp;     *
+&nbsp;     * @return Project object
+&nbsp;     */
+&nbsp;    public Project getProject() {
+<b class="nc">&nbsp;        return this.project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set my project.
+&nbsp;     *
+&nbsp;     * @param project
+&nbsp;     *            Project object
+&nbsp;     */
+&nbsp;    public void setProject(Project project) {
+&nbsp;        // has to be called if a page back move was done
+<b class="nc">&nbsp;        cancel();</b>
+<b class="nc">&nbsp;        this.project = project;</b>
+<b class="nc">&nbsp;        hasProcesses = !project.getProcesses().isEmpty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set copy templates.
+&nbsp;     *
+&nbsp;     * @param copyTemplates
+&nbsp;     *            as boolean
+&nbsp;     */
+&nbsp;    public void setCopyTemplates(boolean copyTemplates) {
+<b class="nc">&nbsp;        this.copyTemplates = copyTemplates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get copy templates.
+&nbsp;     *
+&nbsp;     * @return value of copy templates
+&nbsp;     */
+&nbsp;    public boolean isCopyTemplates() {
+<b class="nc">&nbsp;        return copyTemplates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The need to commit deleted folders only after the save action requires a
+&nbsp;     * filter, so that those folders marked for delete are not shown anymore.
+&nbsp;     *
+&nbsp;     * @return modified ArrayList
+&nbsp;     */
+&nbsp;    public List&lt;Folder&gt; getFolderList() {
+<b class="nc">&nbsp;        List&lt;Folder&gt; filteredFolderList = new ArrayList&lt;&gt;(this.project.getFolders());</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Integer id : this.deletedFolders) {</b>
+<b class="nc">&nbsp;            for (Folder f : this.project.getFolders()) {</b>
+<b class="nc">&nbsp;                if (Objects.isNull(f.getId()) ? Objects.isNull(id) : f.getId().equals(id)) {</b>
+<b class="nc">&nbsp;                    filteredFolderList.remove(f);</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return filteredFolderList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The need to commit deleted folders only after the save action requires a
+&nbsp;     * filter, so that those folders marked for delete are not shown anymore.
+&nbsp;     *
+&nbsp;     * @return modified ArrayList
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getSelectableFolders() {
+<b class="nc">&nbsp;        return getFolderList().stream().map(folder -&gt; new SelectItem(folder.getFileGroup(), folder.toString()))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if folder list contains audio folder.
+&nbsp;     *
+&nbsp;     * @return true if folder list contains audio folder
+&nbsp;     */
+&nbsp;    public boolean hasAudioFolder() {
+<b class="nc">&nbsp;        return getFolderList().stream().anyMatch(folder -&gt; folder.getMimeType().startsWith(MIMETYPE_PREFIX_AUDIO));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if folder list contains video folder.
+&nbsp;     *
+&nbsp;     * @return true if folder list contains video folder
+&nbsp;     */
+&nbsp;    public boolean hasVideoFolder() {
+<b class="nc">&nbsp;        return getFolderList().stream().anyMatch(folder -&gt; folder.getMimeType().startsWith(MIMETYPE_PREFIX_VIDEO));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Map&lt;String, Folder&gt; getFolderMap() {
+<b class="nc">&nbsp;        return getFolderList().parallelStream().collect(Collectors.toMap(Folder::getFileGroup, Function.identity()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder currently under edit in the pop-up dialog.
+&nbsp;     *
+&nbsp;     * @return the folder currently under edit
+&nbsp;     */
+&nbsp;    public Folder getMyFolder() {
+<b class="nc">&nbsp;        return this.myFolder;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder currently under edit in the pop-up dialog.
+&nbsp;     *
+&nbsp;     * @param myFolder
+&nbsp;     *            folder to set to be under edit now
+&nbsp;     */
+&nbsp;    public void setMyFolder(Folder myFolder) {
+<b class="nc">&nbsp;        this.myFolder = myFolder;</b>
+<b class="nc">&nbsp;        this.generator = new FolderGenerator(myFolder);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an encapsulation to access the generator properties of the folder
+&nbsp;     * in a JSF-friendly way.
+&nbsp;     *
+&nbsp;     * @return the generator controller
+&nbsp;     */
+&nbsp;    public FolderGenerator getGenerator() {
+<b class="nc">&nbsp;        return generator;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of possible MIME types to display them in the drop-down
+&nbsp;     * select.
+&nbsp;     *
+&nbsp;     * @return possible MIME types
+&nbsp;     */
+&nbsp;    public Map&lt;String, String&gt; getMimeTypes() {
+<b class="nc">&nbsp;        if (mimeTypes.isEmpty()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                Locale language = FacesContext.getCurrentInstance().getViewRoot().getLocale();</b>
+<b class="nc">&nbsp;                List&lt;LanguageRange&gt; languages = Collections.singletonList(new LanguageRange(language.toLanguageTag()));</b>
+<b class="nc">&nbsp;                mimeTypes = FileFormatsConfig.getFileFormats().parallelStream()</b>
+<b class="nc">&nbsp;                        .collect(Collectors.toMap(locale -&gt; locale.getLabel(languages), FileFormat::getMimeType,</b>
+<b class="nc">&nbsp;                            (prior, recent) -&gt; recent, TreeMap::new));</b>
+<b class="nc">&nbsp;            } catch (JAXBException | RuntimeException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_READING, new Object[] {e.getMessage() }, logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return mimeTypes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use as source for generation of derived resources
+&nbsp;     * of this project.
+&nbsp;     *
+&nbsp;     * @return the source folder for generation
+&nbsp;     */
+&nbsp;    public String getGeneratorSource() {
+<b class="nc">&nbsp;        Folder source = project.getGeneratorSource();</b>
+<b class="nc">&nbsp;        return Objects.isNull(source) ? null : source.getFileGroup();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use as source for generation of derived resources of
+&nbsp;     * this project.
+&nbsp;     *
+&nbsp;     * @param generatorSource
+&nbsp;     *            source folder for generation to set
+&nbsp;     */
+&nbsp;    public void setGeneratorSource(String generatorSource) {
+<b class="nc">&nbsp;        project.setGeneratorSource(getFolderMap().get(generatorSource));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for the media view.
+&nbsp;     *
+&nbsp;     * @return media view folder
+&nbsp;     */
+&nbsp;    public String getMediaView() {
+<b class="nc">&nbsp;        Folder mediaView = project.getMediaView();</b>
+<b class="nc">&nbsp;        return Objects.isNull(mediaView) ? null : mediaView.getFileGroup();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for the media view.
+&nbsp;     *
+&nbsp;     * @param mediaView
+&nbsp;     *         media view folder
+&nbsp;     */
+&nbsp;    public void setMediaView(String mediaView) {
+<b class="nc">&nbsp;        project.setMediaView(getFolderMap().get(mediaView));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for the audio media view.
+&nbsp;     *
+&nbsp;     * @return audio media view folder
+&nbsp;     */
+&nbsp;    public String getAudioMediaView() {
+<b class="nc">&nbsp;        Folder audioMediaView = project.getAudioMediaView();</b>
+<b class="nc">&nbsp;        return Objects.isNull(audioMediaView) ? null : audioMediaView.getFileGroup();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for the media view.
+&nbsp;     *
+&nbsp;     * @param audioMediaView
+&nbsp;     *         audio media view folder
+&nbsp;     */
+&nbsp;    public void setAudioMediaView(String audioMediaView) {
+<b class="nc">&nbsp;        project.setAudioMediaView(getFolderMap().get(audioMediaView));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for the video media view.
+&nbsp;     *
+&nbsp;     * @return video media view folder
+&nbsp;     */
+&nbsp;    public String getVideoMediaView() {
+<b class="nc">&nbsp;        Folder videoMediaView = project.getVideoMediaView();</b>
+<b class="nc">&nbsp;        return Objects.isNull(videoMediaView) ? null : videoMediaView.getFileGroup();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for the media view.
+&nbsp;     *
+&nbsp;     * @param videoMediaView
+&nbsp;     *         video media view folder
+&nbsp;     */
+&nbsp;    public void setVideoMediaView(String videoMediaView) {
+<b class="nc">&nbsp;        project.setVideoMediaView(getFolderMap().get(videoMediaView));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for preview.
+&nbsp;     *
+&nbsp;     * @return preview folder
+&nbsp;     */
+&nbsp;    public String getPreview() {
+<b class="nc">&nbsp;        Folder preview = project.getPreview();</b>
+<b class="nc">&nbsp;        return Objects.isNull(preview) ? null : preview.getFileGroup();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for preview.
+&nbsp;     *
+&nbsp;     * @param preview
+&nbsp;     *         preview folder
+&nbsp;     */
+&nbsp;    public void setPreview(String preview) {
+<b class="nc">&nbsp;        project.setPreview(getFolderMap().get(preview));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for audio preview.
+&nbsp;     *
+&nbsp;     * @return audio preview folder
+&nbsp;     */
+&nbsp;    public String getAudioPreview() {
+<b class="nc">&nbsp;        Folder audioPreview = project.getAudioPreview();</b>
+<b class="nc">&nbsp;        return Objects.isNull(audioPreview) ? null : audioPreview.getFileGroup();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for audio preview.
+&nbsp;     *
+&nbsp;     * @param audioPreview
+&nbsp;     *         audio preview folder
+&nbsp;     */
+&nbsp;    public void setAudioPreview(String audioPreview) {
+<b class="nc">&nbsp;        project.setAudioPreview(getFolderMap().get(audioPreview));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder to use for video preview.
+&nbsp;     *
+&nbsp;     * @return video preview folder
+&nbsp;     */
+&nbsp;    public String getVideoPreview() {
+<b class="nc">&nbsp;        Folder videoPreview = project.getVideoPreview();</b>
+<b class="nc">&nbsp;        return Objects.isNull(videoPreview) ? null : videoPreview.getFileGroup();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the folder to use for video preview.
+&nbsp;     *
+&nbsp;     * @param videoPreview
+&nbsp;     *         video preview folder
+&nbsp;     */
+&nbsp;    public void setVideoPreview(String videoPreview) {
+<b class="nc">&nbsp;        project.setVideoPreview(getFolderMap().get(videoPreview));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for project edit form.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *         ID of the ruleset to load
+&nbsp;     */
+&nbsp;    public void loadProject(int id) {
+<b class="nc">&nbsp;        SecurityAccessController securityAccessController = new SecurityAccessController();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!securityAccessController.hasAuthorityToEditProject(id)) {</b>
+<b class="nc">&nbsp;                ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();</b>
+<b class="nc">&nbsp;                context.redirect(DEFAULT_LINK);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.PROJECT.getTranslationSingular(), id },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!Objects.equals(id, 0)) {</b>
+<b class="nc">&nbsp;                setProject(ServiceManager.getProjectService().getById(id));</b>
+<b class="nc">&nbsp;                this.locked = true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            setSaveDisabled(true);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.PROJECT.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of projects.
+&nbsp;     *
+&nbsp;     * @return list of projects
+&nbsp;     */
+&nbsp;    public List&lt;ProjectDTO&gt; getProjects() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getProjectService().findAll();</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {ObjectType.PROJECT.getTranslationPlural() },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;            return new LinkedList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set referring view which will be returned when the user clicks &quot;save&quot; or
+&nbsp;     * &quot;cancel&quot; on the project edit page.
+&nbsp;     *
+&nbsp;     * @param referer
+&nbsp;     *            the referring view
+&nbsp;     */
+&nbsp;    public void setProjectEditReferer(String referer) {
+<b class="nc">&nbsp;        if (!referer.isEmpty()) {</b>
+<b class="nc">&nbsp;            if (&quot;projects&quot;.equals(referer)) {</b>
+<b class="nc">&nbsp;                this.projectEditReferer = referer;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                this.projectEditReferer = DEFAULT_LINK;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get project edit page referring view.
+&nbsp;     *
+&nbsp;     * @return project edit page referring view
+&nbsp;     */
+&nbsp;    public String getProjectEditReferer() {
+<b class="nc">&nbsp;        return this.projectEditReferer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return whether project has processes or not.
+&nbsp;     *
+&nbsp;     * @return whether project has processes or not
+&nbsp;     */
+&nbsp;    public Boolean hasProcesses() {
+<b class="nc">&nbsp;        return hasProcesses;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

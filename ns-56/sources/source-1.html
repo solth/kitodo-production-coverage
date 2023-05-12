@@ -1,0 +1,269 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > AESUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.security</a>
+</div>
+
+<h1>Coverage Summary for Class: AESUtil (org.kitodo.production.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AESUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,9%
+  </span>
+  <span class="absValue">
+    (34/37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.security;
+&nbsp;
+&nbsp;import java.security.InvalidAlgorithmParameterException;
+&nbsp;import java.security.InvalidKeyException;
+&nbsp;import java.security.NoSuchAlgorithmException;
+&nbsp;import java.security.SecureRandom;
+&nbsp;import java.security.spec.InvalidKeySpecException;
+&nbsp;import java.security.spec.KeySpec;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Base64;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.crypto.BadPaddingException;
+&nbsp;import javax.crypto.Cipher;
+&nbsp;import javax.crypto.IllegalBlockSizeException;
+&nbsp;import javax.crypto.NoSuchPaddingException;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import javax.crypto.SecretKeyFactory;
+&nbsp;import javax.crypto.spec.IvParameterSpec;
+&nbsp;import javax.crypto.spec.PBEKeySpec;
+&nbsp;import javax.crypto.spec.SecretKeySpec;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;
+<b class="nc">&nbsp;public class AESUtil {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(AESUtil.class);</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * DO NOT CHANGE! Identifier for is encryption check and secret key generation.
+&nbsp;     * If changed are made, encrypted data cannot be restored.
+&nbsp;     */
+&nbsp;    private static final String SALT_PREFIX = &quot;KITODO&quot;;
+&nbsp;
+&nbsp;    private static final int SALT_LENGTH = 16;
+&nbsp;
+&nbsp;    private static final int IV_LENGTH = 16;
+&nbsp;
+&nbsp;    private static final String ALGORITHM = &quot;AES/CBC/PKCS5Padding&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Encrypts a value by the secret using AES/CBC/PKCS5Padding algorithm.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Function generates salt to convert secret to AES-256 secret key and makes
+&nbsp;     * simple secrets more complex. In addition, function generates initialization
+&nbsp;     * vector (iv) to made encrypted value different when original value is the
+&nbsp;     * same. Salt and iv will be become one with the cipher text and result is
+&nbsp;     * converted to base64. As pseudocode the structure is as follows: BASE64( SALT(
+&nbsp;     * SALT_PREFIX + RANDOM ) + CIPHER TEXT + IV ( RANDOM ) )
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param value
+&nbsp;     *            The value to encrypt
+&nbsp;     * @param secret
+&nbsp;     *            The secret from config properties
+&nbsp;     * @return The encrypted value as base64 string.
+&nbsp;     */
+&nbsp;    public static String encrypt(String value, String secret)
+&nbsp;            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+&nbsp;            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException {
+<b class="fc">&nbsp;        if (Objects.isNull(value)) {</b>
+<b class="nc">&nbsp;            return StringUtils.EMPTY;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // generate salt
+<b class="fc">&nbsp;        byte[] salt = new byte[SALT_LENGTH];</b>
+<b class="fc">&nbsp;        new SecureRandom().nextBytes(salt);</b>
+<b class="fc">&nbsp;        System.arraycopy(SALT_PREFIX.getBytes(), 0, salt, 0, SALT_PREFIX.getBytes().length);</b>
+&nbsp;
+&nbsp;        // generate iv
+<b class="fc">&nbsp;        byte[] iv = new byte[IV_LENGTH];</b>
+<b class="fc">&nbsp;        new SecureRandom().nextBytes(iv);</b>
+&nbsp;
+<b class="fc">&nbsp;        Cipher cipher = Cipher.getInstance(ALGORITHM);</b>
+<b class="fc">&nbsp;        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(secret, salt), new IvParameterSpec(iv));</b>
+<b class="fc">&nbsp;        byte[] cipherText = cipher.doFinal(value.getBytes());</b>
+&nbsp;
+&nbsp;        // prefix cipher text with salt and attach iv to the end
+<b class="fc">&nbsp;        byte[] cipherCombined = new byte[SALT_LENGTH + cipherText.length + IV_LENGTH];</b>
+&nbsp;
+<b class="fc">&nbsp;        System.arraycopy(salt, 0, cipherCombined, 0, SALT_LENGTH);</b>
+<b class="fc">&nbsp;        System.arraycopy(cipherText, 0, cipherCombined, SALT_LENGTH, cipherText.length);</b>
+<b class="fc">&nbsp;        System.arraycopy(iv, 0, cipherCombined, SALT_LENGTH + cipherText.length, iv.length);</b>
+&nbsp;
+<b class="fc">&nbsp;        return Base64.getEncoder().encodeToString(cipherCombined);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if value is encrypted.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Function checks if value starts with defined salt prefix after base64
+&nbsp;     * decoding.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param potentialEncryptedValue
+&nbsp;     *            The value to be checked.
+&nbsp;     * @return boolean true if value is encrypted using encrypt function
+&nbsp;     */
+&nbsp;    public static boolean isEncrypted(String potentialEncryptedValue) {
+&nbsp;        try {
+<b class="fc">&nbsp;            if (Objects.nonNull(potentialEncryptedValue)) {</b>
+<b class="fc">&nbsp;                byte[] cipherCombined = Base64.getDecoder().decode(potentialEncryptedValue);</b>
+<b class="fc">&nbsp;                byte[] saltPrefix = Arrays.copyOfRange(cipherCombined, 0, SALT_PREFIX.getBytes().length);</b>
+&nbsp;                // check if cipher combined has salt prefix
+<b class="fc">&nbsp;                return Arrays.equals(saltPrefix, SALT_PREFIX.getBytes());</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="fc">&nbsp;            logger.debug(&quot;Value to encrypt is not a valid base64 string.&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Decrypts encrypted value by the secret using AES/CBC/PKCS5Padding algorithm.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Function splits encrypted value salt, cipher text and iv after base64
+&nbsp;     * decoding. Salt and secret will be used to build AES-256 secret key. With the
+&nbsp;     * help of the iv and the secret key, the cipher text is decrypted and returned.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param encryptValue
+&nbsp;     *            The encrypted value
+&nbsp;     * @param secret
+&nbsp;     *            The secret from config properties
+&nbsp;     * @return The decrypted value.
+&nbsp;     */
+&nbsp;    public static String decrypt(String encryptValue, String secret)
+&nbsp;            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+&nbsp;            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException {
+<b class="fc">&nbsp;        byte[] cipherCombined = Base64.getDecoder().decode(encryptValue);</b>
+&nbsp;
+&nbsp;        // get cipherText and iv from cipherCombined
+<b class="fc">&nbsp;        byte[] salt = Arrays.copyOfRange(cipherCombined, 0, SALT_LENGTH);</b>
+<b class="fc">&nbsp;        byte[] cipherText = Arrays.copyOfRange(cipherCombined, SALT_LENGTH, cipherCombined.length - IV_LENGTH);</b>
+<b class="fc">&nbsp;        byte[] iv = Arrays.copyOfRange(cipherCombined, cipherCombined.length - IV_LENGTH, cipherCombined.length);</b>
+&nbsp;
+<b class="fc">&nbsp;        Cipher cipher = Cipher.getInstance(ALGORITHM);</b>
+<b class="fc">&nbsp;        cipher.init(Cipher.DECRYPT_MODE, getSecretKey(secret, salt), new IvParameterSpec(iv));</b>
+<b class="fc">&nbsp;        byte[] value = cipher.doFinal(cipherText);</b>
+<b class="fc">&nbsp;        return new String(value);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static SecretKey getSecretKey(String secret, byte[] salt)
+&nbsp;            throws InvalidKeySpecException, NoSuchAlgorithmException {
+<b class="fc">&nbsp;        KeySpec spec = new PBEKeySpec(secret.toCharArray(), salt, 65536, 256); // AES-256</b>
+<b class="fc">&nbsp;        SecretKeyFactory f = SecretKeyFactory.getInstance(&quot;PBKDF2WithHmacSHA1&quot;);</b>
+<b class="fc">&nbsp;        byte[] key = f.generateSecret(spec).getEncoded();</b>
+<b class="fc">&nbsp;        return new SecretKeySpec(key, &quot;AES&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

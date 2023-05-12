@@ -1,0 +1,179 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > VersionProvider</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: VersionProvider (org.kitodo.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VersionProvider</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (19/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.net.URL;
+&nbsp;import java.util.Enumeration;
+&nbsp;import java.util.jar.Attributes;
+&nbsp;import java.util.jar.Manifest;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.dataformat.DataFormatVersionProvider;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides methods to get information about module or data format.
+&nbsp; */
+&nbsp;public class VersionProvider {
+<b class="fc">&nbsp;    private static DataFormatVersionProvider dataFormatVersionProvider = new DataFormatVersionProvider();</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(VersionProvider.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private VersionProvider() {
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reading version info out of the manifest file of current jar.
+&nbsp;     *
+&nbsp;     * @return The version info as String. (module or application name - version -
+&nbsp;     *         build time)
+&nbsp;     * @throws IOException
+&nbsp;     *             IOException is thrown if an error occurs while reading the
+&nbsp;     *             MANIFEST.MF file.
+&nbsp;     */
+&nbsp;    public static String getModuleVersionInfo() throws IOException {
+<b class="fc">&nbsp;        Enumeration&lt;URL&gt; resources = Thread.currentThread().getContextClassLoader()</b>
+<b class="fc">&nbsp;                .getResources(&quot;META-INF/MANIFEST.MF&quot;);</b>
+<b class="fc">&nbsp;        while (resources.hasMoreElements()) {</b>
+<b class="fc">&nbsp;            URL manifestUrl = resources.nextElement();</b>
+<b class="fc">&nbsp;            try (InputStream inputStream = manifestUrl.openStream()) {</b>
+<b class="fc">&nbsp;                Manifest manifest = new Manifest(inputStream);</b>
+<b class="fc">&nbsp;                Attributes mainAttributes = manifest.getMainAttributes();</b>
+<b class="fc">&nbsp;                String implementationTitle = mainAttributes.getValue(&quot;Implementation-Title&quot;);</b>
+<b class="fc">&nbsp;                if (implementationTitle != null &amp;&amp; implementationTitle.equals(&quot;Kitodo - Data Editor&quot;)) {</b>
+<b class="fc">&nbsp;                    String implementationVersion = mainAttributes.getValue(&quot;Implementation-Version&quot;);</b>
+<b class="fc">&nbsp;                    String buildTime = mainAttributes.getValue(&quot;Implementation-Build-Date&quot;);</b>
+<b class="fc">&nbsp;                    return implementationTitle + &quot; - &quot; + implementationVersion + &quot; (&quot; + buildTime + &quot;)&quot;;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        logger.error(&quot;Could not read application version info for writing in header of mets file!&quot;);</b>
+<b class="fc">&nbsp;        return &quot;Version info is missing&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the current version of used data format.
+&nbsp;     * 
+&nbsp;     * @return the current version of used data format
+&nbsp;     */
+&nbsp;    public static String getDataFormatVersion() {
+<b class="fc">&nbsp;        return dataFormatVersionProvider.getDataFormatVersion();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

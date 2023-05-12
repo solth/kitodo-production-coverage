@@ -1,0 +1,314 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Role</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: Role (org.kitodo.data.database.beans)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Role</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,7%
+  </span>
+  <span class="absValue">
+    (24/33)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Role$HibernateProxy$okXn6wSD</td>
+  </tr>
+  <tr>
+    <td class="name">Role$HibernateProxy$zS6C1APL</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,7%
+  </span>
+  <span class="absValue">
+    (24/33)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.beans;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.persistence.CascadeType;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.ForeignKey;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.JoinTable;
+&nbsp;import javax.persistence.ManyToMany;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;import org.kitodo.data.database.persistence.RoleDAO;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;role&quot;)
+&nbsp;public class Role extends BaseBean implements Comparable&lt;Role&gt; {
+&nbsp;
+&nbsp;    @Column(name = &quot;title&quot;, nullable = false)
+&nbsp;    private String title;
+&nbsp;
+&nbsp;    @ManyToMany(mappedBy = &quot;roles&quot;, cascade = CascadeType.PERSIST)
+&nbsp;    private List&lt;User&gt; users;
+&nbsp;
+&nbsp;    @ManyToMany(mappedBy = &quot;roles&quot;, cascade = CascadeType.PERSIST)
+&nbsp;    private List&lt;Task&gt; tasks;
+&nbsp;
+&nbsp;    @ManyToMany(cascade = CascadeType.PERSIST)
+&nbsp;    @JoinTable(name = &quot;role_x_authority&quot;, joinColumns = {@JoinColumn(name = &quot;role_id&quot;,
+&nbsp;            foreignKey = @ForeignKey(name = &quot;FK_role_x_authority_role_id&quot;)) },
+&nbsp;            inverseJoinColumns = {@JoinColumn(name = &quot;authority_id&quot;,
+&nbsp;                    foreignKey = @ForeignKey(name = &quot;FK_role_x_authority_authority_id&quot;)) })
+&nbsp;    private List&lt;Authority&gt; authorities;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;client_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_role_client_id&quot;))
+&nbsp;    private Client client;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The Constructor.
+&nbsp;     */
+<b class="fc">&nbsp;    public Role() {</b>
+<b class="fc">&nbsp;        this.tasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.users = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.authorities = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets title.
+&nbsp;     *
+&nbsp;     * @return The title.
+&nbsp;     */
+&nbsp;    public String getTitle() {
+<b class="fc">&nbsp;        if (this.title == null) {</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return this.title;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets title.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            The title.
+&nbsp;     */
+&nbsp;    public void setTitle(String title) {
+<b class="fc">&nbsp;        this.title = title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets authorities.
+&nbsp;     *
+&nbsp;     * @return The authorities.
+&nbsp;     */
+&nbsp;    public List&lt;Authority&gt; getAuthorities() {
+<b class="fc">&nbsp;        initialize(new RoleDAO(), this.authorities);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.authorities)) {</b>
+<b class="nc">&nbsp;            this.authorities = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.authorities;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets authorities.
+&nbsp;     *
+&nbsp;     * @param authorities
+&nbsp;     *            The authorities.
+&nbsp;     */
+&nbsp;    public void setAuthorities(List&lt;Authority&gt; authorities) {
+<b class="fc">&nbsp;        this.authorities = authorities;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets users.
+&nbsp;     *
+&nbsp;     * @return The users.
+&nbsp;     */
+&nbsp;    public List&lt;User&gt; getUsers() {
+<b class="fc">&nbsp;        initialize(new RoleDAO(), this.users);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.users)) {</b>
+<b class="nc">&nbsp;            this.users = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.users;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets users.
+&nbsp;     *
+&nbsp;     * @param users
+&nbsp;     *            The users.
+&nbsp;     */
+&nbsp;    public void setUsers(List&lt;User&gt; users) {
+<b class="nc">&nbsp;        this.users = users;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets tasks.
+&nbsp;     *
+&nbsp;     * @return The tasks.
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getTasks() {
+<b class="fc">&nbsp;        initialize(new RoleDAO(), this.tasks);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(this.tasks)) {</b>
+<b class="nc">&nbsp;            this.tasks = new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.tasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets tasks.
+&nbsp;     *
+&nbsp;     * @param tasks
+&nbsp;     *            The tasks.
+&nbsp;     */
+&nbsp;    public void setTasks(List&lt;Task&gt; tasks) {
+<b class="nc">&nbsp;        this.tasks = tasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get client.
+&nbsp;     *
+&nbsp;     * @return the client bean
+&nbsp;     */
+&nbsp;    public Client getClient() {
+<b class="fc">&nbsp;        return client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set client.
+&nbsp;     *
+&nbsp;     * @param client
+&nbsp;     *            bean
+&nbsp;     */
+&nbsp;    public void setClient(Client client) {
+<b class="fc">&nbsp;        this.client = client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int compareTo(Role o) {
+<b class="nc">&nbsp;        return this.getTitle().compareTo(o.getTitle());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object object) {
+<b class="fc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof Role) {</b>
+<b class="fc">&nbsp;            Role role = (Role) object;</b>
+<b class="fc">&nbsp;            return Objects.equals(this.getId(), role.getId()) &amp;&amp; Objects.equals(this.getTitle() , role.getTitle());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        return this.getTitle().hashCode();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

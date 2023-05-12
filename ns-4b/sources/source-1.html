@@ -1,0 +1,364 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ActiveMQDirector</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.interfaces.activemq</a>
+</div>
+
+<h1>Coverage Summary for Class: ActiveMQDirector (org.kitodo.production.interfaces.activemq)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ActiveMQDirector</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/83)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.interfaces.activemq;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import javax.jms.Connection;
+&nbsp;import javax.jms.DeliveryMode;
+&nbsp;import javax.jms.Destination;
+&nbsp;import javax.jms.JMSException;
+&nbsp;import javax.jms.MessageConsumer;
+&nbsp;import javax.jms.MessageProducer;
+&nbsp;import javax.jms.Session;
+&nbsp;import javax.servlet.ServletContextEvent;
+&nbsp;import javax.servlet.ServletContextListener;
+&nbsp;import javax.servlet.annotation.WebListener;
+&nbsp;
+&nbsp;import org.apache.activemq.ActiveMQConnectionFactory;
+&nbsp;import org.apache.activemq.ActiveMQSslConnectionFactory;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class ActiveMQDirector is the head of all Active MQ processors. It
+&nbsp; * implements the ServletContextListener interface and is called automatically
+&nbsp; * upon server startup. Its job is to connect to the Active MQ server and
+&nbsp; * register the listeners configured.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * The Active MQ services are intended to be run in case that
+&nbsp; * {@code activeMQ.hostURL} is configured in the kitodo_config.properties file.
+&nbsp; * To disable the service, the entry there should be commented out.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * The class ActiveMQDirector also provides a basic ExceptionListener
+&nbsp; * implementation as required for the connection.
+&nbsp; */
+&nbsp;@WebListener
+<b class="nc">&nbsp;public class ActiveMQDirector implements Runnable, ServletContextListener {</b>
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(ActiveMQDirector.class);</b>
+&nbsp;
+&nbsp;    // When implementing new services, add them to this list
+&nbsp;    private static Collection&lt;? extends ActiveMQProcessor&gt; services;
+&nbsp;
+&nbsp;    static {
+<b class="nc">&nbsp;        services = Arrays.asList(new FinalizeStepProcessor());</b>
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    private static Connection connection = null;</b>
+<b class="nc">&nbsp;    private static Session session = null;</b>
+&nbsp;    private static MessageProducer resultsTopic;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The method is called by the web container on startup
+&nbsp;     * and is used to start up the active MQ connection. All processors from
+&nbsp;     * {@link #services} are registered.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void contextInitialized(ServletContextEvent initialisation) {
+<b class="nc">&nbsp;        if (ConfigCore.getOptionalString(ParameterCore.ACTIVE_MQ_HOST_URL).isPresent()) {</b>
+<b class="nc">&nbsp;            Thread connectAsynchronously = new Thread(new ActiveMQDirector());</b>
+<b class="nc">&nbsp;            connectAsynchronously.setName(ActiveMQDirector.class.getSimpleName());</b>
+<b class="nc">&nbsp;            connectAsynchronously.setDaemon(true);</b>
+<b class="nc">&nbsp;            connectAsynchronously.start();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void run() {
+<b class="nc">&nbsp;        String activeMQHost = ConfigCore.getParameter(ParameterCore.ACTIVE_MQ_HOST_URL);</b>
+<b class="nc">&nbsp;        logger.info(&quot;Connecting to Active MQ server: {}&quot;, activeMQHost);</b>
+<b class="nc">&nbsp;        session = connectToServer(activeMQHost);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(session)) {</b>
+<b class="nc">&nbsp;            registerListeners(services);</b>
+<b class="nc">&nbsp;            Optional&lt;String&gt; activeMQResultsTopic = ConfigCore.getOptionalString(ParameterCore.ACTIVE_MQ_RESULTS_TOPIC);</b>
+<b class="nc">&nbsp;            activeMQResultsTopic.ifPresent(topic -&gt; resultsTopic = setUpReportChannel(topic));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        logger.info(&quot;Connection to Active MQ server established.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Connection getConnectionFromActiveMQSslFactory(String server) throws Exception {
+<b class="nc">&nbsp;        logger.trace(&quot;Using the ActiveMQSslConnectionFactory to establish a connection to \&quot;&quot; + server + &quot;\&quot;&quot;);</b>
+<b class="nc">&nbsp;        ActiveMQSslConnectionFactory factory = new ActiveMQSslConnectionFactory(server);</b>
+<b class="nc">&nbsp;        factory.setKeyStore(ConfigCore.getParameter(ParameterCore.ACTIVE_MQ_KEYSTORE));</b>
+<b class="nc">&nbsp;        factory.setKeyStorePassword(ConfigCore.getParameter(ParameterCore.ACTIVE_MQ_KEYSTORE_PASSWORD));</b>
+<b class="nc">&nbsp;        factory.setTrustStore(ConfigCore.getParameter(ParameterCore.ACTIVE_MQ_TRUSTSTORE));</b>
+<b class="nc">&nbsp;        factory.setTrustStorePassword(ConfigCore.getParameter(ParameterCore.ACTIVE_MQ_TRUSTSTORE_PASSWORD));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (ConfigCore.getBooleanParameter(ParameterCore.ACTIVE_MQ_USE_AUTH, false))  {</b>
+<b class="nc">&nbsp;            logger.trace(&quot;Using authentication on connection \&quot;&quot; + server + &quot;\&quot;&quot;);</b>
+<b class="nc">&nbsp;            factory.setUserName(ConfigCore.getParameter(ParameterCore.ACTIVE_MQ_AUTH_USERNAME));</b>
+<b class="nc">&nbsp;            factory.setPassword(ConfigCore.getParameter(ParameterCore.ACTIVE_MQ_AUTH_PASSWORD));</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return factory.createConnection();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Connection getConnectionFromActiveMQFactory(String server) throws JMSException {
+<b class="nc">&nbsp;        logger.trace(&quot;Using the ActiveMQConnectionFactory to establish a connection to \&quot;&quot; + server + &quot;\&quot;&quot;);</b>
+<b class="nc">&nbsp;        ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(server);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (ConfigCore.getBooleanParameter(ParameterCore.ACTIVE_MQ_USE_AUTH, false))  {</b>
+<b class="nc">&nbsp;            logger.trace(&quot;Using authentication on connection \&quot;&quot; + server + &quot;\&quot;&quot;);</b>
+<b class="nc">&nbsp;            factory.setUserName(ConfigCore.getParameter(ParameterCore.ACTIVE_MQ_AUTH_USERNAME));</b>
+<b class="nc">&nbsp;            factory.setPassword(ConfigCore.getParameter(ParameterCore.ACTIVE_MQ_AUTH_PASSWORD));</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return factory.createConnection();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets up a connection to an active MQ server. The connection object is
+&nbsp;     * global because it is needed later to shut down the connection.
+&nbsp;     *
+&nbsp;     * @param server
+&nbsp;     *            should be “tcp://{host}:{port}” or “vm://localhost” in case
+&nbsp;     *            that the server is run inside the same virtual machine
+&nbsp;     * @return the session object or “null” upon error
+&nbsp;     */
+&nbsp;    private Session connectToServer(String server) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (ConfigCore.getBooleanParameter(ParameterCore.ACTIVE_MQ_USE_SSL, false))  {</b>
+<b class="nc">&nbsp;                connection = getConnectionFromActiveMQSslFactory(server);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                connection = getConnectionFromActiveMQFactory(server);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            connection.start();</b>
+<b class="nc">&nbsp;            connection.setExceptionListener(exception -&gt; logger.error(exception));</b>
+<b class="nc">&nbsp;            return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            logger.fatal(&quot;Error connecting to ActiveMQ server, giving up.&quot;, e);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method registers the listeners with the active MQ server.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * If a queue name was configured for a service, a MessageConsumer is set up
+&nbsp;     * to listen on that queue and, in case of incoming messages, make the
+&nbsp;     * service process the message. The message checker is saved inside the
+&nbsp;     * service to be able to shut it down later.
+&nbsp;     */
+&nbsp;    private void registerListeners(Collection&lt;? extends ActiveMQProcessor&gt; processors) {
+<b class="nc">&nbsp;        for (ActiveMQProcessor processor : processors) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(processor.getQueueName())) {</b>
+&nbsp;                MessageConsumer messageConsumer;
+&nbsp;                try {
+<b class="nc">&nbsp;                    Destination queue = session.createQueue(processor.getQueueName());</b>
+<b class="nc">&nbsp;                    messageConsumer = session.createConsumer(queue);</b>
+<b class="nc">&nbsp;                    messageConsumer.setMessageListener(processor);</b>
+<b class="nc">&nbsp;                    processor.setMessageConsumer(messageConsumer);</b>
+<b class="nc">&nbsp;                } catch (JMSException | RuntimeException e) {</b>
+<b class="nc">&nbsp;                    logger.fatal(&quot;Error setting up monitoring for \&quot;{}\&quot;: Giving up.&quot;, processor.getQueueName(), e);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This sets up a connection to the topic the results shall be written to.
+&nbsp;     * The delivery mode is set so “persistent” to allow consumers not online
+&nbsp;     * with the server in the moment of message submission to read the messages
+&nbsp;     * later. The log messages are set to be kept on the server for 7 days. This
+&nbsp;     * value can be overridden from the kitodo_config.properties parameter
+&nbsp;     * “activeMQ.results.timeToLive”. The time to live must be specified in
+&nbsp;     * milliseconds; 0 disables the oblivion. (See also:
+&nbsp;     * http://docs.oracle.com/javaee/6/api/javax/jms/MessageProducer.html#setTimeToLive%28long%29
+&nbsp;     * )
+&nbsp;     *
+&nbsp;     * @param topic
+&nbsp;     *            name of the active MQ topic
+&nbsp;     * @return a MessageProducer object ready for writing or “null” on error
+&nbsp;     */
+&nbsp;    private MessageProducer setUpReportChannel(String topic) {
+&nbsp;        MessageProducer reportChannel;
+&nbsp;        try {
+<b class="nc">&nbsp;            Destination channel = session.createTopic(topic);</b>
+<b class="nc">&nbsp;            reportChannel = session.createProducer(channel);</b>
+<b class="nc">&nbsp;            reportChannel.setDeliveryMode(DeliveryMode.PERSISTENT);</b>
+<b class="nc">&nbsp;            reportChannel.setTimeToLive(ConfigCore.getLongParameterOrDefaultValue(ParameterCore.ACTIVE_MQ_RESULTS_TTL));</b>
+<b class="nc">&nbsp;            return reportChannel;</b>
+<b class="nc">&nbsp;        } catch (JMSException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            logger.fatal(&quot;Error setting up report channel \&quot;{}\&quot;: Giving up.&quot;, topic, e);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Any class that wants to create new Active MQ Messages needs read access
+&nbsp;     * to the session, since Active MQ messages don’t have a constructor.
+&nbsp;     *
+&nbsp;     * @return the session object
+&nbsp;     */
+&nbsp;    public static Session getSession() {
+<b class="nc">&nbsp;        return session;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Instances of WebServiceResult can be sent by calling their send() method.
+&nbsp;     * Therefore, they need read access on their topic.
+&nbsp;     *
+&nbsp;     * @return the resultsTopic object
+&nbsp;     */
+&nbsp;    public static MessageProducer getResultsTopic() {
+<b class="nc">&nbsp;        return resultsTopic;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The method contextDestroyed is called by the web container on shutdown.
+&nbsp;     * It shuts down all listeners, the session and last, the connection.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void contextDestroyed(ServletContextEvent destruction) {
+&nbsp;        // Shut down all message consumers on any queues
+<b class="nc">&nbsp;        for (ActiveMQProcessor service : services) {</b>
+<b class="nc">&nbsp;            MessageConsumer messageConsumer = service.getMessageConsumer();</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(messageConsumer)) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    messageConsumer.close();</b>
+<b class="nc">&nbsp;                } catch (JMSException e) {</b>
+<b class="nc">&nbsp;                    logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // quit session
+&nbsp;        try {
+<b class="nc">&nbsp;            if (Objects.nonNull(session)) {</b>
+<b class="nc">&nbsp;                session.close();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (JMSException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // shut down connection
+&nbsp;        try {
+<b class="nc">&nbsp;            if (Objects.nonNull(connection)) {</b>
+<b class="nc">&nbsp;                connection.close();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (JMSException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

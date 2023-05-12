@@ -1,0 +1,191 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RoleDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.persistence</a>
+</div>
+
+<h1>Coverage Summary for Class: RoleDAO (org.kitodo.data.database.persistence)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RoleDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,7%
+  </span>
+  <span class="absValue">
+    (18/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.persistence;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Client;
+&nbsp;import org.kitodo.data.database.beans.Role;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;
+<b class="fc">&nbsp;public class RoleDAO extends BaseDAO&lt;Role&gt; {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Role getById(Integer id) throws DAOException {
+<b class="fc">&nbsp;        Role role = retrieveObject(Role.class, id);</b>
+<b class="fc">&nbsp;        if (role == null) {</b>
+<b class="fc">&nbsp;            throw new DAOException(&quot;Object cannot be found in database&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return role;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Role&gt; getAll() throws DAOException {
+<b class="fc">&nbsp;        return retrieveAllObjects(Role.class);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Role&gt; getAll(int offset, int size) throws DAOException {
+<b class="fc">&nbsp;        return retrieveObjects(&quot;FROM Role ORDER BY id ASC&quot;, offset, size);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Role&gt; getAllNotIndexed(int offset, int size) {
+<b class="nc">&nbsp;        throw new UnsupportedOperationException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void remove(Integer id) throws DAOException {
+<b class="fc">&nbsp;        removeObject(Role.class, id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all user roles assigned to selected client for current user.
+&nbsp;     *
+&nbsp;     * @param clientId
+&nbsp;     *            selected client id for current user
+&nbsp;     * @return list of user roles
+&nbsp;     */
+&nbsp;    public List&lt;Role&gt; getAllRolesByClientId(int clientId) {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; parameters = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        parameters.put(&quot;clientId&quot;, clientId);</b>
+<b class="fc">&nbsp;        return getByQuery(&quot;SELECT r FROM Role AS r JOIN r.client AS c WHERE c.id = :clientId GROUP BY r.id&quot;,</b>
+&nbsp;            parameters);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all roles available to assign to the edited user. It will be displayed
+&nbsp;     * in the addRolesPopup.
+&nbsp;     *
+&nbsp;     * @param clients
+&nbsp;     *            list of clients to which edited user is assigned
+&nbsp;     * @return list of all matching roles
+&nbsp;     */
+&nbsp;    public List&lt;Role&gt; getAllAvailableForAssignToUser(List&lt;Client&gt; clients) {
+<b class="fc">&nbsp;        List&lt;Integer&gt; clientIds = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Client client : clients) {</b>
+<b class="fc">&nbsp;            clientIds.add(client.getId());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; parameters = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        parameters.put(&quot;clientIds&quot;, clientIds);</b>
+<b class="fc">&nbsp;        return getByQuery(&quot;SELECT r FROM Role AS r JOIN r.client AS c WITH c.id IN :clientIds&quot;,</b>
+&nbsp;                parameters);
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,202 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DataSelector</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.metadata.copier</a>
+</div>
+
+<h1>Coverage Summary for Class: DataSelector (org.kitodo.production.metadata.copier)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DataSelector</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.metadata.copier;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.ConfigurationException;
+&nbsp;
+&nbsp;/**
+&nbsp; * A DataSelector is useful to access a data object. There are different
+&nbsp; * DataSelectors available to access metadata and program variables.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * The factory method {{@link #create(String)} can be used to retrieve a
+&nbsp; * DataSelector instance for a given path.
+&nbsp; */
+<b class="nc">&nbsp;public abstract class DataSelector {</b>
+&nbsp;    /**
+&nbsp;     * Symbol indicating that the element of several to choose shall be the last
+&nbsp;     * one.
+&nbsp;     */
+&nbsp;    protected static final String LAST_CHILD_QUANTIFIER = &quot;&gt;&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Symbol indicating that the next segment of the path is a document
+&nbsp;     * structure hierarchy level.
+&nbsp;     */
+&nbsp;    protected static final String METADATA_PATH_SEPARATOR = &quot;/&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Symbol indicating that the next segment of the path is a metadata.
+&nbsp;     */
+&nbsp;    protected static final String METADATA_SEPARATOR = &quot;@&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Symbol indicating that the next segment of the path is a reference to the
+&nbsp;     * node of the logical document structure that the metadata will be written
+&nbsp;     * to.
+&nbsp;     */
+&nbsp;    protected static final String RESPECTIVE_DESTINATION_REFERENCE = &quot;#&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Symbol indicating that the value is a static string.
+&nbsp;     */
+&nbsp;    private static final String STRING_MARK = &quot;\&quot;&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Symbol indicating that the selector is to select a variable.
+&nbsp;     */
+&nbsp;    protected static final String VARIABLE_REFERENCE = &quot;$&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Factory method to create a DataSelector.
+&nbsp;     *
+&nbsp;     * @param path
+&nbsp;     *            path to the data object to access
+&nbsp;     * @return a subclass implementing the data selector required for the given
+&nbsp;     *         path
+&nbsp;     * @throws ConfigurationException
+&nbsp;     *             if the path cannot be evaluated
+&nbsp;     */
+&nbsp;    public static DataSelector create(String path) throws ConfigurationException {
+<b class="nc">&nbsp;        if (path.startsWith(METADATA_PATH_SEPARATOR) || path.startsWith(METADATA_SEPARATOR)) {</b>
+<b class="nc">&nbsp;            return MetadataSelector.create(path);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (path.startsWith(VARIABLE_REFERENCE)) {</b>
+<b class="nc">&nbsp;            return new VariableSelector(path);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (path.startsWith(STRING_MARK)) {</b>
+<b class="nc">&nbsp;            return new StringSelector(path);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (path.startsWith(RESPECTIVE_DESTINATION_REFERENCE)) {</b>
+<b class="nc">&nbsp;            return new DestinationReferenceSelector(path);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new ConfigurationException(</b>
+&nbsp;                &quot;Cannot create data selector: Path must start with \&quot;@\&quot;, \&quot;/\&quot; or \&quot;$\&quot;, but is: &quot; + path);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calling findIn() on the implementing instance should return the value of
+&nbsp;     * the metadata named by the path used to construct the metadata selector.
+&nbsp;     * Should return null if either the path or the metadata at the end of the
+&nbsp;     * path aren’t available.
+&nbsp;     *
+&nbsp;     * @param data
+&nbsp;     *            data collection to locate the metadata in
+&nbsp;     * @return the value the path points to, or null if absent
+&nbsp;     * @throws RuntimeException
+&nbsp;     *             if the path cannot be resolved
+&nbsp;     */
+&nbsp;    public abstract String findIn(CopierData data);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

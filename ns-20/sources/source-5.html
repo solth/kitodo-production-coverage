@@ -1,0 +1,172 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessTypeField</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.elasticsearch.index.type.enums</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessTypeField (org.kitodo.data.elasticsearch.index.type.enums)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessTypeField</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (46/46)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.elasticsearch.index.type.enums;
+&nbsp;
+<b class="fc">&nbsp;public enum ProcessTypeField implements TypeInterface {</b>
+&nbsp;
+<b class="fc">&nbsp;    ID(&quot;id&quot;),</b>
+<b class="fc">&nbsp;    TITLE(&quot;title&quot;),</b>
+<b class="fc">&nbsp;    CREATION_DATE(&quot;creationDate&quot;),</b>
+<b class="fc">&nbsp;    WIKI_FIELD(&quot;wikiField&quot;),</b>
+<b class="fc">&nbsp;    SORT_HELPER_ARTICLES(&quot;sortHelperArticles&quot;),</b>
+<b class="fc">&nbsp;    SORT_HELPER_DOCSTRUCTS(&quot;sortHelperDocstructs&quot;),</b>
+<b class="fc">&nbsp;    SORT_HELPER_IMAGES(&quot;sortHelperImages&quot;),</b>
+<b class="fc">&nbsp;    SORT_HELPER_METADATA(&quot;sortHelperMetadata&quot;),</b>
+<b class="fc">&nbsp;    SORT_HELPER_STATUS(&quot;sortHelperStatus&quot;),</b>
+<b class="fc">&nbsp;    PROCESS_BASE_URI(&quot;processBaseUri&quot;),</b>
+<b class="fc">&nbsp;    TEMPLATE_ID(&quot;template.id&quot;),</b>
+<b class="fc">&nbsp;    TEMPLATE_TITLE(&quot;template.title&quot;),</b>
+<b class="fc">&nbsp;    PROJECT_ID(&quot;project.id&quot;),</b>
+<b class="fc">&nbsp;    PROJECT_TITLE(&quot;project.title&quot;),</b>
+<b class="fc">&nbsp;    PROJECT_ACTIVE(&quot;project.active&quot;),</b>
+<b class="fc">&nbsp;    PROJECT_CLIENT_ID(&quot;project.client.id&quot;),</b>
+<b class="fc">&nbsp;    DOCKET(&quot;docket&quot;),</b>
+<b class="fc">&nbsp;    RULESET(&quot;ruleset&quot;),</b>
+<b class="fc">&nbsp;    BATCHES(&quot;batches&quot;),</b>
+<b class="fc">&nbsp;    COMMENTS(&quot;comments&quot;),</b>
+<b class="fc">&nbsp;    COMMENTS_MESSAGE(&quot;comments.message&quot;),</b>
+<b class="fc">&nbsp;    HAS_CHILDREN(&quot;hasChildren&quot;),</b>
+<b class="fc">&nbsp;    PARENT_ID(&quot;parent.id&quot;),</b>
+<b class="fc">&nbsp;    TASKS(&quot;tasks&quot;),</b>
+<b class="fc">&nbsp;    PROPERTIES(&quot;properties&quot;),</b>
+<b class="fc">&nbsp;    TEMPLATES(&quot;templates&quot;),</b>
+<b class="fc">&nbsp;    WORKPIECES(&quot;workpieces&quot;),</b>
+<b class="fc">&nbsp;    METADATA(&quot;meta&quot;),</b>
+<b class="fc">&nbsp;    NUMBER_OF_METADATA(&quot;numberOfMetadata&quot;),</b>
+<b class="fc">&nbsp;    NUMBER_OF_IMAGES(&quot;numberOfImages&quot;),</b>
+<b class="fc">&nbsp;    NUMBER_OF_STRUCTURES(&quot;numberOfStructures&quot;),</b>
+<b class="fc">&nbsp;    BASE_TYPE(&quot;baseType&quot;),</b>
+<b class="fc">&nbsp;    IN_CHOICE_LIST_SHOWN(&quot;inChoiceListShown&quot;),</b>
+<b class="fc">&nbsp;    LAST_EDITING_USER(&quot;lastEditingUser&quot;),</b>
+<b class="fc">&nbsp;    PROCESSING_BEGIN_LAST_TASK(&quot;processingBeginLastTask&quot;),</b>
+<b class="fc">&nbsp;    PROCESSING_END_LAST_TASK(&quot;processingEndLastTask&quot;),</b>
+<b class="fc">&nbsp;    CORRECTION_COMMENT_STATUS(&quot;correctionCommentStatus&quot;),</b>
+<b class="fc">&nbsp;    PROGRESS_CLOSED(&quot;progressClosed&quot;),</b>
+<b class="fc">&nbsp;    PROGRESS_IN_PROCESSING(&quot;progressInProcessing&quot;),</b>
+<b class="fc">&nbsp;    PROGRESS_OPEN(&quot;progressOpen&quot;),</b>
+<b class="fc">&nbsp;    PROGRESS_LOCKED(&quot;progressLocked&quot;),</b>
+<b class="fc">&nbsp;    PROGRESS_COMBINED(&quot;progressCombined&quot;);</b>
+&nbsp;
+&nbsp;    private String name;
+&nbsp;
+<b class="fc">&nbsp;    ProcessTypeField(String name) {</b>
+<b class="fc">&nbsp;        this.name = name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="fc">&nbsp;        return name;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

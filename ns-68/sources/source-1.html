@@ -1,0 +1,187 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TaskImageGeneratorThread</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.thread</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskImageGeneratorThread (org.kitodo.production.thread)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskImageGeneratorThread</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (3/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (6/12)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.thread;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.production.helper.tasks.EmptyTask;
+&nbsp;import org.kitodo.production.services.image.ImageGenerator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Performs creating images in the task manager, when the operator clicks on a
+&nbsp; * link to generate images manually.
+&nbsp; */
+&nbsp;public class TaskImageGeneratorThread extends EmptyTask {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(TaskImageGeneratorThread.class);</b>
+&nbsp;    /**
+&nbsp;     * Image generator to be run by this thread.
+&nbsp;     */
+&nbsp;    private final ImageGenerator imageGenerator;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new process title.
+&nbsp;     *
+&nbsp;     * @param processTitle
+&nbsp;     *            process title to generate
+&nbsp;     * @param imageGenerator
+&nbsp;     *            image generator to run in this thread
+&nbsp;     */
+&nbsp;    public TaskImageGeneratorThread(String processTitle, ImageGenerator imageGenerator) {
+<b class="fc">&nbsp;        super(processTitle);</b>
+<b class="fc">&nbsp;        this.imageGenerator = imageGenerator;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a copy of this thread, to continue it after it was terminated.
+&nbsp;     *
+&nbsp;     * @param master
+&nbsp;     *            stopped thread
+&nbsp;     */
+&nbsp;    public TaskImageGeneratorThread(TaskImageGeneratorThread master) {
+<b class="nc">&nbsp;        super(master);</b>
+<b class="nc">&nbsp;        this.imageGenerator = master.imageGenerator;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the task is started, it will execute this run() method which will
+&nbsp;     * start the export on the ExportDms. This task instance is passed in
+&nbsp;     * addition so that the ExportDms can update the task’s state.
+&nbsp;     *
+&nbsp;     * @see org.kitodo.production.helper.tasks.EmptyTask#run()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void run() {
+&nbsp;        try {
+<b class="fc">&nbsp;            imageGenerator.setSupervisor(this);</b>
+<b class="fc">&nbsp;            imageGenerator.run();</b>
+<b class="nc">&nbsp;        } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            setException(e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calls the clone constructor to create a not yet executed instance of this
+&nbsp;     * thread object. This is necessary for threads that have terminated in
+&nbsp;     * order to render possible to restart them.
+&nbsp;     *
+&nbsp;     * @return a not-yet-executed replacement of this thread
+&nbsp;     * @see org.kitodo.production.helper.tasks.EmptyTask#replace()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public TaskImageGeneratorThread replace() {
+<b class="nc">&nbsp;        return new TaskImageGeneratorThread(this);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

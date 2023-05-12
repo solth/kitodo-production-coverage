@@ -1,0 +1,908 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > UserForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: UserForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/46)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/286)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">UserForm$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/47)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/287)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.security.NoSuchAlgorithmException;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.SortedMap;
+&nbsp;import java.util.TreeMap;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.annotation.PostConstruct;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.inject.Inject;
+&nbsp;import javax.inject.Named;
+&nbsp;import javax.naming.NameAlreadyBoundException;
+&nbsp;import javax.naming.NamingException;
+&nbsp;import javax.validation.ConstraintViolation;
+&nbsp;import javax.validation.Validation;
+&nbsp;import javax.validation.Validator;
+&nbsp;import javax.validation.ValidatorFactory;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.codehaus.jackson.map.ObjectMapper;
+&nbsp;import org.codehaus.jackson.type.TypeReference;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Client;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Role;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.dto.ProjectDTO;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.filters.FilterMenu;
+&nbsp;import org.kitodo.production.forms.dataeditor.GalleryViewMode;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.model.LazyDTOModel;
+&nbsp;import org.kitodo.production.security.DynamicAuthenticationProvider;
+&nbsp;import org.kitodo.production.security.SecuritySession;
+&nbsp;import org.kitodo.production.security.password.KitodoPassword;
+&nbsp;import org.kitodo.production.security.password.SecurityPasswordEncoder;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.UserService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;
+&nbsp;@Named(&quot;UserForm&quot;)
+&nbsp;@SessionScoped
+&nbsp;public class UserForm extends BaseForm {
+<b class="nc">&nbsp;    private User userObject = new User();</b>
+<b class="nc">&nbsp;    private boolean hideInactiveUsers = true;</b>
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(UserForm.class);</b>
+<b class="nc">&nbsp;    private final transient SecurityPasswordEncoder passwordEncoder = new SecurityPasswordEncoder();</b>
+<b class="nc">&nbsp;    private final transient UserService userService = ServiceManager.getUserService();</b>
+<b class="nc">&nbsp;    private final transient FilterMenu filterMenu = new FilterMenu(this);</b>
+<b class="nc">&nbsp;    private static final List&lt;String&gt; AVAILABLE_SHORTCUTS = Arrays.asList(</b>
+&nbsp;            &quot;detailView&quot;,
+&nbsp;            &quot;help&quot;,
+&nbsp;            &quot;nextItem&quot;,
+&nbsp;            &quot;nextItemMulti&quot;,
+&nbsp;            &quot;previousItem&quot;,
+&nbsp;            &quot;previousItemMulti&quot;,
+&nbsp;            &quot;structuredView&quot;,
+&nbsp;            &quot;downItem&quot;,
+&nbsp;            &quot;downItemMulti&quot;,
+&nbsp;            &quot;upItem&quot;,
+&nbsp;            &quot;upItemMulti&quot;);
+&nbsp;
+&nbsp;    private String passwordToEncrypt;
+&nbsp;
+&nbsp;    private String oldPassword;
+&nbsp;    private SortedMap&lt;String, String&gt; shortcuts;
+&nbsp;
+&nbsp;    @Named(&quot;LoginForm&quot;)
+&nbsp;    private final LoginForm loginForm;
+&nbsp;
+<b class="nc">&nbsp;    private final String userEditPath = MessageFormat.format(REDIRECT_PATH, &quot;userEdit&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Default constructor with inject login form that also sets the LazyDTOModel
+&nbsp;     * instance of this bean.
+&nbsp;     *
+&nbsp;     * @param loginForm
+&nbsp;     *            is used for update logged user in case updated user is currently
+&nbsp;     *            logged user
+&nbsp;     */
+&nbsp;    @Inject
+&nbsp;    public UserForm(LoginForm loginForm) {
+<b class="nc">&nbsp;        super();</b>
+<b class="nc">&nbsp;        super.setLazyDTOModel(new LazyDTOModel(userService));</b>
+<b class="nc">&nbsp;        this.loginForm = loginForm;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize the list of displayed list columns.
+&nbsp;     */
+&nbsp;    @PostConstruct
+&nbsp;    public void init() {
+<b class="nc">&nbsp;        columns = new ArrayList&lt;&gt;();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;user&quot;));</b>
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;role&quot;));</b>
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;client&quot;));</b>
+<b class="nc">&nbsp;            columns.add(ServiceManager.getListColumnService().getListColumnsForListAsSelectItemGroup(&quot;ldapgroup&quot;));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        selectedColumns = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        selectedColumns.addAll(ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;user&quot;));</b>
+<b class="nc">&nbsp;        selectedColumns.addAll(ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;role&quot;));</b>
+<b class="nc">&nbsp;        selectedColumns.addAll(ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;client&quot;));</b>
+<b class="nc">&nbsp;        selectedColumns</b>
+<b class="nc">&nbsp;                .addAll(ServiceManager.getListColumnService().getSelectedListColumnsForListAndClient(&quot;ldapgroup&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * New user.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String newUser() {
+<b class="nc">&nbsp;        this.userObject = new User();</b>
+<b class="nc">&nbsp;        List&lt;Client&gt; clients = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        clients.add(ServiceManager.getUserService().getSessionClientOfAuthenticatedUser());</b>
+<b class="nc">&nbsp;        this.passwordToEncrypt = &quot;&quot;;</b>
+<b class="nc">&nbsp;        this.userObject.setClients(clients);</b>
+<b class="nc">&nbsp;        this.userObject.setName(&quot;&quot;);</b>
+<b class="nc">&nbsp;        this.userObject.setSurname(&quot;&quot;);</b>
+<b class="nc">&nbsp;        this.userObject.setLogin(&quot;&quot;);</b>
+<b class="nc">&nbsp;        this.userObject.setLdapLogin(&quot;&quot;);</b>
+<b class="nc">&nbsp;        this.userObject.setPassword(passwordToEncrypt);</b>
+<b class="nc">&nbsp;        return userEditPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save user if there is no other user with the same login.
+&nbsp;     *
+&nbsp;     * @return page or empty String
+&nbsp;     */
+&nbsp;    public String save() {
+<b class="nc">&nbsp;        if (Objects.isNull(userObject.getId())) {</b>
+<b class="nc">&nbsp;            Set&lt;ConstraintViolation&lt;KitodoPassword&gt;&gt; passwordViolations = getPasswordViolations();</b>
+<b class="nc">&nbsp;            if (!passwordViolations.isEmpty()) {</b>
+<b class="nc">&nbsp;                for (ConstraintViolation&lt;KitodoPassword&gt; passwordViolation : passwordViolations) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(passwordViolation.getMessage());</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        String login = this.userObject.getLogin();</b>
+<b class="nc">&nbsp;        if (!isUserExistingOrLoginValid(login)) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;loginNotValid&quot;, new Object[] {login });</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (isMissingClient()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorMissingClient&quot;);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            ObjectMapper mapper = new ObjectMapper();</b>
+<b class="nc">&nbsp;            userObject.setShortcuts(mapper.writeValueAsString(shortcuts));</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.USER.getTranslationSingular()}, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            return loginHandling(login);</b>
+<b class="nc">&nbsp;        } catch (DAOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.USER.getTranslationSingular() }, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String loginHandling(String login) throws DAOException {
+<b class="nc">&nbsp;        if (userService.getAmountOfUsersWithExactlyTheSameLogin(this.userObject.getId(), login) == 0) {</b>
+&nbsp;            // save the password only when user is created else changePasswordForCurrentUser is used
+<b class="nc">&nbsp;            if (Objects.isNull(userObject.getId()) &amp;&amp; Objects.nonNull(passwordToEncrypt)) {</b>
+<b class="nc">&nbsp;                userObject.setPassword(passwordEncoder.encrypt(passwordToEncrypt));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            userService.saveToDatabase(userObject);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (userService.getAuthenticatedUser().getId().equals(this.userObject.getId())) {</b>
+<b class="nc">&nbsp;                loginForm.setLoggedUser(this.userObject);</b>
+<b class="nc">&nbsp;                ServiceManager.getSecurityAccessService().updateAuthentication(this.userObject);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return usersPage;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;loginInUse&quot;);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isUserExistingOrLoginValid(String login) {
+<b class="nc">&nbsp;        return Objects.nonNull(userObject.getId()) || userService.isLoginValid(login);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Set&lt;ConstraintViolation&lt;KitodoPassword&gt;&gt; getPasswordViolations() {
+<b class="nc">&nbsp;        if (isLdapServerReadOnly()) {</b>
+<b class="nc">&nbsp;            return Collections.emptySet();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        KitodoPassword validPassword = new KitodoPassword(passwordToEncrypt);</b>
+<b class="nc">&nbsp;        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();</b>
+<b class="nc">&nbsp;        Validator validator = factory.getValidator();</b>
+<b class="nc">&nbsp;        return validator.validate(validPassword);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isMissingClient() {
+<b class="nc">&nbsp;        return this.userObject.getClients().isEmpty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return the list of tasks that are assigned to the user and
+&nbsp;     * that are &quot;INWORK&quot; and belong to process, not template.
+&nbsp;     *
+&nbsp;     * @return list of tasks that are currently assigned to the user and that
+&nbsp;     *         are &quot;INWORK&quot; and belong to process, not template
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getTasksInProgress(User user) {
+<b class="nc">&nbsp;        return ServiceManager.getUserService().getTasksInProgress(user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Unassign all tasks in work from user and set their status back to open.
+&nbsp;     *
+&nbsp;     * @param user user
+&nbsp;     */
+&nbsp;    public void resetTasksToOpen(User user) {
+<b class="nc">&nbsp;        List&lt;Task&gt; tasksInProgress = getTasksInProgress(user);</b>
+<b class="nc">&nbsp;        for (Task taskInProgress : tasksInProgress) {</b>
+<b class="nc">&nbsp;            ServiceManager.getTaskService().replaceProcessingUser(taskInProgress, null);</b>
+<b class="nc">&nbsp;            taskInProgress.setProcessingStatus(TaskStatus.OPEN);</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getTaskService().save(taskInProgress);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[]{ObjectType.TASK.getTranslationSingular()}, logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete user if he does not have tasks in progress.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Please note that deleting a user in Production will not delete the
+&nbsp;     * user from a connected LDAP service.
+&nbsp;     */
+&nbsp;    public void checkAndDelete() {
+<b class="nc">&nbsp;        if (getTasksInProgress(userObject).isEmpty()) {</b>
+<b class="nc">&nbsp;            deleteUser(userObject);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            PrimeFaces.current().ajax().update(&quot;usersTabView:confirmResetTasksDialog&quot;);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;confirmResetTasksDialog&#39;).show();&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Unassign all tasks in work from user and set their status back to open and delete the user.
+&nbsp;     */
+&nbsp;    public void resetTasksAndDeleteUser() {
+<b class="nc">&nbsp;        resetTasksToOpen(userObject);</b>
+<b class="nc">&nbsp;        deleteUser(userObject);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void deleteUser(User user) {
+&nbsp;        try {
+<b class="nc">&nbsp;            userService.removeFromDatabase(user);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[]{ObjectType.USER.getTranslationSingular()}, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove from role.
+&nbsp;     *
+&nbsp;     * @return empty String
+&nbsp;     */
+&nbsp;    public String deleteFromRole() {
+<b class="nc">&nbsp;        String idParameter = Helper.getRequestParameter(&quot;ID&quot;);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(idParameter)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                int roleId = Integer.parseInt(idParameter);</b>
+<b class="nc">&nbsp;                for (Role role : this.userObject.getRoles()) {</b>
+<b class="nc">&nbsp;                    if (role.getId().equals(roleId)) {</b>
+<b class="nc">&nbsp;                        this.userObject.getRoles().remove(role);</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add to role.
+&nbsp;     *
+&nbsp;     * @return stay on the same page
+&nbsp;     */
+&nbsp;    public String addToRole() {
+<b class="nc">&nbsp;        String idParameter = Helper.getRequestParameter(&quot;ID&quot;);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(idParameter)) {</b>
+<b class="nc">&nbsp;            int roleId = 0;</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                roleId = Integer.parseInt(idParameter);</b>
+<b class="nc">&nbsp;                Role role = ServiceManager.getRoleService().getById(roleId);</b>
+&nbsp;
+<b class="nc">&nbsp;                if (!this.userObject.getRoles().contains(role)) {</b>
+<b class="nc">&nbsp;                    this.userObject.getRoles().add(role);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_DATABASE_READING,</b>
+<b class="nc">&nbsp;                        new Object[] {ObjectType.ROLE.getTranslationSingular(), roleId }, logger, e);</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove user from client.
+&nbsp;     *
+&nbsp;     * @return empty String
+&nbsp;     */
+&nbsp;    public String deleteFromClient() {
+<b class="nc">&nbsp;        String idParameter = Helper.getRequestParameter(ID_PARAMETER);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(idParameter)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                int clientId = Integer.parseInt(idParameter);</b>
+<b class="nc">&nbsp;                for (Client client : this.userObject.getClients()) {</b>
+<b class="nc">&nbsp;                    if (client.getId().equals(clientId)) {</b>
+<b class="nc">&nbsp;                        this.userObject.getClients().remove(client);</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add client to user.
+&nbsp;     *
+&nbsp;     * @return null
+&nbsp;     */
+&nbsp;    public String addToClient() {
+<b class="nc">&nbsp;        String idParameter = Helper.getRequestParameter(&quot;ID&quot;);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(idParameter)) {</b>
+<b class="nc">&nbsp;            int clientId = 0;</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                clientId = Integer.parseInt(idParameter);</b>
+<b class="nc">&nbsp;                Client client = ServiceManager.getClientService().getById(clientId);</b>
+&nbsp;
+<b class="nc">&nbsp;                if (!this.userObject.getClients().contains(client)) {</b>
+<b class="nc">&nbsp;                    this.userObject.getClients().add(client);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_DATABASE_READING,</b>
+<b class="nc">&nbsp;                        new Object[] {ObjectType.CLIENT.getTranslationSingular(), clientId }, logger, e);</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove user from project.
+&nbsp;     *
+&nbsp;     * @return empty String
+&nbsp;     */
+&nbsp;    public String deleteFromProject() {
+<b class="nc">&nbsp;        String idParameter = Helper.getRequestParameter(&quot;ID&quot;);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(idParameter)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                int projectId = Integer.parseInt(idParameter);</b>
+<b class="nc">&nbsp;                for (Project project : this.userObject.getProjects()) {</b>
+<b class="nc">&nbsp;                    if (project.getId().equals(projectId)) {</b>
+<b class="nc">&nbsp;                        this.userObject.getProjects().remove(project);</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add user to project.
+&nbsp;     *
+&nbsp;     * @return empty String or null
+&nbsp;     */
+&nbsp;    public String addToProject() {
+<b class="nc">&nbsp;        String idParameter = Helper.getRequestParameter(&quot;ID&quot;);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(idParameter)) {</b>
+<b class="nc">&nbsp;            int projectId = 0;</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                projectId = Integer.parseInt(idParameter);</b>
+<b class="nc">&nbsp;                Project project = ServiceManager.getProjectService().getById(projectId);</b>
+&nbsp;
+<b class="nc">&nbsp;                if (!this.userObject.getProjects().contains(project)) {</b>
+<b class="nc">&nbsp;                    this.userObject.getProjects().add(project);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_DATABASE_READING,</b>
+<b class="nc">&nbsp;                        new Object[] {ObjectType.PROJECT.getTranslationSingular(), projectId }, logger, e);</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_PARAMETER_MISSING, new Object[] {ID_PARAMETER});</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Getter und Setter
+&nbsp;     */
+&nbsp;
+&nbsp;    public User getUserObject() {
+<b class="nc">&nbsp;        return this.userObject;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set class.
+&nbsp;     *
+&nbsp;     * @param userObject
+&nbsp;     *            user object
+&nbsp;     */
+&nbsp;    public void setUserObject(User userObject) {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.userObject = userService.getById(userObject.getId());</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            this.userObject = userObject;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set user by ID.
+&nbsp;     *
+&nbsp;     * @param userID
+&nbsp;     *            ID of user to set.
+&nbsp;     */
+&nbsp;    public void setUserById(int userID) {
+&nbsp;        try {
+<b class="nc">&nbsp;            setUserObject(userService.getById(userID));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.USER.getTranslationSingular(), userID },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Writes the user at ldap server.
+&nbsp;     */
+&nbsp;    public String writeUserAtLdapServer() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getLdapServerService().createNewUser(this.userObject,</b>
+<b class="nc">&nbsp;                passwordEncoder.decrypt(this.userObject.getPassword()));</b>
+<b class="nc">&nbsp;        } catch (NameAlreadyBoundException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Ldap entry already exists&quot;, logger, e);</b>
+<b class="nc">&nbsp;        } catch (NoSuchAlgorithmException | NamingException | IOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Could not generate ldap entry&quot;, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isHideInactiveUsers() {
+<b class="nc">&nbsp;        return this.hideInactiveUsers;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setHideInactiveUsers(boolean hideInactiveUsers) {
+<b class="nc">&nbsp;        this.hideInactiveUsers = hideInactiveUsers;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for user edit form.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            ID of the user to load
+&nbsp;     */
+&nbsp;    public void load(int id) {
+&nbsp;        // reset when user is loaded
+<b class="nc">&nbsp;        passwordToEncrypt = &quot;&quot;;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!Objects.equals(id, 0)) {</b>
+<b class="nc">&nbsp;                setUserObject(userService.getById(id));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(userObject) &amp;&amp; StringUtils.isNotBlank(userObject.getShortcuts())) {</b>
+<b class="nc">&nbsp;                shortcuts = mapShortcuts(new ObjectMapper().readValue(userObject.getShortcuts(),</b>
+<b class="nc">&nbsp;                        new TypeReference&lt;TreeMap&lt;String, String&gt;&gt;() {}));</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                shortcuts = mapShortcuts(new TreeMap&lt;&gt;());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            setSaveDisabled(true);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.USER.getTranslationSingular(), id }, logger, e);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Could not parse shortcuts loaded from user with id &quot; + id + &quot;!&quot;, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get map of supported metadata languages.
+&nbsp;     *
+&nbsp;     * @return map of supported metadata languages
+&nbsp;     */
+&nbsp;    public Map&lt;String, String&gt; getMetadataLanguages() {
+<b class="nc">&nbsp;        Map&lt;String, String&gt; metadataLanguages = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        String[] availableMetadataLanguages = ConfigCore.getStringArrayParameter(ParameterCore.METADATA_LANGUAGE_LIST);</b>
+<b class="nc">&nbsp;        for (String availableLanguage : availableMetadataLanguages) {</b>
+<b class="nc">&nbsp;            String[] language = availableLanguage.split(&quot;-&quot;);</b>
+<b class="nc">&nbsp;            metadataLanguages.put(language[0], language[1]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return metadataLanguages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of projects available for assignment to the user.
+&nbsp;     *
+&nbsp;     * @return list of projects available for assignment to the user
+&nbsp;     */
+&nbsp;    public List&lt;ProjectDTO&gt; getProjects() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getProjectService().findAllAvailableForAssignToUser(this.userObject)</b>
+<b class="nc">&nbsp;                    .stream().sorted(Comparator.comparing(ProjectDTO::getTitle)).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {ObjectType.PROJECT.getTranslationPlural() },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;            return new LinkedList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of roles available for assignment to the user.
+&nbsp;     *
+&nbsp;     * @return list of roles available for assignment to the user
+&nbsp;     */
+&nbsp;    public List&lt;Role&gt; getRoles() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getRoleService().getAllAvailableForAssignToUser(this.userObject)</b>
+<b class="nc">&nbsp;                    .stream().sorted(Comparator.comparing(Role::getTitle)).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {ObjectType.ROLE.getTranslationPlural() }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;            return new LinkedList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of clients available for assignment to the user.
+&nbsp;     *
+&nbsp;     * @return list of clients available for assignment to the user
+&nbsp;     */
+&nbsp;    public List&lt;Client&gt; getClients() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getClientService().getAllAvailableForAssignToUser(this.userObject)</b>
+<b class="nc">&nbsp;                    .stream().sorted(Comparator.comparing(Client::getName)).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {ObjectType.CLIENT.getTranslationPlural() }, logger,</b>
+&nbsp;                    e);
+<b class="nc">&nbsp;            return new LinkedList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return empty string. Returning the actual password is never required, but GUI needs a getter for form fields.
+&nbsp;     *
+&nbsp;     * @return Empty string.
+&nbsp;     */
+&nbsp;    public String getPasswordToEncrypt() {
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets password.
+&nbsp;     *
+&nbsp;     * @param passwordToEncrypt
+&nbsp;     *            The password.
+&nbsp;     */
+&nbsp;    public void setPasswordToEncrypt(String passwordToEncrypt) {
+<b class="nc">&nbsp;        this.passwordToEncrypt = passwordToEncrypt;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether given UserDTO &#39;user&#39; is logged in.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            UserDTO to check
+&nbsp;     * @return whether given UserDTO is checked in
+&nbsp;     */
+&nbsp;    public static boolean checkUserLoggedIn(User user) {
+<b class="nc">&nbsp;        for (SecuritySession securitySession : ServiceManager.getSessionService().getActiveSessions()) {</b>
+<b class="nc">&nbsp;            if (securitySession.getUserName().equals(user.getLogin())) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Changes the password for current user in database and in case Ldap
+&nbsp;     * authentication is active also on ldap server.
+&nbsp;     */
+&nbsp;    public void changePasswordForCurrentUser() {
+<b class="nc">&nbsp;        if (isOldPasswordInvalid()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;passwordsDontMatchOld&quot;);</b>
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            Set&lt;ConstraintViolation&lt;KitodoPassword&gt;&gt; passwordViolations = getPasswordViolations();</b>
+<b class="nc">&nbsp;            if (passwordViolations.isEmpty()) {</b>
+<b class="nc">&nbsp;                if (DynamicAuthenticationProvider.getInstance().isLdapAuthentication()</b>
+<b class="nc">&nbsp;                        &amp;&amp; Objects.nonNull(userObject.getLdapGroup())) {</b>
+<b class="nc">&nbsp;                    ServiceManager.getLdapServerService().changeUserPassword(userObject, passwordToEncrypt);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    userService.changeUserPassword(userObject, this.passwordToEncrypt);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                Helper.setMessage(&quot;passwordChanged&quot;);</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;resetPasswordDialog&#39;).hide();&quot;);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                for (ConstraintViolation&lt;KitodoPassword&gt; passwordViolation : passwordViolations) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(passwordViolation.getMessage());</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.USER.getTranslationSingular() }, logger, e);</b>
+<b class="nc">&nbsp;        } catch (NoSuchAlgorithmException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;ldap error&quot;, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isOldPasswordInvalid() {
+<b class="nc">&nbsp;        if (!ServiceManager.getSecurityAccessService().hasAuthorityToEditUser()) {</b>
+<b class="nc">&nbsp;            return !Objects.equals(this.oldPassword, passwordEncoder.decrypt(this.userObject.getPassword()));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get old password.
+&nbsp;     *
+&nbsp;     * @return value of oldPassword
+&nbsp;     */
+&nbsp;    public String getOldPassword() {
+<b class="nc">&nbsp;        return oldPassword;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set old password.
+&nbsp;     *
+&nbsp;     * @param oldPassword
+&nbsp;     *            as java.lang.String
+&nbsp;     */
+&nbsp;    public void setOldPassword(String oldPassword) {
+<b class="nc">&nbsp;        this.oldPassword = oldPassword;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get shortcuts.
+&nbsp;     *
+&nbsp;     * @return value of shortcuts
+&nbsp;     */
+&nbsp;    public SortedMap&lt;String, String&gt; getShortcuts() {
+<b class="nc">&nbsp;        return shortcuts;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private SortedMap&lt;String, String&gt; mapShortcuts(Map&lt;String, String&gt; loadedShortcuts) {
+<b class="nc">&nbsp;        SortedMap&lt;String, String&gt; shortcuts = new TreeMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (String shortcut : AVAILABLE_SHORTCUTS) {</b>
+<b class="nc">&nbsp;            shortcuts.put(shortcut, loadedShortcuts.getOrDefault(shortcut, &quot;&quot;));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return shortcuts;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Changes the filter of the UserForm and reloads it.
+&nbsp;     *
+&nbsp;     * @param filter
+&nbsp;     *            the filter to apply.
+&nbsp;     * @return reload path of the page.
+&nbsp;     */
+&nbsp;    public String changeFilter(String filter) {
+<b class="nc">&nbsp;        filterMenu.parseFilters(filter);</b>
+<b class="nc">&nbsp;        setFilter(filter);</b>
+<b class="nc">&nbsp;        return usersPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void setFilter(String filter) {
+<b class="nc">&nbsp;        super.filter = filter;</b>
+<b class="nc">&nbsp;        this.lazyDTOModel.setFilterString(filter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether LDAP group and LDAP server are configured for current user
+&nbsp;     * and if LDAP server is read only.
+&nbsp;     *
+&nbsp;     * @return whether LDAP server is configured and read only
+&nbsp;     */
+&nbsp;    public boolean isLdapServerReadOnly() {
+<b class="nc">&nbsp;        if (Objects.nonNull(this.userObject)</b>
+<b class="nc">&nbsp;                &amp;&amp; Objects.nonNull(this.userObject.getLdapGroup())</b>
+<b class="nc">&nbsp;                &amp;&amp; Objects.nonNull(this.userObject.getLdapGroup().getLdapServer())) {</b>
+<b class="nc">&nbsp;            return this.userObject.getLdapGroup().getLdapServer().isReadOnly();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get gallery view modes.
+&nbsp;     *
+&nbsp;     * @return list of Strings
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getGalleryViewModes() {
+<b class="nc">&nbsp;        return GalleryViewMode.getGalleryViewModes();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get translation of GalleryViewMode with given enum value &#39;galleryViewMode&#39;.
+&nbsp;     * @param galleryViewModeValue enum value of GalleryViewMode
+&nbsp;     * @return translation of GalleryViewMode
+&nbsp;     */
+&nbsp;    public String getGalleryViewModeTranslation(String galleryViewModeValue) {
+<b class="nc">&nbsp;        return GalleryViewMode.getByName(galleryViewModeValue).getTranslation();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get filterMenu.
+&nbsp;     *
+&nbsp;     * @return value of filterMenu
+&nbsp;     */
+&nbsp;    public FilterMenu getFilterMenu() {
+<b class="nc">&nbsp;        return filterMenu;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PropertyDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.persistence</a>
+</div>
+
+<h1>Coverage Summary for Class: PropertyDAO (org.kitodo.data.database.persistence)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PropertyDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (12/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.persistence;
+&nbsp;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.persistence.PersistenceException;
+&nbsp;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;
+<b class="fc">&nbsp;public class PropertyDAO extends BaseDAO&lt;Property&gt; {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Property getById(Integer id) throws DAOException {
+<b class="fc">&nbsp;        Property property = retrieveObject(Property.class, id);</b>
+<b class="fc">&nbsp;        if (property == null) {</b>
+<b class="fc">&nbsp;            throw new DAOException(&quot;Object cannot be found in database&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return property;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Property&gt; getAll() throws DAOException {
+<b class="fc">&nbsp;        return retrieveAllObjects(Property.class);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Property&gt; getAll(int offset, int size) throws DAOException {
+<b class="fc">&nbsp;        return retrieveObjects(&quot;FROM Property ORDER BY id ASC&quot;, offset, size);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Property&gt; getAllNotIndexed(int offset, int size) throws DAOException {
+<b class="nc">&nbsp;        return retrieveObjects(&quot;FROM Property WHERE indexAction = &#39;INDEX&#39; OR indexAction IS NULL ORDER BY id ASC&quot;,</b>
+&nbsp;            offset, size);
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void remove(Integer propertyId) throws DAOException {
+<b class="fc">&nbsp;        removeObject(Property.class, propertyId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return distinct Property titles from database.
+&nbsp;     *
+&nbsp;     * @return list of distinct Property titles sorted alphabetically.
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; retrieveDistinctTitles() {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            List&lt;?&gt; titles = session.createQuery(&quot;SELECT DISTINCT title FROM Property&quot;).list();</b>
+<b class="fc">&nbsp;            return titles.stream().map(Object::toString).sorted().collect(Collectors.toList());</b>
+<b class="fc">&nbsp;        } catch (PersistenceException e) {</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

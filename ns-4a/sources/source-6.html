@@ -1,0 +1,319 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > NewspaperMigrationTask</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.tasks</a>
+</div>
+
+<h1>Coverage Summary for Class: NewspaperMigrationTask (org.kitodo.production.helper.tasks)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NewspaperMigrationTask</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    74,2%
+  </span>
+  <span class="absValue">
+    (23/31)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">NewspaperMigrationTask$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">NewspaperMigrationTask$Part</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    77,8%
+  </span>
+  <span class="absValue">
+    (28/36)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.tasks;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;
+&nbsp;import javax.naming.ConfigurationException;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Batch;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.CommandException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.production.migration.NewspaperProcessesMigrator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Runs the migration of a newspaper in the task manager.
+&nbsp; */
+&nbsp;public class NewspaperMigrationTask extends EmptyTask {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The migration is performed in three parts that build upon each other.
+&nbsp;     */
+<b class="fc">&nbsp;    private static enum Part {</b>
+&nbsp;        /**
+&nbsp;         * First, the individual processes are converted.
+&nbsp;         */
+<b class="fc">&nbsp;        CONVERT_PROCESSES,</b>
+&nbsp;        /**
+&nbsp;         * Then, the overall newspaper process will be created.
+&nbsp;         */
+<b class="fc">&nbsp;        CREATE_NEWSPAPER,</b>
+&nbsp;        /**
+&nbsp;         * Afterwards, for each year, a year process will be created, and linked
+&nbsp;         * to the overall process.
+&nbsp;         */
+<b class="fc">&nbsp;        CREATE_YEARS</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Migrator which is run by this thread.
+&nbsp;     */
+&nbsp;    private final NewspaperProcessesMigrator migrator;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Number of processes, used to calculate progress.
+&nbsp;     */
+&nbsp;    private final int numberOfProcesses;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Current part of migration.
+&nbsp;     */
+&nbsp;    private Part part;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Step counter (for progress).
+&nbsp;     */
+&nbsp;    private int step;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new newspaper migration task.
+&nbsp;     *
+&nbsp;     * @param batch
+&nbsp;     *            the batch object which holds together the newspaper processes
+&nbsp;     */
+&nbsp;    public NewspaperMigrationTask(Batch batch) {
+<b class="fc">&nbsp;        super(batch.getTitle());</b>
+<b class="fc">&nbsp;        this.numberOfProcesses = batch.getProcesses().size();</b>
+<b class="fc">&nbsp;        this.part = Part.CONVERT_PROCESSES;</b>
+<b class="fc">&nbsp;        this.migrator = new NewspaperProcessesMigrator(batch);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Clone constructor. Provides the ability to restart an export that was
+&nbsp;     * previously interrupted by the user.
+&nbsp;     *
+&nbsp;     * @param source
+&nbsp;     *            terminated thread
+&nbsp;     */
+&nbsp;    private NewspaperMigrationTask(NewspaperMigrationTask source) {
+<b class="nc">&nbsp;        super(source);</b>
+<b class="nc">&nbsp;        this.migrator = source.migrator;</b>
+<b class="nc">&nbsp;        this.numberOfProcesses = source.numberOfProcesses;</b>
+<b class="nc">&nbsp;        this.part = source.part;</b>
+<b class="nc">&nbsp;        this.step = source.step;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the total number of steps. There is one (conversion) step per
+&nbsp;     * process, one overall process generation step, and for each year one year
+&nbsp;     * process generation step. The number of steps is growing during the first
+&nbsp;     * part as long as more years are encountered, so this value must be updated
+&nbsp;     * every time.
+&nbsp;     *
+&nbsp;     * @return the number of steps
+&nbsp;     */
+&nbsp;    private int getNumberOfSteps() {
+<b class="fc">&nbsp;        return numberOfProcesses + 1 + migrator.getNumberOfYears();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Performs the next migration step.
+&nbsp;     *
+&nbsp;     * @throws DAOException
+&nbsp;     *             if a process cannot be load from the database
+&nbsp;     * @throws IOException
+&nbsp;     *             if file syestem I/O fails
+&nbsp;     * @throws ProcessGenerationException
+&nbsp;     *             if a process cannot be generated
+&nbsp;     * @throws DataException
+&nbsp;     *             if a process cannot be saved to the database
+&nbsp;     * @throws ConfigurationException
+&nbsp;     *             if the newspaper division is not well configured in the
+&nbsp;     *             ruleset
+&nbsp;     */
+&nbsp;    private void next() throws DAOException, IOException, ProcessGenerationException, DataException,
+&nbsp;            ConfigurationException, CommandException {
+<b class="fc">&nbsp;        switch (part) {</b>
+&nbsp;            case CONVERT_PROCESSES: {
+<b class="fc">&nbsp;                super.setWorkDetail(migrator.getProcessTitle(step));</b>
+<b class="fc">&nbsp;                migrator.convertProcess(step);</b>
+<b class="fc">&nbsp;                if (step == numberOfProcesses - 1) {</b>
+<b class="fc">&nbsp;                    part = Part.CREATE_NEWSPAPER;</b>
+&nbsp;                }
+&nbsp;                break;
+&nbsp;            }
+&nbsp;            case CREATE_NEWSPAPER: {
+<b class="fc">&nbsp;                super.setWorkDetail(migrator.getTitle());</b>
+<b class="fc">&nbsp;                migrator.createOverallProcess();</b>
+<b class="fc">&nbsp;                part = Part.CREATE_YEARS;</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            }
+&nbsp;            case CREATE_YEARS: {
+<b class="fc">&nbsp;                super.setWorkDetail(migrator.getPendingYearTitle());</b>
+<b class="fc">&nbsp;                migrator.createNextYearProcess();</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            }
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalStateException(&quot;For step: &quot; + part);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        setProgress(100 * ++step / getNumberOfSteps());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Runs the current thread.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void run() {
+&nbsp;        try {
+<b class="fc">&nbsp;            while (!part.equals(Part.CREATE_YEARS) || migrator.hasNextYear()) {</b>
+<b class="fc">&nbsp;                next();</b>
+<b class="fc">&nbsp;                if (isInterrupted()) {</b>
+&nbsp;                    return;
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;            setProgress(100);</b>
+<b class="nc">&nbsp;        } catch (ConfigurationException | DAOException | IOException | ProcessGenerationException | DataException</b>
+&nbsp;                | CommandException e) {
+<b class="nc">&nbsp;            setException(e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

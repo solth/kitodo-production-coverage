@@ -1,0 +1,190 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileFormatsConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.config.xml.fileformats</a>
+</div>
+
+<h1>Coverage Summary for Class: FileFormatsConfig (org.kitodo.config.xml.fileformats)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileFormatsConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.config.xml.fileformats;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.function.Function;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.xml.bind.JAXBException;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;import javax.xml.bind.annotation.XmlRootElement;
+&nbsp;import javax.xml.bind.annotation.XmlType;
+&nbsp;
+&nbsp;import org.kitodo.config.KitodoConfig;
+&nbsp;import org.kitodo.utils.JAXBContextCache;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@code kitodo_fileFormats.xml} config file. This class corresponds to the
+&nbsp; * {@code &lt;kitodo_fileFormats&gt;} tag in {@code kitodo_fileFormats.xml}.
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;@XmlType(name = &quot;&quot;, propOrder = {&quot;fileFormat&quot; })
+&nbsp;@XmlRootElement(name = &quot;kitodo_fileFormats&quot;)
+<b class="fc">&nbsp;public class FileFormatsConfig {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final File CONFIG_FILE = new File(</b>
+<b class="fc">&nbsp;            Paths.get(KitodoConfig.getKitodoConfigDirectory(), &quot;kitodo_fileFormats.xml&quot;).toString());</b>
+&nbsp;
+&nbsp;    @XmlElement(required = true)
+&nbsp;    protected List&lt;FileFormat&gt; fileFormat;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of configured file formats.
+&nbsp;     *
+&nbsp;     * @return the configured file formats
+&nbsp;     * @throws JAXBException
+&nbsp;     *             if the content of the file is syntactically or semantically
+&nbsp;     *             incorrect
+&nbsp;     */
+&nbsp;    public static List&lt;FileFormat&gt; getFileFormats() throws JAXBException {
+<b class="fc">&nbsp;        return JAXBContextCache.getInstance().getUnmarshalled(FileFormatsConfig.class, CONFIG_FILE).fileFormat;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a map of configured file formats.
+&nbsp;     *
+&nbsp;     * @param keyMapper
+&nbsp;     *            a mapping function to produce the keys of the map
+&nbsp;     * @return a map of the configured file formats
+&nbsp;     * @throws JAXBException
+&nbsp;     *             if the content of the file is syntactically or semantically
+&nbsp;     *             incorrect
+&nbsp;     */
+&nbsp;    public static &lt;T&gt; Map&lt;T, FileFormat&gt; getFileFormats(Function&lt;? super FileFormat, T&gt; keyMapper)
+&nbsp;            throws JAXBException {
+<b class="fc">&nbsp;        return getFileFormats().stream().collect(Collectors.toMap(keyMapper, Function.identity()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a file format by its MIME type, if any.
+&nbsp;     *
+&nbsp;     * @param mimeType
+&nbsp;     *            MIME type to look up
+&nbsp;     * @return the file format
+&nbsp;     * @throws JAXBException
+&nbsp;     *             if the content of the file is syntactically or semantically
+&nbsp;     *             incorrect
+&nbsp;     */
+&nbsp;    public static Optional&lt;FileFormat&gt; getFileFormat(String mimeType) throws JAXBException {
+<b class="fc">&nbsp;        return Optional.ofNullable(getFileFormats(FileFormat::getMimeType).get(mimeType));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

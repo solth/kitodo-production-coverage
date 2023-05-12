@@ -1,0 +1,1031 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Course</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model.bibliography.course</a>
+</div>
+
+<h1>Coverage Summary for Class: Course (org.kitodo.production.model.bibliography.course)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Course</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    31,2%
+  </span>
+  <span class="absValue">
+    (10/32)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    17,5%
+  </span>
+  <span class="absValue">
+    (54/308)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model.bibliography.course;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.time.DayOfWeek;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.MonthDay;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.kitodo.production.helper.XMLUtils;
+&nbsp;import org.kitodo.production.model.bibliography.course.metadata.CountableMetadata;
+&nbsp;import org.kitodo.production.model.bibliography.course.metadata.RecoveredMetadata;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.Node;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class Course represents the course of appearance of a newspaper.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * A course of appearance consists of one or more blocks of time. Interruptions
+&nbsp; * in the course of appearance can be modeled by subsequent blocks.
+&nbsp; */
+&nbsp;public class Course extends ArrayList&lt;Block&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attribute {@code after=&quot;…&quot;} used in the XML representation of a course of
+&nbsp;     * appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Newspapers, especially bigger ones, can have several issues that, e.g.,
+&nbsp;     * may differ in time of publication (morning issue, evening issue, …) or
+&nbsp;     * geographic distribution (Edinburgh issue, London issue, …). Normally,
+&nbsp;     * when parsing the XML file, the issues are created in their order of first
+&nbsp;     * appearance. However, if you want to enforce a different order, you can
+&nbsp;     * define it here.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The attribute {@code after=&quot;…&quot;} holds the names of issues that shall be
+&nbsp;     * ordered before this issue. Several issues are to be separated by white
+&nbsp;     * space. Issue names containing white space must be enclosed in double
+&nbsp;     * replaced by two subsequent apostrophes (&quot;{@code &#39;&#39;}&quot;, 2× U+0027).
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Not-yet-mentioned issues are created before, though maybe empty.
+&nbsp;     */
+&nbsp;    private static final String ATTRIBUTE_AFTER = &quot;after&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attribute {@code date=&quot;…&quot;} used in the XML representation of a course of
+&nbsp;     * appearance.
+&nbsp;     */
+&nbsp;    private static final String ATTRIBUTE_DATE = &quot;date&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attribute {@code increment=&quot;…&quot;} used in the XML representation of a
+&nbsp;     * course of appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The attribute {@code increment=&quot;…&quot;} can have as value one of the
+&nbsp;     * {@link Granularity} values, in lower case. It indicates when the counter
+&nbsp;     * shall be incremented.
+&nbsp;     */
+&nbsp;    private static final String ATTRIBUTE_INCREMENT = &quot;increment&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attribute {@code issue=&quot;…&quot;} used in the XML representation of a course of
+&nbsp;     * appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The attribute {@code issue=&quot;…&quot;} holds the name of the issue. Newspapers,
+&nbsp;     * especially bigger ones, can have several issues that, e.g., may differ in
+&nbsp;     * time of publication (morning issue, evening issue, …) or geographic
+&nbsp;     * distribution (Edinburgh issue, London issue, …).
+&nbsp;     */
+&nbsp;    private static final String ATTRIBUTE_ISSUE_HEADING = &quot;issue&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attribute {@code metadataType=&quot;…&quot;} used in the XML representation of a
+&nbsp;     * course of appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The attribute {@code metadataType=&quot;…&quot;} holds the name of the metadata
+&nbsp;     * type that this counter will be written to.
+&nbsp;     */
+&nbsp;    private static final String ATTRIBUTE_METADATA_TYPE = &quot;metadataType&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attribute {@code value=&quot;…&quot;} used in the XML representation of a course of
+&nbsp;     * appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The attribute {@code value=&quot;…&quot;} holds the counter start value.
+&nbsp;     */
+&nbsp;    private static final String ATTRIBUTE_VALUE = &quot;value&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attribute {@code index=&quot;…&quot;} used in the XML representation of a course of
+&nbsp;     * appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The attribute {@code index=&quot;…&quot;} is optional. It may be used to
+&nbsp;     * distinguish different blocks if needed and can be omitted if only one
+&nbsp;     * block is used.
+&nbsp;     */
+&nbsp;    private static final String ATTRIBUTE_VARIANT = &quot;index&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attribute {@code yearBegin=&quot;…&quot;} used in the XML representation of a
+&nbsp;     * course of appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The attribute {@code yearBegin=&quot;…&quot;} is optional. It may be used to
+&nbsp;     * indicate a year begin different from the first of January, as it may be
+&nbsp;     * used for school years, business years, or seasons.
+&nbsp;     */
+&nbsp;    private static final String ATTRIBUTE_YEAR_BEGIN = &quot;yearBegin&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attribute {@code yearTerm=&quot;…&quot;} used in the XML representation of a course
+&nbsp;     * of appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The attribute {@code yearTerm=&quot;…&quot;} is optional. It may be used to
+&nbsp;     * indicate the type of year that begins with a date different from the
+&nbsp;     * first of January, values maybe like “business year”, “season”, or “school
+&nbsp;     * year”.
+&nbsp;     */
+&nbsp;    private static final String ATTRIBUTE_YEAR_TERM = &quot;yearTerm&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Element {@code &lt;appeared&gt;} used in the XML representation of a
+&nbsp;     * course of appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Each {@code &lt;appeared&gt;} element represents one issue that
+&nbsp;     * physically appeared. It has the attributes {@code issue=&quot;…&quot;}
+&nbsp;     * (required, may be empty) and {@code date=&quot;…&quot;} (required) and cannot
+&nbsp;     * hold child elements.
+&nbsp;     */
+&nbsp;    private static final String ELEMENT_APPEARED = &quot;appeared&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Element {@code &lt;course&gt;} used in the XML representation of a
+&nbsp;     * course of appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * {@code &lt;course&gt;} is the root element of the XML
+&nbsp;     * representation. It can hold two children,
+&nbsp;     * {@code &lt;description&gt;} (output only, optional) and
+&nbsp;     * {@code &lt;processes&gt;} (required).
+&nbsp;     */
+&nbsp;    private static final String ELEMENT_COURSE = &quot;course&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Element {@code &lt;description&gt;} used in the XML representation
+&nbsp;     * of a course of appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * {@code &lt;description&gt;} holds a verbal, human-readable
+&nbsp;     * description of the course of appearance, which is generated only and
+&nbsp;     * doesn’t have an effect on input.
+&nbsp;     */
+&nbsp;    private static final String ELEMENT_DESCRIPTION = &quot;description&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Element {@code &lt;metadata&gt;} used in the XML representation of a course of
+&nbsp;     * appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * {@code &lt;metadata&gt;} declares an auto-counting metadata value assigned to
+&nbsp;     * the issue it is used in. The counter will start counting until it is
+&nbsp;     * replaced by another counter. A counter value of {@code &quot;&quot;} disables the
+&nbsp;     * counter.
+&nbsp;     */
+&nbsp;    private static final String ELEMENT_METADATA = &quot;metadata&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Element {@code &lt;process&gt;} used in the XML representation of a course of
+&nbsp;     * appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Each {@code &lt;process&gt;} element represents one process to be generated in
+&nbsp;     * Production. It can hold {@code &lt;title&gt;} elements (of any quantity).
+&nbsp;     */
+&nbsp;    private static final String ELEMENT_PROCESS = &quot;process&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Element {@code &lt;processes&gt;} used in the XML representation of
+&nbsp;     * a course of appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Each {@code &lt;processes&gt;} element represents the processes to
+&nbsp;     * be generated in Production. It can hold
+&nbsp;     * {@code &lt;process&gt;} elements (of any quantity).
+&nbsp;     */
+&nbsp;    private static final String ELEMENT_PROCESSES = &quot;processes&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Element {@code &lt;title&gt;} used in the XML representation of a
+&nbsp;     * course of appearance. Each {@code &lt;title&gt;} element represents
+&nbsp;     * a block in time the appeared issues belong to. It has the optional
+&nbsp;     * attribute {@code index=&quot;…&quot;} and can hold
+&nbsp;     * {@code &lt;appeared&gt;} elements (of any quantity).
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Note: In the original design, the element was intended to model title
+&nbsp;     * name changes. This was given up later, but for historical reasons, the
+&nbsp;     * XML element’s name is still “title”. For the original design, see
+&nbsp;     * https://github.com/kitodo/kitodo-production/issues/51#issuecomment-38035674
+&nbsp;     */
+&nbsp;    private static final String ELEMENT_BLOCK = &quot;title&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * January the 1ˢᵗ.
+&nbsp;     */
+<b class="fc">&nbsp;    public static final MonthDay FIRST_OF_JANUARY = MonthDay.of(1, 1);</b>
+&nbsp;
+&nbsp;    private static final int WEEKDAY_PAGES = 40;
+&nbsp;    private static final int SUNDAY_PAGES = 240;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * List of Lists of Issues, each representing a process.
+&nbsp;     */
+<b class="fc">&nbsp;    private final transient List&lt;List&lt;IndividualIssue&gt;&gt; processes = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private final transient Map&lt;String, Block&gt; resolveByBlockVariantCache = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    private boolean processesAreVolatile = true;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The name of the year, such as “business year”, “fiscal year”, or
+&nbsp;     * “season”.
+&nbsp;     */
+<b class="fc">&nbsp;    private String yearName = &quot;&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The first day of the year.
+&nbsp;     */
+<b class="fc">&nbsp;    private MonthDay yearStart = MonthDay.of(1, 1);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Default constructor, creates an empty course. Must be made explicit since
+&nbsp;     * we offer other constructors, too.
+&nbsp;     */
+&nbsp;    public Course() {
+<b class="fc">&nbsp;        super();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor to create a course from an XML source.
+&nbsp;     *
+&nbsp;     * @param xml
+&nbsp;     *            XML document data structure
+&nbsp;     * @throws NoSuchElementException
+&nbsp;     *             if ELEMENT_COURSE or ELEMENT_PROCESSES cannot be found
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the dates of two blocks do overlap
+&nbsp;     * @throws NullPointerException
+&nbsp;     *             if a mandatory element is absent
+&nbsp;     */
+&nbsp;    public Course(Document xml) {
+<b class="nc">&nbsp;        super();</b>
+<b class="nc">&nbsp;        processesAreVolatile = false;</b>
+<b class="nc">&nbsp;        Element rootNode = XMLUtils.getFirstChildWithTagName(xml, ELEMENT_COURSE);</b>
+<b class="nc">&nbsp;        String yearBegin = rootNode.getAttribute(ATTRIBUTE_YEAR_BEGIN);</b>
+<b class="nc">&nbsp;        if (!yearBegin.isEmpty()) {</b>
+<b class="nc">&nbsp;            LocalDate dateTime = LocalDate.parse(yearBegin,</b>
+<b class="nc">&nbsp;                    DateTimeFormatter.ofPattern(&quot;--MM-dd&quot;).withLocale(DateTimeFormatter.ISO_DATE.getLocale()));</b>
+<b class="nc">&nbsp;            yearStart = MonthDay.of(dateTime.getMonthValue(), dateTime.getDayOfMonth());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        yearName = rootNode.getAttribute(ATTRIBUTE_YEAR_TERM);</b>
+<b class="nc">&nbsp;        Element processesNode = XMLUtils.getFirstChildWithTagName(rootNode, ELEMENT_PROCESSES);</b>
+<b class="nc">&nbsp;        int initialCapacity = 10;</b>
+<b class="nc">&nbsp;        Map&lt;LocalDate, IndividualIssue&gt; lastIssueForDate = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;RecoveredMetadata&gt; recoveredMetadata = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Node processNode = processesNode.getFirstChild(); processNode != null; processNode = processNode</b>
+<b class="nc">&nbsp;                .getNextSibling()) {</b>
+<b class="nc">&nbsp;            if (!(processNode instanceof Element) || !processNode.getNodeName().equals(ELEMENT_PROCESS)) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            initialCapacity = processProcessNode(initialCapacity, lastIssueForDate, recoveredMetadata, processNode);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        processRecoveredMetadata(recoveredMetadata);</b>
+<b class="nc">&nbsp;        recalculateRegularityOfIssues();</b>
+<b class="nc">&nbsp;        processesAreVolatile = true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private int processProcessNode(int initialCapacity, Map&lt;LocalDate, IndividualIssue&gt; lastIssueForDate,
+&nbsp;                                   List&lt;RecoveredMetadata&gt; recoveredMetadata, Node processNode) {
+<b class="nc">&nbsp;        List&lt;IndividualIssue&gt; process = new ArrayList&lt;&gt;(initialCapacity);</b>
+<b class="nc">&nbsp;        for (Node blockNode = processNode.getFirstChild(); blockNode != null; blockNode = blockNode</b>
+<b class="nc">&nbsp;                .getNextSibling()) {</b>
+<b class="nc">&nbsp;            if (!(blockNode instanceof Element) || !blockNode.getNodeName().equals(ELEMENT_BLOCK)) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            processBlockNode(lastIssueForDate, recoveredMetadata, process, blockNode);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        processes.add(process);</b>
+<b class="nc">&nbsp;        initialCapacity = (int) Math.round(1.1 * process.size());</b>
+<b class="nc">&nbsp;        return initialCapacity;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processBlockNode(Map&lt;LocalDate, IndividualIssue&gt; lastIssueForDate,
+&nbsp;                                  List&lt;RecoveredMetadata&gt; recoveredMetadata, List&lt;IndividualIssue&gt; process,
+&nbsp;                                  Node blockNode) {
+<b class="nc">&nbsp;        String variant = ((Element) blockNode).getAttribute(ATTRIBUTE_VARIANT);</b>
+<b class="nc">&nbsp;        for (Node issueNode = blockNode.getFirstChild(); issueNode != null; issueNode = issueNode</b>
+<b class="nc">&nbsp;                .getNextSibling()) {</b>
+<b class="nc">&nbsp;            if (!(issueNode instanceof Element) || !issueNode.getNodeName().equals(ELEMENT_APPEARED)) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            String issue = ((Element) issueNode).getAttribute(ATTRIBUTE_ISSUE_HEADING);</b>
+<b class="nc">&nbsp;            String date = ((Element) issueNode).getAttribute(ATTRIBUTE_DATE);</b>
+<b class="nc">&nbsp;            if (date == null) {</b>
+<b class="nc">&nbsp;                throw new NullPointerException(ATTRIBUTE_DATE);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            String after = ((Element) issueNode).getAttribute(ATTRIBUTE_AFTER);</b>
+<b class="nc">&nbsp;            List&lt;String&gt; before = Objects.isNull(after) ? Collections.emptyList()</b>
+<b class="nc">&nbsp;                    : splitAtSpaces(after);</b>
+<b class="nc">&nbsp;            LocalDate localDate = LocalDate.parse(date);</b>
+<b class="nc">&nbsp;            IndividualIssue individualIssue = addAddition(variant, before, issue, localDate);</b>
+<b class="nc">&nbsp;            IndividualIssue previousIssue = lastIssueForDate.get(localDate);</b>
+<b class="nc">&nbsp;            if (previousIssue != null) {</b>
+<b class="nc">&nbsp;                Integer sortingNumber = previousIssue.getSortingNumber();</b>
+<b class="nc">&nbsp;                if (sortingNumber == null) {</b>
+<b class="nc">&nbsp;                    sortingNumber = 1;</b>
+<b class="nc">&nbsp;                    previousIssue.setSortingNumber(sortingNumber);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                individualIssue.setSortingNumber(sortingNumber + 1);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            lastIssueForDate.put(localDate, individualIssue);</b>
+<b class="nc">&nbsp;            process.add(individualIssue);</b>
+<b class="nc">&nbsp;            findToBeRecoveredMetadata(recoveredMetadata, issueNode, issue, date);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processRecoveredMetadata(List&lt;RecoveredMetadata&gt; recoveredMetadata) {
+<b class="nc">&nbsp;        Map&lt;Pair&lt;Block, String&gt;, CountableMetadata&gt; last = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (RecoveredMetadata metaDatum : recoveredMetadata) {</b>
+<b class="nc">&nbsp;            Block foundBlock = null;</b>
+<b class="nc">&nbsp;            Issue foundIssue = null;</b>
+<b class="nc">&nbsp;            BLOCK: for (Block block : this) {</b>
+<b class="nc">&nbsp;                for (IndividualIssue individualIssue : block.getIndividualIssues(metaDatum.getDate())) {</b>
+<b class="nc">&nbsp;                    if (individualIssue.getHeading().equals(metaDatum.getIssue())) {</b>
+<b class="nc">&nbsp;                        foundBlock = block;</b>
+<b class="nc">&nbsp;                        foundIssue = individualIssue.getIssue();</b>
+<b class="nc">&nbsp;                        break BLOCK;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            CountableMetadata previousMetadata = last.get(Pair.of(foundBlock, metaDatum.getMetadataType()));</b>
+<b class="nc">&nbsp;            if (previousMetadata != null) {</b>
+<b class="nc">&nbsp;                previousMetadata.setDelete(Pair.of(metaDatum.getDate(), foundIssue));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            CountableMetadata metadata = new CountableMetadata(foundBlock, Pair.of(metaDatum.getDate(), foundIssue));</b>
+<b class="nc">&nbsp;            metadata.setMetadataType(metaDatum.getMetadataType());</b>
+<b class="nc">&nbsp;            metadata.setStartValue(metaDatum.getValue());</b>
+<b class="nc">&nbsp;            metadata.setStepSize(metaDatum.getStepSize());</b>
+<b class="nc">&nbsp;            foundBlock.addMetadata(metadata);</b>
+<b class="nc">&nbsp;            last.put(Pair.of(foundBlock, metaDatum.getMetadataType()), metadata);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void findToBeRecoveredMetadata(List&lt;RecoveredMetadata&gt; recoveredMetadata, Node issueNode,
+&nbsp;                                           String issue, String date) {
+<b class="nc">&nbsp;        for (Node metadataNode = issueNode</b>
+<b class="nc">&nbsp;                .getFirstChild(); metadataNode != null; metadataNode = metadataNode.getNextSibling()) {</b>
+<b class="nc">&nbsp;            if (!(metadataNode instanceof Element)</b>
+<b class="nc">&nbsp;                    || !metadataNode.getNodeName().equals(ELEMENT_METADATA)) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            RecoveredMetadata recovered = new RecoveredMetadata(LocalDate.parse(date), issue);</b>
+<b class="nc">&nbsp;            recovered.setMetadataType(((Element) metadataNode).getAttribute(ATTRIBUTE_METADATA_TYPE));</b>
+<b class="nc">&nbsp;            if (recovered.getMetadataType() == null) {</b>
+<b class="nc">&nbsp;                throw new NullPointerException(ATTRIBUTE_METADATA_TYPE);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            recovered.setValue(((Element) metadataNode).getAttribute(ATTRIBUTE_VALUE));</b>
+<b class="nc">&nbsp;            if (recovered.getValue() == null) {</b>
+<b class="nc">&nbsp;                throw new NullPointerException(ATTRIBUTE_VALUE);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            String increment = ((Element) metadataNode).getAttribute(ATTRIBUTE_INCREMENT);</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                recovered.setStepSize(Granularity.valueOf(increment.toUpperCase()));</b>
+<b class="nc">&nbsp;            } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;                recovered.setStepSize(null);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            recoveredMetadata.add(recovered);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Appends the specified block to the end of this course.
+&nbsp;     *
+&nbsp;     * @param block
+&nbsp;     *            block to be appended to this course
+&nbsp;     * @return true (as specified by Collection.add(E))
+&nbsp;     * @see java.util.ArrayList#add(java.lang.Object)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean add(Block block) {
+<b class="fc">&nbsp;        super.add(block);</b>
+<b class="fc">&nbsp;        if (block.countIndividualIssues() &gt; 0) {</b>
+<b class="fc">&nbsp;            processes.clear();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a LocalDate to the set of additions of the issue identified by
+&nbsp;     * issueHeading in the block optionally identified by a variant. Note that
+&nbsp;     * in case that the date is outside the time range of the described block,
+&nbsp;     * the time range will be expanded. Do not use this function in contexts
+&nbsp;     * where there is one or more issues in the block that have a regular
+&nbsp;     * appearance set, because in this case the regularly appeared issues in the
+&nbsp;     * expanded block will show up later, too, which is probably not what you
+&nbsp;     * want.
+&nbsp;     *
+&nbsp;     * @param variant
+&nbsp;     *            block identifier (may be null)
+&nbsp;     * @param beforeIssues
+&nbsp;     *            issues to be existing before this one
+&nbsp;     * @param issueHeading
+&nbsp;     *            heading of the issue this issue is of
+&nbsp;     * @param date
+&nbsp;     *            date to add
+&nbsp;     * @return an IndividualIssue representing the added issue
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the date would cause the block to overlap with another
+&nbsp;     *             block
+&nbsp;     */
+&nbsp;    private IndividualIssue addAddition(String variant, List&lt;String&gt; beforeIssues, String issueHeading,
+&nbsp;            LocalDate date) {
+&nbsp;
+<b class="nc">&nbsp;        Block block = get(variant);</b>
+<b class="nc">&nbsp;        if (block == null) {</b>
+<b class="nc">&nbsp;            block = new Block(this, variant);</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                block.setFirstAppearance(date);</b>
+<b class="nc">&nbsp;                block.setLastAppearance(date);</b>
+<b class="nc">&nbsp;            } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;                throw new IllegalArgumentException(e.getMessage() + &quot;, (&quot; + variant + &quot;) &quot; + date, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            add(block);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            if (block.getFirstAppearance().isAfter(date)) {</b>
+<b class="nc">&nbsp;                block.setFirstAppearance(date);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (block.getLastAppearance().isBefore(date)) {</b>
+<b class="nc">&nbsp;                block.setLastAppearance(date);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        for (String issueBefore : beforeIssues) {</b>
+<b class="nc">&nbsp;            Issue issue = block.getIssue(issueBefore);</b>
+<b class="nc">&nbsp;            if (issue == null) {</b>
+<b class="nc">&nbsp;                issue = new Issue(this, issueBefore);</b>
+<b class="nc">&nbsp;                block.addIssue(issue);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        Issue issue = block.getIssue(issueHeading);</b>
+<b class="nc">&nbsp;        if (issue == null) {</b>
+<b class="nc">&nbsp;            issue = new Issue(this, issueHeading);</b>
+<b class="nc">&nbsp;            block.addIssue(issue);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        issue.addAddition(date);</b>
+<b class="nc">&nbsp;        return new IndividualIssue(block, issue, date, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes the process list. This is
+&nbsp;     * necessary if the processes must be regenerated because the data structure
+&nbsp;     * they will be derived from has changed, or if they only had been added
+&nbsp;     * temporarily to be able to retrieve an XML file containing values.
+&nbsp;     */
+&nbsp;    public void clearProcesses() {
+<b class="fc">&nbsp;        if (processesAreVolatile) {</b>
+<b class="fc">&nbsp;            processes.clear();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines how many stampings of
+&nbsp;     * issues physically appeared without generating a list of IndividualIssue
+&nbsp;     * objects.
+&nbsp;     *
+&nbsp;     * @return the count of issues
+&nbsp;     */
+&nbsp;    public long countIndividualIssues() {
+<b class="nc">&nbsp;        long numberOfIndividualIssues = 0;</b>
+<b class="nc">&nbsp;        for (Block block : this) {</b>
+<b class="nc">&nbsp;            numberOfIndividualIssues += block.countIndividualIssues();</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return numberOfIndividualIssues;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the block identified by the optionally given variant, or null if
+&nbsp;     * no block with the given variant can be found.
+&nbsp;     *
+&nbsp;     * @param variant
+&nbsp;     *            the variant of the block (may be null)
+&nbsp;     * @return the block identified by the given variant, or null if no block
+&nbsp;     *         can be found
+&nbsp;     */
+&nbsp;    private Block get(String variant) {
+<b class="nc">&nbsp;        if (resolveByBlockVariantCache.containsKey(variant)) {</b>
+<b class="nc">&nbsp;            Block potentialResult = resolveByBlockVariantCache.get(variant);</b>
+<b class="nc">&nbsp;            if (potentialResult.isIdentifiedBy(variant)) {</b>
+<b class="nc">&nbsp;                return potentialResult;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                resolveByBlockVariantCache.remove(variant);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        for (Block candidate : this) {</b>
+<b class="nc">&nbsp;            if (candidate.isIdentifiedBy(variant)) {</b>
+<b class="nc">&nbsp;                resolveByBlockVariantCache.put(variant, candidate);</b>
+<b class="nc">&nbsp;                return candidate;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates a list of IndividualIssue
+&nbsp;     * objects, each of them representing a stamping of one physically appeared
+&nbsp;     * issue.
+&nbsp;     *
+&nbsp;     * @return a LinkedHashSet of IndividualIssue objects, each of them
+&nbsp;     *         representing one physically appeared issue
+&nbsp;     */
+&nbsp;    public Set&lt;IndividualIssue&gt; getIndividualIssues() {
+<b class="fc">&nbsp;        LinkedHashSet&lt;IndividualIssue&gt; individualIssues = new LinkedHashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        LocalDate lastAppearance = getLastAppearance();</b>
+<b class="fc">&nbsp;        LocalDate firstAppearance = getFirstAppearance();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(firstAppearance)) {</b>
+<b class="fc">&nbsp;            for (LocalDate day = firstAppearance; !day.isAfter(lastAppearance); day = day.plusDays(1)) {</b>
+<b class="fc">&nbsp;                for (Block block : this) {</b>
+<b class="fc">&nbsp;                    individualIssues.addAll(block.getIndividualIssues(day));</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return individualIssues;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the date the regularity of this
+&nbsp;     * course of appearance starts with.
+&nbsp;     *
+&nbsp;     * @return the date of first appearance
+&nbsp;     */
+&nbsp;    public LocalDate getFirstAppearance() {
+<b class="fc">&nbsp;        if (super.isEmpty()) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        LocalDate firstAppearance = super.get(0).getFirstAppearance();</b>
+<b class="fc">&nbsp;        for (int index = 1; index &lt; super.size(); index++) {</b>
+<b class="fc">&nbsp;            LocalDate otherFirstAppearance = super.get(index).getFirstAppearance();</b>
+<b class="fc">&nbsp;            if (otherFirstAppearance.isBefore(firstAppearance)) {</b>
+<b class="nc">&nbsp;                firstAppearance = otherFirstAppearance;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return firstAppearance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the date the regularity of this
+&nbsp;     * course of appearance ends with.
+&nbsp;     *
+&nbsp;     * @return the date of last appearance
+&nbsp;     */
+&nbsp;    public LocalDate getLastAppearance() {
+<b class="fc">&nbsp;        if (super.isEmpty()) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        LocalDate lastAppearance = super.get(0).getLastAppearance();</b>
+<b class="fc">&nbsp;        for (int index = 1; index &lt; super.size(); index++) {</b>
+<b class="fc">&nbsp;            LocalDate otherLastAppearance = super.get(index).getLastAppearance();</b>
+<b class="fc">&nbsp;            if (otherLastAppearance.isAfter(lastAppearance)) {</b>
+<b class="fc">&nbsp;                lastAppearance = otherLastAppearance;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return lastAppearance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the number of processes into
+&nbsp;     * which the course of appearance will be split.
+&nbsp;     *
+&nbsp;     * @return the number of processes
+&nbsp;     */
+&nbsp;    public int getNumberOfProcesses() {
+<b class="nc">&nbsp;        return processes.size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the name of the year. The name of the year is optional and maybe
+&nbsp;     * empty. Typical values are “Business year”, “Fiscal year”, or “Season”.
+&nbsp;     *
+&nbsp;     * @return the name of the year
+&nbsp;     */
+&nbsp;    public String getYearName() {
+<b class="nc">&nbsp;        return yearName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the beginning of the year. Typically, this is the 1ˢᵗ of January,
+&nbsp;     * but it can be changed here to other days as well. The beginning of the
+&nbsp;     * year must parse and must not not be empty.
+&nbsp;     *
+&nbsp;     * @return the beginning of the year
+&nbsp;     */
+&nbsp;    public MonthDay getYearStart() {
+<b class="nc">&nbsp;        return yearStart;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculates a guessed number of pages for a course of appearance of a
+&nbsp;     * newspaper, presuming each issue having 40 pages and Sunday issues having
+&nbsp;     * six times that size because most people buy the Sunday issue most often
+&nbsp;     * and therefore advertisers buy the most space on that day.
+&nbsp;     *
+&nbsp;     * @return a guessed total number of pages for the full course of appearance
+&nbsp;     */
+&nbsp;    public long guessTotalNumberOfPages() {
+<b class="nc">&nbsp;        long totalNumberOfPages = 0;</b>
+<b class="nc">&nbsp;        for (Block block : this) {</b>
+<b class="nc">&nbsp;            LocalDate lastAppearance = block.getLastAppearance();</b>
+<b class="nc">&nbsp;            for (LocalDate day = block.getFirstAppearance(); !day.isAfter(lastAppearance); day = day.plusDays(1)) {</b>
+<b class="nc">&nbsp;                for (Issue issue : block.getIssues()) {</b>
+<b class="nc">&nbsp;                    if (issue.isMatch(day)) {</b>
+<b class="nc">&nbsp;                        totalNumberOfPages += day.getDayOfWeek() != DayOfWeek.SUNDAY ? WEEKDAY_PAGES</b>
+<b class="nc">&nbsp;                                : SUNDAY_PAGES;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return totalNumberOfPages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the processes to create from the
+&nbsp;     * course of appearance.
+&nbsp;     *
+&nbsp;     * @return the processes
+&nbsp;     */
+&nbsp;    public List&lt;List&lt;IndividualIssue&gt;&gt; getProcesses() {
+<b class="fc">&nbsp;        return processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Iterates over the array of blocks and returns the
+&nbsp;     * first one that matches a given date. Since there shouldn’t be overlapping
+&nbsp;     * blocks, there should be at most one block for which this is true. If no
+&nbsp;     * matching block is found, it will return null.
+&nbsp;     *
+&nbsp;     * @param date
+&nbsp;     *            a LocalDate to examine
+&nbsp;     * @return the block on which this date is represented, if any
+&nbsp;     */
+&nbsp;    public Block isMatch(LocalDate date) {
+<b class="nc">&nbsp;        for (Block block : this) {</b>
+<b class="nc">&nbsp;            if (block.isMatch(date)) {</b>
+<b class="nc">&nbsp;                return block;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Joins a list of strings to a string of whitespace-separated tokens,
+&nbsp;     * surrounding tokens containing spaces with quotes.
+&nbsp;     *
+&nbsp;     * @param input
+&nbsp;     *            string to tokenize
+&nbsp;     * @return list of split strings
+&nbsp;     */
+&nbsp;    private static String joinQuoting(Collection&lt;String&gt; input) {
+<b class="nc">&nbsp;        StringBuilder result = new StringBuilder(16 * input.size());</b>
+<b class="nc">&nbsp;        boolean first = true;</b>
+<b class="nc">&nbsp;        for (String item : input) {</b>
+<b class="nc">&nbsp;            if (first) {</b>
+<b class="nc">&nbsp;                first = false;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                result.append(&#39; &#39;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            boolean hasSpace = item.indexOf(&#39; &#39;) &gt; -1;</b>
+<b class="nc">&nbsp;            if (hasSpace) {</b>
+<b class="nc">&nbsp;                result.append(&#39;&quot;&#39;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            result.append(item.replaceAll(&quot;\&quot;&quot;, &quot;&#39;&#39;&quot;));</b>
+<b class="nc">&nbsp;            if (hasSpace) {</b>
+<b class="nc">&nbsp;                result.append(&#39;&quot;&#39;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return result.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Recalculates for all blocks of this Course for each Issue the daysOfWeek
+&nbsp;     * of its regular appearance within the interval of time of the block. This
+&nbsp;     * is especially sensible to detect the underlying regularity after lots of
+&nbsp;     * issues whose existence is known have been added one by one as additions
+&nbsp;     * to the underlying issue(s).
+&nbsp;     */
+&nbsp;    public void recalculateRegularityOfIssues() {
+<b class="nc">&nbsp;        for (Block block : this) {</b>
+<b class="nc">&nbsp;            block.recalculateRegularityOfIssues();</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes the element at the specified position in
+&nbsp;     * this list. Shifts any subsequent elements to the left (subtracts one from
+&nbsp;     * their indices). Additionally, any references to the object held in the
+&nbsp;     * map used for resolving are being removed so that the object can be
+&nbsp;     * garbage-collected.
+&nbsp;     *
+&nbsp;     * @param index
+&nbsp;     *            the index of the element to be removed
+&nbsp;     * @return the element that was removed from the list
+&nbsp;     * @throws IndexOutOfBoundsException
+&nbsp;     *             if the index is out of range (index &lt; 0 || index &gt;= size())
+&nbsp;     * @see java.util.ArrayList#remove(int)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Block remove(int index) {
+<b class="nc">&nbsp;        Block block = super.remove(index);</b>
+<b class="nc">&nbsp;        resolveByBlockVariantCache.entrySet().removeIf(entry -&gt; entry.getValue() == block);</b>
+<b class="nc">&nbsp;        if (block.countIndividualIssues() &gt; 0) {</b>
+<b class="nc">&nbsp;            processes.clear();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return block;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Splits a string of whitespace-separated tokens, considering tokens
+&nbsp;     * surrounded by quotes as one.
+&nbsp;     *
+&nbsp;     * @param input
+&nbsp;     *            string to tokenize
+&nbsp;     * @return list of split strings
+&nbsp;     */
+&nbsp;    private static List&lt;String&gt; splitAtSpaces(String input) {
+<b class="nc">&nbsp;        List&lt;String&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        Matcher matcher = Pattern.compile(&quot;([^\&quot;]\\S*|\&quot;.+?\&quot;)\\s*&quot;).matcher(input);</b>
+<b class="nc">&nbsp;        while (matcher.find()) {</b>
+<b class="nc">&nbsp;            result.add(matcher.group(1).replaceFirst(&quot;^\&quot;(.*)\&quot;$&quot;, &quot;$1&quot;).replaceAll(&quot;&#39;&#39;&quot;, &quot;\&quot;&quot;));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculates the processes depending on the given BreakMode.
+&nbsp;     *
+&nbsp;     * @param mode
+&nbsp;     *            how the course shall be broken into issues
+&nbsp;     */
+&nbsp;
+&nbsp;    public void splitInto(Granularity mode) {
+<b class="fc">&nbsp;        int initialCapacity = 10;</b>
+<b class="fc">&nbsp;        Integer lastMark = null;</b>
+<b class="fc">&nbsp;        List&lt;IndividualIssue&gt; process = null;</b>
+&nbsp;
+<b class="fc">&nbsp;        processes.clear();</b>
+<b class="fc">&nbsp;        for (IndividualIssue issue : getIndividualIssues()) {</b>
+<b class="fc">&nbsp;            Integer mark = issue.getBreakMark(mode, yearStart);</b>
+<b class="fc">&nbsp;            if (!mark.equals(lastMark) &amp;&amp; process != null) {</b>
+<b class="fc">&nbsp;                initialCapacity = (int) Math.round(1.1 * process.size());</b>
+<b class="fc">&nbsp;                processes.add(process);</b>
+<b class="fc">&nbsp;                process = null;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (process == null) {</b>
+<b class="fc">&nbsp;                process = new ArrayList&lt;&gt;(initialCapacity);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            process.add(issue);</b>
+<b class="fc">&nbsp;            lastMark = mark;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (process != null) {</b>
+<b class="fc">&nbsp;            processes.add(process);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Transforms a course of appearance to XML.
+&nbsp;     *
+&nbsp;     * @return XML as String
+&nbsp;     */
+&nbsp;    public Document toXML() throws IOException {
+<b class="nc">&nbsp;        Document xml = XMLUtils.newDocument();</b>
+<b class="nc">&nbsp;        Element courseNode = xml.createElement(ELEMENT_COURSE);</b>
+<b class="nc">&nbsp;        if (!yearStart.equals(FIRST_OF_JANUARY)) {</b>
+<b class="nc">&nbsp;            courseNode.setAttribute(ATTRIBUTE_YEAR_BEGIN, yearStart.toString());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!yearName.isEmpty()) {</b>
+<b class="nc">&nbsp;            courseNode.setAttribute(ATTRIBUTE_YEAR_TERM, yearName);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Element description = xml.createElement(ELEMENT_DESCRIPTION);</b>
+<b class="nc">&nbsp;        description.appendChild(xml.createTextNode(StringUtils.join(CourseToGerman.asReadableText(this), &quot;\n\n&quot;)));</b>
+<b class="nc">&nbsp;        courseNode.appendChild(description);</b>
+&nbsp;
+<b class="nc">&nbsp;        courseNode.appendChild(processesToXml(xml));</b>
+<b class="nc">&nbsp;        xml.appendChild(courseNode);</b>
+<b class="nc">&nbsp;        return xml;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Element processesToXml(Document xml) {
+<b class="nc">&nbsp;        Element processesNode = xml.createElement(ELEMENT_PROCESSES);</b>
+<b class="nc">&nbsp;        Set&lt;Pair&lt;Integer, String&gt;&gt; afterDeclarations = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (List&lt;IndividualIssue&gt; process : processes) {</b>
+<b class="nc">&nbsp;            Element processNode = xml.createElement(ELEMENT_PROCESS);</b>
+<b class="nc">&nbsp;            Element blockNode = null;</b>
+<b class="nc">&nbsp;            int previous = -1;</b>
+<b class="nc">&nbsp;            for (IndividualIssue issue : process) {</b>
+<b class="nc">&nbsp;                blockNode = issueToXml(xml, afterDeclarations, processNode, blockNode, previous, issue);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            if (blockNode != null) {</b>
+<b class="nc">&nbsp;                processNode.appendChild(blockNode);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            processesNode.appendChild(processNode);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return processesNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Element issueToXml(Document xml, Set&lt;Pair&lt;Integer, String&gt;&gt; afterDeclarations, Element processNode,
+&nbsp;            Element blockNode, int previous, IndividualIssue issue) {
+<b class="nc">&nbsp;        int index = issue.indexIn(this);</b>
+<b class="nc">&nbsp;        if (index != previous &amp;&amp; blockNode != null) {</b>
+<b class="nc">&nbsp;            processNode.appendChild(blockNode);</b>
+<b class="nc">&nbsp;            blockNode = null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (blockNode == null) {</b>
+<b class="nc">&nbsp;            blockNode = xml.createElement(ELEMENT_BLOCK);</b>
+<b class="nc">&nbsp;            blockNode.setAttribute(ATTRIBUTE_VARIANT, Integer.toString(index + 1));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Element issueNode = xml.createElement(ELEMENT_APPEARED);</b>
+<b class="nc">&nbsp;        issueNode.setAttribute(ATTRIBUTE_ISSUE_HEADING, issue.getHeading());</b>
+<b class="nc">&nbsp;        issueNode.setAttribute(ATTRIBUTE_DATE, issue.getDate().toString());</b>
+<b class="nc">&nbsp;        addMetadataToIssue(xml, issue, issueNode);</b>
+<b class="nc">&nbsp;        Pair&lt;Integer, String&gt; afterDeclaration = Pair.of(index, issue.getHeading());</b>
+<b class="nc">&nbsp;        if (!afterDeclarations.contains(afterDeclaration)) {</b>
+<b class="nc">&nbsp;            List&lt;String&gt; issuesBefore = issue.getIssuesBefore();</b>
+<b class="nc">&nbsp;            if (!issuesBefore.isEmpty()) {</b>
+<b class="nc">&nbsp;                issueNode.setAttribute(ATTRIBUTE_AFTER, joinQuoting(issuesBefore));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            afterDeclarations.add(afterDeclaration);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        blockNode.appendChild(issueNode);</b>
+<b class="nc">&nbsp;        previous = index;</b>
+<b class="nc">&nbsp;        return blockNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addMetadataToIssue(Document xml, IndividualIssue issue, Element issueNode) {
+<b class="nc">&nbsp;        Pair&lt;LocalDate, Issue&gt; issueId = Pair.of(issue.getDate(), issue.getIssue());</b>
+<b class="nc">&nbsp;        Map&lt;String, CountableMetadata&gt; metadata = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Block block : this) {</b>
+<b class="nc">&nbsp;            for (CountableMetadata metaDatum : block.getMetadata(issueId, false)) {</b>
+<b class="nc">&nbsp;                metadata.put(metaDatum.getMetadataType(), metaDatum);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        for (Block block : this) {</b>
+<b class="nc">&nbsp;            for (CountableMetadata metaDatum : block.getMetadata(issueId, true)) {</b>
+<b class="nc">&nbsp;                metadata.put(metaDatum.getMetadataType(), metaDatum);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        for (Entry&lt;String, CountableMetadata&gt; entry : metadata.entrySet()) {</b>
+<b class="nc">&nbsp;            Element metadataNode = xml.createElement(ELEMENT_METADATA);</b>
+<b class="nc">&nbsp;            metadataNode.setAttribute(ATTRIBUTE_METADATA_TYPE, entry.getKey());</b>
+<b class="nc">&nbsp;            CountableMetadata metaDatum = entry.getValue();</b>
+<b class="nc">&nbsp;            if (metaDatum.matches(metaDatum.getMetadataType(), issueId, false)) {</b>
+<b class="nc">&nbsp;                metadataNode.setAttribute(ATTRIBUTE_VALUE, &quot;&quot;);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                metadataNode.setAttribute(ATTRIBUTE_VALUE, ImportService.getProcessDetailValue(metaDatum.getMetadataDetail()));</b>
+<b class="nc">&nbsp;                if (metaDatum.getStepSize() != null) {</b>
+<b class="nc">&nbsp;                    metadataNode.setAttribute(ATTRIBUTE_INCREMENT, metaDatum.getStepSize().toString().toLowerCase());</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            issueNode.appendChild(metadataNode);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the year name of the course.
+&nbsp;     *
+&nbsp;     * @param yearName
+&nbsp;     *            the yearName to set
+&nbsp;     */
+&nbsp;    public void setYearName(String yearName) {
+<b class="nc">&nbsp;        this.yearName = yearName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the year start of the course.
+&nbsp;     *
+&nbsp;     * @param yearStart
+&nbsp;     *            the yearStart to set
+&nbsp;     */
+&nbsp;    public void setYearStart(MonthDay yearStart) {
+<b class="fc">&nbsp;        this.yearStart = yearStart;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

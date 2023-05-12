@@ -1,0 +1,308 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > XMLEditor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.editor</a>
+</div>
+
+<h1>Coverage Summary for Class: XMLEditor (org.kitodo.production.editor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">XMLEditor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (8/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    49,2%
+  </span>
+  <span class="absValue">
+    (31/63)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.editor;
+&nbsp;
+&nbsp;import java.io.FileNotFoundException;
+&nbsp;import java.io.FileOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.PrintWriter;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.io.StringReader;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.stream.Stream;
+&nbsp;
+&nbsp;import javax.annotation.PostConstruct;
+&nbsp;import javax.faces.application.FacesMessage;
+&nbsp;import javax.faces.component.UIComponent;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.faces.view.ViewScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;import javax.xml.XMLConstants;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;import javax.xml.transform.Transformer;
+&nbsp;import javax.xml.transform.TransformerConfigurationException;
+&nbsp;import javax.xml.transform.TransformerException;
+&nbsp;import javax.xml.transform.TransformerFactory;
+&nbsp;import javax.xml.transform.dom.DOMSource;
+&nbsp;import javax.xml.transform.stream.StreamResult;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.enums.KitodoConfigFile;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.xml.sax.InputSource;
+&nbsp;import org.xml.sax.SAXException;
+&nbsp;import org.xml.sax.SAXParseException;
+&nbsp;
+&nbsp;@Named(&quot;XMLEditor&quot;)
+&nbsp;@ViewScoped
+&nbsp;public class XMLEditor implements Serializable {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(XMLEditor.class);</b>
+&nbsp;    private KitodoConfigFile configurationFile;
+<b class="fc">&nbsp;    private String currentConfigurationFile = &quot;&quot;;</b>
+<b class="fc">&nbsp;    private String xmlConfigurationString = &quot;&quot;;</b>
+<b class="fc">&nbsp;    private static DocumentBuilder documentBuilder = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+<b class="fc">&nbsp;    public XMLEditor() {</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();</b>
+<b class="fc">&nbsp;            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);</b>
+<b class="fc">&nbsp;            documentBuilder = documentBuilderFactory.newDocumentBuilder();</b>
+<b class="nc">&nbsp;        } catch (ParserConfigurationException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;ERROR: unable to instantiate document builder: {}&quot;, e.getMessage());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load first configuration file when bean is created.
+&nbsp;     */
+&nbsp;    @PostConstruct
+&nbsp;    public void loadInitialConfiguration() {
+<b class="fc">&nbsp;        loadProjectConfiguration();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the XML configuration string.
+&nbsp;     *
+&nbsp;     * @return the XML configuration string
+&nbsp;     */
+&nbsp;    public String getXMLConfiguration() {
+<b class="fc">&nbsp;        return this.xmlConfigurationString;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set the XML configuration string.
+&nbsp;     *
+&nbsp;     * @param configuration
+&nbsp;     *            the XML configuration string
+&nbsp;     */
+&nbsp;    public void setXMLConfiguration(String configuration) {
+<b class="fc">&nbsp;        this.xmlConfigurationString = configuration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get name of configuration file currently loaded into frontend editor.
+&nbsp;     *
+&nbsp;     * @return configuration file name
+&nbsp;     */
+&nbsp;    public String getCurrentConfigurationFile() {
+<b class="nc">&nbsp;        return currentConfigurationFile;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the content of the XML configuration file with the given name
+&nbsp;     * &#39;configurationFile&#39;.
+&nbsp;     *
+&nbsp;     * @param configurationFile
+&nbsp;     *            name of the configuration to be loaded
+&nbsp;     */
+&nbsp;    public void loadXMLConfiguration(String configurationFile) {
+&nbsp;        try {
+<b class="fc">&nbsp;            currentConfigurationFile = configurationFile;</b>
+<b class="fc">&nbsp;            this.configurationFile = KitodoConfigFile.getByName(configurationFile);</b>
+<b class="fc">&nbsp;            try (Stream&lt;String&gt; lines = Files.lines(this.configurationFile.getFile().toPath())) {</b>
+<b class="fc">&nbsp;                this.xmlConfigurationString = lines.collect(Collectors.joining(&quot;\n&quot;));</b>
+<b class="fc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            String errorMessage = &quot;ERROR: Unable to load configuration file &#39;&quot; + configurationFile + &quot;&#39;.&quot;;</b>
+<b class="nc">&nbsp;            logger.error(&quot;{} {}&quot;, errorMessage, e.getMessage());</b>
+<b class="nc">&nbsp;            this.xmlConfigurationString = errorMessage;</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save the String &#39;xmlConfigurationString&#39; to the XML file denoted by
+&nbsp;     * &#39;configurationFile&#39;.
+&nbsp;     */
+&nbsp;    public void saveXMLConfiguration() {
+<b class="fc">&nbsp;        logger.info(&quot;Saving configuration to file {}&quot;, currentConfigurationFile);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            Document document = documentBuilder.parse(new InputSource(new StringReader(this.xmlConfigurationString)));</b>
+<b class="fc">&nbsp;            TransformerFactory transformerFactory = TransformerFactory.newInstance();</b>
+<b class="fc">&nbsp;            Transformer transformer = transformerFactory.newTransformer();</b>
+<b class="fc">&nbsp;            DOMSource domSource = new DOMSource(document);</b>
+<b class="fc">&nbsp;            try (FileOutputStream outputStream = new FileOutputStream(configurationFile.getFile(), false);</b>
+<b class="fc">&nbsp;                    PrintWriter printWriter = new PrintWriter(outputStream)) {</b>
+<b class="fc">&nbsp;                StreamResult streamResult = new StreamResult(printWriter);</b>
+<b class="fc">&nbsp;                transformer.transform(domSource, streamResult);</b>
+<b class="fc">&nbsp;            } catch (TransformerException e) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;ERROR: transformation failed: {}&quot;, e.getMessage());</b>
+<b class="fc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (TransformerConfigurationException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;ERROR: transformer configuration exception: {}&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;        } catch (FileNotFoundException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;ERROR: file not found: &quot; + e.getMessage());</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;ERROR: could not save XML configuration: {}&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;        } catch (SAXException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;ERROR: error parsing given XML string: {}&quot;, e.getMessage());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the given String &#39;xmlCode&#39; contains well formed XML
+&nbsp;     * code or not.
+&nbsp;     *
+&nbsp;     * @param facesContext
+&nbsp;     *            the current FacesContext
+&nbsp;     * @param uiComponent
+&nbsp;     *            the component containing the String that is being validated
+&nbsp;     * @param xmlCode
+&nbsp;     *            XML code that will be validated
+&nbsp;     * @return whether &#39;xmlCode&#39; is well formed or not
+&nbsp;     */
+&nbsp;    public boolean validateXMLConfiguration(FacesContext facesContext, UIComponent uiComponent, String xmlCode) {
+<b class="nc">&nbsp;        if (!Objects.equals(documentBuilder, null)) {</b>
+<b class="nc">&nbsp;            InputSource inputSource = new InputSource(new StringReader(xmlCode));</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                documentBuilder.parse(inputSource);</b>
+<b class="nc">&nbsp;                return true;</b>
+<b class="nc">&nbsp;            } catch (SAXParseException e) {</b>
+&nbsp;                // parse method throwing an SAXParseException means given xml code is not well
+&nbsp;                // formed!
+<b class="nc">&nbsp;                String errorString = &quot;Error while parsing XML: line = &quot; + e.getLineNumber() + &quot;, column = &quot;</b>
+<b class="nc">&nbsp;                        + e.getColumnNumber() + &quot;: &quot; + e.getMessage();</b>
+<b class="nc">&nbsp;                FacesMessage errorMessage = new FacesMessage(FacesMessage.SEVERITY_ERROR, &quot;XML parsing error&quot;,</b>
+&nbsp;                        errorString);
+<b class="nc">&nbsp;                facesContext.addMessage(uiComponent.getClientId(), errorMessage);</b>
+<b class="nc">&nbsp;                logger.error(errorString);</b>
+<b class="nc">&nbsp;                return false;</b>
+<b class="nc">&nbsp;            } catch (SAXException | IOException e) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;{}: {}&quot;, e.getClass().getSimpleName(), e.getMessage());</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            logger.error(&quot;ERROR: document builder is null!&quot;);</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load the project XML configuration file and display its content in the
+&nbsp;     * editor.
+&nbsp;     */
+&nbsp;    public void loadProjectConfiguration() {
+<b class="fc">&nbsp;        loadXMLConfiguration(KitodoConfigFile.PROJECT_CONFIGURATION.getName());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

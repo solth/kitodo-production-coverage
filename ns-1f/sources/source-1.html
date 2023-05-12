@@ -1,0 +1,285 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > BaseType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.elasticsearch.index.type</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseType (org.kitodo.data.elasticsearch.index.type)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,3%
+  </span>
+  <span class="absValue">
+    (60/65)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.elasticsearch.index.type;
+&nbsp;
+&nbsp;import java.text.DateFormat;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.BaseBean;
+&nbsp;import org.kitodo.data.database.beans.BaseIndexedBean;
+&nbsp;import org.kitodo.data.database.beans.BaseTemplateBean;
+&nbsp;import org.kitodo.data.database.beans.Batch;
+&nbsp;import org.kitodo.data.database.beans.Client;
+&nbsp;import org.kitodo.data.database.beans.Comment;
+&nbsp;import org.kitodo.data.database.beans.Filter;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Role;
+&nbsp;import org.kitodo.data.database.beans.Ruleset;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.beans.Workflow;
+&nbsp;import org.kitodo.data.elasticsearch.api.TypeInterface;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.BatchTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.CommentTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.FilterTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.ProcessTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.ProjectTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.RoleTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.TaskTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.UserTypeField;
+&nbsp;
+&nbsp;/**
+&nbsp; * Abstract class for Type class.
+&nbsp; */
+<b class="fc">&nbsp;public abstract class BaseType&lt;T extends BaseIndexedBean&gt; implements TypeInterface&lt;T&gt; {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Map&lt;String, Object&gt; createDocument(T baseIndexedBean) {
+<b class="fc">&nbsp;        return getJsonObject(baseIndexedBean);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Map&lt;Integer, Map&lt;String, Object&gt;&gt; createDocuments(List&lt;T&gt; baseIndexedBeans) {
+<b class="fc">&nbsp;        Map&lt;Integer, Map&lt;String, Object&gt;&gt; documents = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (T bean : baseIndexedBeans) {</b>
+<b class="fc">&nbsp;            documents.put(bean.getId(), createDocument(bean));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return documents;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    abstract Map&lt;String, Object&gt; getJsonObject(T baseIndexedBean);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method for adding relationship between bean objects.
+&nbsp;     *
+&nbsp;     * @param objects
+&nbsp;     *            list
+&nbsp;     * @param addAdditionalProperties
+&nbsp;     *            true or false, if true also additional information are included,
+&nbsp;     *            type of information depends on the bean which is added as related
+&nbsp;     *            object
+&nbsp;     * @return JSONArray
+&nbsp;     */
+&nbsp;    &lt;F extends BaseBean&gt; List addObjectRelation(List&lt;F&gt; objects, boolean addAdditionalProperties) {
+<b class="fc">&nbsp;        List&lt;Map&lt;String, Object&gt;&gt; jsonObjects = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (F property : objects) {</b>
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; jsonObject = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            jsonObject.put(BatchTypeField.ID.getKey(), property.getId());</b>
+<b class="fc">&nbsp;            if (addAdditionalProperties) {</b>
+<b class="fc">&nbsp;                getAdditionalProperties(jsonObject, property);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            jsonObjects.add(jsonObject);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return jsonObjects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method for adding relationship between bean objects.
+&nbsp;     *
+&nbsp;     * @param objects
+&nbsp;     *            list
+&nbsp;     * @return JSONArray
+&nbsp;     */
+&nbsp;    &lt;F extends BaseBean&gt; List addObjectRelation(List&lt;F&gt; objects) {
+<b class="fc">&nbsp;        return addObjectRelation(objects, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void getAdditionalProperties(Map&lt;String, Object&gt; jsonObject, BaseBean property) {
+<b class="fc">&nbsp;        if (property instanceof Batch) {</b>
+<b class="fc">&nbsp;            Batch batch = (Batch) property;</b>
+<b class="fc">&nbsp;            jsonObject.put(BatchTypeField.TITLE.getKey(), preventNull(batch.getTitle()));</b>
+<b class="fc">&nbsp;        } else if (property instanceof BaseTemplateBean) {</b>
+<b class="fc">&nbsp;            jsonObject.put(ProcessTypeField.TITLE.getKey(), preventNull(((BaseTemplateBean) property).getTitle()));</b>
+<b class="fc">&nbsp;        } else if (property instanceof Comment) {</b>
+<b class="nc">&nbsp;            jsonObject.put(CommentTypeField.MESSAGE.getKey(), preventNull(((Comment) property).getMessage()));</b>
+<b class="fc">&nbsp;        } else if (property instanceof Project) {</b>
+<b class="fc">&nbsp;            Project project = (Project) property;</b>
+<b class="fc">&nbsp;            jsonObject.put(ProjectTypeField.TITLE.getKey(), preventNull(project.getTitle()));</b>
+<b class="fc">&nbsp;            jsonObject.put(ProjectTypeField.ACTIVE.getKey(), project.isActive());</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(project.getClient())) {</b>
+<b class="fc">&nbsp;                jsonObject.put(ProjectTypeField.CLIENT_ID.getKey(), project.getClient().getId());</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } else if (property instanceof User) {</b>
+<b class="fc">&nbsp;            User user = (User) property;</b>
+<b class="fc">&nbsp;            jsonObject.put(UserTypeField.LOGIN.getKey(), preventNull(user.getLogin()));</b>
+<b class="fc">&nbsp;            jsonObject.put(UserTypeField.NAME.getKey(), preventNull(user.getName()));</b>
+<b class="fc">&nbsp;            jsonObject.put(UserTypeField.SURNAME.getKey(), preventNull(user.getSurname()));</b>
+<b class="fc">&nbsp;        } else if (property instanceof Role) {</b>
+<b class="nc">&nbsp;            jsonObject.put(RoleTypeField.TITLE.getKey(), preventNull(((Role) property).getTitle()));</b>
+<b class="fc">&nbsp;        } else if (property instanceof Task) {</b>
+<b class="fc">&nbsp;            jsonObject.put(TaskTypeField.TITLE.getKey(), preventNull(((Task) property).getTitle()));</b>
+<b class="nc">&nbsp;        } else if (property instanceof Filter) {</b>
+<b class="nc">&nbsp;            jsonObject.put(FilterTypeField.VALUE.getKey(), preventNull(((Filter) property).getValue()));</b>
+&nbsp;        } 
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method used for formatting Date as JsonValue. It will help to change fast a
+&nbsp;     * way of Date formatting or expected String format.
+&nbsp;     *
+&nbsp;     * @param date
+&nbsp;     *            as Date
+&nbsp;     * @return formatted date as JsonValue - String or NULL
+&nbsp;     */
+&nbsp;    String getFormattedDate(Date date) {
+<b class="fc">&nbsp;        if (Objects.nonNull(date)) {</b>
+<b class="fc">&nbsp;            DateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);</b>
+<b class="fc">&nbsp;            return dateFormat.format(date);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    int preventNull(Integer value) {
+<b class="fc">&nbsp;        if (Objects.isNull(value)) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    String preventNull(String value) {
+<b class="fc">&nbsp;        if (Objects.isNull(value)) {</b>
+<b class="fc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    int getId(BaseBean baseBean) {
+<b class="fc">&nbsp;        if (Objects.nonNull(baseBean)) {</b>
+<b class="fc">&nbsp;            return baseBean.getId();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    String getTitle(BaseBean baseBean) {
+<b class="fc">&nbsp;        if (baseBean instanceof BaseTemplateBean) {</b>
+<b class="fc">&nbsp;            return preventNull(((BaseTemplateBean) baseBean).getTitle());</b>
+<b class="fc">&nbsp;        } else if (baseBean instanceof Project) {</b>
+<b class="fc">&nbsp;            return preventNull(((Project) baseBean).getTitle());</b>
+<b class="fc">&nbsp;        } else if (baseBean instanceof Workflow) {</b>
+<b class="fc">&nbsp;            return preventNull(((Workflow) baseBean).getTitle());</b>
+<b class="fc">&nbsp;        } else if (baseBean instanceof Client) {</b>
+<b class="fc">&nbsp;            return preventNull(((Client) baseBean).getName());</b>
+<b class="fc">&nbsp;        } else if (baseBean instanceof Ruleset) {</b>
+<b class="fc">&nbsp;            return preventNull(((Ruleset) baseBean).getTitle());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

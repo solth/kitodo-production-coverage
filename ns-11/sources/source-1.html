@@ -1,0 +1,203 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Command</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.command</a>
+</div>
+
+<h1>Coverage Summary for Class: Command (org.kitodo.command)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Command</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (35/40)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.command;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Scanner;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.command.CommandInterface;
+&nbsp;import org.kitodo.api.command.CommandResult;
+&nbsp;
+<b class="fc">&nbsp;public class Command implements CommandInterface {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(Command.class);</b>
+&nbsp;    private static final String CHARSET = &quot;UTF-8&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method executes a script.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            The id, to identify the command and it&#39;s results.
+&nbsp;     * @param command
+&nbsp;     *            The command as a String.
+&nbsp;     * @return The command result.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public CommandResult runCommand(Integer id, String command) {
+&nbsp;        CommandResult commandResult;
+&nbsp;        Process process;
+<b class="fc">&nbsp;        String[] callSequence = command.split(&quot;[\\r\\n\\s]+&quot;);</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            process = new ProcessBuilder(callSequence).start();</b>
+<b class="fc">&nbsp;            try (InputStream inputStream = process.getInputStream();</b>
+<b class="fc">&nbsp;                    InputStream errorInputStream = process.getErrorStream()) {</b>
+<b class="fc">&nbsp;                List&lt;String&gt; outputMessage = inputStreamArrayToList(inputStream);</b>
+<b class="fc">&nbsp;                List&lt;String&gt; errorMessage = inputStreamArrayToList(errorInputStream);</b>
+<b class="fc">&nbsp;                int errCode = process.waitFor();</b>
+&nbsp;
+<b class="fc">&nbsp;                outputMessage.addAll(errorMessage);</b>
+&nbsp;
+<b class="fc">&nbsp;                commandResult = new CommandResult(id, command, errCode == 0, outputMessage);</b>
+<b class="fc">&nbsp;                if (commandResult.isSuccessful()) {</b>
+<b class="fc">&nbsp;                    logger.info(&quot;Execution of Command {} {} was successful!: {}&quot;, commandResult.getId(),</b>
+<b class="fc">&nbsp;                        commandResult.getCommand(), commandResult.getMessages());</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    logger.error(&quot;Execution of Command {} {} failed!: {}&quot;, commandResult.getId(),</b>
+<b class="fc">&nbsp;                        commandResult.getCommand(), commandResult.getMessages());</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (InterruptedException e) {</b>
+<b class="nc">&nbsp;            commandResult = new CommandResult(id, command, false, Collections.singletonList(e.getMessage()));</b>
+<b class="nc">&nbsp;            logger.error(&quot;Execution of Command Thread was interrupted!&quot;);</b>
+<b class="nc">&nbsp;            Thread.currentThread().interrupt();</b>
+<b class="nc">&nbsp;            return commandResult;</b>
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="fc">&nbsp;            List&lt;String&gt; errorMessages = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;            errorMessages.add(e.getCause().toString());</b>
+<b class="fc">&nbsp;            errorMessages.add(e.getMessage());</b>
+<b class="fc">&nbsp;            commandResult = new CommandResult(id, command, false, errorMessages);</b>
+<b class="fc">&nbsp;            logger.error(&quot;Execution of Command {} {} failed!: {}&quot;, commandResult.getId(), commandResult.getCommand(),</b>
+<b class="fc">&nbsp;                commandResult.getMessages());</b>
+<b class="fc">&nbsp;            return commandResult;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return commandResult;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The method reads an InputStream and returns it as a ArrayList.
+&nbsp;     *
+&nbsp;     * @param inputStream
+&nbsp;     *            The Stream to convert.
+&nbsp;     * @return A ArrayList holding the single lines.
+&nbsp;     */
+&nbsp;    private static ArrayList&lt;String&gt; inputStreamArrayToList(InputStream inputStream) {
+<b class="fc">&nbsp;        ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        try (Scanner inputLines = new Scanner(inputStream, CHARSET)) {</b>
+<b class="fc">&nbsp;            while (inputLines.hasNextLine()) {</b>
+<b class="fc">&nbsp;                String myLine = inputLines.nextLine();</b>
+<b class="fc">&nbsp;                list.add(myLine);</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return list;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1983 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > StructurePanel</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: StructurePanel (org.kitodo.production.forms.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">StructurePanel</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    11,7%
+  </span>
+  <span class="absValue">
+    (12/103)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7,7%
+  </span>
+  <span class="absValue">
+    (60/777)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.dataeditor;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.ImmutablePair;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.MediaVariant;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.exceptions.UnknownTreeNodeDataException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.model.Subfolder;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.dataeditor.DataEditorService;
+&nbsp;import org.primefaces.event.NodeCollapseEvent;
+&nbsp;import org.primefaces.event.NodeExpandEvent;
+&nbsp;import org.primefaces.event.NodeSelectEvent;
+&nbsp;import org.primefaces.event.TreeDragDropEvent;
+&nbsp;import org.primefaces.model.DefaultTreeNode;
+&nbsp;import org.primefaces.model.TreeNode;
+&nbsp;
+&nbsp;public class StructurePanel implements Serializable {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(StructurePanel.class);</b>
+&nbsp;    public static final String STRUCTURE_NODE_TYPE = &quot;Structure&quot;;
+&nbsp;    public static final String PHYS_STRUCTURE_NODE_TYPE = &quot;PhysStructure&quot;;
+&nbsp;    public static final String MEDIA_NODE_TYPE = &quot;Media&quot;;
+&nbsp;    public static final String VIEW_NODE_TYPE = &quot;View&quot;;
+&nbsp;    private final DataEditorForm dataEditor;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If changing the tree node fails, we need this value to undo the user’s
+&nbsp;     * select action.
+&nbsp;     */
+&nbsp;    private TreeNode previouslySelectedLogicalNode;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If changing the tree node fails, we need this value to undo the user’s
+&nbsp;     * select action.
+&nbsp;     */
+&nbsp;    private TreeNode previouslySelectedPhysicalNode;
+&nbsp;
+&nbsp;    private TreeNode selectedLogicalNode;
+&nbsp;
+&nbsp;    private TreeNode selectedPhysicalNode;
+&nbsp;
+&nbsp;    private LogicalDivision structure;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The logical structure tree of the edited document.
+&nbsp;     */
+<b class="fc">&nbsp;    private DefaultTreeNode logicalTree = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The physical structure tree of the edited document.
+&nbsp;     */
+<b class="fc">&nbsp;    private DefaultTreeNode physicalTree = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * HashMap containing the current expansion states of all TreeNodes in the logical structure tree.
+&nbsp;     */
+&nbsp;    private HashMap&lt;LogicalDivision, Boolean&gt; previousExpansionStatesLogicalTree;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * HashMap containing the current expansion states of all TreeNodes in the physical structure tree.
+&nbsp;     */
+&nbsp;    private HashMap&lt;PhysicalDivision, Boolean&gt; previousExpansionStatesPhysicalTree;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * HashMap acting as cache for faster retrieval of Subfolders.
+&nbsp;     */
+<b class="fc">&nbsp;    Map&lt;String, Subfolder&gt; subfoldersCache = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * List of all physicalDivisions assigned to multiple LogicalDivisions.
+&nbsp;     */
+<b class="fc">&nbsp;    private List&lt;PhysicalDivision&gt; severalAssignments = new LinkedList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Variable used to set the correct order value when building the logical and physical trees from the PrimeFaces tree.
+&nbsp;     */
+<b class="fc">&nbsp;    private int order = 1;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Active tabs in StructurePanel&#39;s accordion.
+&nbsp;     */
+&nbsp;    private String activeTabs;
+&nbsp;
+<b class="fc">&nbsp;    private String titleMetadata = &quot;type&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines whether the logical tree is built as a combination of physical media nodes and
+&nbsp;     * logical structure nodes (default) or whether it only contains structure nodes.
+&nbsp;     */
+<b class="fc">&nbsp;    private boolean hideMediaInLogicalTree = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines whether a page range is show together with the label of a logical structure node.
+&nbsp;     * The page consists of the label of the first and last media of the logical division,
+&nbsp;     * e.g. &quot;4 : iv - 6 : vi&quot;.
+&nbsp;     */
+<b class="fc">&nbsp;    private boolean showPageRangeInLogicalTree = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines whether the hierarchy level of a tree node should be displayed with its label or not.
+&nbsp;     */
+<b class="fc">&nbsp;    private boolean showHierarchyLevel = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new structure panel.
+&nbsp;     *
+&nbsp;     * @param dataEditor
+&nbsp;     *            the master metadata editor
+&nbsp;     */
+<b class="fc">&nbsp;    StructurePanel(DataEditorForm dataEditor) {</b>
+<b class="fc">&nbsp;        this.dataEditor = dataEditor;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Clear content.
+&nbsp;     */
+&nbsp;    public void clear() {
+<b class="nc">&nbsp;        logicalTree = null;</b>
+<b class="nc">&nbsp;        physicalTree = null;</b>
+<b class="nc">&nbsp;        selectedLogicalNode = null;</b>
+<b class="nc">&nbsp;        selectedPhysicalNode = null;</b>
+<b class="nc">&nbsp;        previouslySelectedLogicalNode = null;</b>
+<b class="nc">&nbsp;        previouslySelectedPhysicalNode = null;</b>
+<b class="nc">&nbsp;        structure = null;</b>
+<b class="nc">&nbsp;        subfoldersCache = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        severalAssignments = new LinkedList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void deleteSelectedStructure() {
+<b class="nc">&nbsp;        if (getSelectedStructure().isEmpty()) {</b>
+&nbsp;            /*
+&nbsp;             * No element is selected or the selected element is not a structure
+&nbsp;             * but, for example, a physical division.
+&nbsp;             */
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;        LogicalDivision selectedStructure = getSelectedStructure().get();</b>
+<b class="nc">&nbsp;        LinkedList&lt;LogicalDivision&gt; ancestors = MetadataEditor.getAncestorsOfLogicalDivision(selectedStructure,</b>
+&nbsp;            structure);
+<b class="nc">&nbsp;        if (ancestors.isEmpty()) {</b>
+&nbsp;            // The selected element is the root node of the tree.
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Collection&lt;View&gt; subViews = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        getAllSubViews(selectedStructure, subViews);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;View&gt; multipleViews = subViews.stream().filter(v -&gt; v.getPhysicalDivision().getLogicalDivisions().size() &gt; 1)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        for (View view : multipleViews) {</b>
+<b class="nc">&nbsp;            dataEditor.unassignView(selectedStructure, view, selectedStructure.getViews().getLast().equals(view));</b>
+<b class="nc">&nbsp;            if (view.getPhysicalDivision().getLogicalDivisions().size() &lt;= 1) {</b>
+<b class="nc">&nbsp;                severalAssignments.remove(view.getPhysicalDivision());</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        subViews.removeAll(multipleViews);</b>
+&nbsp;
+<b class="nc">&nbsp;        LogicalDivision parent = ancestors.getLast();</b>
+&nbsp;
+<b class="nc">&nbsp;        parent.getViews().addAll(subViews);</b>
+<b class="nc">&nbsp;        parent.getViews().sort(Comparator.comparingInt(v -&gt; v.getPhysicalDivision().getOrder()));</b>
+&nbsp;
+<b class="nc">&nbsp;        parent.getChildren().remove(selectedStructure);</b>
+<b class="nc">&nbsp;        show();</b>
+<b class="nc">&nbsp;        dataEditor.getGalleryPanel().updateStripes();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void getAllSubViews(LogicalDivision selectedStructure, Collection&lt;View&gt; views) {
+<b class="nc">&nbsp;        if (Objects.nonNull(selectedStructure.getViews())) {</b>
+<b class="nc">&nbsp;            views.addAll(selectedStructure.getViews());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (LogicalDivision child : selectedStructure.getChildren()) {</b>
+<b class="nc">&nbsp;            getAllSubViews(child, views);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void deleteSelectedPhysicalDivision() {
+<b class="nc">&nbsp;        for (Pair&lt;PhysicalDivision, LogicalDivision&gt; selectedPhysicalDivision : dataEditor.getSelectedMedia()) {</b>
+<b class="nc">&nbsp;            if (!dataEditor.getUnsavedDeletedMedia().contains(selectedPhysicalDivision.getKey())) {</b>
+<b class="nc">&nbsp;                if (selectedPhysicalDivision.getKey().getLogicalDivisions().size() &gt; 1) {</b>
+<b class="nc">&nbsp;                    Helper.setMessage(selectedPhysicalDivision.getKey().toString() + &quot;: is removed fom all assigned structural elements&quot;);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                for (LogicalDivision structuralElement : selectedPhysicalDivision.getKey().getLogicalDivisions()) {</b>
+<b class="nc">&nbsp;                    structuralElement.getViews().removeIf(view -&gt; view.getPhysicalDivision().equals(selectedPhysicalDivision.getKey()));</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                selectedPhysicalDivision.getKey().getLogicalDivisions().clear();</b>
+<b class="nc">&nbsp;                LinkedList&lt;PhysicalDivision&gt; ancestors = MetadataEditor.getAncestorsOfPhysicalDivision(selectedPhysicalDivision.getKey(),</b>
+<b class="nc">&nbsp;                        dataEditor.getWorkpiece().getPhysicalStructure());</b>
+<b class="nc">&nbsp;                if (ancestors.isEmpty()) {</b>
+&nbsp;                    // The selected element is the root node of the tree.
+&nbsp;                    return;
+&nbsp;                }
+<b class="nc">&nbsp;                PhysicalDivision parent = ancestors.getLast();</b>
+<b class="nc">&nbsp;                parent.getChildren().remove(selectedPhysicalDivision.getKey());</b>
+<b class="nc">&nbsp;                dataEditor.getUnsavedDeletedMedia().add(selectedPhysicalDivision.getKey());</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        int i = 1;</b>
+<b class="nc">&nbsp;        for (PhysicalDivision physicalDivision : dataEditor.getWorkpiece().getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted()) {</b>
+<b class="nc">&nbsp;            physicalDivision.setOrder(i);</b>
+<b class="nc">&nbsp;            i++;</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        show();</b>
+<b class="nc">&nbsp;        dataEditor.getMetadataPanel().clear();</b>
+<b class="nc">&nbsp;        dataEditor.getSelectedMedia().clear();</b>
+<b class="nc">&nbsp;        dataEditor.getGalleryPanel().updateStripes();</b>
+<b class="nc">&nbsp;        dataEditor.getPaginationPanel().show();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selected logical TreeNode.
+&nbsp;     *
+&nbsp;     * @return value of selectedLogicalNode
+&nbsp;     */
+&nbsp;    public TreeNode getSelectedLogicalNode() {
+<b class="nc">&nbsp;        return selectedLogicalNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selected logical TreeNode.
+&nbsp;     *
+&nbsp;     * @param selected
+&nbsp;     *          TreeNode that will be selected
+&nbsp;     */
+&nbsp;    public void setSelectedLogicalNode(TreeNode selected) {
+<b class="nc">&nbsp;        if (Objects.nonNull(selected)) {</b>
+<b class="nc">&nbsp;            this.selectedLogicalNode = selected;</b>
+<b class="nc">&nbsp;            expandNode(selected.getParent());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selectedPhysicalNode.
+&nbsp;     *
+&nbsp;     * @return value of selectedPhysicalNode
+&nbsp;     */
+&nbsp;    public TreeNode getSelectedPhysicalNode() {
+<b class="nc">&nbsp;        return selectedPhysicalNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selectedPhysicalNode.
+&nbsp;     *
+&nbsp;     * @param selectedPhysicalNode as org.primefaces.model.TreeNode
+&nbsp;     */
+&nbsp;    public void setSelectedPhysicalNode(TreeNode selectedPhysicalNode) {
+<b class="nc">&nbsp;        if (Objects.nonNull(selectedPhysicalNode)) {</b>
+<b class="nc">&nbsp;            this.selectedPhysicalNode = selectedPhysicalNode;</b>
+<b class="nc">&nbsp;            expandNode(selectedPhysicalNode.getParent());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    Optional&lt;LogicalDivision&gt; getSelectedStructure() {
+<b class="nc">&nbsp;        if (Objects.isNull(selectedLogicalNode)) {</b>
+<b class="nc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StructureTreeNode structureTreeNode = (StructureTreeNode) selectedLogicalNode.getData();</b>
+<b class="nc">&nbsp;        Object dataObject = structureTreeNode.getDataObject();</b>
+<b class="nc">&nbsp;        return Optional.ofNullable(dataObject instanceof LogicalDivision ? (LogicalDivision) dataObject : null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    Optional&lt;PhysicalDivision&gt; getSelectedPhysicalDivision() {
+<b class="nc">&nbsp;        if (Objects.isNull(selectedPhysicalNode)) {</b>
+<b class="nc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StructureTreeNode structureTreeNode = (StructureTreeNode) selectedPhysicalNode.getData();</b>
+<b class="nc">&nbsp;        Object dataObject = structureTreeNode.getDataObject();</b>
+<b class="nc">&nbsp;        return Optional.ofNullable(dataObject instanceof PhysicalDivision ? (PhysicalDivision) dataObject : null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Select given PhysicalDivision in physical structure tree.
+&nbsp;     *
+&nbsp;     * @param physicalDivision
+&nbsp;     *          PhysicalDivision to be selected in physical structure tree
+&nbsp;     */
+&nbsp;    void selectPhysicalDivision(PhysicalDivision physicalDivision) {
+<b class="nc">&nbsp;        TreeNode matchingTreeNode = getMatchingTreeNode(getPhysicalTree(), physicalDivision);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(matchingTreeNode)) {</b>
+<b class="nc">&nbsp;            updatePhysicalNodeSelection(matchingTreeNode);</b>
+<b class="nc">&nbsp;            matchingTreeNode.setSelected(true);</b>
+<b class="nc">&nbsp;            previouslySelectedPhysicalNode.setSelected(false);</b>
+<b class="nc">&nbsp;            show(true);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private TreeNode getMatchingTreeNode(TreeNode parent, PhysicalDivision physicalDivision) {
+<b class="nc">&nbsp;        TreeNode matchingTreeNode = null;</b>
+<b class="nc">&nbsp;        for (TreeNode treeNode : parent.getChildren()) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(treeNode) &amp;&amp; treeNode.getData() instanceof StructureTreeNode) {</b>
+<b class="nc">&nbsp;                StructureTreeNode structureTreeNode = (StructureTreeNode) treeNode.getData();</b>
+<b class="nc">&nbsp;                if (structureTreeNode.getDataObject() instanceof PhysicalDivision) {</b>
+<b class="nc">&nbsp;                    PhysicalDivision currentPhysicalDivision = (PhysicalDivision) structureTreeNode.getDataObject();</b>
+<b class="nc">&nbsp;                    if (Objects.nonNull(currentPhysicalDivision.getDivId())</b>
+<b class="nc">&nbsp;                            &amp;&amp; currentPhysicalDivision.getDivId().equals(physicalDivision.getDivId())) {</b>
+<b class="nc">&nbsp;                        matchingTreeNode = treeNode;</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        matchingTreeNode = getMatchingTreeNode(treeNode, physicalDivision);</b>
+<b class="nc">&nbsp;                        if (Objects.nonNull(matchingTreeNode)) {</b>
+<b class="nc">&nbsp;                            break;</b>
+&nbsp;                        }
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return matchingTreeNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get logicalTree.
+&nbsp;     *
+&nbsp;     * @return value of logicalTree
+&nbsp;     */
+&nbsp;    public DefaultTreeNode getLogicalTree() {
+<b class="nc">&nbsp;        return this.logicalTree;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get physicalTree.
+&nbsp;     *
+&nbsp;     * @return value of physicalTree
+&nbsp;     */
+&nbsp;    public DefaultTreeNode getPhysicalTree() {
+<b class="nc">&nbsp;        return physicalTree;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void preserve() throws UnknownTreeNodeDataException {
+<b class="nc">&nbsp;        if (isSeparateMedia()) {</b>
+<b class="nc">&nbsp;            this.preserveLogical();</b>
+<b class="nc">&nbsp;            this.preservePhysical();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            if (isHideMediaInLogicalTree()) {</b>
+<b class="nc">&nbsp;                this.preserveLogical();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                this.preserveLogicalAndPhysical();</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates the live structure of the workpiece with the current members of
+&nbsp;     * the structure tree in their given order. The live structure of the
+&nbsp;     * workpiece which is stored in the logical structure of the structure tree.
+&nbsp;     */
+&nbsp;    private void preserveLogical() {
+<b class="nc">&nbsp;        if (!this.logicalTree.getChildren().isEmpty()) {</b>
+<b class="nc">&nbsp;            preserveLogicalRecursive(this.logicalTree.getChildren().get(logicalTree.getChildCount() - 1));</b>
+<b class="nc">&nbsp;            dataEditor.checkForChanges();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates the live structure of a structure tree node and returns it, to
+&nbsp;     * provide for updating the parent. If the tree node contains children which
+&nbsp;     * aren’t structures, {@code null} is returned to skip them on the level
+&nbsp;     * above.
+&nbsp;     */
+&nbsp;    private static LogicalDivision preserveLogicalRecursive(TreeNode treeNode) {
+<b class="nc">&nbsp;        StructureTreeNode structureTreeNode = (StructureTreeNode) treeNode.getData();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(structureTreeNode) || !(structureTreeNode.getDataObject() instanceof LogicalDivision)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        LogicalDivision structure = (LogicalDivision) structureTreeNode.getDataObject();</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;LogicalDivision&gt; childrenLive = structure.getChildren();</b>
+<b class="nc">&nbsp;        childrenLive.clear();</b>
+<b class="nc">&nbsp;        for (TreeNode child : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            LogicalDivision maybeChildStructure = preserveLogicalRecursive(child);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(maybeChildStructure)) {</b>
+<b class="nc">&nbsp;                childrenLive.add(maybeChildStructure);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return structure;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void preservePhysical() {
+<b class="nc">&nbsp;        if (!physicalTree.getChildren().isEmpty()) {</b>
+<b class="nc">&nbsp;            preservePhysicalRecursive(physicalTree.getChildren().get(0));</b>
+<b class="nc">&nbsp;            dataEditor.checkForChanges();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static PhysicalDivision preservePhysicalRecursive(TreeNode treeNode) {
+<b class="nc">&nbsp;        StructureTreeNode structureTreeNode = (StructureTreeNode) treeNode.getData();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(structureTreeNode) || !(structureTreeNode.getDataObject() instanceof PhysicalDivision)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        PhysicalDivision physicalDivision = (PhysicalDivision) structureTreeNode.getDataObject();</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; childrenLive = physicalDivision.getChildren();</b>
+<b class="nc">&nbsp;        childrenLive.clear();</b>
+<b class="nc">&nbsp;        for (TreeNode child : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            PhysicalDivision possibleChildPhysicalDivision = preservePhysicalRecursive(child);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(possibleChildPhysicalDivision)) {</b>
+<b class="nc">&nbsp;                childrenLive.add(possibleChildPhysicalDivision);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return physicalDivision;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Loads the tree(s) into the panel and sets the selected element to the
+&nbsp;     * logical structure of the structure tree.
+&nbsp;     *
+&nbsp;     * @param keepSelection
+&nbsp;     *            if true, keeps the currently selected node(s)
+&nbsp;     */
+&nbsp;    public void show(boolean keepSelection) {
+<b class="nc">&nbsp;        if (keepSelection) {</b>
+<b class="nc">&nbsp;            String logicalRowKey = null;</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(selectedLogicalNode)) {</b>
+<b class="nc">&nbsp;                logicalRowKey = selectedLogicalNode.getRowKey();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            String physicalRowKey = null;</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(selectedPhysicalNode)) {</b>
+<b class="nc">&nbsp;                physicalRowKey = selectedPhysicalNode.getRowKey();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            TreeNode keepSelectedLogicalNode = selectedLogicalNode;</b>
+<b class="nc">&nbsp;            TreeNode keepSelectedPhysicalNode = selectedPhysicalNode;</b>
+<b class="nc">&nbsp;            show();</b>
+<b class="nc">&nbsp;            selectedLogicalNode = keepSelectedLogicalNode;</b>
+<b class="nc">&nbsp;            selectedPhysicalNode = keepSelectedPhysicalNode;</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(logicalRowKey)) {</b>
+<b class="nc">&nbsp;                restoreSelection(logicalRowKey, this.logicalTree);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(physicalRowKey)) {</b>
+<b class="nc">&nbsp;                restoreSelection(physicalRowKey, this.physicalTree);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            show();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Loads the tree(s) into the panel and sets the selected element to the
+&nbsp;     * logical structure of the structure tree.
+&nbsp;     */
+&nbsp;    public void show() {
+<b class="nc">&nbsp;        this.structure = dataEditor.getWorkpiece().getLogicalStructure();</b>
+&nbsp;
+<b class="nc">&nbsp;        this.previousExpansionStatesLogicalTree = getLogicalTreeNodeExpansionStates(this.logicalTree);</b>
+<b class="nc">&nbsp;        this.logicalTree = buildStructureTree();</b>
+<b class="nc">&nbsp;        updateLogicalNodeExpansionStates(this.logicalTree, this.previousExpansionStatesLogicalTree);</b>
+&nbsp;
+<b class="nc">&nbsp;        this.previousExpansionStatesPhysicalTree = getPhysicalTreeNodeExpansionStates(this.physicalTree);</b>
+<b class="nc">&nbsp;        this.physicalTree = buildMediaTree(dataEditor.getWorkpiece().getPhysicalStructure());</b>
+<b class="nc">&nbsp;        updatePhysicalNodeExpansionStates(this.physicalTree, this.previousExpansionStatesPhysicalTree);</b>
+&nbsp;
+<b class="nc">&nbsp;        this.selectedLogicalNode = logicalTree.getChildren().get(logicalTree.getChildCount() - 1);</b>
+<b class="nc">&nbsp;        this.selectedPhysicalNode = physicalTree.getChildren().get(0);</b>
+<b class="nc">&nbsp;        this.previouslySelectedLogicalNode = selectedLogicalNode;</b>
+<b class="nc">&nbsp;        this.previouslySelectedPhysicalNode = selectedPhysicalNode;</b>
+<b class="nc">&nbsp;        dataEditor.checkForChanges();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void restoreSelection(String rowKey, TreeNode parentNode) {
+<b class="nc">&nbsp;        for (TreeNode childNode : parentNode.getChildren()) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(childNode) &amp;&amp; rowKey.equals(childNode.getRowKey())) {</b>
+<b class="nc">&nbsp;                childNode.setSelected(true);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                childNode.setSelected(false);</b>
+<b class="nc">&nbsp;                restoreSelection(rowKey, childNode);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the structure tree. If hierarchical links exist upwards, they are
+&nbsp;     * displayed above the tree as separate trees.
+&nbsp;     *
+&nbsp;     * @return the structure tree(s) and the collection of views displayed in
+&nbsp;     *         the tree
+&nbsp;     */
+&nbsp;    private DefaultTreeNode buildStructureTree() {
+<b class="nc">&nbsp;        DefaultTreeNode invisibleRootNode = new DefaultTreeNode();</b>
+<b class="nc">&nbsp;        invisibleRootNode.setExpanded(true);</b>
+<b class="nc">&nbsp;        invisibleRootNode.setType(STRUCTURE_NODE_TYPE);</b>
+<b class="nc">&nbsp;        addParentLinksRecursive(dataEditor.getProcess(), invisibleRootNode);</b>
+<b class="nc">&nbsp;        buildStructureTreeRecursively(structure, invisibleRootNode);</b>
+<b class="nc">&nbsp;        return invisibleRootNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructs a page range string by combining the labels of the first and last view
+&nbsp;     * of the provided logical division.
+&nbsp;     *
+&nbsp;     * @param structure the logical division
+&nbsp;     * @return the page range string
+&nbsp;     */
+&nbsp;    private String buildPageRangeFromLogicalDivision(LogicalDivision structure) {
+<b class="nc">&nbsp;        LinkedList&lt;View&gt; views = structure.getViews();</b>
+<b class="nc">&nbsp;        if (views.size() &gt; 1) {</b>
+<b class="nc">&nbsp;            return buildViewLabel(views.getFirst()) + &quot; | &quot; + buildViewLabel(views.getLast());</b>
+<b class="nc">&nbsp;        } else if (views.size() &gt; 0) {</b>
+<b class="nc">&nbsp;            return buildViewLabel(views.getFirst());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Build a StructureTreeNode for a logical division, which is then visualized in the logical structure tree.
+&nbsp;     *
+&nbsp;     * @param structure the logical division
+&nbsp;     * @return the StructureTreeNode instance
+&nbsp;     */
+&nbsp;    private StructureTreeNode buildStructureTreeNode(LogicalDivision structure) {
+&nbsp;        StructureTreeNode node;
+<b class="fc">&nbsp;        if (Objects.isNull(structure.getLink())) {</b>
+<b class="nc">&nbsp;            StructuralElementViewInterface divisionView = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                structure.getType(), dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;            String label = divisionView.getLabel();</b>
+<b class="nc">&nbsp;            String pageRange = buildPageRangeFromLogicalDivision(structure);</b>
+<b class="nc">&nbsp;            boolean undefined = divisionView.isUndefined() &amp;&amp; Objects.nonNull(structure.getType());</b>
+<b class="nc">&nbsp;            node = new StructureTreeNode(label, pageRange, undefined, false, structure);</b>
+<b class="nc">&nbsp;        } else {</b>
+<b class="fc">&nbsp;            node = new StructureTreeNode(structure.getLink().getUri().toString(), null, true, true, structure);</b>
+<b class="fc">&nbsp;            for (Process child : dataEditor.getCurrentChildren()) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    String type = ServiceManager.getProcessService().getBaseType(child.getId());</b>
+<b class="nc">&nbsp;                    if (child.getId() == ServiceManager.getProcessService()</b>
+<b class="nc">&nbsp;                            .processIdFromUri(structure.getLink().getUri())) {</b>
+<b class="nc">&nbsp;                        StructuralElementViewInterface view = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                            type, dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;                        node = new StructureTreeNode(&quot;[&quot; + child.getId() + &quot;] &quot; + view.getLabel() + &quot; - &quot;</b>
+<b class="nc">&nbsp;                                + child.getTitle(), null, view.isUndefined(), true, structure);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                } catch (DataException e) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(&quot;metadataReadError&quot;, e.getMessage(), logger, e);</b>
+<b class="nc">&nbsp;                    node = new StructureTreeNode(child.getTitle(), null, true, true, child);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return node;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Recursively build the logical structure tree.
+&nbsp;     *
+&nbsp;     * @param structure the current logical structure
+&nbsp;     * @param result the current corresponding primefaces tree node
+&nbsp;     * @return a collection of views that contains all views of the full sub-tree
+&nbsp;     */
+&nbsp;    private Collection&lt;View&gt; buildStructureTreeRecursively(LogicalDivision structure, TreeNode result) {
+<b class="fc">&nbsp;        StructureTreeNode node = buildStructureTreeNode(structure);</b>
+&nbsp;        /*
+&nbsp;         * Creating the tree node by handing over the parent node automatically
+&nbsp;         * appends it to the parent as a child. That’s the logic of the JSF
+&nbsp;         * framework. So you do not have to add the result anywhere.
+&nbsp;         */
+<b class="fc">&nbsp;        DefaultTreeNode parent = new DefaultTreeNode(STRUCTURE_NODE_TYPE, node, result);</b>
+<b class="fc">&nbsp;        if (logicalNodeStateUnknown(this.previousExpansionStatesLogicalTree, parent)) {</b>
+<b class="fc">&nbsp;            parent.setExpanded(true);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Set&lt;View&gt; viewsShowingOnAChild = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (!this.logicalStructureTreeContainsMedia()) {</b>
+<b class="nc">&nbsp;            for (LogicalDivision child : structure.getChildren()) {</b>
+<b class="nc">&nbsp;                viewsShowingOnAChild.addAll(buildStructureTreeRecursively(child, parent));</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+&nbsp;            // iterate through children and views ordered by the ORDER attribute
+<b class="fc">&nbsp;            List&lt;Pair&lt;View, LogicalDivision&gt;&gt; merged = mergeLogicalStructureViewsAndChildren(structure);</b>
+<b class="fc">&nbsp;            for (Pair&lt;View, LogicalDivision&gt; pair : merged) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(pair.getRight())) {</b>
+&nbsp;                    // add child and their views
+<b class="nc">&nbsp;                    viewsShowingOnAChild.addAll(buildStructureTreeRecursively(pair.getRight(), parent));</b>
+<b class="nc">&nbsp;                } else if (!viewsShowingOnAChild.contains(pair.getLeft())) {</b>
+&nbsp;                    // add views of current logical division as leaf nodes
+<b class="nc">&nbsp;                    DefaultTreeNode viewNode = addTreeNode(buildViewLabel(pair.getLeft()), false, false, pair.getLeft(), parent);</b>
+<b class="nc">&nbsp;                    viewNode.setType(VIEW_NODE_TYPE);</b>
+<b class="nc">&nbsp;                    viewsShowingOnAChild.add(pair.getLeft());</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return viewsShowingOnAChild;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a list containing both views and children of a LogicalDivision ordered by their ORDER attribute.
+&nbsp;     * This ordering reflects how tree nodes are visualized in the logical structure tree.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Unfortunately, the mets ORDER attribute of logical divisions and physical divisions is maintained and stored
+&nbsp;     * separately, which means the order does not reflect a consistent tree traversal strategy, e.g. depth-first search.
+&nbsp;     * Instead, the ORDER-attribute is partially updated upon various drag-&amp;-drop operations, which can lead to
+&nbsp;     * arbitrary ORDER-values, e.g. a view can have the same ORDER-value as a child.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param structure the logical division
+&nbsp;     * @return a sorted list of Views and LogicalDivisions, each pair only containing one or the other
+&nbsp;     */
+&nbsp;    public static List&lt;Pair&lt;View, LogicalDivision&gt;&gt; mergeLogicalStructureViewsAndChildren(LogicalDivision structure) {
+<b class="fc">&nbsp;        List&lt;Pair&lt;View, LogicalDivision&gt;&gt; merged = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        Iterator&lt;View&gt; viewIterator = structure.getViews().iterator();</b>
+<b class="fc">&nbsp;        Iterator&lt;LogicalDivision&gt; childIterator = structure.getChildren().iterator();</b>
+<b class="fc">&nbsp;        View nextView = null;</b>
+<b class="fc">&nbsp;        LogicalDivision nextChild = null;</b>
+&nbsp;
+&nbsp;        // iterate through both the list of children and views at the same time
+<b class="fc">&nbsp;        while (viewIterator.hasNext() || childIterator.hasNext() || Objects.nonNull(nextView) || Objects.nonNull(nextChild)) {</b>
+&nbsp;            // pull the next view from the list of remaining views
+<b class="nc">&nbsp;            if (Objects.isNull(nextView) &amp;&amp; viewIterator.hasNext()) {</b>
+<b class="nc">&nbsp;                nextView = viewIterator.next();</b>
+&nbsp;            }
+&nbsp;            // pull the next child from the list of remaining children
+<b class="nc">&nbsp;            if (Objects.isNull(nextChild) &amp;&amp; childIterator.hasNext()) {</b>
+<b class="nc">&nbsp;                nextChild = childIterator.next();</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // decide on whether to add child or view first
+&nbsp;            boolean addChildNext;
+<b class="nc">&nbsp;            if (Objects.nonNull(nextChild) &amp;&amp; Objects.nonNull(nextView)) {</b>
+&nbsp;                // compare order attribute between child and view to figure out which one is added first in tree
+<b class="nc">&nbsp;                addChildNext = nextChild.getOrder() &lt;= nextView.getPhysicalDivision().getOrder();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                addChildNext = Objects.nonNull(nextChild);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // add child or view to the merged result list
+<b class="nc">&nbsp;            if (addChildNext) {</b>
+<b class="nc">&nbsp;                merged.add(new ImmutablePair&lt;&gt;(null, nextChild));</b>
+<b class="nc">&nbsp;                nextChild = null;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                merged.add(new ImmutablePair&lt;&gt;(nextView, null));</b>
+<b class="nc">&nbsp;                nextView = null;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return merged;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Finds canonical id for view by checking all folders.
+&nbsp;     *
+&nbsp;     * @param view the view
+&nbsp;     * @return string representing media canonical id
+&nbsp;     */
+&nbsp;    public String findCanonicalIdForView(View view) {
+<b class="nc">&nbsp;        PhysicalDivision mediaUnit = view.getPhysicalDivision();</b>
+<b class="nc">&nbsp;        Iterator&lt;Entry&lt;MediaVariant, URI&gt;&gt; mediaFileIterator = mediaUnit.getMediaFiles().entrySet().iterator();</b>
+<b class="nc">&nbsp;        String canonical = &quot;-&quot;;</b>
+<b class="nc">&nbsp;        if (mediaFileIterator.hasNext()) {</b>
+<b class="nc">&nbsp;            Entry&lt;MediaVariant, URI&gt; mediaFileEntry = mediaFileIterator.next();</b>
+<b class="nc">&nbsp;            Subfolder subfolder = this.subfoldersCache.computeIfAbsent(mediaFileEntry.getKey().getUse(),</b>
+<b class="nc">&nbsp;                    use -&gt; new Subfolder(dataEditor.getProcess(), dataEditor.getProcess().getProject().getFolders()</b>
+<b class="nc">&nbsp;                            .parallelStream().filter(folder -&gt; folder.getFileGroup().equals(use)).findAny()</b>
+<b class="nc">&nbsp;                            .orElseThrow(() -&gt;  new IllegalStateException(&quot;Missing folder with file group \&quot;&quot; + use</b>
+<b class="nc">&nbsp;                                    + &quot;\&quot; in project \&quot;&quot; + dataEditor.getProcess().getProject().getTitle()))));</b>
+<b class="nc">&nbsp;            canonical = subfolder.getCanonical(mediaFileEntry.getValue());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return canonical;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Builds the display text for a MediaUnit in the StructurePanel.
+&nbsp;     * Using a regular expression to strip leading zeros. (?!$) lookahead ensures
+&nbsp;     * that not the entire string will be matched. Using Hashmap for subfolder caching
+&nbsp;     *
+&nbsp;     * @param view
+&nbsp;     *            View which holds the MediaUnit
+&nbsp;     * @return the display label of the MediaUnit
+&nbsp;     */
+&nbsp;    public String buildViewLabel(View view) {
+<b class="nc">&nbsp;        String canonical = findCanonicalIdForView(view);</b>
+<b class="nc">&nbsp;        PhysicalDivision mediaUnit = view.getPhysicalDivision();</b>
+<b class="nc">&nbsp;        return canonical.replaceFirst(&quot;^0+(?!$)&quot;, &quot;&quot;) + &quot; : &quot;</b>
+<b class="nc">&nbsp;            + (Objects.isNull(mediaUnit.getOrderlabel()) ? &quot;uncounted&quot; : mediaUnit.getOrderlabel());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a tree node to the given parent node. The tree node is set to
+&nbsp;     * ‘expanded’.
+&nbsp;     *
+&nbsp;     * @param parentProcess
+&nbsp;     *            parent process of current process
+&nbsp;     * @param type
+&nbsp;     *            the internal name of the type of node, to be resolved through
+&nbsp;     *            the rule set
+&nbsp;     * @param parent
+&nbsp;     *            parent node to which the new node is to be added
+&nbsp;     * @return the generated node so that you can add children to it
+&nbsp;     */
+&nbsp;    private DefaultTreeNode addTreeNode(Process parentProcess, String type, DefaultTreeNode parent) {
+<b class="nc">&nbsp;        StructuralElementViewInterface structuralElementView = dataEditor.getRulesetManagement().getStructuralElementView(type,</b>
+<b class="nc">&nbsp;            dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;        return addTreeNode(&quot;[&quot; + parentProcess.getId() + &quot;] &quot; + structuralElementView.getLabel() + &quot; - &quot;</b>
+<b class="nc">&nbsp;                        + parentProcess.getTitle(), structuralElementView.isUndefined(), true, null, parent);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a tree node to the given parent node. The tree node is set to
+&nbsp;     * ‘expanded’.
+&nbsp;     *
+&nbsp;     * @param label
+&nbsp;     *            Label of the tree node displayed to the user
+&nbsp;     * @param undefined
+&nbsp;     *            whether the given type in the rule set is undefined. If so,
+&nbsp;     *            the node is highlighted in color and marked with a warning
+&nbsp;     *            symbol.
+&nbsp;     * @param linked
+&nbsp;     *            whether the node is a link. If so, it will be marked with a
+&nbsp;     *            link symbol.
+&nbsp;     * @param dataObject
+&nbsp;     *            the internal object represented by the node
+&nbsp;     * @param parent
+&nbsp;     *            parent node to which the new node is to be added
+&nbsp;     * @return the generated node so that you can add children to it
+&nbsp;     */
+&nbsp;    private DefaultTreeNode addTreeNode(String label, boolean undefined, boolean linked, Object dataObject,
+&nbsp;            DefaultTreeNode parent) {
+<b class="fc">&nbsp;        DefaultTreeNode node = new DefaultTreeNode(new StructureTreeNode(label, null, undefined, linked, dataObject),</b>
+&nbsp;                parent);
+<b class="fc">&nbsp;        if (dataObject instanceof PhysicalDivision &amp;&amp; physicalNodeStateUnknown(this.previousExpansionStatesPhysicalTree, node)</b>
+&nbsp;                || dataObject instanceof LogicalDivision
+<b class="nc">&nbsp;                &amp;&amp; logicalNodeStateUnknown(this.previousExpansionStatesLogicalTree, node)) {</b>
+<b class="nc">&nbsp;            node.setExpanded(true);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return node;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Recursively adds the parent processes in the display. For each parent
+&nbsp;     * process, the recursion is run through once, that is for a newspaper issue
+&nbsp;     * twice (annual process, overall process). If this fails (child is not
+&nbsp;     * found in the parent process, or I/O error), instead only a link is added
+&nbsp;     * to the process and the warning sign is activated.
+&nbsp;     *
+&nbsp;     * @param child
+&nbsp;     *            child process, calling recursion
+&nbsp;     * @param tree
+&nbsp;     *            list of structure trees, in this list the parent links are
+&nbsp;     *            inserted on top, therefore LinkedList
+&nbsp;     */
+&nbsp;    private void addParentLinksRecursive(Process child, DefaultTreeNode tree) {
+<b class="fc">&nbsp;        Process parent = child.getParent();</b>
+&nbsp;        // Termination condition of recursion, if the process has no parent
+<b class="fc">&nbsp;        if (Objects.isNull(parent)) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;        // Process parent link of the parent recursively
+<b class="fc">&nbsp;        addParentLinksRecursive(parent, tree);</b>
+<b class="fc">&nbsp;        URI uri = ServiceManager.getProcessService().getMetadataFileUri(parent);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            LogicalDivision logicalStructure = ServiceManager.getMetsService().loadWorkpiece(uri).getLogicalStructure();</b>
+<b class="fc">&nbsp;            List&lt;LogicalDivision&gt; logicalDivisionList</b>
+<b class="fc">&nbsp;                    = MetadataEditor.determineLogicalDivisionPathToChild(logicalStructure, child.getId());</b>
+<b class="fc">&nbsp;            DefaultTreeNode parentNode = tree;</b>
+<b class="fc">&nbsp;            if (logicalDivisionList.isEmpty()) {</b>
+&nbsp;                /*
+&nbsp;                 * Error case: The child is not linked in the parent process.
+&nbsp;                 * Show the process title of the parent process and a warning
+&nbsp;                 * sign.
+&nbsp;                 */
+<b class="fc">&nbsp;                addTreeNode(parent.getTitle(), true, true, parent, tree).setType(STRUCTURE_NODE_TYPE);</b>
+&nbsp;            } else {
+&nbsp;                /*
+&nbsp;                 * Default case: Show the path through the parent process to the
+&nbsp;                 * linked child
+&nbsp;                 */
+<b class="nc">&nbsp;                for (LogicalDivision logicalDivision : logicalDivisionList) {</b>
+<b class="nc">&nbsp;                    if (Objects.isNull(logicalDivision.getType())) {</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        parentNode = addTreeNode(parent, logicalDivision.getType(), parentNode);</b>
+<b class="nc">&nbsp;                        parentNode.setType(STRUCTURE_NODE_TYPE);</b>
+<b class="nc">&nbsp;                        parentNode.setExpanded(true);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+&nbsp;            /*
+&nbsp;             * Error case: The metadata file of the parent process cannot be
+&nbsp;             * loaded. Show the process title of the parent process and the
+&nbsp;             * warning sign.
+&nbsp;             */
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;metadataReadError&quot;, e.getMessage(), logger, e);</b>
+<b class="nc">&nbsp;            addTreeNode(parent.getTitle(), true, true, parent, tree).setType(STRUCTURE_NODE_TYPE);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Builds the parent link tree in a temporary primefaces tree in order to determine how many
+&nbsp;     * nodes are added to the tree. The number of nodes influences the order of nodes in the logical
+&nbsp;     * structure tree and is needed to determine the correct tree node id, see
+&nbsp;     * `GalleryPanel.addStripesRecursive`.
+&nbsp;     *
+&nbsp;     * @return the number of root nodes (first level children) that are
+&nbsp;     *         added as a result of calling `addParentLinksRecursive`.
+&nbsp;     */
+&nbsp;    public Integer getNumberOfParentLinkRootNodesAdded() {
+<b class="nc">&nbsp;        DefaultTreeNode node = new DefaultTreeNode();</b>
+<b class="nc">&nbsp;        addParentLinksRecursive(dataEditor.getProcess(), node);</b>
+<b class="nc">&nbsp;        return node.getChildCount();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the media tree.
+&nbsp;     *
+&nbsp;     * @param mediaRoot
+&nbsp;     *            root of physical divisions to show on the tree
+&nbsp;     * @return the media tree
+&nbsp;     */
+&nbsp;    private DefaultTreeNode buildMediaTree(PhysicalDivision mediaRoot) {
+<b class="nc">&nbsp;        DefaultTreeNode rootTreeNode = new DefaultTreeNode();</b>
+<b class="nc">&nbsp;        rootTreeNode.setType(PHYS_STRUCTURE_NODE_TYPE);</b>
+<b class="nc">&nbsp;        if (physicalNodeStateUnknown(this.previousExpansionStatesPhysicalTree, rootTreeNode)) {</b>
+<b class="nc">&nbsp;            rootTreeNode.setExpanded(true);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        buildMediaTreeRecursively(mediaRoot, rootTreeNode);</b>
+<b class="nc">&nbsp;        return rootTreeNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void buildMediaTreeRecursively(PhysicalDivision physicalDivision, DefaultTreeNode parentTreeNode) {
+<b class="nc">&nbsp;        StructuralElementViewInterface divisionView = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                physicalDivision.getType(), dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;        DefaultTreeNode treeNode = addTreeNode(Objects.equals(physicalDivision.getType(), PhysicalDivision.TYPE_PAGE)</b>
+<b class="nc">&nbsp;                        ? divisionView.getLabel().concat(&quot; &quot; + physicalDivision.getOrderlabel()) : divisionView.getLabel(),</b>
+&nbsp;                false, false, physicalDivision, parentTreeNode);
+&nbsp;
+<b class="nc">&nbsp;        if (PhysicalDivision.TYPES.contains(physicalDivision.getType())) {</b>
+<b class="nc">&nbsp;            treeNode.setType(MEDIA_NODE_TYPE);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            treeNode.setType(PHYS_STRUCTURE_NODE_TYPE);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (physicalNodeStateUnknown(this.previousExpansionStatesPhysicalTree, treeNode)) {</b>
+<b class="nc">&nbsp;            treeNode.setExpanded(true);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(physicalDivision.getChildren())) {</b>
+<b class="nc">&nbsp;            for (PhysicalDivision child : physicalDivision.getChildren()) {</b>
+<b class="nc">&nbsp;                buildMediaTreeRecursively(child, treeNode);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Callback function triggered when a node is selected in the logical structure tree.
+&nbsp;     *
+&nbsp;     * @param event
+&nbsp;     *            NodeSelectEvent triggered by logical node being selected
+&nbsp;     */
+&nbsp;    public void treeLogicalSelect(NodeSelectEvent event) {
+&nbsp;        /*
+&nbsp;         * The newly selected element has already been set in &#39;selectedLogicalNode&#39; by
+&nbsp;         * JSF at this point.
+&nbsp;         */
+&nbsp;        try {
+<b class="nc">&nbsp;            dataEditor.switchStructure(event.getTreeNode().getData(), true);</b>
+<b class="nc">&nbsp;            previouslySelectedLogicalNode = selectedLogicalNode;</b>
+<b class="nc">&nbsp;        } catch (NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            selectedLogicalNode = previouslySelectedLogicalNode;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Callback function triggered when a node is selected in the physical structure tree.
+&nbsp;     *
+&nbsp;     * @param event
+&nbsp;     *            NodeSelectEvent triggered by logical node being selected
+&nbsp;     */
+&nbsp;    public void treePhysicalSelect(NodeSelectEvent event) {
+&nbsp;        /*
+&nbsp;         * The newly selected element has already been set in &#39;selectedPhysicalNode&#39; by
+&nbsp;         * JSF at this point.
+&nbsp;         */
+&nbsp;        try {
+<b class="nc">&nbsp;            dataEditor.switchPhysicalDivision();</b>
+<b class="nc">&nbsp;            previouslySelectedPhysicalNode = selectedPhysicalNode;</b>
+<b class="nc">&nbsp;        } catch (NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            selectedPhysicalNode = previouslySelectedPhysicalNode;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void updateNodeSelection(GalleryMediaContent galleryMediaContent, LogicalDivision structure) {
+<b class="nc">&nbsp;        this.updateLogicalNodeSelection(galleryMediaContent, structure);</b>
+<b class="nc">&nbsp;        this.updatePhysicalNodeSelection(galleryMediaContent);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updatePhysicalNodeSelection(TreeNode treeNode) {
+<b class="nc">&nbsp;        if (this.isSeparateMedia()) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(previouslySelectedPhysicalNode)) {</b>
+<b class="nc">&nbsp;                previouslySelectedPhysicalNode.setSelected(false);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(selectedPhysicalNode) &amp;&amp; !selectedPhysicalNode.equals(treeNode)) {</b>
+<b class="nc">&nbsp;                selectedPhysicalNode.setSelected(false);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(physicalTree) &amp;&amp; Objects.nonNull(treeNode)) {</b>
+<b class="nc">&nbsp;                setSelectedPhysicalNode(treeNode);</b>
+<b class="nc">&nbsp;                this.dataEditor.getMetadataPanel().showPhysical(this.dataEditor.getSelectedPhysicalDivision());</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    void updatePhysicalNodeSelection(GalleryMediaContent galleryMediaContent) {
+<b class="nc">&nbsp;        if (Objects.nonNull(physicalTree)) {</b>
+<b class="nc">&nbsp;            TreeNode selectedTreeNode = updatePhysicalNodeSelectionRecursive(galleryMediaContent, physicalTree);</b>
+<b class="nc">&nbsp;            updatePhysicalNodeSelection(selectedTreeNode);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    void updateLogicalNodeSelection(GalleryMediaContent galleryMediaContent, LogicalDivision structure) {
+<b class="nc">&nbsp;        if (Objects.nonNull(previouslySelectedLogicalNode)) {</b>
+<b class="nc">&nbsp;            previouslySelectedLogicalNode.setSelected(false);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(selectedLogicalNode)) {</b>
+<b class="nc">&nbsp;            selectedLogicalNode.setSelected(false);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(this.logicalTree)) {</b>
+<b class="nc">&nbsp;            if (Objects.isNull(structure)) {</b>
+<b class="nc">&nbsp;                GalleryStripe matchingGalleryStripe = this.dataEditor.getGalleryPanel().getLogicalStructureOfMedia(galleryMediaContent);</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(matchingGalleryStripe)) {</b>
+<b class="nc">&nbsp;                    structure = matchingGalleryStripe.getStructure();</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(structure)) {</b>
+&nbsp;                TreeNode selectedTreeNode;
+<b class="nc">&nbsp;                if (!this.logicalStructureTreeContainsMedia()) {</b>
+<b class="nc">&nbsp;                    selectedTreeNode = updateLogicalNodeSelectionRecursive(structure, logicalTree);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    selectedTreeNode = updatePhysSelectionInLogTreeRecursive(galleryMediaContent.getView().getPhysicalDivision(), structure,</b>
+&nbsp;                            logicalTree);
+&nbsp;                }
+<b class="nc">&nbsp;                if (Objects.nonNull(selectedTreeNode)) {</b>
+<b class="nc">&nbsp;                    setSelectedLogicalNode(selectedTreeNode);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    Helper.setErrorMessage(&quot;Unable to update node selection in logical structure!&quot;);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    void updateLogicalNodeSelection(LogicalDivision logicalDivision) {
+<b class="nc">&nbsp;        if (Objects.nonNull(previouslySelectedLogicalNode)) {</b>
+<b class="nc">&nbsp;            previouslySelectedLogicalNode.setSelected(false);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(selectedLogicalNode)) {</b>
+<b class="nc">&nbsp;            selectedLogicalNode.setSelected(false);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(logicalTree)) {</b>
+<b class="nc">&nbsp;            TreeNode selectedTreeNode = updateLogicalNodeSelectionRecursive(logicalDivision, logicalTree);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(selectedTreeNode)) {</b>
+<b class="nc">&nbsp;                setSelectedLogicalNode(selectedTreeNode);</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    dataEditor.switchStructure(selectedTreeNode.getData(), false);</b>
+<b class="nc">&nbsp;                } catch (NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;                    logger.error(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;Unable to update node selection in logical structure!&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update the node selection in logical tree.
+&nbsp;     * @param structure the LogicalDivision to be selected as a TreeNode
+&nbsp;     * @param treeNode the logical structure tree
+&nbsp;     * @return the TreeNode that will be selected
+&nbsp;     */
+&nbsp;    public TreeNode updateLogicalNodeSelectionRecursive(LogicalDivision structure, TreeNode treeNode) {
+<b class="nc">&nbsp;        TreeNode matchingTreeNode = null;</b>
+<b class="nc">&nbsp;        for (TreeNode currentTreeNode : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            if (treeNodeMatchesStructure(structure, currentTreeNode)) {</b>
+<b class="nc">&nbsp;                currentTreeNode.setSelected(true);</b>
+<b class="nc">&nbsp;                matchingTreeNode = currentTreeNode;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                matchingTreeNode = updateLogicalNodeSelectionRecursive(structure, currentTreeNode);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(matchingTreeNode)) {</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return matchingTreeNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private TreeNode updatePhysicalNodeSelectionRecursive(GalleryMediaContent galleryMediaContent, TreeNode treeNode) {
+<b class="nc">&nbsp;        if (Objects.isNull(galleryMediaContent)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        TreeNode matchingTreeNode = null;</b>
+<b class="nc">&nbsp;        for (TreeNode currentTreeNode : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            if (currentTreeNode.getChildCount() &lt; 1 &amp;&amp; treeNodeMatchesGalleryMediaContent(galleryMediaContent, currentTreeNode)) {</b>
+<b class="nc">&nbsp;                currentTreeNode.setSelected(true);</b>
+<b class="nc">&nbsp;                matchingTreeNode = currentTreeNode;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                currentTreeNode.setSelected(false);</b>
+<b class="nc">&nbsp;                matchingTreeNode = updatePhysicalNodeSelectionRecursive(galleryMediaContent, currentTreeNode);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(matchingTreeNode)) {</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return matchingTreeNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private TreeNode updatePhysSelectionInLogTreeRecursive(PhysicalDivision selectedPhysicalDivision, LogicalDivision parentElement,
+&nbsp;                                                           TreeNode treeNode) {
+<b class="nc">&nbsp;        TreeNode matchingTreeNode = null;</b>
+<b class="nc">&nbsp;        for (TreeNode currentTreeNode : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            if (treeNode.getData() instanceof StructureTreeNode</b>
+<b class="nc">&nbsp;                    &amp;&amp; Objects.nonNull(((StructureTreeNode) treeNode.getData()).getDataObject())</b>
+<b class="nc">&nbsp;                    &amp;&amp; ((StructureTreeNode) treeNode.getData()).getDataObject().equals(parentElement)</b>
+<b class="nc">&nbsp;                    &amp;&amp; currentTreeNode.getData() instanceof StructureTreeNode</b>
+<b class="nc">&nbsp;                    &amp;&amp; ((StructureTreeNode) currentTreeNode.getData()).getDataObject() instanceof View</b>
+<b class="nc">&nbsp;                    &amp;&amp; ((View) ((StructureTreeNode) currentTreeNode.getData()).getDataObject()).getPhysicalDivision()</b>
+<b class="nc">&nbsp;                            .equals(selectedPhysicalDivision)) {</b>
+<b class="nc">&nbsp;                currentTreeNode.setSelected(true);</b>
+<b class="nc">&nbsp;                matchingTreeNode = currentTreeNode;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                currentTreeNode.setSelected(false);</b>
+<b class="nc">&nbsp;                matchingTreeNode = updatePhysSelectionInLogTreeRecursive(selectedPhysicalDivision, parentElement, currentTreeNode);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(matchingTreeNode)) {</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return matchingTreeNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean treeNodeMatchesGalleryMediaContent(GalleryMediaContent galleryMediaContent, TreeNode treeNode) {
+<b class="nc">&nbsp;        if (treeNode.getData() instanceof StructureTreeNode) {</b>
+<b class="nc">&nbsp;            StructureTreeNode structureTreeNode = (StructureTreeNode) treeNode.getData();</b>
+<b class="nc">&nbsp;            PhysicalDivision physicalDivision = null;</b>
+<b class="nc">&nbsp;            if (structureTreeNode.getDataObject() instanceof PhysicalDivision) {</b>
+<b class="nc">&nbsp;                physicalDivision = (PhysicalDivision) structureTreeNode.getDataObject();</b>
+<b class="nc">&nbsp;            } else if (structureTreeNode.getDataObject() instanceof View) {</b>
+<b class="nc">&nbsp;                View view = (View) structureTreeNode.getDataObject();</b>
+<b class="nc">&nbsp;                physicalDivision = view.getPhysicalDivision();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(physicalDivision) &amp;&amp; Objects.nonNull(galleryMediaContent.getView())) {</b>
+<b class="nc">&nbsp;                return Objects.equals(physicalDivision, galleryMediaContent.getView().getPhysicalDivision());</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean treeNodeMatchesStructure(LogicalDivision structure, TreeNode treeNode) {
+<b class="nc">&nbsp;        if (Objects.nonNull(treeNode) &amp;&amp; treeNode.getData() instanceof StructureTreeNode) {</b>
+<b class="nc">&nbsp;            StructureTreeNode structureTreeNode = (StructureTreeNode) treeNode.getData();</b>
+<b class="nc">&nbsp;            if (structureTreeNode.getDataObject() instanceof LogicalDivision) {</b>
+<b class="nc">&nbsp;                return Objects.equals(structureTreeNode.getDataObject(), structure);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Callback function triggered on NodeCollapseEvent. Sets the &#39;expanded&#39; flag of the corresponding tree node to
+&nbsp;     * &#39;false&#39; because this is not done automatically by PrimeFaces on a NodeCollapseEvent.
+&nbsp;     *
+&nbsp;     * @param event
+&nbsp;     *          the NodeCollapseEvent triggered in the corresponding structure tree
+&nbsp;     */
+&nbsp;    public void onNodeCollapse(NodeCollapseEvent event) {
+<b class="nc">&nbsp;        if (Objects.nonNull(event) &amp;&amp; Objects.nonNull(event.getTreeNode())) {</b>
+<b class="nc">&nbsp;            event.getTreeNode().setExpanded(false);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Callback function triggered on NodeExpandEvent. Sets the &#39;expanded&#39; flag of the corresponding tree node to
+&nbsp;     * &#39;true&#39; because this is not done automatically by PrimeFaces on a NodeExpandEvent.
+&nbsp;     *
+&nbsp;     * @param event
+&nbsp;     *          the NodeExpandEvent triggered in the corresponding structure tree
+&nbsp;     */
+&nbsp;    public void onNodeExpand(NodeExpandEvent event) {
+<b class="nc">&nbsp;        if (Objects.nonNull(event) &amp;&amp; Objects.nonNull(event.getTreeNode())) {</b>
+<b class="nc">&nbsp;            event.getTreeNode().setExpanded(true);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Callback function triggered on TreeDragDropEvent. Checks whether performed drag&#39;n&#39;drop action is allowed
+&nbsp;     * considering ruleset restrictions on structure hierarchy. In case some ruleset rules were violated by the action
+&nbsp;     * displays a corresponding error message to the user and reverts tree to prior state.
+&nbsp;     *
+&nbsp;     * @param event TreeDragDropEvent
+&nbsp;     *              event triggering this callback function
+&nbsp;     */
+&nbsp;    public void onDragDrop(TreeDragDropEvent event) {
+<b class="nc">&nbsp;        Object dragNodeObject = event.getDragNode().getData();</b>
+<b class="nc">&nbsp;        Object dropNodeObject = event.getDropNode().getData();</b>
+&nbsp;
+<b class="nc">&nbsp;        expandNode(event.getDropNode());</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            StructureTreeNode dropNode = (StructureTreeNode) dropNodeObject;</b>
+<b class="nc">&nbsp;            StructureTreeNode dragNode = (StructureTreeNode) dragNodeObject;</b>
+<b class="nc">&nbsp;            if (dropNode.isLinked()) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;dataEditor.dragNDropLinkError&quot;);</b>
+<b class="nc">&nbsp;                show();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            else if (dragNode.getDataObject() instanceof LogicalDivision</b>
+<b class="nc">&nbsp;                    &amp;&amp; dropNode.getDataObject() instanceof LogicalDivision) {</b>
+<b class="nc">&nbsp;                checkLogicalDragDrop(dragNode, dropNode);</b>
+<b class="nc">&nbsp;            } else if (dragNode.getDataObject() instanceof PhysicalDivision</b>
+<b class="nc">&nbsp;                    &amp;&amp; dropNode.getDataObject() instanceof PhysicalDivision) {</b>
+<b class="nc">&nbsp;                checkPhysicalDragDrop(dragNode, dropNode);</b>
+<b class="nc">&nbsp;            } else if (dragNode.getDataObject() instanceof View</b>
+<b class="nc">&nbsp;                     &amp;&amp; dropNode.getDataObject() instanceof LogicalDivision) {</b>
+<b class="nc">&nbsp;                movePageNode(event, dropNode, dragNode);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                Helper.setErrorMessage(</b>
+<b class="nc">&nbsp;                    Helper.getTranslation(&quot;dataEditor.dragNDropError&quot;, dragNode.getLabel(), dropNode.getLabel()));</b>
+<b class="nc">&nbsp;                show();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (Exception exception) {</b>
+<b class="nc">&nbsp;            logger.error(exception.getLocalizedMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determine the LogicalDivision to which the given View is assigned.
+&nbsp;     *
+&nbsp;     * @param view
+&nbsp;     *          View for which the LogicalDivision is determined
+&nbsp;     * @return the LogicalDivision to which the given View is assigned
+&nbsp;     */
+&nbsp;    LogicalDivision getPageStructure(View view, LogicalDivision parent) {
+<b class="nc">&nbsp;        LogicalDivision resultElement = null;</b>
+<b class="nc">&nbsp;        for (LogicalDivision child : parent.getChildren()) {</b>
+<b class="nc">&nbsp;            if (child.getViews().contains(view)) {</b>
+<b class="nc">&nbsp;                resultElement = child;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                resultElement =  getPageStructure(view, child);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(resultElement)) {</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return resultElement;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Move page encapsulated in given StructureTreeNode &#39;dragNode&#39; to Structural Element encapsulated in given
+&nbsp;     * StructureTreeNode &#39;dropNode&#39; at index encoded in given TreeDragDropEvent &#39;event&#39;.
+&nbsp;     *
+&nbsp;     * @param event
+&nbsp;     *          TreeDragDropEvent triggering &#39;movePageNode&#39;
+&nbsp;     * @param dropNode
+&nbsp;     *          StructureTreeNode containing the Structural Element to which the page is moved
+&nbsp;     * @param dragNode
+&nbsp;     *          StructureTreeNode containing the View/Page that is moved
+&nbsp;     */
+&nbsp;    private void movePageNode(TreeDragDropEvent event, StructureTreeNode dropNode, StructureTreeNode dragNode) throws Exception {
+<b class="nc">&nbsp;        TreeNode dragParent = event.getDragNode().getParent();</b>
+<b class="nc">&nbsp;        if (dragParent.getData() instanceof StructureTreeNode) {</b>
+<b class="nc">&nbsp;            StructureTreeNode dragParentTreeNode = (StructureTreeNode) dragParent.getData();</b>
+<b class="nc">&nbsp;            if (dragParentTreeNode.getDataObject() instanceof LogicalDivision) {</b>
+&nbsp;                // FIXME waiting for PrimeFaces&#39; tree drop index bug to be fixed.
+&nbsp;                // Until fixed dropping nodes onto other nodes will produce random drop indices.
+<b class="nc">&nbsp;                preserveLogicalAndPhysical();</b>
+<b class="nc">&nbsp;                show();</b>
+<b class="nc">&nbsp;                expandNode(event.getDropNode());</b>
+<b class="nc">&nbsp;                dataEditor.getGalleryPanel().updateStripes();</b>
+<b class="nc">&nbsp;                dataEditor.getPaginationPanel().show();</b>
+&nbsp;                return;
+&nbsp;            } else {
+<b class="nc">&nbsp;                Helper.setErrorMessage(</b>
+<b class="nc">&nbsp;                    Helper.getTranslation(&quot;dataEditor.dragNDropError&quot;, dragNode.getLabel(), dropNode.getLabel()));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(</b>
+<b class="nc">&nbsp;                Helper.getTranslation(&quot;dataEditor.dragNDropError&quot;, dragNode.getLabel(), dropNode.getLabel()));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        show();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Change the order of the PhysicalDivisions in the workpiece.
+&nbsp;     * When structure is saved to METS this is represented by the order of DIV elements in the physical structMap.
+&nbsp;     * @param toElement logical element where to which the PhysicalDivisions are assigned
+&nbsp;     * @param elementsToBeMoved List of PhysicalDivisions which are moved
+&nbsp;     * @param insertionIndex index at which the PhysicalDivisions are added to the existing List of PhysicalDivisions.
+&nbsp;     *                       The value -1 represents the end of the list.
+&nbsp;     */
+&nbsp;    void reorderPhysicalDivisions(LogicalDivision toElement,
+&nbsp;                           List&lt;Pair&lt;View, LogicalDivision&gt;&gt; elementsToBeMoved,
+&nbsp;                           int insertionIndex) {
+&nbsp;        int physicalInsertionIndex;
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; physicalDivisionsToBeMoved = elementsToBeMoved.stream()</b>
+<b class="nc">&nbsp;                .map(e -&gt; e.getLeft().getPhysicalDivision())</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (insertionIndex &gt; toElement.getViews().size()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Unsupported drag&#39;n&#39;drop operation: Insertion index exceeds list.&quot;);</b>
+<b class="nc">&nbsp;            insertionIndex = -1;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (insertionIndex &lt; 0 || toElement.getViews().size() == 0) {</b>
+&nbsp;            // no insertion position was specified or the element does not contain any pages yet
+<b class="nc">&nbsp;            physicalInsertionIndex = toElement.getOrder() - 1;</b>
+&nbsp;        } else {
+&nbsp;            // if &#39;insertionIndex&#39; equals the size of the list, it means we want to append the moved pages _behind_ the physical division of
+&nbsp;            // the last view in the list of views of the &#39;toElement&#39;
+<b class="nc">&nbsp;            if (insertionIndex == toElement.getViews().size()) {</b>
+<b class="nc">&nbsp;                physicalInsertionIndex = toElement.getViews().getLast().getPhysicalDivision().getOrder();</b>
+<b class="nc">&nbsp;            } else if (insertionIndex == 0) {</b>
+&nbsp;                // insert at first position directly after logical element
+<b class="nc">&nbsp;                physicalInsertionIndex = toElement.getOrder() - 1;</b>
+&nbsp;            } else {
+&nbsp;                // insert at given index
+<b class="nc">&nbsp;                physicalInsertionIndex = toElement.getViews().get(insertionIndex).getPhysicalDivision().getOrder() - 1;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (physicalInsertionIndex &gt; physicalDivisionsToBeMoved.stream()</b>
+<b class="nc">&nbsp;                .map(PhysicalDivision::getOrder)</b>
+<b class="nc">&nbsp;                .collect(Collectors.summarizingInt(Integer::intValue))</b>
+<b class="nc">&nbsp;                .getMin() - 1) {</b>
+<b class="nc">&nbsp;            int finalInsertionIndex = physicalInsertionIndex;</b>
+<b class="nc">&nbsp;            physicalInsertionIndex -= (int) physicalDivisionsToBeMoved.stream().filter(m -&gt; m.getOrder() - 1 &lt; finalInsertionIndex).count();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        dataEditor.getWorkpiece().getPhysicalStructure().getChildren().removeAll(physicalDivisionsToBeMoved);</b>
+<b class="nc">&nbsp;        int numberOfChildren = dataEditor.getWorkpiece().getPhysicalStructure().getChildren().size();</b>
+<b class="nc">&nbsp;        if (physicalInsertionIndex &lt; numberOfChildren) {</b>
+<b class="nc">&nbsp;            dataEditor.getWorkpiece().getPhysicalStructure().getChildren().addAll(physicalInsertionIndex, physicalDivisionsToBeMoved);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            dataEditor.getWorkpiece().getPhysicalStructure().getChildren().addAll(physicalDivisionsToBeMoved);</b>
+<b class="nc">&nbsp;            if (physicalInsertionIndex &gt; numberOfChildren) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;Could not append media at correct position. Index exceeded list.&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Change order fields of physical elements. When saved to METS this is represented by the physical structMap divs&#39;
+&nbsp;     * &quot;ORDER&quot; attribute.
+&nbsp;     */
+&nbsp;    void changePhysicalOrderFields() {
+<b class="nc">&nbsp;        ServiceManager.getFileService().renumberPhysicalDivisions(dataEditor.getWorkpiece(), false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Change the order attribute of the logical elements that are affected by pages around them being moved.
+&nbsp;     * @param toElement logical element the pages will be assigned to
+&nbsp;     * @param elementsToBeMoved physical elements which are moved
+&nbsp;     */
+&nbsp;    void changeLogicalOrderFields(LogicalDivision toElement, List&lt;Pair&lt;View, LogicalDivision&gt;&gt; elementsToBeMoved,
+&nbsp;                                  int insertionIndex) {
+<b class="nc">&nbsp;        HashMap&lt;Integer, List&lt;LogicalDivision&gt;&gt; logicalElementsByOrder = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (LogicalDivision logicalElement : dataEditor.getWorkpiece().getAllLogicalDivisions()) {</b>
+<b class="nc">&nbsp;            if (logicalElementsByOrder.containsKey(logicalElement.getOrder()))  {</b>
+<b class="nc">&nbsp;                logicalElementsByOrder.get(logicalElement.getOrder()).add(logicalElement);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                logicalElementsByOrder.put(logicalElement.getOrder(), new LinkedList&lt;&gt;(Collections.singletonList(logicalElement)));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // Order values of moved pages and target element. Logical elements located between these Order values are affected.
+<b class="nc">&nbsp;        List&lt;Integer&gt; ordersAffectedByMove = getOrdersAffectedByMove(elementsToBeMoved, toElement);</b>
+&nbsp;
+&nbsp;        /* The new Order value for the logical elements can be calculated quite simple:
+&nbsp;        The Order values of elements located before the target element have to be modified by -i - 1.
+&nbsp;        The Order values of elements located after the target element have to be modified by the size of ordersAffectedByMove - i.
+&nbsp;        (ordersAffectedByMove equals to the number of moved pages + the target element.)
+&nbsp;         */
+&nbsp;
+<b class="nc">&nbsp;        for (Map.Entry&lt;Integer, List&lt;LogicalDivision&gt;&gt; entry : logicalElementsByOrder.entrySet()) {</b>
+<b class="nc">&nbsp;            for (int i = 0; i &lt; ordersAffectedByMove.size() - 1; i++) {</b>
+<b class="nc">&nbsp;                if (ordersAffectedByMove.get(i) &lt; entry.getKey() &amp;&amp; entry.getKey() &lt; ordersAffectedByMove.get(i + 1)) {</b>
+<b class="nc">&nbsp;                    if (ordersAffectedByMove.get(i) &lt; toElement.getOrder()) {</b>
+<b class="nc">&nbsp;                        updateOrder(entry.getValue(), -i - 1);</b>
+<b class="nc">&nbsp;                    } else if (ordersAffectedByMove.get(i) &gt; toElement.getOrder()) {</b>
+<b class="nc">&nbsp;                        updateOrder(entry.getValue(), ordersAffectedByMove.size() - i);</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+&nbsp;            // check if elements exist with the same order like toElement (the toElememt itself might be affected as well)
+<b class="nc">&nbsp;            if (entry.getKey() == toElement.getOrder()) {</b>
+<b class="nc">&nbsp;                List&lt;LogicalDivision&gt; beforeToElement = entry.getValue().subList(0, entry.getValue().indexOf(toElement) + 1);</b>
+<b class="nc">&nbsp;                List&lt;LogicalDivision&gt; afterToElement = entry.getValue().subList(entry.getValue().indexOf(toElement) + 1,</b>
+<b class="nc">&nbsp;                        entry.getValue().size());</b>
+&nbsp;                /* toElement at index 0 means we&#39;re in an edge case: toElement is the first order which is affected (no pages with smaller
+&nbsp;                order affected) and its order will not change, nor will other elements with the same order before it. */
+<b class="nc">&nbsp;                if (ordersAffectedByMove.indexOf(toElement.getOrder()) &gt; 0) {</b>
+<b class="nc">&nbsp;                    updateOrder(beforeToElement, -ordersAffectedByMove.indexOf(entry.getKey()));</b>
+&nbsp;                }
+&nbsp;                /* Order of elements directly after toElement (with same order) only have to be update if the pages are inserted at the
+&nbsp;                first position. If they are inserted after any pages, the order of elements in afterToElement will not change. */
+<b class="nc">&nbsp;                if (insertionIndex == 0) {</b>
+<b class="nc">&nbsp;                    updateOrder(afterToElement, elementsToBeMoved.size() - ordersAffectedByMove.indexOf(toElement.getOrder()));</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Integer&gt; getOrdersAffectedByMove(List&lt;Pair&lt;View, LogicalDivision&gt;&gt; views, LogicalDivision toElement) {
+<b class="nc">&nbsp;        Set&lt;Integer&gt; ordersAffectedByMove = views.stream()</b>
+<b class="nc">&nbsp;                .map(e -&gt; e.getLeft().getPhysicalDivision().getOrder())</b>
+<b class="nc">&nbsp;                .collect(Collectors.toSet());</b>
+<b class="nc">&nbsp;        ordersAffectedByMove.add(toElement.getOrder());</b>
+<b class="nc">&nbsp;        return ordersAffectedByMove.stream()</b>
+<b class="nc">&nbsp;                .sorted()</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updateOrder(List&lt;LogicalDivision&gt; elementsToBeUpdated, int delta) {
+<b class="nc">&nbsp;        for (LogicalDivision element : elementsToBeUpdated) {</b>
+<b class="nc">&nbsp;            element.setOrder(element.getOrder() + delta);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Move List of elements &#39;elementsToBeMoved&#39; from LogicalDivision in each Pair to LogicalDivision
+&nbsp;     * &#39;toElement&#39;.
+&nbsp;     *
+&nbsp;     * @param toElement
+&nbsp;     *          LogicalDivision to which View is moved
+&nbsp;     * @param elementsToBeMoved
+&nbsp;     *          List of elements to be moved as Pairs of View and LogicalDivision they are attached to
+&nbsp;     * @param insertionIndex
+&nbsp;     *          Index where views will be inserted into toElement&#39;s views
+&nbsp;     */
+&nbsp;    void moveViews(LogicalDivision toElement,
+&nbsp;                   List&lt;Pair&lt;View, LogicalDivision&gt;&gt; elementsToBeMoved,
+&nbsp;                   int insertionIndex) {
+<b class="nc">&nbsp;        List&lt;View&gt; views = elementsToBeMoved.stream()</b>
+<b class="nc">&nbsp;                .map(Pair::getKey)</b>
+<b class="nc">&nbsp;                .filter(Objects::nonNull)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        if (insertionIndex &lt; 0 || insertionIndex == toElement.getViews().size()) {</b>
+<b class="nc">&nbsp;            toElement.getViews().addAll(views);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            toElement.getViews().addAll(insertionIndex, views);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        for (Pair&lt;View, LogicalDivision&gt; elementToBeMoved : elementsToBeMoved) {</b>
+<b class="nc">&nbsp;            boolean removeLastOccurrenceOfView = toElement.equals(elementToBeMoved.getValue())</b>
+<b class="nc">&nbsp;                    &amp;&amp; insertionIndex &lt; elementToBeMoved.getValue().getViews().lastIndexOf(elementToBeMoved.getKey());</b>
+<b class="nc">&nbsp;            dataEditor.unassignView(elementToBeMoved.getValue(), elementToBeMoved.getKey(), removeLastOccurrenceOfView);</b>
+<b class="nc">&nbsp;            elementToBeMoved.getKey().getPhysicalDivision().getLogicalDivisions().add(toElement);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void checkLogicalDragDrop(StructureTreeNode dragNode, StructureTreeNode dropNode) {
+<b class="nc">&nbsp;        LogicalDivision dragStructure = (LogicalDivision) dragNode.getDataObject();</b>
+<b class="nc">&nbsp;        LogicalDivision dropStructure = (LogicalDivision) dropNode.getDataObject();</b>
+&nbsp;
+<b class="nc">&nbsp;        StructuralElementViewInterface divisionView = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                dropStructure.getType(), dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+&nbsp;
+&nbsp;        LinkedList&lt;LogicalDivision&gt; dragParents;
+<b class="nc">&nbsp;        if (divisionView.getAllowedSubstructuralElements().containsKey(dragStructure.getType())</b>
+<b class="nc">&nbsp;                || Objects.nonNull(dragStructure.getLink())) {</b>
+<b class="nc">&nbsp;            dragParents = MetadataEditor.getAncestorsOfLogicalDivision(dragStructure,</b>
+<b class="nc">&nbsp;                    dataEditor.getWorkpiece().getLogicalStructure());</b>
+<b class="nc">&nbsp;            if (!dragParents.isEmpty()) {</b>
+<b class="nc">&nbsp;                LogicalDivision parentStructure = dragParents.get(dragParents.size() - 1);</b>
+<b class="nc">&nbsp;                if (parentStructure.getChildren().contains(dragStructure)) {</b>
+<b class="nc">&nbsp;                    if (logicalStructureTreeContainsMedia()) {</b>
+<b class="nc">&nbsp;                        preserveLogicalAndPhysical();</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        preserveLogical();</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    this.dataEditor.getGalleryPanel().updateStripes();</b>
+<b class="nc">&nbsp;                    this.dataEditor.getPaginationPanel().show();</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    Helper.setErrorMessage(Helper.getTranslation(&quot;dataEditor.childNotContainedError&quot;,</b>
+<b class="nc">&nbsp;                        dragNode.getLabel()));</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(Helper.getTranslation(&quot;dataEditor.noParentsError&quot;,</b>
+<b class="nc">&nbsp;                    dragNode.getLabel()));</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(Helper.getTranslation(&quot;dataEditor.forbiddenChildElement&quot;,</b>
+<b class="nc">&nbsp;                dragNode.getLabel(), dropNode.getLabel()));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        show();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void checkPhysicalDragDrop(StructureTreeNode dragNode, StructureTreeNode dropNode) {
+<b class="nc">&nbsp;        PhysicalDivision dragUnit = (PhysicalDivision) dragNode.getDataObject();</b>
+<b class="nc">&nbsp;        PhysicalDivision dropUnit = (PhysicalDivision) dropNode.getDataObject();</b>
+&nbsp;
+<b class="nc">&nbsp;        StructuralElementViewInterface divisionView = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                dropUnit.getType(), dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+&nbsp;
+&nbsp;        LinkedList&lt;PhysicalDivision&gt; dragParents;
+<b class="nc">&nbsp;        if (divisionView.getAllowedSubstructuralElements().containsKey(dragUnit.getType())) {</b>
+<b class="nc">&nbsp;            dragParents = MetadataEditor.getAncestorsOfPhysicalDivision(dragUnit, dataEditor.getWorkpiece().getPhysicalStructure());</b>
+<b class="nc">&nbsp;            if (dragParents.isEmpty()) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(Helper.getTranslation(&quot;dataEditor.noParentsError&quot;,</b>
+<b class="nc">&nbsp;                    dragNode.getLabel()));</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                PhysicalDivision parentUnit = dragParents.get(dragParents.size() - 1);</b>
+<b class="nc">&nbsp;                if (parentUnit.getChildren().contains(dragUnit)) {</b>
+<b class="nc">&nbsp;                    preservePhysical();</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    Helper.setErrorMessage(Helper.getTranslation(&quot;dataEditor.childNotContainedError&quot;,</b>
+<b class="nc">&nbsp;                        dragUnit.getType()));</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(Helper.getTranslation(&quot;dataEditor.forbiddenChildElement&quot;,</b>
+<b class="nc">&nbsp;                dragNode.getLabel(), dropNode.getLabel()));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        show();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void preserveLogicalAndPhysical() throws UnknownTreeNodeDataException {
+<b class="nc">&nbsp;        if (!this.logicalTree.getChildren().isEmpty()) {</b>
+<b class="nc">&nbsp;            order = 1;</b>
+<b class="nc">&nbsp;            for (PhysicalDivision physicalDivision : dataEditor.getWorkpiece().getPhysicalStructure().getChildren()) {</b>
+<b class="nc">&nbsp;                physicalDivision.getLogicalDivisions().clear();</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            dataEditor.getWorkpiece().getPhysicalStructure().getChildren().clear();</b>
+<b class="nc">&nbsp;            preserveLogicalAndPhysicalRecursive(this.logicalTree.getChildren().get(logicalTree.getChildCount() - 1));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private LogicalDivision preserveLogicalAndPhysicalRecursive(TreeNode treeNode) throws UnknownTreeNodeDataException {
+<b class="nc">&nbsp;        StructureTreeNode structureTreeNode = (StructureTreeNode) treeNode.getData();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(structureTreeNode) || !(structureTreeNode.getDataObject() instanceof LogicalDivision)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        LogicalDivision structure = (LogicalDivision) structureTreeNode.getDataObject();</b>
+<b class="nc">&nbsp;        structure.setOrder(order);</b>
+<b class="nc">&nbsp;        structure.getViews().clear();</b>
+<b class="nc">&nbsp;        structure.getChildren().clear();</b>
+<b class="nc">&nbsp;        for (TreeNode child : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            if (!(child.getData() instanceof StructureTreeNode)) {</b>
+<b class="nc">&nbsp;                throw new UnknownTreeNodeDataException(child.getData().getClass().getCanonicalName());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (((StructureTreeNode) child.getData()).getDataObject() instanceof LogicalDivision) {</b>
+<b class="nc">&nbsp;                LogicalDivision possibleChildStructure = preserveLogicalAndPhysicalRecursive(child);</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(possibleChildStructure)) {</b>
+<b class="nc">&nbsp;                    structure.getChildren().add(possibleChildStructure);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } else if (((StructureTreeNode) child.getData()).getDataObject() instanceof View) {</b>
+<b class="nc">&nbsp;                View view = (View) ((StructureTreeNode) child.getData()).getDataObject();</b>
+<b class="nc">&nbsp;                structure.getViews().add(view);</b>
+<b class="nc">&nbsp;                if (!dataEditor.getWorkpiece().getAllPhysicalDivisions().contains(view.getPhysicalDivision())) {</b>
+<b class="nc">&nbsp;                    view.getPhysicalDivision().setOrder(order);</b>
+<b class="nc">&nbsp;                    dataEditor.getWorkpiece().getPhysicalStructure().getChildren().add(view.getPhysicalDivision());</b>
+<b class="nc">&nbsp;                    order++;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                if (!view.getPhysicalDivision().getLogicalDivisions().contains(structure)) {</b>
+<b class="nc">&nbsp;                    view.getPhysicalDivision().getLogicalDivisions().add(structure);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return structure;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the metadata of a process should be displayed in separate logical and physical
+&nbsp;     * structure trees or in one unified structure tree.
+&nbsp;     *
+&nbsp;     * @return
+&nbsp;     *          whether metadata structure should be displayed in separate structure trees or not
+&nbsp;     */
+&nbsp;    public boolean isSeparateMedia() {
+<b class="fc">&nbsp;        Process process = dataEditor.getProcess();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(process)) {</b>
+<b class="fc">&nbsp;            Template template = process.getTemplate();</b>
+<b class="fc">&nbsp;            if ( Objects.nonNull(template) ) {</b>
+<b class="fc">&nbsp;                return template.getWorkflow().isSeparateStructure();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void expandNode(TreeNode node) {
+<b class="nc">&nbsp;        if (Objects.nonNull(node)) {</b>
+<b class="nc">&nbsp;            node.setExpanded(true);</b>
+<b class="nc">&nbsp;            expandNode(node.getParent());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private HashMap&lt;LogicalDivision, Boolean&gt; getLogicalTreeNodeExpansionStates(DefaultTreeNode tree) {
+<b class="nc">&nbsp;        if (Objects.nonNull(tree) &amp;&amp; tree.getChildCount() == 1) {</b>
+<b class="nc">&nbsp;            TreeNode treeRoot = tree.getChildren().get(0);</b>
+<b class="nc">&nbsp;            LogicalDivision structuralElement = getTreeNodeStructuralElement(treeRoot);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(structuralElement)) {</b>
+<b class="nc">&nbsp;                return getLogicalTreeNodeExpansionStatesRecursively(treeRoot, new HashMap&lt;&gt;());</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return new HashMap&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private HashMap&lt;LogicalDivision, Boolean&gt; getLogicalTreeNodeExpansionStatesRecursively(TreeNode treeNode,
+&nbsp;            HashMap&lt;LogicalDivision, Boolean&gt; expansionStates) {
+<b class="nc">&nbsp;        if (Objects.nonNull(treeNode)) {</b>
+<b class="nc">&nbsp;            LogicalDivision structureData = getTreeNodeStructuralElement(treeNode);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(structureData)) {</b>
+<b class="nc">&nbsp;                expansionStates.put(structureData, treeNode.isExpanded());</b>
+<b class="nc">&nbsp;                for (TreeNode childNode : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;                    expansionStates.putAll(getLogicalTreeNodeExpansionStatesRecursively(childNode, expansionStates));</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return expansionStates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private HashMap&lt;PhysicalDivision, Boolean&gt; getPhysicalTreeNodeExpansionStates(DefaultTreeNode tree) {
+<b class="nc">&nbsp;        if (Objects.nonNull(tree) &amp;&amp; tree.getChildCount() == 1) {</b>
+<b class="nc">&nbsp;            TreeNode treeRoot = tree.getChildren().get(0);</b>
+<b class="nc">&nbsp;            PhysicalDivision physicalDivision = getTreeNodePhysicalDivision(treeRoot);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(physicalDivision)) {</b>
+<b class="nc">&nbsp;                return getPhysicalTreeNodeExpansionStatesRecursively(treeRoot, new HashMap&lt;&gt;());</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return new HashMap&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private HashMap&lt;PhysicalDivision, Boolean&gt; getPhysicalTreeNodeExpansionStatesRecursively(TreeNode treeNode,
+&nbsp;            HashMap&lt;PhysicalDivision, Boolean&gt; expansionStates) {
+<b class="nc">&nbsp;        if (Objects.nonNull(treeNode)) {</b>
+<b class="nc">&nbsp;            PhysicalDivision physicalDivision = getTreeNodePhysicalDivision(treeNode);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(physicalDivision)) {</b>
+<b class="nc">&nbsp;                expansionStates.put(physicalDivision, treeNode.isExpanded());</b>
+<b class="nc">&nbsp;                for (TreeNode childNode : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;                    expansionStates.putAll(getPhysicalTreeNodeExpansionStatesRecursively(childNode, expansionStates));</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return expansionStates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updateLogicalNodeExpansionStates(DefaultTreeNode tree, HashMap&lt;LogicalDivision, Boolean&gt; expansionStates) {
+<b class="nc">&nbsp;        if (Objects.nonNull(tree) &amp;&amp; Objects.nonNull(expansionStates) &amp;&amp; !expansionStates.isEmpty()) {</b>
+<b class="nc">&nbsp;            updateNodeExpansionStatesRecursively(tree, expansionStates);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updateNodeExpansionStatesRecursively(TreeNode treeNode, HashMap&lt;LogicalDivision, Boolean&gt; expansionStates) {
+<b class="nc">&nbsp;        LogicalDivision element = getTreeNodeStructuralElement(treeNode);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(element) &amp;&amp; expansionStates.containsKey(element)) {</b>
+<b class="nc">&nbsp;            treeNode.setExpanded(expansionStates.get(element));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (TreeNode childNode : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            updateNodeExpansionStatesRecursively(childNode, expansionStates);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updatePhysicalNodeExpansionStates(DefaultTreeNode tree, HashMap&lt;PhysicalDivision, Boolean&gt; expansionStates) {
+<b class="nc">&nbsp;        if (Objects.nonNull(tree) &amp;&amp; Objects.nonNull(expansionStates) &amp;&amp; !expansionStates.isEmpty()) {</b>
+<b class="nc">&nbsp;            updatePhysicalNodeExpansionStatesRecursively(tree, expansionStates);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updatePhysicalNodeExpansionStatesRecursively(TreeNode treeNode, HashMap&lt;PhysicalDivision, Boolean&gt; expansionStates) {
+<b class="nc">&nbsp;        PhysicalDivision physicalDivision = getTreeNodePhysicalDivision(treeNode);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(physicalDivision) &amp;&amp; expansionStates.containsKey(physicalDivision)) {</b>
+<b class="nc">&nbsp;            treeNode.setExpanded(expansionStates.get(physicalDivision));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (TreeNode childNode : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            updatePhysicalNodeExpansionStatesRecursively(childNode, expansionStates);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean logicalNodeStateUnknown(HashMap&lt;LogicalDivision, Boolean&gt; expansionStates, TreeNode treeNode) {
+<b class="fc">&nbsp;        LogicalDivision element = getTreeNodeStructuralElement(treeNode);</b>
+<b class="fc">&nbsp;        return !Objects.nonNull(expansionStates) || (Objects.nonNull(element) &amp;&amp; !expansionStates.containsKey(element));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean physicalNodeStateUnknown(HashMap&lt;PhysicalDivision, Boolean&gt; expanionStates, TreeNode treeNode) {
+<b class="nc">&nbsp;        PhysicalDivision physicalDivision = getTreeNodePhysicalDivision(treeNode);</b>
+<b class="nc">&nbsp;        return Objects.isNull(expanionStates) || (Objects.nonNull(physicalDivision) &amp;&amp; !expanionStates.containsKey(physicalDivision));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private LogicalDivision getTreeNodeStructuralElement(TreeNode treeNode) {
+<b class="fc">&nbsp;        if (treeNode.getData() instanceof StructureTreeNode) {</b>
+<b class="fc">&nbsp;            StructureTreeNode structureTreeNode = (StructureTreeNode) treeNode.getData();</b>
+<b class="fc">&nbsp;            if (structureTreeNode.getDataObject() instanceof LogicalDivision) {</b>
+<b class="fc">&nbsp;                return (LogicalDivision) structureTreeNode.getDataObject();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private PhysicalDivision getTreeNodePhysicalDivision(TreeNode treeNode) {
+<b class="nc">&nbsp;        if (treeNode.getData() instanceof StructureTreeNode) {</b>
+<b class="nc">&nbsp;            StructureTreeNode structureTreeNode = (StructureTreeNode) treeNode.getData();</b>
+<b class="nc">&nbsp;            if (structureTreeNode.getDataObject() instanceof PhysicalDivision) {</b>
+<b class="nc">&nbsp;                return (PhysicalDivision) structureTreeNode.getDataObject();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get List of PhysicalDivisions assigned to multiple LogicalDivisions.
+&nbsp;     *
+&nbsp;     * @return value of severalAssignments
+&nbsp;     */
+&nbsp;    List&lt;PhysicalDivision&gt; getSeveralAssignments() {
+<b class="nc">&nbsp;        return severalAssignments;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get activeTabs.
+&nbsp;     *
+&nbsp;     * @return value of activeTabs
+&nbsp;     */
+&nbsp;    public String getActiveTabs() {
+<b class="nc">&nbsp;        return activeTabs;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set activeTabs.
+&nbsp;     *
+&nbsp;     * @param activeTabs as java.lang.String
+&nbsp;     */
+&nbsp;    public void setActiveTabs(String activeTabs) {
+<b class="nc">&nbsp;        this.activeTabs = activeTabs;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the index of this StructureTreeNode&#39;s PhysicalDivision out of all
+&nbsp;     * PhysicalDivisions which are assigned to more than one LogicalDivision.
+&nbsp;     *
+&nbsp;     * @param treeNode
+&nbsp;     *            object to find the index for
+&nbsp;     * @return index of the StructureTreeNode&#39;s PhysicalDivision if present in
+&nbsp;     *         the List of several assignments, or -1 if not present in the
+&nbsp;     *         list.
+&nbsp;     */
+&nbsp;    public int getMultipleAssignmentsIndex(StructureTreeNode treeNode) {
+<b class="nc">&nbsp;        if (treeNode.getDataObject() instanceof View</b>
+<b class="nc">&nbsp;                &amp;&amp; Objects.nonNull(((View) treeNode.getDataObject()).getPhysicalDivision())) {</b>
+<b class="nc">&nbsp;            return severalAssignments.indexOf(((View) treeNode.getDataObject()).getPhysicalDivision());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return -1;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the selected Node&#39;s PhysicalDivision is assigned to several LogicalDivisions.
+&nbsp;     *
+&nbsp;     * @return {@code true} when the PhysicalDivision is assigned to more than one logical element
+&nbsp;     */
+&nbsp;    public boolean isAssignedSeveralTimes() {
+<b class="nc">&nbsp;        if (Objects.nonNull(selectedLogicalNode) &amp;&amp; selectedLogicalNode.getData() instanceof  StructureTreeNode) {</b>
+<b class="nc">&nbsp;            StructureTreeNode structureTreeNode = (StructureTreeNode) selectedLogicalNode.getData();</b>
+<b class="nc">&nbsp;            if (structureTreeNode.getDataObject() instanceof View) {</b>
+<b class="nc">&nbsp;                View view = (View) structureTreeNode.getDataObject();</b>
+<b class="nc">&nbsp;                return view.getPhysicalDivision().getLogicalDivisions().size() &gt; 1;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the selected Node&#39;s PhysicalDivision can be assigned to the next logical element in addition to the current assignment.
+&nbsp;     * @return {@code true} if the PhysicalDivision can be assigned to the next LogicalDivision
+&nbsp;     */
+&nbsp;    public boolean isAssignableSeveralTimes() {
+<b class="nc">&nbsp;        if (Objects.nonNull(selectedLogicalNode) &amp;&amp; selectedLogicalNode.getData() instanceof  StructureTreeNode) {</b>
+<b class="nc">&nbsp;            StructureTreeNode structureTreeNode = (StructureTreeNode) selectedLogicalNode.getData();</b>
+<b class="nc">&nbsp;            if (structureTreeNode.getDataObject() instanceof View) {</b>
+<b class="nc">&nbsp;                List&lt;TreeNode&gt; logicalNodeSiblings = selectedLogicalNode.getParent().getParent().getChildren();</b>
+<b class="nc">&nbsp;                int logicalNodeIndex = logicalNodeSiblings.indexOf(selectedLogicalNode.getParent());</b>
+<b class="nc">&nbsp;                List&lt;TreeNode&gt; viewSiblings = selectedLogicalNode.getParent().getChildren();</b>
+&nbsp;                // check for selected node&#39;s positions and siblings after selected node&#39;s parent
+<b class="nc">&nbsp;                if (viewSiblings.indexOf(selectedLogicalNode) == viewSiblings.size() - 1</b>
+<b class="nc">&nbsp;                        &amp;&amp; logicalNodeSiblings.size() &gt; logicalNodeIndex + 1) {</b>
+<b class="nc">&nbsp;                    TreeNode nextSibling = logicalNodeSiblings.get(logicalNodeIndex + 1);</b>
+<b class="nc">&nbsp;                    if (nextSibling.getData() instanceof StructureTreeNode) {</b>
+<b class="nc">&nbsp;                        StructureTreeNode structureTreeNodeSibling = (StructureTreeNode) nextSibling.getData();</b>
+<b class="nc">&nbsp;                        return structureTreeNodeSibling.getDataObject() instanceof LogicalDivision;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Assign selected Node&#39;s PhysicalDivision to the next LogicalDivision.
+&nbsp;     */
+&nbsp;    public void assign() {
+<b class="nc">&nbsp;        if (isAssignableSeveralTimes()) {</b>
+<b class="nc">&nbsp;            View view = (View) ((StructureTreeNode) selectedLogicalNode.getData()).getDataObject();</b>
+<b class="nc">&nbsp;            View viewToAssign = new View();</b>
+<b class="nc">&nbsp;            viewToAssign.setPhysicalDivision(view.getPhysicalDivision());</b>
+<b class="nc">&nbsp;            List&lt;TreeNode&gt; logicalNodeSiblings = selectedLogicalNode.getParent().getParent().getChildren();</b>
+<b class="nc">&nbsp;            int logicalNodeIndex = logicalNodeSiblings.indexOf(selectedLogicalNode.getParent());</b>
+<b class="nc">&nbsp;            TreeNode nextSibling = logicalNodeSiblings.get(logicalNodeIndex + 1);</b>
+<b class="nc">&nbsp;            StructureTreeNode structureTreeNodeSibling = (StructureTreeNode) nextSibling.getData();</b>
+<b class="nc">&nbsp;            LogicalDivision logicalDivision = (LogicalDivision) structureTreeNodeSibling.getDataObject();</b>
+<b class="nc">&nbsp;            dataEditor.assignView(logicalDivision, viewToAssign, 0);</b>
+<b class="nc">&nbsp;            severalAssignments.add(viewToAssign.getPhysicalDivision());</b>
+<b class="nc">&nbsp;            show();</b>
+<b class="nc">&nbsp;            dataEditor.getSelectedMedia().clear();</b>
+<b class="nc">&nbsp;            dataEditor.getGalleryPanel().updateStripes();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Unassign the selected Node&#39;s PhysicalDivision from the LogicalDivision parent at the selected position.
+&nbsp;     * This does not remove it from other LogicalDivisions.
+&nbsp;     */
+&nbsp;    public void unassign() {
+<b class="nc">&nbsp;        if (isAssignedSeveralTimes()) {</b>
+<b class="nc">&nbsp;            StructureTreeNode structureTreeNode = (StructureTreeNode) selectedLogicalNode.getData();</b>
+<b class="nc">&nbsp;            View view = (View) structureTreeNode.getDataObject();</b>
+<b class="nc">&nbsp;            if (selectedLogicalNode.getParent().getData() instanceof StructureTreeNode) {</b>
+<b class="nc">&nbsp;                StructureTreeNode structureTreeNodeParent = (StructureTreeNode) selectedLogicalNode.getParent().getData();</b>
+<b class="nc">&nbsp;                if (structureTreeNodeParent.getDataObject() instanceof LogicalDivision) {</b>
+<b class="nc">&nbsp;                    LogicalDivision logicalDivision =</b>
+<b class="nc">&nbsp;                            (LogicalDivision) structureTreeNodeParent.getDataObject();</b>
+<b class="nc">&nbsp;                    dataEditor.unassignView(logicalDivision, view, false);</b>
+<b class="nc">&nbsp;                    if (view.getPhysicalDivision().getLogicalDivisions().size() &lt;= 1) {</b>
+<b class="nc">&nbsp;                        severalAssignments.remove(view.getPhysicalDivision());</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    show();</b>
+<b class="nc">&nbsp;                    dataEditor.getGalleryPanel().updateStripes();</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get title metadata.
+&nbsp;     * @return value of titleMetadata
+&nbsp;     */
+&nbsp;    public String getTitleMetadata() {
+<b class="nc">&nbsp;        return titleMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set title metadata.
+&nbsp;     * @param titleMetadata as java.lang.String
+&nbsp;     */
+&nbsp;    public void setTitleMetadata(String titleMetadata) {
+<b class="nc">&nbsp;        this.titleMetadata = titleMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of metadata keys that are used for displaying title information from the Kitodo configuration file.
+&nbsp;     * @return list of title metadata keys
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getTitleMetadataItems() {
+<b class="nc">&nbsp;        return DataEditorService.getTitleKeys()</b>
+<b class="nc">&nbsp;                .stream()</b>
+<b class="nc">&nbsp;                .map(key -&gt; new SelectItem(key,dataEditor.getRulesetManagement().getTranslationForKey(</b>
+<b class="nc">&nbsp;                        key,dataEditor.getPriorityList()).orElse(key)))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns true if the logical structure tree is a combined tree of structure nodes and view nodes (media).
+&nbsp;     *
+&nbsp;     * @return true if logical structure tree contains media
+&nbsp;     */
+&nbsp;    public boolean logicalStructureTreeContainsMedia() {
+<b class="fc">&nbsp;        return !this.isSeparateMedia() &amp;&amp; !this.isHideMediaInLogicalTree();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return true if the users selected the option to hide media in the logical structure tree.
+&nbsp;     *
+&nbsp;     * @return true if the user want to hide media in the logical structure tree
+&nbsp;     */
+&nbsp;    public boolean isHideMediaInLogicalTree() {
+<b class="fc">&nbsp;        return this.hideMediaInLogicalTree;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets whether media should be shown in the logical structure tree.
+&nbsp;     *
+&nbsp;     * @param hideMediaInLogicalTree boolean
+&nbsp;     */
+&nbsp;    public void setHideMediaInLogicalTree(boolean hideMediaInLogicalTree) {
+<b class="nc">&nbsp;        this.hideMediaInLogicalTree = hideMediaInLogicalTree;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Listener that is called when the user changes the UI option to show or hide
+&nbsp;     * media in the logical structure tree.
+&nbsp;     */
+&nbsp;    public void onHideMediaInLogicalTreeChange() {
+<b class="nc">&nbsp;        this.show();</b>
+<b class="nc">&nbsp;        this.dataEditor.getGalleryPanel().show();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the user selected to show the page range for each logical structure node.
+&nbsp;     *
+&nbsp;     * @return value of showPageRangeInLogicalTree
+&nbsp;     */
+&nbsp;    public boolean isShowPageRangeInLogicalTree() {
+<b class="nc">&nbsp;        return this.showPageRangeInLogicalTree;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether the page range should be shown for each logical structure node.
+&nbsp;     * @param showPageRangeInLogicalTree boolean
+&nbsp;     */
+&nbsp;    public void setShowPageRangeInLogicalTree(boolean showPageRangeInLogicalTree) {
+<b class="nc">&nbsp;        this.showPageRangeInLogicalTree = showPageRangeInLogicalTree;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the user selected to show the hierarchy level of individual tree nodes in the structure tree.
+&nbsp;     * @return value of showHierarchyLevel
+&nbsp;     */
+&nbsp;    public boolean isShowHierarchyLevel() {
+<b class="nc">&nbsp;        return showHierarchyLevel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether the hierarchy level of individual tree nodes in the structure tree should be displayed.
+&nbsp;     * @param showHierarchyLevel boolean
+&nbsp;     */
+&nbsp;    public void setShowHierarchyLevel(boolean showHierarchyLevel) {
+<b class="nc">&nbsp;        this.showHierarchyLevel = showHierarchyLevel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Expand all tree nodes in the logical structure tree.
+&nbsp;     */
+&nbsp;    public void expandAll() {
+<b class="nc">&nbsp;        toggleAll(this.logicalTree, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Collapse all tree nodes in the logical structure tree.
+&nbsp;     */
+&nbsp;    public void collapseAll() {
+<b class="nc">&nbsp;        toggleAll(this.logicalTree, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void toggleAll(TreeNode treeNode, boolean expanded) {
+<b class="nc">&nbsp;        for (TreeNode childNode : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            toggleAll(childNode, expanded);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        treeNode.setExpanded(expanded);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,248 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CopierData</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.metadata.copier</a>
+</div>
+
+<h1>Coverage Summary for Class: CopierData (org.kitodo.production.metadata.copier)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CopierData</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.metadata.copier;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyDocStructHelperInterface;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyMetsModsDigitalDocumentHelper;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyPrefsHelper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;/**
+&nbsp; * A CopierData object contains all the data the data copier has access to. It
+&nbsp; * has been implemented as an own bean class to allow to easily add variables
+&nbsp; * later without needing to extend many interfaces.
+&nbsp; */
+&nbsp;public class CopierData {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A metadata selector relative to which the data shall be read during
+&nbsp;     * copying.
+&nbsp;     */
+&nbsp;    private final MetadataSelector destination;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The workspace file to modify.
+&nbsp;     */
+&nbsp;    private final LegacyMetsModsDigitalDocumentHelper fileformat;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The Production process corresponding to the workspace file.
+&nbsp;     */
+&nbsp;    private final Process process;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new CopierData bean with an additional destination metadata
+&nbsp;     * selector.
+&nbsp;     *
+&nbsp;     * @param data
+&nbsp;     *            data bean without or with destination metadata selector
+&nbsp;     * @param destination
+&nbsp;     *            destination metadata selector to use
+&nbsp;     */
+<b class="nc">&nbsp;    public CopierData(CopierData data, MetadataSelector destination) {</b>
+<b class="nc">&nbsp;        this.fileformat = data.fileformat;</b>
+<b class="nc">&nbsp;        this.process = data.process;</b>
+<b class="nc">&nbsp;        this.destination = destination;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new CopierData bean.
+&nbsp;     *
+&nbsp;     * @param fileformat
+&nbsp;     *            the document to modify
+&nbsp;     * @param process
+&nbsp;     *            the related Production process
+&nbsp;     */
+<b class="nc">&nbsp;    public CopierData(LegacyMetsModsDigitalDocumentHelper fileformat, Process process) {</b>
+<b class="nc">&nbsp;        this.fileformat = fileformat;</b>
+<b class="nc">&nbsp;        this.process = process;</b>
+<b class="nc">&nbsp;        this.destination = null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new CopierData bean.
+&nbsp;     *
+&nbsp;     * @param fileformat
+&nbsp;     *            the document to modify
+&nbsp;     * @param template
+&nbsp;     *            the related Production process
+&nbsp;     */
+<b class="nc">&nbsp;    public CopierData(LegacyMetsModsDigitalDocumentHelper fileformat, Template template) {</b>
+<b class="nc">&nbsp;        this.fileformat = fileformat;</b>
+<b class="nc">&nbsp;        this.destination = null;</b>
+<b class="nc">&nbsp;        this.process = new Process();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the destination metadata selector relative to which the data
+&nbsp;     * shall be read during copying.
+&nbsp;     *
+&nbsp;     * @return the destination metadata selector
+&nbsp;     */
+&nbsp;    public MetadataSelector getDestination() {
+<b class="nc">&nbsp;        return destination;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the digital document contained in the fileformat passed-in in the
+&nbsp;     * constructor.
+&nbsp;     *
+&nbsp;     * @return the digital document
+&nbsp;     */
+&nbsp;    LegacyMetsModsDigitalDocumentHelper getDigitalDocument() {
+<b class="nc">&nbsp;        return fileformat.getDigitalDocument();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the top-level element of the logical document structure tree.
+&nbsp;     *
+&nbsp;     * @return the logical document structure
+&nbsp;     */
+&nbsp;    public LegacyDocStructHelperInterface getLogicalDocStruct() {
+<b class="nc">&nbsp;        return getDigitalDocument().getLogicalDocStruct();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the ruleset to be used with the fileformat.
+&nbsp;     *
+&nbsp;     * @return the required ruleset.
+&nbsp;     */
+&nbsp;    public LegacyPrefsHelper getPreferences() {
+<b class="nc">&nbsp;        return ServiceManager.getRulesetService().getPreferences(process.getRuleset());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the process title.
+&nbsp;     *
+&nbsp;     * @return the process title
+&nbsp;     */
+&nbsp;    public Process getProcess() {
+<b class="nc">&nbsp;        return process;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a string that textually represents this bean.
+&nbsp;     *
+&nbsp;     * @return a string representation of this object
+&nbsp;     * @see java.lang.Object#toString()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return &quot;{fileformat: &quot; + fileformat.toString() + &quot;, process: &quot; + getProcess().getTitle() + &#39;}&#39;;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

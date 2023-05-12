@@ -1,0 +1,252 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Indexer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.elasticsearch.index</a>
+</div>
+
+<h1>Coverage Summary for Class: Indexer (org.kitodo.data.elasticsearch.index)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Indexer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    53,8%
+  </span>
+  <span class="absValue">
+    (14/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.elasticsearch.index;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import javax.ws.rs.HttpMethod;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.BaseIndexedBean;
+&nbsp;import org.kitodo.data.elasticsearch.Index;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.BaseType;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation of ElasticSearch Indexer for index package.
+&nbsp; */
+&nbsp;public class Indexer&lt;T extends BaseIndexedBean, S extends BaseType&gt; extends Index {
+&nbsp;
+&nbsp;    private String method;
+&nbsp;    private static final String INCORRECT_HTTP = &quot;Incorrect HTTP method!&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor for indexer with type names equal to table names.
+&nbsp;     *
+&nbsp;     * @param beanClass
+&nbsp;     *            as Class
+&nbsp;     */
+&nbsp;    public Indexer(Class&lt;?&gt; beanClass) {
+<b class="fc">&nbsp;        super(beanClass);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor for indexer with type names not equal to table names.
+&nbsp;     *
+&nbsp;     * @param type
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public Indexer(String type) {
+<b class="nc">&nbsp;        super(type);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Perform request depending on given parameters of HTTP Method.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBean
+&nbsp;     *            bean object which will be added or deleted from index
+&nbsp;     * @param baseType
+&nbsp;     *            type on which will be called method createDocument()
+&nbsp;     * @param forceRefresh
+&nbsp;     *            force index refresh - if true, time of execution is longer but
+&nbsp;     *            object is right after that available for display
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public void performSingleRequest(T baseIndexedBean, S baseType, boolean forceRefresh)
+&nbsp;            throws CustomResponseException, DataException, IOException {
+<b class="fc">&nbsp;        IndexRestClient restClient = initiateRestClient();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (method.equals(HttpMethod.PUT)) {</b>
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; document = baseType.createDocument(baseIndexedBean);</b>
+<b class="fc">&nbsp;            restClient.addDocument(this.type, document, baseIndexedBean.getId(), forceRefresh);</b>
+<b class="fc">&nbsp;        } else if (method.equals(HttpMethod.DELETE)) {</b>
+<b class="fc">&nbsp;            restClient.deleteDocument(this.type, baseIndexedBean.getId(), forceRefresh);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new CustomResponseException(INCORRECT_HTTP);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Perform delete request depending on given id of the bean.
+&nbsp;     *
+&nbsp;     * @param beanId
+&nbsp;     *            response from the server
+&nbsp;     * @param forceRefresh
+&nbsp;     *            force index refresh - if true, time of execution is longer but
+&nbsp;     *            object is right after that available for display
+&nbsp;     */
+&nbsp;    public void performSingleRequest(Integer beanId, boolean forceRefresh) throws CustomResponseException, DataException {
+<b class="fc">&nbsp;        IndexRestClient restClient = initiateRestClient();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (method.equals(HttpMethod.DELETE)) {</b>
+<b class="fc">&nbsp;            restClient.deleteDocument(this.type, beanId, forceRefresh);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new CustomResponseException(INCORRECT_HTTP);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This function is called directly by the administrator of the system.
+&nbsp;     *
+&nbsp;     * @param baseIndexedBeans
+&nbsp;     *            list of bean objects which will be added to index
+&nbsp;     * @param baseType
+&nbsp;     *            type on which will be called method createDocument()
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public void performMultipleRequests(List&lt;T&gt; baseIndexedBeans, S baseType, boolean async) throws CustomResponseException {
+<b class="nc">&nbsp;        IndexRestClient restClient = initiateRestClient();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (method.equals(HttpMethod.PUT)) {</b>
+<b class="nc">&nbsp;            Map&lt;Integer, Map&lt;String, Object&gt;&gt; documents = baseType.createDocuments(baseIndexedBeans);</b>
+<b class="nc">&nbsp;            if (async) {</b>
+<b class="nc">&nbsp;                restClient.addTypeAsync(this.type, documents);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                restClient.addTypeSync(this.type, documents);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            throw new CustomResponseException(INCORRECT_HTTP);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private IndexRestClient initiateRestClient() {
+<b class="fc">&nbsp;        IndexRestClient restClient = IndexRestClient.getInstance();</b>
+<b class="fc">&nbsp;        restClient.setIndexBase(index);</b>
+<b class="fc">&nbsp;        return restClient;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get type of method which will be used during performing request.
+&nbsp;     *
+&nbsp;     * @return method for request
+&nbsp;     */
+&nbsp;    public String getMethod() {
+<b class="nc">&nbsp;        return method;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set up type of method which will be used during performing request.
+&nbsp;     *
+&nbsp;     * @param method
+&nbsp;     *            Determines if we want to add (update) or delete document - true
+&nbsp;     *            add, false delete
+&nbsp;     */
+&nbsp;    public void setMethod(String method) {
+<b class="fc">&nbsp;        this.method = method;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

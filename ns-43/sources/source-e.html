@@ -1,0 +1,593 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > VariableReplacer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: VariableReplacer (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VariableReplacer</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (15/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,7%
+  </span>
+  <span class="absValue">
+    (87/165)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">VariableReplacer$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">VariableReplacer$MetadataLevel</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    68,2%
+  </span>
+  <span class="absValue">
+    (15/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    51,2%
+  </span>
+  <span class="absValue">
+    (87/170)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import org.apache.commons.io.FilenameUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.KitodoConfig;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;
+&nbsp;/**
+&nbsp; * Replaces placeholders in a string. The variable replacer enables placeholders
+&nbsp; * specified in a character string to be replaced with internal values from the
+&nbsp; * process or the metadata of its workpiece. The character string is, for
+&nbsp; * example, the call of an external program.
+&nbsp; */
+&nbsp;public class VariableReplacer {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(VariableReplacer.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * There are three different levels of access to the workpiece&#39;s metadata.
+&nbsp;     */
+<b class="nc">&nbsp;    private enum MetadataLevel {</b>
+&nbsp;        /**
+&nbsp;         * First, a metadata entry with the specified name is searched for in
+&nbsp;         * the first division of the first subordinate hierarchy level; if it is
+&nbsp;         * not found there, a search is then made in the top hierarchy level.
+&nbsp;         */
+<b class="nc">&nbsp;        ALL,</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * A metadata entry with the specified name is only searched for in the
+&nbsp;         * first division of the first subordinate hierarchy level.
+&nbsp;         */
+<b class="nc">&nbsp;        FIRSTCHILD,</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * A metadata entry with the specified name is only searched for in the
+&nbsp;         * top hierarchy level.
+&nbsp;         */
+<b class="nc">&nbsp;        TOPSTRUCT</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This regular expression is used to search for placeholders that need to
+&nbsp;     * be replaced.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Pattern VARIABLE_FINDER_REGEX = Pattern.compile(</b>
+&nbsp;                &quot;(\\$?)\\((?:(prefs|processid|processtitle|projectid|stepid|stepname|generatorsource|generatorsourcepath)|&quot;
+&nbsp;                + &quot;(?:(meta|process|product|template)\\.(?:(firstchild|topstruct)\\.)?([^)]+)|&quot;
+&nbsp;                + &quot;(?:(filename|basename|relativepath))))\\)&quot;);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The map is filled with replacement instructions that are required for
+&nbsp;     * backwards compatibility with version 2.
+&nbsp;     */
+&nbsp;    private static Map&lt;String, String&gt; legacyVariablesMap;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The program builds a regular expression to search for outdated
+&nbsp;     * replacement instructions and to replace them with the new instructions in
+&nbsp;     * a first step.
+&nbsp;     */
+&nbsp;    private static Pattern legacyVariablesPattern;
+&nbsp;
+&nbsp;    private Workpiece workpiece;
+&nbsp;    private Process process;
+&nbsp;    private Task task;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new Variable Replacer.
+&nbsp;     *
+&nbsp;     * @param workpiece
+&nbsp;     *            Workpiece to read metadata values from
+&nbsp;     * @param process
+&nbsp;     *            Process to read values from
+&nbsp;     * @param task
+&nbsp;     *            Task to read values from
+&nbsp;     */
+<b class="fc">&nbsp;    public VariableReplacer(Workpiece workpiece, Process process, Task task) {</b>
+<b class="fc">&nbsp;        initializeLegacyVariablesPreprocessor();</b>
+<b class="fc">&nbsp;        this.workpiece = workpiece;</b>
+<b class="fc">&nbsp;        this.process = process;</b>
+<b class="fc">&nbsp;        this.task = task;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The method is called by the constructor of the class to load conversion
+&nbsp;     * instructions for obsolete replacement patterns from the configuration
+&nbsp;     * file.
+&nbsp;     */
+&nbsp;    private final void initializeLegacyVariablesPreprocessor() {
+<b class="fc">&nbsp;        StringBuilder regexBuilder = null;</b>
+<b class="fc">&nbsp;        boolean useLegacyVariablesPreprocessor = false;</b>
+<b class="fc">&nbsp;        for (Iterator&lt;String&gt; iterator = ConfigCore.getConfig().getKeys(); iterator.hasNext();) {</b>
+<b class="fc">&nbsp;            String key = iterator.next();</b>
+<b class="fc">&nbsp;            if (key.startsWith(&quot;variable.&quot;)) {</b>
+<b class="fc">&nbsp;                String variableName = key.substring(9);</b>
+<b class="fc">&nbsp;                if (useLegacyVariablesPreprocessor) {</b>
+<b class="nc">&nbsp;                    regexBuilder.append(&#39;|&#39;);</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    regexBuilder = new StringBuilder(&quot;\\((&quot;);</b>
+<b class="fc">&nbsp;                    legacyVariablesMap = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;                    useLegacyVariablesPreprocessor = true;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                regexBuilder.append(Pattern.quote(variableName));</b>
+<b class="fc">&nbsp;                legacyVariablesMap.put(variableName, ConfigCore.getParameter(key));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (useLegacyVariablesPreprocessor) {</b>
+<b class="fc">&nbsp;            regexBuilder.append(&quot;)\\)&quot;);</b>
+<b class="fc">&nbsp;            legacyVariablesPattern = Pattern.compile(regexBuilder.toString());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Replace variables within a string. Like an ant, run through the variables
+&nbsp;     * and fetch them from the digital document.
+&nbsp;     *
+&nbsp;     * @param stringWithVariables
+&nbsp;     *            a string maybe holding variables
+&nbsp;     * @return string with variables replaced
+&nbsp;     */
+&nbsp;    public String replace(String stringWithVariables) {
+<b class="fc">&nbsp;        return replaceWithFilename(stringWithVariables,null);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Replace variables withing a string. Like an ant, run through the variables
+&nbsp;     * and fetch them from the digital document. Filename variables are replaced using the filename parameter.
+&nbsp;     * 
+&nbsp;     * @param stringWithVariables
+&nbsp;     *             string with placeholders
+&nbsp;     * @param filename
+&nbsp;     *             filename for replacement
+&nbsp;     *
+&nbsp;     * @return string with replaced placeholders
+&nbsp;     */
+&nbsp;    public String replaceWithFilename(String stringWithVariables, String filename) {
+<b class="fc">&nbsp;        if (Objects.isNull(stringWithVariables)) {</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        stringWithVariables = invokeLegacyVariableReplacer(stringWithVariables);</b>
+&nbsp;
+<b class="fc">&nbsp;        Matcher variableFinder = VARIABLE_FINDER_REGEX.matcher(stringWithVariables);</b>
+<b class="fc">&nbsp;        boolean stringChanged = false;</b>
+<b class="fc">&nbsp;        StringBuffer replacedStringBuffer = null;</b>
+<b class="fc">&nbsp;        while (variableFinder.find()) {</b>
+<b class="fc">&nbsp;            if (!stringChanged) {</b>
+<b class="fc">&nbsp;                replacedStringBuffer = new StringBuffer();</b>
+<b class="fc">&nbsp;                stringChanged = true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            variableFinder.appendReplacement(replacedStringBuffer, determineReplacement(variableFinder, filename));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (stringChanged) {</b>
+<b class="fc">&nbsp;            variableFinder.appendTail(replacedStringBuffer);</b>
+<b class="fc">&nbsp;            return replacedStringBuffer.toString();</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return stringWithVariables;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Replaces outdated replacement patterns with appropriate ones.
+&nbsp;     *
+&nbsp;     * @param stringToReplace
+&nbsp;     *            string (perhaps) containing obsolete replacement patterns
+&nbsp;     * @return string in which obsolete replacement patterns have been replaced
+&nbsp;     *         by appropriate ones
+&nbsp;     */
+&nbsp;    private String invokeLegacyVariableReplacer(String stringToReplace) {
+<b class="fc">&nbsp;        if (Objects.isNull(legacyVariablesPattern)) {</b>
+<b class="nc">&nbsp;            return stringToReplace;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Matcher legacyVariablesMatcher = legacyVariablesPattern.matcher(stringToReplace);</b>
+<b class="fc">&nbsp;        StringBuffer replacedLegaycVariablesBuffer = new StringBuffer();</b>
+<b class="fc">&nbsp;        while (legacyVariablesMatcher.find()) {</b>
+<b class="fc">&nbsp;            legacyVariablesMatcher.appendReplacement(replacedLegaycVariablesBuffer,</b>
+<b class="fc">&nbsp;                legacyVariablesMap.get(legacyVariablesMatcher.group(1)));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        legacyVariablesMatcher.appendTail(replacedLegaycVariablesBuffer);</b>
+<b class="fc">&nbsp;        return replacedLegaycVariablesBuffer.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is called in the replacement loop to determine the
+&nbsp;     * replacement value for a revealed variable.
+&nbsp;     */
+&nbsp;    private String determineReplacement(Matcher variableFinder, String filename) {
+<b class="fc">&nbsp;        if (Objects.nonNull(variableFinder.group(2))) {</b>
+<b class="fc">&nbsp;            return determineReplacementForInternalValue(variableFinder);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.nonNull(variableFinder.group(3))) {</b>
+<b class="nc">&nbsp;            return determineReplacementForMetadata(variableFinder);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.nonNull(variableFinder.group(6)) &amp;&amp; Objects.nonNull(filename)) {</b>
+<b class="fc">&nbsp;            return determineReplacementForFilePlaceholder(variableFinder, filename);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return variableFinder.group();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If an internal value is to be determined, it is determined here.
+&nbsp;     */
+&nbsp;    private String determineReplacementForInternalValue(Matcher variableFinder) {
+<b class="fc">&nbsp;        switch (variableFinder.group(2)) {</b>
+&nbsp;            case &quot;prefs&quot;:
+<b class="fc">&nbsp;                return determineReplacementForPrefs(variableFinder);</b>
+&nbsp;            case &quot;processid&quot;:
+<b class="fc">&nbsp;                return determineReplacementForProcessid(variableFinder);</b>
+&nbsp;            case &quot;processtitle&quot;:
+<b class="fc">&nbsp;                return determineReplacementForProcesstitle(variableFinder);</b>
+&nbsp;            case &quot;projectid&quot;:
+<b class="fc">&nbsp;                return determineReplacementForProjectid(variableFinder);</b>
+&nbsp;            case &quot;stepid&quot;:
+<b class="nc">&nbsp;                return determineReplacementForStepid(variableFinder);</b>
+&nbsp;            case &quot;stepname&quot;:
+<b class="nc">&nbsp;                return determineReplacementForStepname(variableFinder);</b>
+&nbsp;            case &quot;generatorsource&quot; :
+&nbsp;            case &quot;generatorsourcepath&quot;:
+<b class="fc">&nbsp;                return determineReplacementForGeneratorSource(variableFinder, variableFinder.group(2));</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                logger.warn(&quot;Cannot replace \&quot;{}\&quot;: no such case defined in switch&quot;, variableFinder.group());</b>
+<b class="nc">&nbsp;                return variableFinder.group();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String determineReplacementForPrefs(Matcher variableFinder) {
+&nbsp;        String rulesetsDirectory;
+&nbsp;        try {
+<b class="fc">&nbsp;            rulesetsDirectory = ConfigCore.getParameter(ParameterCore.DIR_RULESETS);</b>
+<b class="nc">&nbsp;        } catch (NoSuchElementException e) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(prefs)\&quot;: Missing configuration entry: directory.rulesets&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (Objects.isNull(process)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(prefs)\&quot;: no process given&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.isNull(process.getRuleset())) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(prefs)\&quot;: process has no ruleset assigned&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.isNull(process.getRuleset().getFile())) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(prefs)\&quot;: process&#39;s ruleset has no file&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return variableFinder.group(1) + rulesetsDirectory + process.getRuleset().getFile();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String determineReplacementForProcessid(Matcher variableFinder) {
+<b class="fc">&nbsp;        if (Objects.isNull(process)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(processid)\&quot;: no process given&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return variableFinder.group(1) + process.getId().toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String determineReplacementForProcesstitle(Matcher variableFinder) {
+<b class="fc">&nbsp;        if (Objects.isNull(process)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(processtitle)\&quot;: no process given&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return variableFinder.group(1) + process.getTitle();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String determineReplacementForProjectid(Matcher variableFinder) {
+<b class="fc">&nbsp;        if (Objects.isNull(process)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(projectid)\&quot;: no process given&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.isNull(process.getProject())) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(projectid)\&quot;: process has no project assigned&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return variableFinder.group(1) + String.valueOf(process.getProject().getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String determineReplacementForStepid(Matcher variableFinder) {
+<b class="nc">&nbsp;        if (Objects.isNull(task)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(stepid)\&quot;: no task given&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return variableFinder.group(1) + String.valueOf(task.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String determineReplacementForStepname(Matcher variableFinder) {
+<b class="nc">&nbsp;        if (Objects.isNull(task)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(stepname)\&quot;: no task given&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return variableFinder.group(1) + task.getTitle();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String determineReplacementForGeneratorSource(Matcher variableFinder, String match) {
+<b class="fc">&nbsp;        if (Objects.isNull(process)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(&quot; + match + &quot;)\&quot;: no process given&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.isNull(process.getProject())) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(&quot; + match + &quot;)\&quot;: process has no project assigned&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.isNull(process.getProject().getGeneratorSource())) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;(&quot; + match + &quot;)\&quot;: process has no generator source assigned&quot;);</b>
+<b class="nc">&nbsp;            return variableFinder.group(1);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        //Since image paths may contain variables themselves, use recursion
+<b class="fc">&nbsp;        String generatorSource = replace(String.valueOf(process.getProject().getGeneratorSource().getPath()));</b>
+<b class="fc">&nbsp;        String replacedString = variableFinder.group(1);</b>
+<b class="fc">&nbsp;        if (match.equals(&quot;generatorsource&quot;)) {</b>
+<b class="fc">&nbsp;            replacedString += generatorSource;    </b>
+&nbsp;        }
+<b class="fc">&nbsp;        else if (match.equals(&quot;generatorsourcepath&quot;)) {</b>
+<b class="fc">&nbsp;            replacedString += KitodoConfig.getKitodoDataDirectory() + process.getId() + &quot;/&quot; + generatorSource;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return replacedString;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If a value is to be determined from the metadata, it is determined here.
+&nbsp;     */
+&nbsp;    private String determineReplacementForMetadata(Matcher variableFinder) {
+<b class="nc">&nbsp;        String dollarSignIfToKeep = variableFinder.group(1);</b>
+&nbsp;        MetadataLevel metadataLevel;
+<b class="nc">&nbsp;        if (variableFinder.group(3).equals(&quot;meta&quot;)) {</b>
+<b class="nc">&nbsp;            if (dollarSignIfToKeep.isEmpty()) {</b>
+<b class="nc">&nbsp;                return variableFinder.group();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                dollarSignIfToKeep = &quot;&quot;;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            metadataLevel = Objects.isNull(variableFinder.group(4)) ? MetadataLevel.ALL</b>
+<b class="nc">&nbsp;                    : MetadataLevel.valueOf(variableFinder.group(4).toUpperCase());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            metadataLevel = MetadataLevel.TOPSTRUCT;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (Objects.isNull(workpiece)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;{}\&quot;: no workpiece given&quot;, variableFinder.group());</b>
+<b class="nc">&nbsp;            return dollarSignIfToKeep;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        switch (metadataLevel) {</b>
+&nbsp;            case ALL:
+<b class="nc">&nbsp;                List&lt;LogicalDivision&gt; allChildren = workpiece.getLogicalStructure().getChildren();</b>
+<b class="nc">&nbsp;                String allFirstchildValue = allChildren.isEmpty() ? null</b>
+<b class="nc">&nbsp;                        : MetadataEditor.getMetadataValue(allChildren.get(0), variableFinder.group(5));</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(allFirstchildValue)) {</b>
+<b class="nc">&nbsp;                    return allFirstchildValue;</b>
+&nbsp;                }
+&nbsp;                // else fall through
+&nbsp;
+&nbsp;            case TOPSTRUCT:
+<b class="nc">&nbsp;                return determineReplacementForTopstruct(variableFinder, dollarSignIfToKeep);</b>
+&nbsp;
+&nbsp;            case FIRSTCHILD:
+<b class="nc">&nbsp;                return determineReplacementForFirstchild(variableFinder, dollarSignIfToKeep);</b>
+&nbsp;
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalStateException(&quot;complete switch&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String determineReplacementForTopstruct(Matcher variableFinder, String failureResult) {
+<b class="nc">&nbsp;        String value = MetadataEditor.getMetadataValue(workpiece.getLogicalStructure(), variableFinder.group(5));</b>
+<b class="nc">&nbsp;        if (Objects.isNull(value)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;{}\&quot;: No such metadata entry in the root element&quot;, variableFinder.group());</b>
+<b class="nc">&nbsp;            return failureResult;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String determineReplacementForFirstchild(Matcher variableFinder, String failureResult) {
+<b class="nc">&nbsp;        List&lt;LogicalDivision&gt; firstchildChildren = workpiece.getLogicalStructure().getChildren();</b>
+<b class="nc">&nbsp;        if (firstchildChildren.isEmpty()) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;{}\&quot;: Workpiece doesn&#39;t have subordinate logical divisions&quot;,</b>
+<b class="nc">&nbsp;                variableFinder.group());</b>
+<b class="nc">&nbsp;            return failureResult;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        String value = MetadataEditor.getMetadataValue(firstchildChildren.get(0), variableFinder.group(5));</b>
+<b class="nc">&nbsp;        if (Objects.isNull(value)) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Cannot replace \&quot;{}\&quot;: No such metadata entry in the first division&quot;, variableFinder.group());</b>
+<b class="nc">&nbsp;            return failureResult;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;    * Checks whether a string contains file variables.
+&nbsp;     * 
+&nbsp;     * @param stringWithVariables
+&nbsp;     *             string to be checked for file variables
+&nbsp;     * @return true if string contains file variables
+&nbsp;     */
+&nbsp;    public boolean containsFiles(String stringWithVariables) {
+<b class="fc">&nbsp;        if (Objects.isNull(stringWithVariables)) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return stringWithVariables.contains(&quot;(filename)&quot;) | stringWithVariables.contains(&quot;(basename)&quot;)</b>
+<b class="fc">&nbsp;                | stringWithVariables.contains(&quot;(relativepath)&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If a filename is to be determined, it is determined here.
+&nbsp;     */
+&nbsp;    private String determineReplacementForFilePlaceholder(Matcher variableFinder, String filename) {
+<b class="fc">&nbsp;        switch (variableFinder.group(6)) {</b>
+&nbsp;            case &quot;filename&quot;:
+<b class="fc">&nbsp;                return variableFinder.group(1) + FilenameUtils.getName(filename);</b>
+&nbsp;            case &quot;basename&quot;:
+<b class="fc">&nbsp;                return variableFinder.group(1) + FilenameUtils.getBaseName(filename);</b>
+&nbsp;            case &quot;relativepath&quot;:
+<b class="fc">&nbsp;                return variableFinder.group(1) + filename;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                logger.warn(&quot;Cannot replace \&quot;{}\&quot;: no such case defined in switch&quot;, variableFinder.group());</b>
+<b class="nc">&nbsp;                return variableFinder.group();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

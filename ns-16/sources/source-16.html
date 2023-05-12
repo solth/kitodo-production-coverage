@@ -1,0 +1,247 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SearchField</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: SearchField (org.kitodo.data.database.beans)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SearchField</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,6%
+  </span>
+  <span class="absValue">
+    (7/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69,2%
+  </span>
+  <span class="absValue">
+    (9/13)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SearchField$HibernateProxy$BA5BRTbN</td>
+  </tr>
+  <tr>
+    <td class="name">SearchField$HibernateProxy$uNIMMzyS</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    63,6%
+  </span>
+  <span class="absValue">
+    (7/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69,2%
+  </span>
+  <span class="absValue">
+    (9/13)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.beans;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.ForeignKey;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;searchfield&quot;)
+<b class="fc">&nbsp;public class SearchField extends BaseBean {</b>
+&nbsp;
+&nbsp;    @Column(name = &quot;field_label&quot;)
+&nbsp;    private String label;
+&nbsp;
+&nbsp;    @Column(name = &quot;field_value&quot;)
+&nbsp;    private String value;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;displayed&quot;)</b>
+&nbsp;    private boolean displayed = true;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;parent_element&quot;)</b>
+&nbsp;    private boolean parentElement = false;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;importconfiguration_id&quot;,
+&nbsp;            foreignKey = @ForeignKey(name = &quot;FK_searchfield_importconfiguration_id&quot;))
+&nbsp;    private ImportConfiguration importConfiguration;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get label.
+&nbsp;     *
+&nbsp;     * @return value of label
+&nbsp;     */
+&nbsp;    public String getLabel() {
+<b class="fc">&nbsp;        return label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set label.
+&nbsp;     *
+&nbsp;     * @param label as java.lang.String
+&nbsp;     */
+&nbsp;    public void setLabel(String label) {
+<b class="fc">&nbsp;        this.label = label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get value.
+&nbsp;     *
+&nbsp;     * @return value of value
+&nbsp;     */
+&nbsp;    public String getValue() {
+<b class="fc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set value.
+&nbsp;     *
+&nbsp;     * @param value as java.lang.String
+&nbsp;     */
+&nbsp;    public void setValue(String value) {
+<b class="fc">&nbsp;        this.value = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get hidden.
+&nbsp;     *
+&nbsp;     * @return value of displayed
+&nbsp;     */
+&nbsp;    public boolean isDisplayed() {
+<b class="nc">&nbsp;        return displayed;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set hidden.
+&nbsp;     *
+&nbsp;     * @param displayed as boolean
+&nbsp;     */
+&nbsp;    public void setDisplayed(boolean displayed) {
+<b class="fc">&nbsp;        this.displayed = displayed;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get parentElement.
+&nbsp;     *
+&nbsp;     * @return value of parentElement
+&nbsp;     */
+&nbsp;    public boolean isParentElement() {
+<b class="nc">&nbsp;        return parentElement;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set parentElement.
+&nbsp;     *
+&nbsp;     * @param parentElement as boolean
+&nbsp;     */
+&nbsp;    public void setParentElement(boolean parentElement) {
+<b class="nc">&nbsp;        this.parentElement = parentElement;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get importConfiguration.
+&nbsp;     *
+&nbsp;     * @return value of importConfiguration
+&nbsp;     */
+&nbsp;    public ImportConfiguration getImportConfiguration() {
+<b class="nc">&nbsp;        return importConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set importConfiguration.
+&nbsp;     *
+&nbsp;     * @param importConfiguration as org.kitodo.data.database.beans.ImportConfiguration
+&nbsp;     */
+&nbsp;    public void setImportConfiguration(ImportConfiguration importConfiguration) {
+<b class="fc">&nbsp;        this.importConfiguration = importConfiguration;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

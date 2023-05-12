@@ -1,0 +1,357 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PaginatorType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.metadata.pagination</a>
+</div>
+
+<h1>Coverage Summary for Class: PaginatorType (org.kitodo.production.helper.metadata.pagination)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PaginatorType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PaginatorType$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PaginatorType$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PaginatorType$3</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PaginatorType$4</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PaginatorType$5</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (40/40)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.metadata.pagination;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Constants for the pagination types selectable from a drop-down menu.
+&nbsp; */
+<b class="fc">&nbsp;public enum PaginatorType {</b>
+&nbsp;    /**
+&nbsp;     * User defined counter.
+&nbsp;     */
+<b class="fc">&nbsp;    ADVANCED(99) {</b>
+&nbsp;        @Override
+&nbsp;        public String format(PaginatorMode mode, String value, boolean fictitious, String separator) {
+<b class="fc">&nbsp;            return value;</b>
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Arabic numbers (1, 2, 3, …).
+&nbsp;     */
+<b class="fc">&nbsp;    ARABIC(1) {</b>
+&nbsp;        @Override
+&nbsp;        public String format(PaginatorMode mode, String value, boolean fictitious, String separator) {
+&nbsp;            int a;
+&nbsp;            try {
+<b class="fc">&nbsp;                a = Integer.parseInt(value);</b>
+<b class="fc">&nbsp;            } catch (NumberFormatException b) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    a = RomanNumeral.parseInt(value);</b>
+<b class="fc">&nbsp;                } catch (NumberFormatException unused) {</b>
+<b class="fc">&nbsp;                    throw b;</b>
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            return mode.format(Integer.toString(a), Integer.toString(a + 1), fictitious, separator);</b>
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Any string.
+&nbsp;     */
+<b class="fc">&nbsp;    FREETEXT(6) {</b>
+&nbsp;        @Override
+&nbsp;        public String format(PaginatorMode mode, String value, boolean fictitious, String separator) {
+<b class="fc">&nbsp;            return mode.format(&#39;`&#39; + value + &#39;`&#39;, &#39;`&#39; + value + &#39;`&#39;, fictitious, separator);</b>
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Uppercase roman numbers (I, II, III, …).
+&nbsp;     */
+<b class="fc">&nbsp;    ROMAN(2) {</b>
+&nbsp;        @Override
+&nbsp;        public String format(PaginatorMode mode, String valueString, boolean fictitious, String separator) {
+&nbsp;            int value;
+&nbsp;            try {
+<b class="fc">&nbsp;                value = RomanNumeral.parseInt(valueString);</b>
+<b class="fc">&nbsp;            } catch (NumberFormatException b) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    value = Integer.parseInt(valueString);</b>
+<b class="fc">&nbsp;                } catch (NumberFormatException unused) {</b>
+<b class="fc">&nbsp;                    throw b;</b>
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            return mode.format(RomanNumeral.format(value, true), RomanNumeral.format(value + 1, true), fictitious,</b>
+&nbsp;                separator);
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * String &quot;uncounted&quot;.
+&nbsp;     */
+<b class="fc">&nbsp;    UNCOUNTED(3) {</b>
+&nbsp;        @Override
+&nbsp;        public String format(PaginatorMode mode, String value, boolean fictitious, String separator) {
+<b class="fc">&nbsp;            return mode.format(&quot;`uncounted`&quot;, &quot;`uncounted`&quot;, fictitious, separator);</b>
+&nbsp;        }
+&nbsp;    };
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Map for the look-up of codes.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Map&lt;Integer, PaginatorType&gt; codeMap = new HashMap&lt;&gt;(</b>
+<b class="fc">&nbsp;            (int) Math.ceil(values().length / .75));</b>
+&nbsp;
+&nbsp;    static {
+<b class="fc">&nbsp;        for (PaginatorType member : PaginatorType.values()) {</b>
+<b class="fc">&nbsp;            codeMap.put(member.code, member);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the enum constant of this type with the specified code.
+&nbsp;     *
+&nbsp;     * @param code
+&nbsp;     *            code of the enum constant to be returned
+&nbsp;     * @return the enum constant with the specified code
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if this enum type has no constant with the specified code
+&nbsp;     */
+&nbsp;    public static PaginatorType valueOf(int code) {
+<b class="fc">&nbsp;        PaginatorType valueOf = codeMap.get(code);</b>
+<b class="fc">&nbsp;        if (valueOf == null) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;For int: &quot; + code);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return valueOf;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Code of the enum constant.
+&nbsp;     */
+&nbsp;    private final int code;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Enum constant constructor that takes a code.
+&nbsp;     *
+&nbsp;     * @param code
+&nbsp;     *            code of the enum constant.
+&nbsp;     */
+<b class="fc">&nbsp;    PaginatorType(int code) {</b>
+<b class="fc">&nbsp;        this.code = code;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the paginator syntax for the given parameters.
+&nbsp;     *
+&nbsp;     * @param mode
+&nbsp;     *            paginator mode
+&nbsp;     * @param value
+&nbsp;     *            first value
+&nbsp;     * @param fictitious
+&nbsp;     *            if true, create fictitious pagination
+&nbsp;     * @param separator
+&nbsp;     *            separator character
+&nbsp;     * @return paginator syntax
+&nbsp;     * @throws NumberFormatException
+&nbsp;     *             if the number contains invalid digits
+&nbsp;     */
+&nbsp;    public abstract String format(PaginatorMode mode, String value, boolean fictitious, String separator);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

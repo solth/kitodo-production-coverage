@@ -1,0 +1,197 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetsKitodoConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: MetsKitodoConverter (org.kitodo.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetsKitodoConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (20/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.file.Paths;
+&nbsp;
+&nbsp;import javax.xml.bind.JAXBContext;
+&nbsp;import javax.xml.bind.JAXBException;
+&nbsp;import javax.xml.bind.Marshaller;
+&nbsp;import javax.xml.transform.TransformerException;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.filemanagement.FileManagementInterface;
+&nbsp;import org.kitodo.dataeditor.handlers.MetsKitodoHeaderHandler;
+&nbsp;import org.kitodo.dataformat.metskitodo.Mets;
+&nbsp;import org.kitodo.serviceloader.KitodoServiceLoader;
+&nbsp;import org.kitodo.utils.JAXBContextCache;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides methods to convert mets-mods-goobi xml files to the current used mets-kitodo format.
+&nbsp; */
+&nbsp;public class MetsKitodoConverter {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(MetsKitodoConverter.class);</b>
+<b class="fc">&nbsp;    private static FileManagementInterface fileManagementModule = new KitodoServiceLoader&lt;FileManagementInterface&gt;(</b>
+<b class="fc">&nbsp;            FileManagementInterface.class).loadModule();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private MetsKitodoConverter() {
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads an old mets-mods-goobi formatted xml file by transforming it to the
+&nbsp;     * current used mets-kitodo format by xslt.
+&nbsp;     *
+&nbsp;     * @param xmlFile
+&nbsp;     *            The xml file as URI object.
+&nbsp;     * @param xsltFile
+&nbsp;     *            The xslt file as URI object.
+&nbsp;     * @return The Mets object in mets-kitodo format.
+&nbsp;     */
+&nbsp;    public static Mets convertToMetsKitodoByXslt(URI xmlFile, URI xsltFile) throws IOException, TransformerException, JAXBException {
+<b class="fc">&nbsp;        if (!Paths.get(xsltFile).toFile().exists()) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Path to xslt file for transformation of goobi format metadata files is not valid: &quot;</b>
+<b class="nc">&nbsp;                + xmlFile.getPath());</b>
+<b class="nc">&nbsp;            throw new IOException(&quot;Xslt file [&quot; + xsltFile.getPath()</b>
+&nbsp;                + &quot;] for transformation of goobi format metadata files was not found. Please check your local config!&quot;);
+&nbsp;        } else {
+<b class="fc">&nbsp;            Mets mets = convertUriToMetsFromGoobiFormat(xmlFile, xsltFile);</b>
+<b class="fc">&nbsp;            if (MetsKitodoValidator.checkMetsKitodoFormatOfMets(mets)) {</b>
+<b class="fc">&nbsp;                logger.info(&quot;Successfully converted metadata to kitodo format!&quot;);</b>
+<b class="fc">&nbsp;                return mets;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                throw new IOException(&quot;Can not read data because of not supported format!&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Mets convertUriToMetsFromGoobiFormat(URI xmlFile, URI xsltFile)
+&nbsp;        throws TransformerException, IOException, JAXBException {
+<b class="fc">&nbsp;        String convertedData = JaxbXmlUtils.transformXmlByXslt(xmlFile, xsltFile);</b>
+<b class="fc">&nbsp;        Mets mets = MetsKitodoReader.readStringToMets(convertedData);</b>
+&nbsp;        mets = MetsKitodoHeaderHandler
+<b class="fc">&nbsp;            .addNoteToMetsHeader(&quot;Converted by &quot; + VersionProvider.getModuleVersionInfo(), mets);</b>
+<b class="fc">&nbsp;        saveToFile(mets,xmlFile);</b>
+&nbsp;
+<b class="fc">&nbsp;        return mets;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void saveToFile(Mets mets, URI xmlFile) throws JAXBException, IOException {
+<b class="fc">&nbsp;        URI metsFileUri = fileManagementModule.getFile(xmlFile).toURI();</b>
+<b class="fc">&nbsp;        try (OutputStream outputStream = fileManagementModule.write(metsFileUri)) {</b>
+<b class="fc">&nbsp;            JAXBContext context = JAXBContextCache.getJAXBContext(Mets.class);</b>
+<b class="fc">&nbsp;            Marshaller marshaller = context.createMarshaller();</b>
+<b class="fc">&nbsp;            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);</b>
+<b class="fc">&nbsp;            marshaller.marshal(mets, outputStream);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

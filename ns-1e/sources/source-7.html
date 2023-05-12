@@ -1,0 +1,139 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RulesetType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.elasticsearch.index.type</a>
+</div>
+
+<h1>Coverage Summary for Class: RulesetType (org.kitodo.data.elasticsearch.index.type)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RulesetType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.elasticsearch.index.type;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Ruleset;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.RulesetTypeField;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation of Ruleset Type.
+&nbsp; */
+<b class="fc">&nbsp;public class RulesetType extends BaseType&lt;Ruleset&gt; {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    Map&lt;String, Object&gt; getJsonObject(Ruleset ruleset) {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; jsonObject = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        jsonObject.put(RulesetTypeField.TITLE.getKey(), preventNull(ruleset.getTitle()));</b>
+<b class="fc">&nbsp;        jsonObject.put(RulesetTypeField.FILE.getKey(), preventNull(ruleset.getFile()));</b>
+<b class="fc">&nbsp;        jsonObject.put(RulesetTypeField.ORDER_METADATA_BY_RULESET.getKey(), ruleset.isOrderMetadataByRuleset());</b>
+<b class="fc">&nbsp;        jsonObject.put(RulesetTypeField.ACTIVE.getKey(), ruleset.isActive());</b>
+<b class="fc">&nbsp;        jsonObject.put(RulesetTypeField.CLIENT_ID.getKey(), getId(ruleset.getClient()));</b>
+<b class="fc">&nbsp;        jsonObject.put(RulesetTypeField.CLIENT_NAME.getKey(), getTitle(ruleset.getClient()));</b>
+<b class="fc">&nbsp;        return jsonObject;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

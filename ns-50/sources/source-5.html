@@ -1,0 +1,468 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Subfolder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Subfolder (org.kitodo.production.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Subfolder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (16/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,4%
+  </span>
+  <span class="absValue">
+    (53/85)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FilenameFilter;
+&nbsp;import java.lang.reflect.UndeclaredThrowableException;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.TreeMap;
+&nbsp;import java.util.function.Function;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.stream.Stream;
+&nbsp;
+&nbsp;import javax.xml.bind.JAXBException;
+&nbsp;
+&nbsp;import org.apache.commons.io.FilenameUtils;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.xml.fileformats.FileFormat;
+&nbsp;import org.kitodo.config.xml.fileformats.FileFormatsConfig;
+&nbsp;import org.kitodo.data.database.beans.Folder;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.production.helper.VariableReplacer;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;
+&nbsp;/**
+&nbsp; * A subfolder is a folder in the file system below the process folder that
+&nbsp; * contains a variant of each file of the digital representation of the work
+&nbsp; * intended for a particular use. In this approach, a file is a fragment of the
+&nbsp; * digital representation of the artwork, a conceptual entity that can have
+&nbsp; * different variants. The individual variants of this file are then each stored
+&nbsp; * as computer-readable files in a folder for that use on the volume. They can
+&nbsp; * have different formats, both in terms of the data type and their form of
+&nbsp; * representation. The computer files, which are located in different use
+&nbsp; * folders and which are conceptually the same file, share a part of their
+&nbsp; * filename. This is referred to here as the canonical part of the file name.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * For historical reasons, in some institutions using this software, there is a
+&nbsp; * situation where the different variants of a file are in the same folder and
+&nbsp; * differ in filename suffix. We do not want to advertise this setup, but we
+&nbsp; * will continue to support it because it would be difficult for these
+&nbsp; * institutions to migrate the files.
+&nbsp; */
+&nbsp;public class Subfolder {
+<b class="fc">&nbsp;    private final FileService fileService = ServiceManager.getFileService();</b>
+&nbsp;    /**
+&nbsp;     * The general metrics of this kind of subfolder. So to say its type.
+&nbsp;     */
+&nbsp;    private final Folder folder;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The process this subfolder belongs to. That is the process whose process
+&nbsp;     * directory this sub-folder is below on the file storage.
+&nbsp;     */
+&nbsp;    private final Process process;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The variable replacer used to replace variables in the folder path to the
+&nbsp;     * task folder.
+&nbsp;     */
+&nbsp;    private final VariableReplacer variableReplacer;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new subfolder.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            the process this subfolder belongs to
+&nbsp;     * @param folder
+&nbsp;     *            the general metrics of this kind of subfolder
+&nbsp;     */
+<b class="fc">&nbsp;    public Subfolder(Process process, Folder folder) {</b>
+<b class="fc">&nbsp;        this.process = process;</b>
+<b class="fc">&nbsp;        this.folder = folder;</b>
+<b class="fc">&nbsp;        this.variableReplacer = new VariableReplacer(null, process, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a key mapper for a compiled regular expression.
+&nbsp;     *
+&nbsp;     * @param pattern
+&nbsp;     *            compiled regular expression to determine the key
+&nbsp;     * @return a mapping function for the key of the map
+&nbsp;     */
+&nbsp;    private static Function&lt;URI, String&gt; createKeyMapperForPattern(final Pattern pattern) {
+<b class="fc">&nbsp;        return uri -&gt; {</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(uri)) {</b>
+<b class="fc">&nbsp;                Matcher matcher = pattern.matcher(FilenameUtils.getName(uri.getPath()));</b>
+<b class="fc">&nbsp;                if (!matcher.find()) {</b>
+<b class="nc">&nbsp;                    throw new IllegalStateException(</b>
+&nbsp;                            &quot;Regular expression \&quot;&quot; + pattern + &quot;\&quot; didn&#39;t match on \&quot;&quot; + uri + &#39;&quot;&#39;);
+&nbsp;                }
+<b class="fc">&nbsp;                return matcher.group(1);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Computes the search patterns in the complicated case that the path
+&nbsp;     * contains a search pattern.
+&nbsp;     *
+&nbsp;     * @param lastSeparator
+&nbsp;     *            position of the last File.separatorChar in the path
+&nbsp;     * @param lastSegment
+&nbsp;     *            everything after the last File.separatorChar in the path
+&nbsp;     * @param firstStar
+&nbsp;     *            position of the first star after the last File.separatorChar
+&nbsp;     *            in the path
+&nbsp;     * @return search request consisting of an indication of the folder to be
+&nbsp;     *         searched and a pattern to which the file names must correspond
+&nbsp;     */
+&nbsp;    private Pair&lt;URI, Pattern&gt; determineComplicatedSearchParameters(int lastSeparator, String lastSegment,
+&nbsp;            int firstStar) {
+<b class="nc">&nbsp;        String realPath = variableReplacer.replace(folder.getPath().substring(0, lastSeparator));</b>
+<b class="nc">&nbsp;        String processId = process.getId().toString();</b>
+<b class="nc">&nbsp;        final URI directory = (realPath.isEmpty() ? Paths.get(ConfigCore.getKitodoDataDirectory(), processId)</b>
+<b class="nc">&nbsp;                : Paths.get(ConfigCore.getKitodoDataDirectory(), processId, realPath)).toUri();</b>
+<b class="nc">&nbsp;        StringBuilder patternBuilder = new StringBuilder();</b>
+<b class="nc">&nbsp;        if (firstStar &gt; 0) {</b>
+<b class="nc">&nbsp;            patternBuilder.append(Pattern.quote(lastSegment.substring(0, firstStar)));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        patternBuilder.append(&quot;(.*)&quot;);</b>
+<b class="nc">&nbsp;        if (firstStar &lt; lastSegment.length() - 1) {</b>
+<b class="nc">&nbsp;            patternBuilder.append(Pattern.quote(</b>
+<b class="nc">&nbsp;                lastSegment.substring(firstStar + 1).replaceFirst(&quot;\\*$&quot;, getFileFormat().getExtension(false))));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return Pair.of(directory, Pattern.compile(patternBuilder.toString()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculates the search pattern in the ordinary case that the path is
+&nbsp;     * simply a path.
+&nbsp;     *
+&nbsp;     * @return search request consisting of an indication of the folder to be
+&nbsp;     *         searched and a pattern to which the file names must correspond
+&nbsp;     */
+&nbsp;    private Pair&lt;URI, Pattern&gt; determineCommonSearchParameters() {
+<b class="fc">&nbsp;        String processId = process.getId().toString();</b>
+&nbsp;        URI directory = Paths
+<b class="fc">&nbsp;                .get(ConfigCore.getKitodoDataDirectory(), processId, variableReplacer.replace(folder.getPath()))</b>
+<b class="fc">&nbsp;                .toUri();</b>
+<b class="fc">&nbsp;        String pattern = &quot;(.*)\\.&quot; + Pattern.quote(getFileFormat().getExtension(false));</b>
+<b class="fc">&nbsp;        return Pair.of(directory, Pattern.compile(pattern));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines the directory to search and the search pattern.
+&nbsp;     *
+&nbsp;     * @return search request consisting of an indication of the folder to be
+&nbsp;     *         searched and a pattern to which the file names must correspond
+&nbsp;     */
+&nbsp;    private Pair&lt;URI, Pattern&gt; determineDirectoryAndFileNamePattern() {
+<b class="fc">&nbsp;        int lastSeparator = folder.getPath().lastIndexOf(File.separatorChar);</b>
+<b class="fc">&nbsp;        String lastSegment = folder.getPath().substring(lastSeparator + 1);</b>
+<b class="fc">&nbsp;        int firstStar = lastSegment.indexOf(&#39;*&#39;);</b>
+<b class="fc">&nbsp;        if (firstStar == -1) {</b>
+<b class="fc">&nbsp;            return determineCommonSearchParameters();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return determineComplicatedSearchParameters(lastSeparator, lastSegment, firstStar);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the canonical part of the file name for a given URI.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            URI for which the canonical part of the file name should be
+&nbsp;     *            returned
+&nbsp;     * @return the canonical part of the file name
+&nbsp;     */
+&nbsp;    public String getCanonical(URI uri) {
+<b class="fc">&nbsp;        return createKeyMapperForPattern(determineDirectoryAndFileNamePattern().getRight()).apply(uri);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a file format by its MIME type, if any.
+&nbsp;     *
+&nbsp;     * @return the file format, if any
+&nbsp;     */
+&nbsp;    public FileFormat getFileFormat() {
+&nbsp;        try {
+<b class="fc">&nbsp;            Optional&lt;FileFormat&gt; optionalFileFormat = FileFormatsConfig.getFileFormat(folder.getMimeType());</b>
+<b class="fc">&nbsp;            if (optionalFileFormat.isPresent()) {</b>
+<b class="fc">&nbsp;                return optionalFileFormat.get();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                throw new NoSuchElementException(</b>
+<b class="nc">&nbsp;                        &quot;kitodo_fileFormats.xml has no &lt;fileFormat mimeType=\&quot;&quot; + folder.getMimeType() + &quot;\&quot;&gt;&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (JAXBException e) {</b>
+<b class="nc">&nbsp;            throw new UndeclaredThrowableException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the folder database bean. The folder bean contains the settings
+&nbsp;     * for the subfolder.
+&nbsp;     *
+&nbsp;     * @return the folder
+&nbsp;     */
+&nbsp;    public Folder getFolder() {
+<b class="fc">&nbsp;        return folder;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the relative path to a (fictitious) media file in the folder,
+&nbsp;     * relative to the process dierctory.
+&nbsp;     *
+&nbsp;     * @return relative path to the file
+&nbsp;     */
+&nbsp;    public URI getRelativeFilePath(String canonical) {
+<b class="nc">&nbsp;        List&lt;String&gt; components = getUriComponents(canonical);</b>
+<b class="nc">&nbsp;        return URI.create(components.size() &gt; 2 ? components.get(1) + &#39;/&#39; + components.get(2) : components.get(1));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the relative path to the directory storing the files.
+&nbsp;     *
+&nbsp;     * @return relative path to the directory
+&nbsp;     */
+&nbsp;    public String getRelativeDirectoryPath() {
+<b class="fc">&nbsp;        String pathWithVariables = folder.getPath();</b>
+<b class="fc">&nbsp;        int lastSeparator = pathWithVariables.lastIndexOf(File.separator);</b>
+<b class="fc">&nbsp;        if (pathWithVariables.indexOf(&#39;*&#39;, lastSeparator) &gt; -1) {</b>
+<b class="nc">&nbsp;            pathWithVariables = pathWithVariables.substring(0, lastSeparator);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return variableReplacer.replace(pathWithVariables);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the URI to a file in this folder.
+&nbsp;     *
+&nbsp;     * @param canonical
+&nbsp;     *            the canonical part of the file name. The canonical part is the
+&nbsp;     *            part that is different from one file to another in the folder,
+&nbsp;     *            but equal between two files representing the same content in
+&nbsp;     *            two different folders. A typical canonical part could be
+&nbsp;     *            “00000001”.
+&nbsp;     * @return composed URI
+&nbsp;     */
+&nbsp;    public URI getUri(String canonical) {
+<b class="fc">&nbsp;        List&lt;String&gt; uriComponents = getUriComponents(canonical);</b>
+<b class="fc">&nbsp;        return Paths.get(ConfigCore.getKitodoDataDirectory(), uriComponents.toArray(new String[uriComponents.size()]))</b>
+<b class="fc">&nbsp;                .toUri();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;String&gt; getUriComponents(String canonical) {
+<b class="fc">&nbsp;        int lastSeparator = folder.getPath().lastIndexOf(File.separator);</b>
+<b class="fc">&nbsp;        String lastSegment = folder.getPath().substring(lastSeparator + 1);</b>
+<b class="fc">&nbsp;        List&lt;String&gt; components = new ArrayList&lt;&gt;(3);</b>
+<b class="fc">&nbsp;        components.add(process.getId().toString());</b>
+&nbsp;
+<b class="fc">&nbsp;        if (lastSegment.indexOf(&#39;*&#39;) == -1) {</b>
+<b class="fc">&nbsp;            String localName = canonical + getFileFormat().getExtension(true);</b>
+<b class="fc">&nbsp;            components.add(variableReplacer.replace(folder.getPath()));</b>
+<b class="fc">&nbsp;            components.add(localName);</b>
+<b class="fc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            String realPath = folder.getPath().substring(0, lastSeparator);</b>
+<b class="nc">&nbsp;            String localName = lastSegment.replaceFirst(&quot;\\*&quot;, canonical).replaceFirst(&quot;\\*$&quot;,</b>
+<b class="nc">&nbsp;                getFileFormat().getExtension(false));</b>
+<b class="nc">&nbsp;            if (realPath.isEmpty()) {</b>
+<b class="nc">&nbsp;                components.add(localName);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                components.add(variableReplacer.replace(realPath));</b>
+<b class="nc">&nbsp;                components.add(localName);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return components;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the URI to a file in this folder if that file does exist.
+&nbsp;     *
+&nbsp;     * @param canonical
+&nbsp;     *            the canonical part of the file name. The canonical part is the
+&nbsp;     *            part that is different from one file to another in the folder,
+&nbsp;     *            but equal between two files representing the same content in
+&nbsp;     *            two different folders. A typical canonical part could be
+&nbsp;     *            “00000001”.
+&nbsp;     * @return URI, or empty
+&nbsp;     */
+&nbsp;    public Optional&lt;URI&gt; getURIIfExists(String canonical) {
+<b class="nc">&nbsp;        URI uri = getUri(canonical);</b>
+<b class="nc">&nbsp;        return new File(uri.getPath()).isFile() ? Optional.of(uri) : Optional.empty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a map of canonical file name parts to URIs with all files
+&nbsp;     * actually contained in this folder. The canonical part is the part that is
+&nbsp;     * different from one file to another in the folder, but equal between two
+&nbsp;     * files representing the same content in two different folders. A typical
+&nbsp;     * canonical part could be “00000001”.
+&nbsp;     *
+&nbsp;     * @return map of canonical file name parts to URIs
+&nbsp;     */
+&nbsp;    public Map&lt;String, URI&gt; listContents() {
+<b class="fc">&nbsp;        return listContents(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a map of canonical file name parts to URIs with all files
+&nbsp;     * actually contained in this folder. The canonical part is the part that is
+&nbsp;     * different from one file to another in the folder, but equal between two
+&nbsp;     * files representing the same content in two different folders. A typical
+&nbsp;     * canonical part could be “00000001”.
+&nbsp;     *
+&nbsp;     * @param absolute
+&nbsp;     *            whether to return absolute URIs, else URIs relative to the
+&nbsp;     *            process base directory
+&nbsp;     * @return map of canonical file name parts to URIs
+&nbsp;     */
+&nbsp;    public Map&lt;String, URI&gt; listContents(boolean absolute) {
+<b class="fc">&nbsp;        return listDirectory(determineDirectoryAndFileNamePattern(), absolute);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Search for files with the file management interface.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            search request consisting of an indication of the folder to be
+&nbsp;     *            searched and a pattern to which the file names must correspond
+&nbsp;     * @param absolute
+&nbsp;     *            whether to return absolute URIs, else URIs relative to the
+&nbsp;     *            process base directory
+&nbsp;     * @return a map from the canonical file name part to the URI
+&nbsp;     */
+&nbsp;    private Map&lt;String, URI&gt; listDirectory(Pair&lt;URI, Pattern&gt; query, boolean absolute) {
+<b class="fc">&nbsp;        FilenameFilter filter = (dir, name) -&gt; query.getRight().matcher(name).matches();</b>
+<b class="fc">&nbsp;        try (Stream&lt;URI&gt; relativeURIs = fileService.getSubUris(filter, query.getLeft()).parallelStream()) {</b>
+<b class="fc">&nbsp;            Stream&lt;URI&gt; resultURIs = absolute ? relativeURIs.map(</b>
+<b class="fc">&nbsp;                uri -&gt; new File(ConfigCore.getKitodoDataDirectory().concat(uri.getPath())).toURI())</b>
+<b class="fc">&nbsp;                    : relativeURIs.map(uri -&gt; URI.create(uri.toString().replaceFirst(&quot;^[^/]+/&quot;, &quot;&quot;)));</b>
+<b class="fc">&nbsp;            Function&lt;URI, String&gt; keyMapper = createKeyMapperForPattern(query.getRight());</b>
+<b class="fc">&nbsp;            return resultURIs.collect(Collectors.toMap(keyMapper, Function.identity(), (previous, latest) -&gt; latest,</b>
+<b class="fc">&nbsp;                () -&gt; new TreeMap&lt;&gt;(fileService.getMetadataImageComparator())));</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a string that textually represents this object.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return Objects.toString(process) + &#39;/&#39; + folder;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

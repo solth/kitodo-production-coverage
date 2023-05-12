@@ -1,0 +1,248 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DataEditorSetting</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: DataEditorSetting (org.kitodo.data.database.beans)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DataEditorSetting</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,8%
+  </span>
+  <span class="absValue">
+    (9/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,8%
+  </span>
+  <span class="absValue">
+    (9/11)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DataEditorSetting$HibernateProxy$8TpTtumd</td>
+  </tr>
+  <tr>
+    <td class="name">DataEditorSetting$HibernateProxy$q6G9h4yc</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    81,8%
+  </span>
+  <span class="absValue">
+    (9/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,8%
+  </span>
+  <span class="absValue">
+    (9/11)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.beans;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;@Entity(name = &quot;DataEditorSetting&quot;)
+&nbsp;@Table(name = &quot;dataeditor_setting&quot;)
+&nbsp;public class DataEditorSetting extends BaseBean {
+&nbsp;
+&nbsp;    @Column(name = &quot;user_id&quot;)
+&nbsp;    private int userId;
+&nbsp;
+&nbsp;    @Column(name = &quot;task_id&quot;)
+&nbsp;    private int taskId;
+&nbsp;
+&nbsp;    @Column(name = &quot;structure_width&quot;)
+&nbsp;    private float structureWidth;
+&nbsp;
+&nbsp;    @Column(name = &quot;metadata_width&quot;)
+&nbsp;    private float metadataWidth;
+&nbsp;
+&nbsp;    @Column(name = &quot;gallery_width&quot;)
+&nbsp;    private float galleryWidth;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+<b class="fc">&nbsp;    public DataEditorSetting() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get userId.
+&nbsp;     *
+&nbsp;     * @return value of userId
+&nbsp;     */
+&nbsp;    public int getUserId() {
+<b class="nc">&nbsp;        return userId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set userId.
+&nbsp;     *
+&nbsp;     * @param userId as int
+&nbsp;     */
+&nbsp;    public void setUserId(int userId) {
+<b class="fc">&nbsp;        this.userId = userId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get taskId.
+&nbsp;     *
+&nbsp;     * @return value of taskId
+&nbsp;     */
+&nbsp;    public int getTaskId() {
+<b class="nc">&nbsp;        return taskId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set taskId.
+&nbsp;     *
+&nbsp;     * @param taskId as int
+&nbsp;     */
+&nbsp;    public void setTaskId(int taskId) {
+<b class="fc">&nbsp;        this.taskId = taskId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get structureWidth.
+&nbsp;     *
+&nbsp;     * @return value of structureWidth
+&nbsp;     */
+&nbsp;    public float getStructureWidth() {
+<b class="fc">&nbsp;        return structureWidth;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set structureWidth.
+&nbsp;     *
+&nbsp;     * @param structureWidth as float
+&nbsp;     */
+&nbsp;    public void setStructureWidth(float structureWidth) {
+<b class="fc">&nbsp;        this.structureWidth = structureWidth;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get metadataWidth.
+&nbsp;     *
+&nbsp;     * @return value of metadataWidth
+&nbsp;     */
+&nbsp;    public float getMetadataWidth() {
+<b class="fc">&nbsp;        return metadataWidth;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set metadataWidth.
+&nbsp;     *
+&nbsp;     * @param metadataWidth as float
+&nbsp;     */
+&nbsp;    public void setMetadataWidth(float metadataWidth) {
+<b class="fc">&nbsp;        this.metadataWidth = metadataWidth;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get galleryWidth.
+&nbsp;     *
+&nbsp;     * @return value of galleryWidth
+&nbsp;     */
+&nbsp;    public float getGalleryWidth() {
+<b class="fc">&nbsp;        return galleryWidth;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set galleryWidth.
+&nbsp;     *
+&nbsp;     * @param galleryWidth as float
+&nbsp;     */
+&nbsp;    public void setGalleryWidth(float galleryWidth) {
+<b class="fc">&nbsp;        this.galleryWidth = galleryWidth;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

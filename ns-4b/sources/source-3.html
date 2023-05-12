@@ -1,0 +1,198 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FinalizeStepProcessor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.interfaces.activemq</a>
+</div>
+
+<h1>Coverage Summary for Class: FinalizeStepProcessor (org.kitodo.production.interfaces.activemq)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FinalizeStepProcessor</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.interfaces.activemq;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import javax.jms.JMSException;
+&nbsp;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Comment;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.database.enums.CommentType;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.forms.CurrentTaskForm;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;/**
+&nbsp; * This is a web service interface to close steps. You have to provide the step
+&nbsp; * id as “id”; you can add a field “message” which will be added to the wiki
+&nbsp; * field.
+&nbsp; */
+&nbsp;public class FinalizeStepProcessor extends ActiveMQProcessor {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The default constructor looks up the queue name to use in
+&nbsp;     * kitodo_config.properties. If that is not configured and “null” is passed
+&nbsp;     * to the super constructor, this will prevent
+&nbsp;     * ActiveMQDirector.registerListeners() from starting this service.
+&nbsp;     */
+&nbsp;    public FinalizeStepProcessor() {
+<b class="nc">&nbsp;        super(ConfigCore.getOptionalString(ParameterCore.ACTIVE_MQ_FINALIZE_STEP_QUEUE).orElse(null));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This is the main routine processing incoming tickets. It gets an
+&nbsp;     * CurrentTaskForm object, sets it to the appropriate step which is
+&nbsp;     * retrieved from the database, appends the message − if any − to the wiki
+&nbsp;     * field, and executes the form’s the step close function.
+&nbsp;     *
+&nbsp;     * @param ticket
+&nbsp;     *            the incoming message
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    protected void process(MapMessageObjectReader ticket) throws DAOException, JMSException {
+<b class="nc">&nbsp;        CurrentTaskForm dialog = new CurrentTaskForm();</b>
+<b class="nc">&nbsp;        Integer stepID = ticket.getMandatoryInteger(&quot;id&quot;);</b>
+<b class="nc">&nbsp;        dialog.setCurrentTask(ServiceManager.getTaskService().getById(stepID));</b>
+<b class="nc">&nbsp;        if (ticket.hasField(&quot;properties&quot;)) {</b>
+<b class="nc">&nbsp;            updateProperties(dialog, ticket.getMapOfStringToString(&quot;properties&quot;));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (ticket.hasField(&quot;message&quot;)) {</b>
+<b class="nc">&nbsp;            Comment comment = new Comment();</b>
+<b class="nc">&nbsp;            comment.setProcess(dialog.getCurrentTask().getProcess());</b>
+<b class="nc">&nbsp;            comment.setAuthor(ServiceManager.getUserService().getCurrentUser());</b>
+<b class="nc">&nbsp;            comment.setMessage(ticket.getString(&quot;message&quot;));</b>
+<b class="nc">&nbsp;            comment.setType(CommentType.INFO);</b>
+<b class="nc">&nbsp;            comment.setCreationDate(new Date());</b>
+<b class="nc">&nbsp;            ServiceManager.getCommentService().saveToDatabase(comment);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        dialog.closeTaskByUser();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Transfers the properties to set into Production’s data model.
+&nbsp;     *
+&nbsp;     * @param dialog
+&nbsp;     *            The CurrentTaskForm that we work with
+&nbsp;     * @param propertiesToSet
+&nbsp;     *            A Map with the properties to set
+&nbsp;     */
+&nbsp;    private void updateProperties(CurrentTaskForm dialog, Map&lt;String, String&gt; propertiesToSet) {
+<b class="nc">&nbsp;        List&lt;Property&gt; availableProperties = dialog.getProperties();</b>
+<b class="nc">&nbsp;        for (Property property : availableProperties) {</b>
+<b class="nc">&nbsp;            String key = property.getTitle();</b>
+<b class="nc">&nbsp;            if (propertiesToSet.containsKey(key)) {</b>
+<b class="nc">&nbsp;                String desiredValue = propertiesToSet.get(key);</b>
+<b class="nc">&nbsp;                property.setValue(desiredValue);</b>
+<b class="nc">&nbsp;                dialog.setProperty(property);</b>
+<b class="nc">&nbsp;                dialog.saveCurrentProperty();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

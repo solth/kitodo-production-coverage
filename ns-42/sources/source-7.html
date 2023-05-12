@@ -1,0 +1,203 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > IndexWorkerStatus</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: IndexWorkerStatus (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IndexWorkerStatus</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.util.concurrent.atomic.AtomicBoolean;
+&nbsp;import java.util.concurrent.atomic.AtomicInteger;
+&nbsp;
+&nbsp;public class IndexWorkerStatus {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Stores the maximum batch number that needs to be indexed.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;If a worker thread receives a batch number higher than this number, there are 
+&nbsp;     * no additional batches that need to be processed, and the worker thread stops.&lt;/p&gt;
+&nbsp;     */
+&nbsp;    private final Integer maxBatch;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Stores the number of the next batch that needs to be indexed.
+&nbsp;     */
+<b class="nc">&nbsp;    private final AtomicInteger nextBatch = new AtomicInteger(0);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Stores whether there was a failure during indexing.
+&nbsp;     */
+<b class="nc">&nbsp;    private final AtomicBoolean failed = new AtomicBoolean(false);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the indexing process was canceled by a user.
+&nbsp;     */
+<b class="nc">&nbsp;    private final AtomicBoolean canceled = new AtomicBoolean(false);</b>
+&nbsp;   
+&nbsp;    /**
+&nbsp;     * Initialize index worker status.
+&nbsp;     * 
+&nbsp;     * @param maxBatch the maximum number of batches to be processed
+&nbsp;     */
+<b class="nc">&nbsp;    public IndexWorkerStatus(Integer maxBatch) {</b>
+<b class="nc">&nbsp;        this.maxBatch = maxBatch;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the maximum batch number that can be indexed.
+&nbsp;     * 
+&nbsp;     * @return the maximum batch number that can be indexed
+&nbsp;     */
+&nbsp;    public int getMaxBatch() {
+<b class="nc">&nbsp;        return this.maxBatch;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Access and increase next batch that needs to be indexed in a thread-safe way.
+&nbsp;     * 
+&nbsp;     * @return the next batch that needs to be indexed
+&nbsp;     */
+&nbsp;    public int getAndIncrementNextBatch() {
+<b class="nc">&nbsp;        return this.nextBatch.getAndIncrement();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the indexing process has failed.
+&nbsp;     * 
+&nbsp;     * @return true when the indexing process has failed
+&nbsp;     */
+&nbsp;    public boolean hasFailed() {
+<b class="nc">&nbsp;        return failed.get();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Marks the index status as failed with some reason.
+&nbsp;     */
+&nbsp;    public void markAsFailed() {
+<b class="nc">&nbsp;        this.failed.set(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Marks the index status as canceld by a user.
+&nbsp;     */
+&nbsp;    public void markAsCanceled() {
+<b class="nc">&nbsp;        this.canceled.set(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return whether indexing process was canceled by a user.
+&nbsp;     *
+&nbsp;     * @return true if canceled
+&nbsp;     */
+&nbsp;    public boolean isCanceled() {
+<b class="nc">&nbsp;        return this.canceled.get();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

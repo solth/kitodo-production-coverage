@@ -1,0 +1,703 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Issue</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model.bibliography.course</a>
+</div>
+
+<h1>Coverage Summary for Class: Issue (org.kitodo.production.model.bibliography.course)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Issue</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    27,8%
+  </span>
+  <span class="absValue">
+    (10/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25,6%
+  </span>
+  <span class="absValue">
+    (34/133)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model.bibliography.course;
+&nbsp;
+&nbsp;import java.time.DayOfWeek;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.kitodo.api.dataformat.mets.KitodoUUID;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class Issue represents the regular appearance of one (or the) issue of a
+&nbsp; * newspaper.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * Newspapers, especially bigger ones, can have several issues that may differ
+&nbsp; * in time of publication (morning issue, evening issue, …), geographic
+&nbsp; * distribution (Edinburgh issue, London issue, …) and/or their days of
+&nbsp; * appearance (weekday issue: Mon—Fri, weekend issue: Sat, sports supplement:
+&nbsp; * Mon, property market: Wed, broadcasting programme: Thu). Furthermore there
+&nbsp; * may be exceptions in either that an issue didn’t appear on a date where, due
+&nbsp; * to the day of week, it usually does (i.e. on holidays) or an issue may have
+&nbsp; * appeared where, due to the day of week, it should not have.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * Each issue can be modeled by one Issue object each, which are held by a Block
+&nbsp; * object which provides the dates of first and last appearance.
+&nbsp; */
+&nbsp;public class Issue {
+&nbsp;
+&nbsp;    private static final int APPEARED = 1;
+&nbsp;    private static final int NOT_APPEARED = 0;
+&nbsp;
+&nbsp;    private String id;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Course of appearance this issue is in.
+&nbsp;     */
+&nbsp;    private final Course course;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Dates with issue on days of week without regular appearance.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Implementors note: SortedSet and SortedMap do not declare HashCode &amp;
+&nbsp;     * Equals and cannot be used in a sensible way here.
+&nbsp;     */
+&nbsp;    private Set&lt;LocalDate&gt; additions;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Days of week of regular appearance. JodaTime uses int in [1 = monday … 7
+&nbsp;     * = Sunday]
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Implementors note: SortedSet and SortedMap do not declare HashCode &amp;
+&nbsp;     * Equals and cannot be used in a sensible way here.
+&nbsp;     */
+&nbsp;    private Set&lt;Integer&gt; daysOfWeek;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Dates of days without issue on days of regular appearance (i.e. holidays)
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Implementors note: SortedSet and SortedMap do not declare HashCode &amp;
+&nbsp;     * Equals and cannot be used in a sensible way here.
+&nbsp;     */
+&nbsp;    private Set&lt;LocalDate&gt; exclusions;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Issue name, i.e. “Evening issue”
+&nbsp;     */
+&nbsp;    private String heading;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Empty issue constructor.
+&nbsp;     *
+&nbsp;     * @param course
+&nbsp;     *            course of appearance this issue is in
+&nbsp;     */
+<b class="fc">&nbsp;    public Issue(Course course) {</b>
+<b class="fc">&nbsp;        this.course = course;</b>
+<b class="fc">&nbsp;        this.heading = &quot;&quot;;</b>
+<b class="fc">&nbsp;        this.additions = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.daysOfWeek = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.exclusions = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.id = KitodoUUID.randomUUID();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Issue constructor with the option to set the issue heading.
+&nbsp;     *
+&nbsp;     * @param course
+&nbsp;     *            course of appearance this issue is in
+&nbsp;     * @param heading
+&nbsp;     *            issue heading
+&nbsp;     */
+<b class="nc">&nbsp;    public Issue(Course course, String heading) {</b>
+<b class="nc">&nbsp;        this.course = course;</b>
+<b class="nc">&nbsp;        this.heading = heading;</b>
+<b class="nc">&nbsp;        this.additions = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        this.daysOfWeek = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        this.exclusions = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        this.id = KitodoUUID.randomUUID();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets issue id.
+&nbsp;     *
+&nbsp;     * @return value of id
+&nbsp;     */
+&nbsp;    public String getId() {
+<b class="nc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a LocalDate to the set of exclusions.
+&nbsp;     *
+&nbsp;     * @param addition
+&nbsp;     *            date to add
+&nbsp;     * @return true if the set was changed
+&nbsp;     */
+&nbsp;    public boolean addAddition(LocalDate addition) {
+<b class="fc">&nbsp;        course.clearProcesses();</b>
+<b class="fc">&nbsp;        return additions.add(addition);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds the given dayOfWeek to the Set of daysOfWeek.
+&nbsp;     *
+&nbsp;     * @param dayOfWeek
+&nbsp;     *            An int representing the day of week (1 = monday … 7 = sunday)
+&nbsp;     * @return true if the Set was changed
+&nbsp;     */
+&nbsp;    private boolean addDayOfWeek(DayOfWeek dayOfWeek) {
+<b class="fc">&nbsp;        boolean modified = daysOfWeek.add(dayOfWeek.getValue());</b>
+<b class="fc">&nbsp;        if (modified) {</b>
+<b class="fc">&nbsp;            course.clearProcesses();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return modified;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a LocalDate to the set of exclusions.
+&nbsp;     *
+&nbsp;     * @param exclusion
+&nbsp;     *            date to add
+&nbsp;     * @return true if the set was changed
+&nbsp;     */
+&nbsp;    public boolean addExclusion(LocalDate exclusion) {
+<b class="fc">&nbsp;        course.clearProcesses();</b>
+<b class="fc">&nbsp;        return exclusions.add(exclusion);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a copy of the object. All instance variables will be copied—this
+&nbsp;     * is done in the getter methods—so that modifications to the copied object
+&nbsp;     * will not impact to the copy master.
+&nbsp;     *
+&nbsp;     * @param course
+&nbsp;     *            course the copy shall belong to
+&nbsp;     * @return a copy of this object for the new course
+&nbsp;     */
+&nbsp;    public Issue clone(Course course) {
+<b class="nc">&nbsp;        Issue copy = new Issue(course);</b>
+<b class="nc">&nbsp;        copy.heading = heading;</b>
+<b class="nc">&nbsp;        copy.additions = new HashSet&lt;&gt;(additions);</b>
+<b class="nc">&nbsp;        copy.daysOfWeek = new HashSet&lt;&gt;(daysOfWeek);</b>
+<b class="nc">&nbsp;        copy.exclusions = new HashSet&lt;&gt;(exclusions);</b>
+<b class="nc">&nbsp;        return copy;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines how many stampings of
+&nbsp;     * this issue physically appeared without generating a list of
+&nbsp;     * IndividualIssue objects.
+&nbsp;     *
+&nbsp;     * @param firstAppearance
+&nbsp;     *            first day of the time range to inspect
+&nbsp;     * @param lastAppearance
+&nbsp;     *            last day of the time range to inspect
+&nbsp;     * @return the count of issues
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if lastAppearance is null
+&nbsp;     */
+&nbsp;    public long countIndividualIssues(LocalDate firstAppearance, LocalDate lastAppearance) {
+<b class="fc">&nbsp;        long numberOfIndividualIssues = 0;</b>
+<b class="fc">&nbsp;        for (LocalDate day = firstAppearance; !day.isAfter(lastAppearance); day = day.plusDays(1)) {</b>
+<b class="fc">&nbsp;            if (isMatch(day)) {</b>
+<b class="fc">&nbsp;                numberOfIndividualIssues += 1;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return numberOfIndividualIssues;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Getter function for the Set of additions.
+&nbsp;     *
+&nbsp;     * @return the set of additions
+&nbsp;     */
+&nbsp;    public Set&lt;LocalDate&gt; getAdditions() {
+<b class="nc">&nbsp;        return additions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Getter function for the Set of days of week the issue regularly appears.
+&nbsp;     *
+&nbsp;     * @return the set of days of week the issue regularly appears
+&nbsp;     */
+&nbsp;    public Set&lt;Integer&gt; getDaysOfWeek() {
+<b class="nc">&nbsp;        return daysOfWeek;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Getter function for the Set of exclusions.
+&nbsp;     *
+&nbsp;     * @return the set of exclusions
+&nbsp;     */
+&nbsp;    public Set&lt;LocalDate&gt; getExclusions() {
+<b class="nc">&nbsp;        return exclusions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Getter function for the issue’s name.
+&nbsp;     *
+&nbsp;     * @return the issue’s name
+&nbsp;     */
+&nbsp;    public String getHeading() {
+<b class="fc">&nbsp;        return heading;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the issue regularly appeared on the given day of week.
+&nbsp;     *
+&nbsp;     * @param dayOfWeek
+&nbsp;     *            day of week to look up
+&nbsp;     * @return whether the issue appeared on that day of week
+&nbsp;     */
+&nbsp;    public boolean isDayOfWeek(int dayOfWeek) {
+<b class="nc">&nbsp;        return daysOfWeek.contains(dayOfWeek);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the issue appeared on a given
+&nbsp;     * LocalDate, taking into consideration the daysOfWeek of regular
+&nbsp;     * appearance, the Set of exclusions and the Set of additions.
+&nbsp;     *
+&nbsp;     * @param date
+&nbsp;     *            a LocalDate to examine
+&nbsp;     * @return whether the issue appeared that day
+&nbsp;     */
+&nbsp;    public boolean isMatch(LocalDate date) {
+<b class="fc">&nbsp;        return daysOfWeek.contains(date.getDayOfWeek().getValue()) &amp;&amp; !exclusions.contains(date) || additions.contains(date);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be used to determine whether the issue
+&nbsp;     * regularly appears on Mondays.
+&nbsp;     *
+&nbsp;     * @return true, if the issue regularly appears on Mondays.
+&nbsp;     */
+&nbsp;    public boolean isMonday() {
+<b class="nc">&nbsp;        return daysOfWeek.contains(DayOfWeek.MONDAY.getValue());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be used to determine whether the issue
+&nbsp;     * regularly appears on Tuesdays.
+&nbsp;     *
+&nbsp;     * @return true, if the issue regularly appears on Tuesdays.
+&nbsp;     */
+&nbsp;    public boolean isTuesday() {
+<b class="nc">&nbsp;        return daysOfWeek.contains(DayOfWeek.TUESDAY.getValue());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be used to determine whether the issue
+&nbsp;     * regularly appears on Wednesdays.
+&nbsp;     *
+&nbsp;     * @return true, if the issue regularly appears on Wednesdays.
+&nbsp;     */
+&nbsp;    public boolean isWednesday() {
+<b class="nc">&nbsp;        return daysOfWeek.contains(DayOfWeek.WEDNESDAY.getValue());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be used to determine whether the issue
+&nbsp;     * regularly appears on Sundays.
+&nbsp;     *
+&nbsp;     * @return true, if the issue regularly appears on Thursdays.
+&nbsp;     */
+&nbsp;    public boolean isThursday() {
+<b class="nc">&nbsp;        return daysOfWeek.contains(DayOfWeek.THURSDAY.getValue());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be used to determine whether the issue
+&nbsp;     * regularly appears on Fridays.
+&nbsp;     *
+&nbsp;     * @return true, if the issue regularly appears on Fridays.
+&nbsp;     */
+&nbsp;    public boolean isFriday() {
+<b class="nc">&nbsp;        return daysOfWeek.contains(DayOfWeek.FRIDAY.getValue());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be used to determine whether the issue
+&nbsp;     * regularly appears on Saturdays.
+&nbsp;     *
+&nbsp;     * @return true, if the issue regularly appears on Saturdays.
+&nbsp;     */
+&nbsp;    public boolean isSaturday() {
+<b class="nc">&nbsp;        return daysOfWeek.contains(DayOfWeek.SATURDAY.getValue());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be used to determine whether the issue
+&nbsp;     * regularly appears on Sundays.
+&nbsp;     *
+&nbsp;     * @return true, if the issue regularly appears on Sundays.
+&nbsp;     */
+&nbsp;    public boolean isSunday() {
+<b class="nc">&nbsp;        return daysOfWeek.contains(DayOfWeek.SUNDAY.getValue());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Recalculates for each Issue
+&nbsp;     * the daysOfWeek of its regular appearance within the given interval of
+&nbsp;     * time. This is especially sensible to detect the underlying regularity
+&nbsp;     * after lots of individual issues whose existence is known have been added
+&nbsp;     * one by one as additions.
+&nbsp;     *
+&nbsp;     * @param firstAppearance
+&nbsp;     *            first day of the date range
+&nbsp;     * @param lastAppearance
+&nbsp;     *            last day of the date range
+&nbsp;     */
+&nbsp;    void recalculateRegularity(LocalDate firstAppearance, LocalDate lastAppearance) {
+<b class="nc">&nbsp;        Set&lt;LocalDate&gt; remainingAdditions = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        Set&lt;LocalDate&gt; remainingExclusions = new HashSet&lt;&gt;();</b>
+&nbsp;
+&nbsp;        @SuppressWarnings(&quot;unchecked&quot;)
+<b class="nc">&nbsp;        HashSet&lt;LocalDate&gt;[][] subsets = new HashSet[DayOfWeek.SUNDAY.getValue()][APPEARED + 1];</b>
+<b class="nc">&nbsp;        for (int dayOfWeek = DayOfWeek.MONDAY.getValue(); dayOfWeek &lt;= DayOfWeek.SUNDAY.getValue(); dayOfWeek++) {</b>
+<b class="nc">&nbsp;            subsets[dayOfWeek - 1][NOT_APPEARED] = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;            subsets[dayOfWeek - 1][APPEARED] = new HashSet&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        for (LocalDate day = firstAppearance; !day.isAfter(lastAppearance); day = day.plusDays(1)) {</b>
+<b class="nc">&nbsp;            subsets[day.getDayOfWeek().getValue() - 1][isMatch(day) ? APPEARED : NOT_APPEARED].add(day);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        for (int dayOfWeek = DayOfWeek.MONDAY.getValue(); dayOfWeek &lt;= DayOfWeek.SUNDAY.getValue(); dayOfWeek++) {</b>
+<b class="nc">&nbsp;            if (subsets[dayOfWeek - 1][APPEARED].size() &gt; subsets[dayOfWeek - 1][NOT_APPEARED].size()) {</b>
+<b class="nc">&nbsp;                daysOfWeek.add(dayOfWeek);</b>
+<b class="nc">&nbsp;                remainingExclusions.addAll(subsets[dayOfWeek - 1][NOT_APPEARED]);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                daysOfWeek.remove(dayOfWeek);</b>
+<b class="nc">&nbsp;                remainingAdditions.addAll(subsets[dayOfWeek - 1][APPEARED]);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        additions = remainingAdditions;</b>
+<b class="nc">&nbsp;        exclusions = remainingExclusions;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes the given LocalDate from the set of addition.
+&nbsp;     *
+&nbsp;     * @param addition
+&nbsp;     *            date to remove
+&nbsp;     * @return true if the Set was changed
+&nbsp;     */
+&nbsp;    public boolean removeAddition(LocalDate addition) {
+<b class="nc">&nbsp;        course.clearProcesses();</b>
+<b class="nc">&nbsp;        return additions.remove(addition);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes the given dayOfWeek from the Set of daysOfWeek.
+&nbsp;     *
+&nbsp;     * @param dayOfWeek
+&nbsp;     *            An int representing the day of week (1 = monday … 7 = sunday)
+&nbsp;     */
+&nbsp;    private void removeDayOfWeek(DayOfWeek dayOfWeek) {
+<b class="nc">&nbsp;        boolean modified = daysOfWeek.remove(dayOfWeek.getValue());</b>
+<b class="nc">&nbsp;        if (modified) {</b>
+<b class="nc">&nbsp;            course.clearProcesses();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes the given LocalDate from the set of exclusions.
+&nbsp;     *
+&nbsp;     * @param exclusion
+&nbsp;     *            date to remove
+&nbsp;     * @return true if the Set was changed
+&nbsp;     */
+&nbsp;    public boolean removeExclusion(LocalDate exclusion) {
+<b class="nc">&nbsp;        course.clearProcesses();</b>
+<b class="nc">&nbsp;        return exclusions.remove(exclusion);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether this issue appeared on mondays.
+&nbsp;     * @param isMonday boolean representing appearance
+&nbsp;     */
+&nbsp;    public void setMonday(boolean isMonday) {
+<b class="fc">&nbsp;        if (isMonday) {</b>
+<b class="fc">&nbsp;            addDayOfWeek(DayOfWeek.MONDAY);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            removeDayOfWeek(DayOfWeek.MONDAY);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether this issue appeared on tuesdays.
+&nbsp;     * @param isTuesday boolean representing appearance
+&nbsp;     */
+&nbsp;    public void setTuesday(boolean isTuesday) {
+<b class="nc">&nbsp;        if (isTuesday) {</b>
+<b class="nc">&nbsp;            addDayOfWeek(DayOfWeek.TUESDAY);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            removeDayOfWeek(DayOfWeek.TUESDAY);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether this issue appeared on wednesdays.
+&nbsp;     * @param isWednesday boolean representing appearance
+&nbsp;     */
+&nbsp;    public void setWednesday(boolean isWednesday) {
+<b class="nc">&nbsp;        if (isWednesday) {</b>
+<b class="nc">&nbsp;            addDayOfWeek(DayOfWeek.WEDNESDAY);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            removeDayOfWeek(DayOfWeek.WEDNESDAY);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether this issue appeared on thursdays.
+&nbsp;     * @param isThursday boolean representing appearance
+&nbsp;     */
+&nbsp;    public void setThursday(boolean isThursday) {
+<b class="nc">&nbsp;        if (isThursday) {</b>
+<b class="nc">&nbsp;            addDayOfWeek(DayOfWeek.THURSDAY);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            removeDayOfWeek(DayOfWeek.THURSDAY);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether this issue appeared on fridays.
+&nbsp;     * @param isFriday boolean representing appearance
+&nbsp;     */
+&nbsp;    public void setFriday(boolean isFriday) {
+<b class="nc">&nbsp;        if (isFriday) {</b>
+<b class="nc">&nbsp;            addDayOfWeek(DayOfWeek.FRIDAY);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            removeDayOfWeek(DayOfWeek.FRIDAY);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether this issue appeared on saturdays.
+&nbsp;     * @param isSaturday boolean representing appearance
+&nbsp;     */
+&nbsp;    public void setSaturday(boolean isSaturday) {
+<b class="fc">&nbsp;        if (isSaturday) {</b>
+<b class="fc">&nbsp;            addDayOfWeek(DayOfWeek.SATURDAY);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            removeDayOfWeek(DayOfWeek.SATURDAY);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set whether this issue appeared on sundays.
+&nbsp;     * @param isSunday boolean representing appearance
+&nbsp;     */
+&nbsp;    public void setSunday(boolean isSunday) {
+<b class="nc">&nbsp;        if (isSunday) {</b>
+<b class="nc">&nbsp;            addDayOfWeek(DayOfWeek.SUNDAY);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            removeDayOfWeek(DayOfWeek.SUNDAY);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Setter method for the issue’s name.
+&nbsp;     *
+&nbsp;     * @param heading
+&nbsp;     *            heading to be used
+&nbsp;     */
+&nbsp;    public void setHeading(String heading) {
+<b class="nc">&nbsp;        if (!Objects.equals(this.heading, heading)) {</b>
+<b class="nc">&nbsp;            course.clearProcesses();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        this.heading = heading;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Provides returns a string that contains a concise
+&nbsp;     * but informative representation of this issue that is easy for a person to
+&nbsp;     * read.
+&nbsp;     *
+&nbsp;     * @return a string representation of the issue
+&nbsp;     * @see java.lang.Object#toString()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        StringBuilder result = new StringBuilder();</b>
+<b class="nc">&nbsp;        result.append(heading);</b>
+<b class="nc">&nbsp;        result.append(&quot; (&quot;);</b>
+<b class="nc">&nbsp;        result.append(daysOfWeek.contains(DayOfWeek.MONDAY.getValue()) ? &#39;M&#39; : &#39;-&#39;);</b>
+<b class="nc">&nbsp;        result.append(daysOfWeek.contains(DayOfWeek.TUESDAY.getValue()) ? &#39;T&#39; : &#39;-&#39;);</b>
+<b class="nc">&nbsp;        result.append(daysOfWeek.contains(DayOfWeek.WEDNESDAY.getValue()) ? &#39;W&#39; : &#39;-&#39;);</b>
+<b class="nc">&nbsp;        result.append(daysOfWeek.contains(DayOfWeek.THURSDAY.getValue()) ? &#39;T&#39; : &#39;-&#39;);</b>
+<b class="nc">&nbsp;        result.append(daysOfWeek.contains(DayOfWeek.FRIDAY.getValue()) ? &#39;F&#39; : &#39;-&#39;);</b>
+<b class="nc">&nbsp;        result.append(daysOfWeek.contains(DayOfWeek.SATURDAY.getValue()) ? &#39;S&#39; : &#39;-&#39;);</b>
+<b class="nc">&nbsp;        result.append(daysOfWeek.contains(DayOfWeek.SUNDAY.getValue()) ? &#39;S&#39; : &#39;-&#39;);</b>
+<b class="nc">&nbsp;        result.append(&quot;) +&quot;);</b>
+<b class="nc">&nbsp;        if (additions.size() &lt;= 5) {</b>
+<b class="nc">&nbsp;            result.append(additions.toString());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            result.append(&quot;[…(&quot;);</b>
+<b class="nc">&nbsp;            result.append(additions.size());</b>
+<b class="nc">&nbsp;            result.append(&quot;)…]&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        result.append(&quot; -&quot;);</b>
+<b class="nc">&nbsp;        if (exclusions.size() &lt;= 5) {</b>
+<b class="nc">&nbsp;            result.append(exclusions.toString());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            result.append(&quot;[…(&quot;);</b>
+<b class="nc">&nbsp;            result.append(exclusions.size());</b>
+<b class="nc">&nbsp;            result.append(&quot;)…]&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return result.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a hash code for the object which depends on the content of its
+&nbsp;     * variables. Whenever Issue objects are held in HashSet objects, a
+&nbsp;     * hashCode() is essentially necessary.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The method was generated by Eclipse using right-click → Source → Generate
+&nbsp;     * hashCode() and equals()…. If you will ever change the classes’ fields,
+&nbsp;     * just re-generate it.
+&nbsp;     *
+&nbsp;     * @see java.lang.Object#hashCode()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        final int prime = 31;</b>
+<b class="fc">&nbsp;        int hashCode = 1;</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + id.hashCode();</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((additions == null) ? 0 : additions.hashCode());</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((daysOfWeek == null) ? 0 : daysOfWeek.hashCode());</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((exclusions == null) ? 0 : exclusions.hashCode());</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((heading == null) ? 0 : heading.hashCode());</b>
+<b class="fc">&nbsp;        return hashCode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether two individual issues are equal; the decision depends on
+&nbsp;     * the content of its variables.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The method was generated by Eclipse using right-click → Source → Generate
+&nbsp;     * hashCode() and equals()…. If you will ever change the classes’ fields,
+&nbsp;     * just re-generate it.
+&nbsp;     *
+&nbsp;     * @see java.lang.Object#equals(java.lang.Object)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object obj) {
+<b class="nc">&nbsp;        if (this == obj) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!(obj instanceof Issue)) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Issue other = (Issue) obj;</b>
+<b class="nc">&nbsp;        return id.equals(other.id) &amp;&amp; course.equals(other.course)</b>
+<b class="nc">&nbsp;                &amp;&amp; Objects.equals(additions, other.additions) &amp;&amp; Objects.equals(daysOfWeek, other.daysOfWeek)</b>
+<b class="nc">&nbsp;                &amp;&amp; Objects.equals(exclusions, other.exclusions) &amp;&amp; Objects.equals(heading, other.heading);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,169 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.validation.longtermpreservation</a>
+</div>
+
+<h1>Coverage Summary for Class: FileType (org.kitodo.api.validation.longtermpreservation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.validation.longtermpreservation;
+&nbsp;
+&nbsp;/**
+&nbsp; * Determines the file types supported by the module.
+&nbsp; */
+<b class="fc">&nbsp;public enum FileType {</b>
+&nbsp;    /**
+&nbsp;     * GIF 87a format. Image data only uncompressed.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/3&quot;
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/4&quot;
+&nbsp;     */
+<b class="fc">&nbsp;    GIF,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JPEG format. Versions 1.00, 1.01, and 1.02.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/42&quot;
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/43&quot;
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/44&quot;
+&nbsp;     */
+<b class="fc">&nbsp;    JPEG,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JPEG 2000 part 1 format.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/x-fmt/392&quot;
+&nbsp;     */
+<b class="fc">&nbsp;    JPEG_2000,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * PDF/A-1 (ISO 19005-1:2005) and PDF/A-2 (ISO 19005-2:2011) format.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/95&quot;
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/354&quot;
+&nbsp;     */
+<b class="fc">&nbsp;    PDF,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * PNG format. Versions 1.0, 1.1, and 1.2.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/11&quot;
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/12&quot;
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/13&quot;
+&nbsp;     */
+<b class="fc">&nbsp;    PNG,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * TIFF Rev. 6.0 Part 1 (Baseline TIFF) format. Image data only uncompressed
+&nbsp;     * (TIFF tag 259 (data type SHORT) = value 1 (&quot;no compression&quot;)).
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.nationalarchives.gov.uk/pronom/fmt/10&quot;
+&nbsp;     */
+<b class="fc">&nbsp;    TIFF</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

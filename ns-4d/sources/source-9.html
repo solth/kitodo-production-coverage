@@ -1,0 +1,214 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > VariableSelector</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.metadata.copier</a>
+</div>
+
+<h1>Coverage Summary for Class: VariableSelector (org.kitodo.production.metadata.copier)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VariableSelector</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.metadata.copier;
+&nbsp;
+&nbsp;import java.lang.reflect.Field;
+&nbsp;
+&nbsp;import org.kitodo.exceptions.MetadataException;
+&nbsp;
+&nbsp;/**
+&nbsp; * A VariableSelector provides methods to retrieve variables used in the source
+&nbsp; * code.
+&nbsp; */
+&nbsp;public class VariableSelector extends DataSelector {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Holds the name of the variable to resolve.
+&nbsp;     */
+&nbsp;    private final String qualifier;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the selector passed to the constructor references a variable that is
+&nbsp;     * part of an object which is held in a variable itself, then this
+&nbsp;     * VariableSelector only handles the resolving of the first variable, and
+&nbsp;     * the field subselector holds another VariableSelector to resolve the
+&nbsp;     * remaining variable. Otherwise, this field is null.
+&nbsp;     */
+&nbsp;    private final VariableSelector subselector;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new VariableSelector.
+&nbsp;     *
+&nbsp;     * @param selector
+&nbsp;     *            String identifying a variable
+&nbsp;     */
+<b class="nc">&nbsp;    public VariableSelector(String selector) {</b>
+<b class="nc">&nbsp;        if (selector.startsWith(VARIABLE_REFERENCE)) {</b>
+<b class="nc">&nbsp;            selector = selector.substring(1);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        String[] a = selector.split(&quot;\\.&quot;, 2);</b>
+<b class="nc">&nbsp;        if (a.length == 2) {</b>
+<b class="nc">&nbsp;            this.qualifier = a[0];</b>
+<b class="nc">&nbsp;            this.subselector = new VariableSelector(a[1]);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            this.qualifier = selector;</b>
+<b class="nc">&nbsp;            this.subselector = null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value of the variable named by the path used to construct the
+&nbsp;     * variable selector. Returns null if the variable isn’t available.
+&nbsp;     *
+&nbsp;     * @param data
+&nbsp;     *            object to inspect
+&nbsp;     * @return value of the variable, or null if not found
+&nbsp;     * @see org.kitodo.production.metadata.copier.DataSelector#findIn(CopierData)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String findIn(CopierData data) {
+<b class="nc">&nbsp;        return findIn((Object) data);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value of the variable named by the path used to construct the
+&nbsp;     * variable selector. Returns null if the variable isn’t available.
+&nbsp;     *
+&nbsp;     * @param classInstance
+&nbsp;     *            object to inspect
+&nbsp;     * @return value of the variable, or null if not found
+&nbsp;     */
+&nbsp;    private String findIn(Object classInstance) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Field classesFieldReference = classInstance.getClass().getDeclaredField(qualifier);</b>
+<b class="nc">&nbsp;            classesFieldReference.setAccessible(true);</b>
+<b class="nc">&nbsp;            Object fieldValue = classesFieldReference.get(classInstance);</b>
+<b class="nc">&nbsp;            if (subselector == null) {</b>
+<b class="nc">&nbsp;                return String.valueOf(fieldValue);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return fieldValue != null ? subselector.findIn(fieldValue) : null;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (NoSuchFieldException e) {</b>
+<b class="nc">&nbsp;            return null;</b>
+<b class="nc">&nbsp;        } catch (IllegalArgumentException | IllegalAccessException e) {</b>
+<b class="nc">&nbsp;            throw new MetadataException(e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a string that textually represents this LocalMetadataSelector.
+&nbsp;     *
+&nbsp;     * @return a string representation of this LocalMetadataSelector
+&nbsp;     * @see java.lang.Object#toString()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        if (subselector == null) {</b>
+<b class="nc">&nbsp;            return VARIABLE_REFERENCE + qualifier;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return VARIABLE_REFERENCE + qualifier + &#39;.&#39; + subselector.toString().substring(1);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

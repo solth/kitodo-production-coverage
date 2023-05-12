@@ -1,0 +1,865 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > NewspaperProcessesMigrator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.migration</a>
+</div>
+
+<h1>Coverage Summary for Class: NewspaperProcessesMigrator (org.kitodo.production.migration)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NewspaperProcessesMigrator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (25/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,7%
+  </span>
+  <span class="absValue">
+    (221/261)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.migration;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.TreeMap;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.naming.ConfigurationException;
+&nbsp;
+&nbsp;import org.apache.commons.collections4.iterators.PeekingIterator;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.DatesSimpleMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.FunctionalMetadata;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.SimpleMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Batch;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.enums.BatchType;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.CommandException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.production.helper.tasks.NewspaperMigrationTask;
+&nbsp;import org.kitodo.production.helper.tasks.TaskManager;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.process.NewspaperProcessesGenerator;
+&nbsp;import org.kitodo.production.process.ProcessGenerator;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.BatchService;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.dataeditor.DataEditorService;
+&nbsp;import org.kitodo.production.services.dataformat.MetsService;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Tool for converting newspaper processes from Production v. 2 format to
+&nbsp; * Production v. 3 format.
+&nbsp; */
+&nbsp;public class NewspaperProcessesMigrator {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(NewspaperProcessesMigrator.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata field in Production v. 2 where the displayed title is contained.
+&nbsp;     */
+&nbsp;    private static final String FIELD_TITLE = &quot;TitleDocMain&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata field in Production v. 2, in which the title is contained in
+&nbsp;     * sorting form.
+&nbsp;     */
+&nbsp;    private static final String FIELD_TITLE_SORT = &quot;TitleDocMainShort&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Regular expression to find (and remove) the individual part of the
+&nbsp;     * process title, to get the base process title.
+&nbsp;     */
+&nbsp;    private static final String INDIVIDUAL_PART = &quot;(?&lt;=.)\\p{Punct}+(?:1[6-9]|20)\\d{2}\\p{Punct}?(?:0[1-9]|1[012]).*$&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A regular expression describing a four-digit year number or a double year
+&nbsp;     * consisting of two four-digit year numbers, concatenated by a slash.
+&nbsp;     */
+&nbsp;    private static final String YEAR_OR_DOUBLE_YEAR = &quot;\\d{4}(?:/\\d{4})?&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Acquisition stage of newspaper processes migrator.
+&nbsp;     */
+<b class="fc">&nbsp;    private final String acquisitionStage = &quot;&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The database index number of the newspaper batch.
+&nbsp;     */
+&nbsp;    private Integer batchNumber;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service to read and write Batch objects in the database or search engine
+&nbsp;     * index.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final BatchService batchService = ServiceManager.getBatchService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service that contains the meta-data editor.
+&nbsp;     */
+<b class="fc">&nbsp;    private final DataEditorService dataEditorService = ServiceManager.getDataEditorService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruleset setting where to store the day information.
+&nbsp;     */
+&nbsp;    private DatesSimpleMetadataViewInterface daySimpleMetadataView;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service to access files on the storage.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final FileService fileService = ServiceManager.getFileService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service to read and write METS file format.
+&nbsp;     */
+<b class="fc">&nbsp;    private final MetsService metsService = ServiceManager.getMetsService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruleset setting where to store the month information.
+&nbsp;     */
+&nbsp;    private DatesSimpleMetadataViewInterface monthSimpleMetadataView;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service to read and write Process objects in the database or search
+&nbsp;     * engine index.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final ProcessService processService = ServiceManager.getProcessService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * List of processes.
+&nbsp;     */
+&nbsp;    private final List&lt;Process&gt; processes;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Record ID of the process template.
+&nbsp;     */
+&nbsp;    private int templateId;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The metadata of the newspaper as its whole.
+&nbsp;     */
+<b class="fc">&nbsp;    private Collection&lt;Metadata&gt; overallMetadata = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A process representing the newspaper as its whole.
+&nbsp;     */
+&nbsp;    private Process overallProcess;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The workpiece of the newspaper as its whole.
+&nbsp;     */
+<b class="fc">&nbsp;    private Workpiece overallWorkpiece = new Workpiece();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Record ID of the project.
+&nbsp;     */
+&nbsp;    private int projectId;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The process title.
+&nbsp;     */
+&nbsp;    private String title;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruleset setting where to store the year information.
+&nbsp;     */
+&nbsp;    private DatesSimpleMetadataViewInterface yearSimpleMetadataView;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The years of the course of appearance of the newspaper with their
+&nbsp;     * logical structures.
+&nbsp;     */
+<b class="fc">&nbsp;    private Map&lt;String, LogicalDivision&gt; years = new TreeMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Process IDs of children (issue processes) to be added to the years in
+&nbsp;     * question.
+&nbsp;     */
+<b class="fc">&nbsp;    private Map&lt;String, Collection&lt;Integer&gt;&gt; yearsChildren = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Years iterator during creation of year processes.
+&nbsp;     */
+&nbsp;    private PeekingIterator&lt;Entry&lt;String, LogicalDivision&gt;&gt; yearsIterator;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The ruleset.
+&nbsp;     */
+&nbsp;    private RulesetManagementInterface rulesetManagement;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new process migrator.
+&nbsp;     *
+&nbsp;     * @param batch
+&nbsp;     *            the batch to process
+&nbsp;     */
+<b class="fc">&nbsp;    public NewspaperProcessesMigrator(Batch batch) {</b>
+<b class="fc">&nbsp;        this.batchNumber = batch.getId();</b>
+<b class="fc">&nbsp;        this.processes = batch.getProcesses();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all newspaper batches.
+&nbsp;     *
+&nbsp;     * @return all newspaper batches
+&nbsp;     * @throws DAOException
+&nbsp;     *             if a batch cannot be load from the database
+&nbsp;     * @throws IOException
+&nbsp;     *             if an I/O error occurs when accessing the file system
+&nbsp;     */
+&nbsp;    public static List&lt;Batch&gt; getNewspaperBatches() throws DAOException, IOException {
+<b class="nc">&nbsp;        List&lt;Batch&gt; newspaperBatches = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Batch batch : batchService.getAll()) {</b>
+<b class="nc">&nbsp;            if (BatchType.NEWSPAPER.equals(batch.getType())) {</b>
+<b class="nc">&nbsp;                newspaperBatches.add(batch);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return newspaperBatches;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a newspaper migration task for the given batch ID in the task
+&nbsp;     * manager.
+&nbsp;     *
+&nbsp;     * @param batchId
+&nbsp;     *            number of batch to migrate
+&nbsp;     * @throws DAOException
+&nbsp;     *             if a db error occurs
+&nbsp;     */
+&nbsp;    public static void initializeMigration(Integer batchId) throws DAOException {
+<b class="nc">&nbsp;        Batch batch = ServiceManager.getBatchService().getById(batchId);</b>
+<b class="nc">&nbsp;        TaskManager.addTask(new NewspaperMigrationTask(batch));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initializes the newspaper processes migrator.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            a process, to get basic information from
+&nbsp;     * @param newspaperIncludedStructalElementDivision
+&nbsp;     *            the ID of the newspaper division in the ruleset
+&nbsp;     */
+&nbsp;    private void initializeMigrator(Process process, String newspaperIncludedStructalElementDivision)
+&nbsp;            throws IOException, ConfigurationException {
+&nbsp;
+<b class="fc">&nbsp;        title = generateNewspaperShortTitle(process.getTitle());</b>
+<b class="fc">&nbsp;        logger.trace(&quot;Newspaper is: {}&quot;, title);</b>
+<b class="fc">&nbsp;        projectId = process.getProject().getId();</b>
+<b class="fc">&nbsp;        logger.trace(&quot;Project is: {} (ID {})&quot;, process.getProject().getTitle(), projectId);</b>
+<b class="fc">&nbsp;        templateId = process.getTemplate().getId();</b>
+<b class="fc">&nbsp;        logger.trace(&quot;Template is: {} (ID {})&quot;, process.getTemplate().getTitle(), templateId);</b>
+&nbsp;
+<b class="fc">&nbsp;        rulesetManagement = ServiceManager.getRulesetService()</b>
+<b class="fc">&nbsp;                .openRuleset(process.getRuleset());</b>
+<b class="fc">&nbsp;        StructuralElementViewInterface newspaperView = rulesetManagement.getStructuralElementView(</b>
+&nbsp;            newspaperIncludedStructalElementDivision, &quot;&quot;, NewspaperProcessesGenerator.ENGLISH);
+<b class="fc">&nbsp;        StructuralElementViewInterface yearDivisionView = NewspaperProcessesGenerator.nextSubView(rulesetManagement,</b>
+&nbsp;            newspaperView, acquisitionStage);
+<b class="fc">&nbsp;        yearSimpleMetadataView = yearDivisionView.getDatesSimpleMetadata().orElseThrow(</b>
+<b class="nc">&nbsp;            () -&gt; new ConfigurationException(yearDivisionView.getId() + &quot; has no dates metadata configuration!&quot;));</b>
+<b class="fc">&nbsp;        StructuralElementViewInterface monthDivisionView = NewspaperProcessesGenerator.nextSubView(rulesetManagement,</b>
+&nbsp;            yearDivisionView, acquisitionStage);
+<b class="fc">&nbsp;        monthSimpleMetadataView = monthDivisionView.getDatesSimpleMetadata().orElseThrow(</b>
+<b class="nc">&nbsp;            () -&gt; new ConfigurationException(monthDivisionView.getId() + &quot; has no dates metadata configuration!&quot;));</b>
+<b class="fc">&nbsp;        StructuralElementViewInterface dayDivisionView = NewspaperProcessesGenerator.nextSubView(rulesetManagement,</b>
+&nbsp;            monthDivisionView, acquisitionStage);
+<b class="fc">&nbsp;        daySimpleMetadataView = dayDivisionView.getDatesSimpleMetadata().orElseThrow(</b>
+<b class="nc">&nbsp;            () -&gt; new ConfigurationException(dayDivisionView.getId() + &quot; has no dates metadata configuration!&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert a newspaper like full title into its shorted version.
+&nbsp;     *
+&nbsp;     * @param newspaperFullTitle Newspaper like full title
+&nbsp;     * @return Shorted newspaper like title
+&nbsp;     */
+&nbsp;    public String generateNewspaperShortTitle(String newspaperFullTitle) {
+<b class="fc">&nbsp;        return newspaperFullTitle.replaceFirst(INDIVIDUAL_PART, &quot;&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts one newspaper process.
+&nbsp;     *
+&nbsp;     * @param index
+&nbsp;     *            index of process to convert in the processes object
+&nbsp;     *            list passed to the constructor—&lt;b&gt;not&lt;/b&gt; the process ID
+&nbsp;     */
+&nbsp;    public void convertProcess(int index) throws DAOException, IOException, ConfigurationException {
+<b class="fc">&nbsp;        final long begin = System.nanoTime();</b>
+<b class="fc">&nbsp;        Integer processId = processes.get(index).getId();</b>
+<b class="fc">&nbsp;        Process process = processService.getById(processId);</b>
+<b class="fc">&nbsp;        String processTitle = process.getTitle();</b>
+<b class="fc">&nbsp;        logger.info(&quot;Starting to convert process {} (ID {})...&quot;, processTitle, processId);</b>
+<b class="fc">&nbsp;        URI metadataFilePath = fileService.getMetadataFilePath(process);</b>
+<b class="fc">&nbsp;        URI anchorFilePath = fileService.createAnchorFile(metadataFilePath);</b>
+<b class="fc">&nbsp;        URI yearFilePath = fileService.createYearFile(metadataFilePath);</b>
+<b class="fc">&nbsp;        overallWorkpiece = metsService.loadWorkpiece(anchorFilePath);</b>
+&nbsp;
+<b class="fc">&nbsp;        dataEditorService.readData(anchorFilePath);</b>
+<b class="fc">&nbsp;        dataEditorService.readData(yearFilePath);</b>
+<b class="fc">&nbsp;        dataEditorService.readData(metadataFilePath);</b>
+&nbsp;
+<b class="fc">&nbsp;        Workpiece workpiece = metsService.loadWorkpiece(metadataFilePath);</b>
+<b class="fc">&nbsp;        workpiece.setId(process.getId().toString());</b>
+<b class="fc">&nbsp;        LogicalDivision newspaperLogicalDivision = workpiece.getLogicalStructure();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.isNull(title)) {</b>
+<b class="fc">&nbsp;            initializeMigrator(process, newspaperLogicalDivision.getType());</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        LogicalDivision yearLogicalDivision = cutOffTopLevel(newspaperLogicalDivision);</b>
+<b class="fc">&nbsp;        final String year = createLinkStructureAndCopyDates(process, yearFilePath, yearLogicalDivision);</b>
+&nbsp;
+<b class="fc">&nbsp;        workpiece.setLogicalStructure(cutOffTopLevel(yearLogicalDivision));</b>
+<b class="fc">&nbsp;        moveMetadataFromYearToIssue(process, processTitle, yearFilePath, workpiece);</b>
+<b class="fc">&nbsp;        metsService.saveWorkpiece(workpiece, metadataFilePath);</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Metadata metadata : overallWorkpiece.getLogicalStructure().getMetadata()) {</b>
+<b class="nc">&nbsp;            if (!overallMetadata.contains(metadata)) {</b>
+<b class="nc">&nbsp;                logger.debug(&quot;Adding metadata to newspaper {}: {}&quot;, title, metadata);</b>
+<b class="nc">&nbsp;                overallMetadata.add(metadata);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        yearsChildren.computeIfAbsent(year, each -&gt; new ArrayList&lt;&gt;()).add(processId);</b>
+&nbsp;
+<b class="fc">&nbsp;        ServiceManager.getFileService().renameFile(anchorFilePath, &quot;meta_anchor.migrated&quot;);</b>
+<b class="fc">&nbsp;        ServiceManager.getFileService().renameFile(yearFilePath, &quot;meta_year.migrated&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        logger.info(&quot;Process {} (ID {}) successfully converted.&quot;, processTitle, processId);</b>
+<b class="fc">&nbsp;        if (logger.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;            logger.trace(&quot;Converting {} took {} ms.&quot;, processTitle,</b>
+<b class="nc">&nbsp;                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void moveMetadataFromYearToIssue(Process process, String processTitle, URI yearFilePath,
+&nbsp;            Workpiece workpiece) throws IOException {
+<b class="fc">&nbsp;        Workpiece yearWorkpiece = metsService.loadWorkpiece(yearFilePath);</b>
+&nbsp;        // Copy metadata from year to issue
+<b class="fc">&nbsp;        Collection&lt;Metadata&gt; processMetadataFromYear = new ArrayList&lt;&gt;(</b>
+<b class="fc">&nbsp;                yearWorkpiece.getLogicalStructure().getChildren().get(0).getMetadata());</b>
+<b class="fc">&nbsp;        List&lt;LogicalDivision&gt; issuesIncludedStructuralElements = workpiece.getLogicalStructure().getChildren()</b>
+<b class="fc">&nbsp;                .get(0).getChildren();</b>
+<b class="fc">&nbsp;        issuesIncludedStructuralElements.get(0).getMetadata().addAll(processMetadataFromYear);</b>
+&nbsp;
+<b class="fc">&nbsp;        RulesetManagementInterface rulesetManagement = ServiceManager.getRulesetManagementService()</b>
+<b class="fc">&nbsp;                .getRulesetManagement();</b>
+&nbsp;
+&nbsp;        // find and load the ruleset file
+<b class="fc">&nbsp;        String rulesetDir = ConfigCore.getParameter(ParameterCore.DIR_RULESETS);</b>
+<b class="fc">&nbsp;        String rulesetFullPath = Paths.get(rulesetDir, process.getRuleset().getFile()).toString();</b>
+<b class="fc">&nbsp;        rulesetManagement.load(new File(rulesetFullPath));</b>
+<b class="fc">&nbsp;        Collection&lt;String&gt; functionalKeys = rulesetManagement.getFunctionalKeys(FunctionalMetadata.PROCESS_TITLE);</b>
+<b class="fc">&nbsp;        String titleKey = functionalKeys.isEmpty() ? FIELD_TITLE : functionalKeys.stream().findFirst().get();</b>
+&nbsp;
+<b class="fc">&nbsp;        MetadataEntry titelMetadata = new MetadataEntry();</b>
+<b class="fc">&nbsp;        titelMetadata.setValue(processTitle);</b>
+<b class="fc">&nbsp;        titelMetadata.setKey(titleKey);</b>
+<b class="fc">&nbsp;        titelMetadata.setDomain(MdSec.DMD_SEC);</b>
+<b class="fc">&nbsp;        issuesIncludedStructuralElements.get(0).getMetadata().add(titelMetadata);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Cuts the top level of a tree logical division.
+&nbsp;     *
+&nbsp;     * @param logicalDivision
+&nbsp;     *            tree logical division to be cut
+&nbsp;     * @return the new top level
+&nbsp;     */
+&nbsp;    private static LogicalDivision cutOffTopLevel(LogicalDivision logicalDivision) {
+<b class="fc">&nbsp;        List&lt;LogicalDivision&gt; children = logicalDivision.getChildren();</b>
+<b class="fc">&nbsp;        int numberOfChildren = children.size();</b>
+<b class="fc">&nbsp;        if (numberOfChildren == 0) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        LogicalDivision firstChild = children.get(0);</b>
+<b class="fc">&nbsp;        if (numberOfChildren &gt; 1) {</b>
+<b class="nc">&nbsp;            children.subList(1, numberOfChildren).stream()</b>
+<b class="nc">&nbsp;                    .flatMap(theLogicalDivision -&gt; theLogicalDivision.getChildren().stream())</b>
+<b class="nc">&nbsp;                    .forEachOrdered(firstChild.getChildren()::add);</b>
+<b class="nc">&nbsp;            String firstOrderlabel = firstChild.getOrderlabel();</b>
+<b class="nc">&nbsp;            String lastOrderlabel = children.get(children.size() - 1).getOrderlabel();</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(firstOrderlabel) &amp;&amp; !firstOrderlabel.equals(lastOrderlabel)) {</b>
+<b class="nc">&nbsp;                firstChild.setOrderlabel(firstOrderlabel + &#39;/&#39; + lastOrderlabel);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return firstChild;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates or complements the logical root levels of the annual level.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process ID of the current process (on issue level)
+&nbsp;     * @param yearMetadata
+&nbsp;     *            Production v. 2 year metadata file
+&nbsp;     * @param metaFileYearLogicalDivision
+&nbsp;     *            year logical division of the processes’ metadata file
+&nbsp;     * @throws IOException
+&nbsp;     *             if an error occurs in the disk drive
+&nbsp;     */
+&nbsp;    private String createLinkStructureAndCopyDates(Process process, URI yearMetadata,
+&nbsp;            LogicalDivision metaFileYearLogicalDivision)
+&nbsp;            throws IOException, ConfigurationException {
+&nbsp;
+<b class="fc">&nbsp;        LogicalDivision yearFileYearLogicalDivision = metsService.loadWorkpiece(yearMetadata)</b>
+<b class="fc">&nbsp;                .getLogicalStructure().getChildren().get(0);</b>
+<b class="fc">&nbsp;        String year = MetadataEditor.getMetadataValue(yearFileYearLogicalDivision, FIELD_TITLE_SORT);</b>
+<b class="fc">&nbsp;        if (Objects.isNull(year) || !year.matches(YEAR_OR_DOUBLE_YEAR)) {</b>
+<b class="nc">&nbsp;            logger.debug(&quot;\&quot;{}\&quot; is not a year number. Falling back to {}.&quot;, year, FIELD_TITLE);</b>
+<b class="nc">&nbsp;            year = MetadataEditor.getMetadataValue(yearFileYearLogicalDivision, FIELD_TITLE);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        LogicalDivision processYearLogicalDivision = years.computeIfAbsent(year, theYear -&gt; {</b>
+&nbsp;            // remove existing layers in the year
+<b class="fc">&nbsp;            yearFileYearLogicalDivision.getChildren().get(0).getChildren().get(0).getChildren().clear();</b>
+<b class="fc">&nbsp;            MetadataEditor.writeMetadataEntry(yearFileYearLogicalDivision, yearSimpleMetadataView, theYear);</b>
+<b class="fc">&nbsp;            return yearFileYearLogicalDivision;</b>
+&nbsp;        });
+&nbsp;
+<b class="fc">&nbsp;        createLinkStructureAndCopyMonths(process, metaFileYearLogicalDivision, yearFileYearLogicalDivision, year,</b>
+&nbsp;            processYearLogicalDivision);
+<b class="fc">&nbsp;        return year;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void createLinkStructureAndCopyMonths(Process process,
+&nbsp;            LogicalDivision metaFileYearLogicalDivision, LogicalDivision yearFileYearLogicalDivision, String year,
+&nbsp;            LogicalDivision processYearLogicalDivision) throws ConfigurationException {
+&nbsp;
+&nbsp;        // Add types to month and day
+<b class="fc">&nbsp;        StructuralElementViewInterface newspaperView = rulesetManagement.getStructuralElementView(</b>
+<b class="fc">&nbsp;            overallWorkpiece.getLogicalStructure().getType(), acquisitionStage, Locale.LanguageRange.parse(&quot;en&quot;));</b>
+<b class="fc">&nbsp;        StructuralElementViewInterface yearDivisionView = nextSubView(rulesetManagement, newspaperView,</b>
+&nbsp;            acquisitionStage);
+<b class="fc">&nbsp;        yearSimpleMetadataView = yearDivisionView.getDatesSimpleMetadata().orElseThrow(ConfigurationException::new);</b>
+<b class="fc">&nbsp;        StructuralElementViewInterface monthDivisionView = nextSubView(rulesetManagement, yearDivisionView,</b>
+&nbsp;            acquisitionStage);
+<b class="fc">&nbsp;        monthSimpleMetadataView = monthDivisionView.getDatesSimpleMetadata().orElseThrow(ConfigurationException::new);</b>
+<b class="fc">&nbsp;        String monthType = monthDivisionView.getId();</b>
+<b class="fc">&nbsp;        StructuralElementViewInterface dayDivisionView = nextSubView(rulesetManagement, monthDivisionView,</b>
+&nbsp;            acquisitionStage);
+<b class="fc">&nbsp;        daySimpleMetadataView = dayDivisionView.getDatesSimpleMetadata().orElseThrow(ConfigurationException::new);</b>
+<b class="fc">&nbsp;        String dayType = dayDivisionView.getId();</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Iterator&lt;LogicalDivision&gt; yearFileMonthLogicalDivisionsIterator = yearFileYearLogicalDivision</b>
+<b class="fc">&nbsp;                .getChildren()</b>
+<b class="fc">&nbsp;                .iterator(), metaFileMonthLogicalDivisionsIterator = metaFileYearLogicalDivision</b>
+<b class="fc">&nbsp;                        .getChildren().iterator(); yearFileMonthLogicalDivisionsIterator.hasNext()</b>
+<b class="fc">&nbsp;                                &amp;&amp; metaFileMonthLogicalDivisionsIterator.hasNext();) {</b>
+<b class="fc">&nbsp;            LogicalDivision yearFileMonthLogicalDivision = yearFileMonthLogicalDivisionsIterator</b>
+<b class="fc">&nbsp;                    .next();</b>
+<b class="fc">&nbsp;            LogicalDivision metaFileMonthLogicalDivision = metaFileMonthLogicalDivisionsIterator</b>
+<b class="fc">&nbsp;                    .next();</b>
+<b class="fc">&nbsp;            String month = getCompletedDate(yearFileMonthLogicalDivision, year);</b>
+<b class="fc">&nbsp;            LogicalDivision processMonthLogicalDivision = computeIfAbsent(</b>
+&nbsp;                processYearLogicalDivision, monthSimpleMetadataView, month, monthType);
+<b class="fc">&nbsp;            MetadataEditor.writeMetadataEntry(metaFileMonthLogicalDivision, monthSimpleMetadataView, month);</b>
+&nbsp;
+<b class="fc">&nbsp;            createLinkStructureAndCopyDays(process, yearFileMonthLogicalDivision,</b>
+&nbsp;                metaFileMonthLogicalDivision, month, dayType, processMonthLogicalDivision);
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static StructuralElementViewInterface nextSubView(RulesetManagementInterface ruleset,
+&nbsp;                                                             StructuralElementViewInterface superiorView, String acquisitionStage) {
+&nbsp;
+<b class="fc">&nbsp;        Map&lt;String, String&gt; allowedSubstructuralElements = superiorView.getAllowedSubstructuralElements();</b>
+<b class="fc">&nbsp;        String subType = allowedSubstructuralElements.entrySet().iterator().next().getKey();</b>
+<b class="fc">&nbsp;        return ruleset.getStructuralElementView(subType, acquisitionStage, Locale.LanguageRange.parse(&quot;en&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void createLinkStructureAndCopyDays(Process process,
+&nbsp;            LogicalDivision yearFileMonthLogicalDivision,
+&nbsp;            LogicalDivision metaFileMonthLogicalDivision, String month, String dayType,
+&nbsp;            LogicalDivision processMonthLogicalDivision) {
+&nbsp;
+<b class="fc">&nbsp;        for (Iterator&lt;LogicalDivision&gt; yearFileDayLogicalDivisionsIterator = yearFileMonthLogicalDivision</b>
+<b class="fc">&nbsp;                .getChildren()</b>
+<b class="fc">&nbsp;                .iterator(), metaFileDayLogicalDivisionsIterator = metaFileMonthLogicalDivision</b>
+<b class="fc">&nbsp;                        .getChildren().iterator(); yearFileDayLogicalDivisionsIterator.hasNext()</b>
+<b class="fc">&nbsp;                                &amp;&amp; metaFileDayLogicalDivisionsIterator.hasNext();) {</b>
+<b class="fc">&nbsp;            LogicalDivision yearFileDayLogicalDivision = yearFileDayLogicalDivisionsIterator</b>
+<b class="fc">&nbsp;                    .next();</b>
+<b class="fc">&nbsp;            LogicalDivision metaFileDayLogicalDivision = metaFileDayLogicalDivisionsIterator</b>
+<b class="fc">&nbsp;                    .next();</b>
+<b class="fc">&nbsp;            String day = getCompletedDate(yearFileDayLogicalDivision, month);</b>
+<b class="fc">&nbsp;            LogicalDivision processDayLogicalDivision = computeIfAbsent(</b>
+&nbsp;                processMonthLogicalDivision, daySimpleMetadataView, day, dayType);
+<b class="fc">&nbsp;            MetadataEditor.writeMetadataEntry(metaFileDayLogicalDivision, daySimpleMetadataView, day);</b>
+<b class="fc">&nbsp;            createLinkStructureOfIssues(process, yearFileDayLogicalDivision,</b>
+&nbsp;                processDayLogicalDivision);
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void createLinkStructureOfIssues(Process process,
+&nbsp;            LogicalDivision yearFileDayLogicalDivision,
+&nbsp;            LogicalDivision processDayLogicalDivision) {
+&nbsp;
+<b class="fc">&nbsp;        MetadataEditor.addLink(processDayLogicalDivision, process.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Finds the logical division with the specified label, if it
+&nbsp;     * exists, otherwise it creates.
+&nbsp;     *
+&nbsp;     * @param logicalDivision
+&nbsp;     *            parent logical division
+&nbsp;     * @param simpleMetadataView
+&nbsp;     *            indication which metadata value is used to store the value
+&nbsp;     * @param value
+&nbsp;     *            the value
+&nbsp;     * @return child with value
+&nbsp;     */
+&nbsp;    private static LogicalDivision computeIfAbsent(LogicalDivision logicalDivision,
+&nbsp;            SimpleMetadataViewInterface simpleMetadataView, String value, String type) {
+&nbsp;
+<b class="fc">&nbsp;        int index = 0;</b>
+<b class="fc">&nbsp;        for (LogicalDivision child : logicalDivision.getChildren()) {</b>
+<b class="fc">&nbsp;            String firstSimpleMetadataValue = MetadataEditor.readSimpleMetadataValues(child, simpleMetadataView).get(0);</b>
+<b class="fc">&nbsp;            int comparison = firstSimpleMetadataValue.compareTo(value);</b>
+<b class="fc">&nbsp;            if (comparison &lt;= -1) {</b>
+<b class="fc">&nbsp;                index++;</b>
+<b class="fc">&nbsp;            } else if (comparison == 0) {</b>
+<b class="fc">&nbsp;                return child;</b>
+&nbsp;            } else {
+&nbsp;                break;
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        LogicalDivision computed = new LogicalDivision();</b>
+<b class="fc">&nbsp;        computed.setType(type);</b>
+<b class="fc">&nbsp;        MetadataEditor.writeMetadataEntry(computed, simpleMetadataView, value);</b>
+<b class="fc">&nbsp;        logicalDivision.getChildren().add(index, computed);</b>
+<b class="fc">&nbsp;        return computed;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a date to get a complete date. In Production versions before 2.2,
+&nbsp;     * the date is stored incompletely (as an integer). This is supplemented to
+&nbsp;     * ISO if found. Otherwise just returns the date.
+&nbsp;     *
+&nbsp;     * @param logicalDivision
+&nbsp;     *            the logical division that contains the date
+&nbsp;     * @param previousLevel
+&nbsp;     *            previous part of date
+&nbsp;     * @return ISO date
+&nbsp;     */
+&nbsp;    private static String getCompletedDate(LogicalDivision logicalDivision, String previousLevel) {
+<b class="fc">&nbsp;        String date = MetadataEditor.getMetadataValue(logicalDivision, FIELD_TITLE_SORT);</b>
+<b class="fc">&nbsp;        if (!date.matches(&quot;\\d{1,2}&quot;)) {</b>
+<b class="fc">&nbsp;            return date;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        logger.debug(&quot;Found integer date value ({}), supplementing to ISO date&quot;, date);</b>
+<b class="nc">&nbsp;        StringBuilder composedDate = new StringBuilder();</b>
+<b class="nc">&nbsp;        composedDate.append(previousLevel);</b>
+<b class="nc">&nbsp;        composedDate.append(&#39;-&#39;);</b>
+<b class="nc">&nbsp;        if (date.length() &lt; 2) {</b>
+<b class="nc">&nbsp;            composedDate.append(&#39;0&#39;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        composedDate.append(date);</b>
+<b class="nc">&nbsp;        return composedDate.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates an overall process as a representation of the newspaper as a
+&nbsp;     * whole.
+&nbsp;     *
+&nbsp;     * @throws ProcessGenerationException
+&nbsp;     *             An error occurred while creating the process.
+&nbsp;     * @throws IOException
+&nbsp;     *             An error has occurred in the disk drive.
+&nbsp;     */
+&nbsp;    public void createOverallProcess() throws ProcessGenerationException, IOException, DAOException,
+&nbsp;            CommandException {
+<b class="fc">&nbsp;        final long begin = System.nanoTime();</b>
+<b class="fc">&nbsp;        logger.info(&quot;Creating overall process {}...&quot;, title);</b>
+<b class="fc">&nbsp;        overallWorkpiece.getLogicalStructure().getChildren().clear();</b>
+&nbsp;
+<b class="fc">&nbsp;        ProcessGenerator processGenerator = new ProcessGenerator();</b>
+<b class="fc">&nbsp;        processGenerator.generateProcess(templateId, projectId);</b>
+<b class="fc">&nbsp;        overallProcess = processGenerator.getGeneratedProcess();</b>
+<b class="fc">&nbsp;        overallProcess.setTitle(getTitle());</b>
+<b class="fc">&nbsp;        ProcessService.checkTasks(overallProcess, overallWorkpiece.getLogicalStructure().getType());</b>
+<b class="fc">&nbsp;        processService.saveToDatabase(overallProcess);</b>
+<b class="fc">&nbsp;        ServiceManager.getFileService().createProcessLocation(overallProcess);</b>
+<b class="fc">&nbsp;        overallWorkpiece.setId(overallProcess.getId().toString());</b>
+<b class="fc">&nbsp;        overallWorkpiece.getLogicalStructure().getMetadata().addAll(overallMetadata);</b>
+<b class="fc">&nbsp;        addToBatch(overallProcess);</b>
+&nbsp;
+<b class="fc">&nbsp;        logger.info(&quot;Process {} (ID {}) successfully created.&quot;, overallProcess.getTitle(), overallProcess.getId());</b>
+<b class="fc">&nbsp;        if (logger.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;            logger.trace(&quot;Creating {} took {} ms.&quot;, overallProcess.getTitle(),</b>
+<b class="nc">&nbsp;                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the next year process.
+&nbsp;     *
+&nbsp;     * @throws ProcessGenerationException
+&nbsp;     *             if the process cannot be generated
+&nbsp;     * @throws IOException
+&nbsp;     *             if an I/O error occurs when accessing the file system
+&nbsp;     * @throws DataException
+&nbsp;     *             if there is an error saving the process
+&nbsp;     * @throws DAOException
+&nbsp;     *             if a process cannot be load from the database
+&nbsp;     */
+&nbsp;    public void createNextYearProcess() throws ProcessGenerationException, IOException, DAOException,
+&nbsp;            CommandException {
+<b class="fc">&nbsp;        final long begin = System.nanoTime();</b>
+<b class="fc">&nbsp;        Entry&lt;String, LogicalDivision&gt; yearToCreate = yearsIterator.next();</b>
+<b class="fc">&nbsp;        String yearTitle = getYearTitle(yearToCreate.getKey());</b>
+<b class="fc">&nbsp;        logger.info(&quot;Creating process for year {}, {}...&quot;, yearToCreate.getKey(), yearTitle);</b>
+<b class="fc">&nbsp;        ProcessGenerator processGenerator = new ProcessGenerator();</b>
+<b class="fc">&nbsp;        processGenerator.generateProcess(templateId, projectId);</b>
+<b class="fc">&nbsp;        Process yearProcess = processGenerator.getGeneratedProcess();</b>
+<b class="fc">&nbsp;        yearProcess.setTitle(yearTitle);</b>
+<b class="fc">&nbsp;        ProcessService.checkTasks(yearProcess, yearToCreate.getValue().getType());</b>
+&nbsp;        // remove metadata from year (which originally relates to issue and was copied there)
+<b class="fc">&nbsp;        yearToCreate.getValue().getMetadata().clear();</b>
+<b class="fc">&nbsp;        processService.saveToDatabase(yearProcess);</b>
+&nbsp;
+<b class="fc">&nbsp;        MetadataEditor.addLink(overallWorkpiece.getLogicalStructure(), yearProcess.getId());</b>
+<b class="fc">&nbsp;        if (!yearsIterator.hasNext()) {</b>
+<b class="fc">&nbsp;            metsService.saveWorkpiece(overallWorkpiece, fileService.getMetadataFilePath(overallProcess, false, false));</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        yearProcess.setParent(overallProcess);</b>
+<b class="fc">&nbsp;        overallProcess.getChildren().add(yearProcess);</b>
+<b class="fc">&nbsp;        processService.saveToDatabase(yearProcess);</b>
+&nbsp;
+<b class="fc">&nbsp;        ServiceManager.getFileService().createProcessLocation(yearProcess);</b>
+&nbsp;
+<b class="fc">&nbsp;        createYearWorkpiece(yearToCreate, yearTitle, yearProcess);</b>
+&nbsp;
+<b class="fc">&nbsp;        Collection&lt;Integer&gt; childIds = yearsChildren.get(yearToCreate.getKey());</b>
+<b class="fc">&nbsp;        for (Integer childId : childIds) {</b>
+<b class="fc">&nbsp;            Process child = processService.getById(childId);</b>
+<b class="fc">&nbsp;            child.setParent(yearProcess);</b>
+<b class="fc">&nbsp;            yearProcess.getChildren().add(child);</b>
+<b class="fc">&nbsp;            processService.saveToDatabase(child);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (WorkflowControllerService.allChildrenClosed(yearProcess)) {</b>
+<b class="nc">&nbsp;            yearProcess.setSortHelperStatus(&quot;100000000&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        processService.saveToDatabase(yearProcess);</b>
+<b class="fc">&nbsp;        addToBatch(yearProcess);</b>
+&nbsp;
+<b class="fc">&nbsp;        logger.info(&quot;Process {} (ID {}) successfully created.&quot;, yearProcess.getTitle(), yearProcess.getId());</b>
+<b class="fc">&nbsp;        if (logger.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;            logger.trace(&quot;Creating {} took {} ms.&quot;, yearProcess.getTitle(),</b>
+<b class="nc">&nbsp;                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void createYearWorkpiece(Entry&lt;String, LogicalDivision&gt; yearToCreate, String yearTitle,
+&nbsp;                                     Process yearProcess) throws IOException {
+<b class="fc">&nbsp;        Workpiece yearWorkpiece = new Workpiece();</b>
+<b class="fc">&nbsp;        yearWorkpiece.setId(yearProcess.getId().toString());</b>
+<b class="fc">&nbsp;        yearWorkpiece.setLogicalStructure(yearToCreate.getValue());</b>
+<b class="fc">&nbsp;        StructuralElementViewInterface newspaperView = rulesetManagement.getStructuralElementView(</b>
+<b class="fc">&nbsp;            yearWorkpiece.getLogicalStructure().getType(), acquisitionStage, Locale.LanguageRange.parse(&quot;de&quot;));</b>
+<b class="fc">&nbsp;        final Collection&lt;String&gt; processTitleKeys = rulesetManagement.getFunctionalKeys(FunctionalMetadata.PROCESS_TITLE);</b>
+<b class="fc">&nbsp;        newspaperView.getAllowedMetadata().parallelStream().filter(SimpleMetadataViewInterface.class::isInstance)</b>
+<b class="fc">&nbsp;                .map(SimpleMetadataViewInterface.class::cast)</b>
+<b class="fc">&nbsp;                .filter(metadataView -&gt; processTitleKeys.contains(metadataView.getId())).collect(Collectors.toList())</b>
+<b class="fc">&nbsp;                .forEach(yearView -&gt; MetadataEditor.writeMetadataEntry(yearWorkpiece.getLogicalStructure(), yearView, yearTitle));</b>
+<b class="fc">&nbsp;        metsService.saveWorkpiece(yearWorkpiece, fileService.getMetadataFilePath(yearProcess, false, false));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add the process to the newspaper batch.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process to be added
+&nbsp;     */
+&nbsp;    private void addToBatch(Process process) throws DAOException {
+<b class="fc">&nbsp;        Batch batch = batchService.getById(batchNumber);</b>
+<b class="fc">&nbsp;        process.getBatches().add(batch);</b>
+<b class="fc">&nbsp;        batch.getProcesses().add(process);</b>
+<b class="fc">&nbsp;        processService.saveToDatabase(process);</b>
+<b class="fc">&nbsp;        batchService.saveToDatabase(batch);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the number of years that have issues referenced.
+&nbsp;     *
+&nbsp;     * @return the number of years
+&nbsp;     */
+&nbsp;    public int getNumberOfYears() {
+<b class="fc">&nbsp;        return years.size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the title of the year process to create next.
+&nbsp;     *
+&nbsp;     * @return the title of the year process to create next
+&nbsp;     */
+&nbsp;    public String getPendingYearTitle() {
+<b class="fc">&nbsp;        return getYearTitle(yearsIterator.peek().getKey());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the process title of the process with the given transfer index.
+&nbsp;     *
+&nbsp;     * @param transferIndex
+&nbsp;     *            index of process in transfer object list
+&nbsp;     * @return the process title
+&nbsp;     */
+&nbsp;    public String getProcessTitle(int transferIndex) {
+<b class="fc">&nbsp;        return processes.get(transferIndex).getTitle();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the title of the overall process.
+&nbsp;     *
+&nbsp;     * @return the title
+&nbsp;     */
+&nbsp;    public String getTitle() {
+<b class="fc">&nbsp;        return title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the title of a year process.
+&nbsp;     *
+&nbsp;     * @param year
+&nbsp;     *            year to return title
+&nbsp;     * @return the title
+&nbsp;     */
+&nbsp;    private String getYearTitle(String year) {
+<b class="fc">&nbsp;        return title + &#39;-&#39; + year.split(&quot;/&quot;)[0];</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether there are more years to create.
+&nbsp;     *
+&nbsp;     * @return whether there are more years
+&nbsp;     */
+&nbsp;    public boolean hasNextYear() {
+<b class="fc">&nbsp;        if (Objects.isNull(yearsIterator)) {</b>
+<b class="fc">&nbsp;            yearsIterator = new PeekingIterator(years.entrySet().iterator());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return yearsIterator.hasNext();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

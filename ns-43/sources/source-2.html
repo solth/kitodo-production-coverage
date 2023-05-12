@@ -1,0 +1,235 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CustomListColumnInitializer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomListColumnInitializer (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomListColumnInitializer</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.List;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.enterprise.context.ApplicationScoped;
+&nbsp;import javax.enterprise.context.Initialized;
+&nbsp;import javax.enterprise.event.Observes;
+&nbsp;import javax.servlet.ServletContext;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.ListColumn;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;@ApplicationScoped
+&nbsp;@SuppressWarnings(&quot;unused&quot;)
+<b class="nc">&nbsp;public class CustomListColumnInitializer {</b>
+&nbsp;
+&nbsp;    private static final String PROCESS_PREFIX = &quot;process.&quot;;
+&nbsp;    private static final String TASK_PREFIX = &quot;task.&quot;;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(CustomListColumnInitializer.class);</b>
+&nbsp;    private String[] processProperties;
+&nbsp;    private String[] taskProcessProperties;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load custom columns from Kitodo configuration file and save them as custom list columns to
+&nbsp;     * database during application startup.
+&nbsp;     *
+&nbsp;     * @param context ServletContext
+&nbsp;     */
+&nbsp;    public void init(@Observes @Initialized(ApplicationScoped.class) ServletContext context) {
+&nbsp;        try {
+<b class="nc">&nbsp;            processProperties = loadCustomColumnsFromConfigurationFile(ParameterCore.PROCESS_PROPERTIES, PROCESS_PREFIX);</b>
+<b class="nc">&nbsp;            taskProcessProperties = loadCustomColumnsFromConfigurationFile(ParameterCore.TASK_CUSTOM_COLUMNS, TASK_PREFIX);</b>
+<b class="nc">&nbsp;            List&lt;String&gt; customColumns = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            customColumns.addAll(Arrays.asList(processProperties));</b>
+<b class="nc">&nbsp;            customColumns.addAll(Arrays.asList(taskProcessProperties));</b>
+&nbsp;
+<b class="nc">&nbsp;            updateCustomColumnsInDatabase(customColumns);</b>
+&nbsp;
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Unable to update custom list columns in database!&quot;);</b>
+<b class="nc">&nbsp;        } catch (NoSuchElementException e) {</b>
+<b class="nc">&nbsp;            logger.info(&quot;Configuration key &#39;&quot;</b>
+<b class="nc">&nbsp;                    + ParameterCore.PROCESS_PROPERTIES.toString()</b>
+<b class="nc">&nbsp;                    + &quot;&#39; or &#39;&quot; + ParameterCore.TASK_CUSTOM_COLUMNS.toString()</b>
+&nbsp;                    + &quot;&#39; not found in configuration =&gt; unable to load corresponding custom columns!&quot;);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get names of process properties configured in kitodo_config.properties as custom columns for the process list
+&nbsp;     *
+&nbsp;     * @return array of process properties
+&nbsp;     */
+&nbsp;    public String[] getProcessProperties() {
+<b class="nc">&nbsp;        return processProperties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get names of custom task columns configured in kitodo_config.properties as custom columns for the task list
+&nbsp;     *
+&nbsp;     * @return array of custom task columns
+&nbsp;     */
+&nbsp;    public String[] getTaskProcessProperties() {
+<b class="nc">&nbsp;        return taskProcessProperties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load custom column names for configuration key &#39;configurationKey&#39; from Kitodo configuration file, prefix them
+&nbsp;     * with given String &#39;prefix&#39; and return names as list.
+&nbsp;     *
+&nbsp;     * @param configurationKey
+&nbsp;     *              Configuration key for custom column names in Kitodo configuration file
+&nbsp;     * @param prefix
+&nbsp;     *              String that is prepend to extracted custom column names before returning them as a list
+&nbsp;     * @return List of custom column names prepended with given String &#39;prefix&#39;.
+&nbsp;     */
+&nbsp;    private String[] loadCustomColumnsFromConfigurationFile(ParameterCore configurationKey, String prefix) {
+<b class="nc">&nbsp;        return Arrays.stream(ConfigCore.getParameter(configurationKey).split(&quot;,&quot;))</b>
+<b class="nc">&nbsp;                .filter(name -&gt; !name.trim().isEmpty())</b>
+<b class="nc">&nbsp;                .map(name -&gt; prefix + name.trim())</b>
+<b class="nc">&nbsp;                .toArray(String[]::new);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update list of custom columns in database. First, delete all custom column in database except for those in given
+&nbsp;     * list &#39;customColumnList&#39;. Then, add all elements from given list to database that are not already in database.
+&nbsp;     *
+&nbsp;     * @param customColumnList
+&nbsp;     *              list of custom column names that should be in the database
+&nbsp;     * @throws DAOException
+&nbsp;     *              thrown when custom column table or entries cannot be found in database
+&nbsp;     */
+&nbsp;    private void updateCustomColumnsInDatabase(List&lt;String&gt; customColumnList) throws DAOException {
+<b class="nc">&nbsp;        ServiceManager.getListColumnService().removeCustomListColumns(customColumnList);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;String&gt; availableColumnNames = ServiceManager.getListColumnService().getAllCustomListColumns().stream()</b>
+<b class="nc">&nbsp;                .map(ListColumn::getTitle)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        logger.info(&quot;Loading custom column names from configuration file...&quot;);</b>
+<b class="nc">&nbsp;        for (String ccn : customColumnList) {</b>
+<b class="nc">&nbsp;            if (!ccn.trim().isEmpty()) {</b>
+<b class="nc">&nbsp;                if (availableColumnNames.contains(ccn)) {</b>
+<b class="nc">&nbsp;                    logger.info(&quot;Custom column &#39;{}&#39; already saved to database as custom list column!&quot;, ccn);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    ListColumn customColumn = new ListColumn(ccn, true);</b>
+<b class="nc">&nbsp;                    ServiceManager.getListColumnService().saveToDatabase(customColumn);</b>
+<b class="nc">&nbsp;                    logger.info(&quot;Custom column &#39;{}&#39; successfully saved to database as custom list column!&quot;, ccn);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,252 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Ruleset</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: Ruleset (org.kitodo.data.database.beans)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Ruleset</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,3%
+  </span>
+  <span class="absValue">
+    (12/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,1%
+  </span>
+  <span class="absValue">
+    (19/26)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Ruleset$HibernateProxy$DlzNa3VX</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    92,3%
+  </span>
+  <span class="absValue">
+    (12/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,1%
+  </span>
+  <span class="absValue">
+    (19/26)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.beans;
+&nbsp;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.ForeignKey;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;ruleset&quot;)
+<b class="fc">&nbsp;public class Ruleset extends BaseIndexedBean {</b>
+&nbsp;
+&nbsp;    @Column(name = &quot;title&quot;)
+&nbsp;    private String title;
+&nbsp;
+&nbsp;    @Column(name = &quot;file&quot;)
+&nbsp;    private String file;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;orderMetadataByRuleset&quot;)</b>
+<b class="fc">&nbsp;    private Boolean orderMetadataByRuleset = false;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;active&quot;)</b>
+<b class="fc">&nbsp;    private Boolean active = true;</b>
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;client_id&quot;, foreignKey = @ForeignKey(name = &quot;FK_ruleset_client_id&quot;))
+&nbsp;    private Client client;
+&nbsp;
+&nbsp;    public String getTitle() {
+<b class="fc">&nbsp;        return this.title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTitle(String title) {
+<b class="fc">&nbsp;        this.title = title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getFile() {
+<b class="fc">&nbsp;        return this.file;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setFile(String file) {
+<b class="fc">&nbsp;        this.file = file;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if metadata should be ordered by ruleset.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isOrderMetadataByRuleset() {
+<b class="fc">&nbsp;        if (this.orderMetadataByRuleset == null) {</b>
+<b class="nc">&nbsp;            this.orderMetadataByRuleset = false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.orderMetadataByRuleset;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set if metadata should be ordered by ruleset.
+&nbsp;     *
+&nbsp;     * @param orderMetadataByRuleset
+&nbsp;     *            true or false
+&nbsp;     */
+&nbsp;    public void setOrderMetadataByRuleset(boolean orderMetadataByRuleset) {
+<b class="fc">&nbsp;        this.orderMetadataByRuleset = orderMetadataByRuleset;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if ruleset is active.
+&nbsp;     *
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public Boolean isActive() {
+<b class="fc">&nbsp;        if (Objects.isNull(this.active)) {</b>
+<b class="nc">&nbsp;            this.active = true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.active;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set ruleset as active.
+&nbsp;     *
+&nbsp;     * @param active as boolean
+&nbsp;     */
+&nbsp;    public void setActive(boolean active) {
+<b class="nc">&nbsp;        this.active = active;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get client.
+&nbsp;     *
+&nbsp;     * @return Client object
+&nbsp;     */
+&nbsp;    public Client getClient() {
+<b class="fc">&nbsp;        return this.client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set client.
+&nbsp;     *
+&nbsp;     * @param client
+&nbsp;     *            as Client object
+&nbsp;     */
+&nbsp;    public void setClient(Client client) {
+<b class="fc">&nbsp;        this.client = client;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object object) {
+<b class="fc">&nbsp;        if (this == object) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (object instanceof Ruleset) {</b>
+<b class="nc">&nbsp;            Ruleset ruleset = (Ruleset) object;</b>
+<b class="nc">&nbsp;            return Objects.equals(this.getId(), ruleset.getId());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        return Objects.hash(title, file, orderMetadataByRuleset, active);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

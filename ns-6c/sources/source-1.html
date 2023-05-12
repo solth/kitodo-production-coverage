@@ -1,0 +1,173 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > KitodoScriptTask</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.workflow.model.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: KitodoScriptTask (org.kitodo.production.workflow.model.beans)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KitodoScriptTask</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (3/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (5/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.workflow.model.beans;
+&nbsp;
+&nbsp;import org.camunda.bpm.model.bpmn.instance.ScriptTask;
+&nbsp;
+&nbsp;public class KitodoScriptTask extends KitodoTask {
+&nbsp;
+&nbsp;    private String scriptName;
+&nbsp;    private String scriptPath;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     * 
+&nbsp;     * @param scriptTask
+&nbsp;     *            BPMN model task
+&nbsp;     */
+&nbsp;    public KitodoScriptTask(ScriptTask scriptTask) {
+<b class="fc">&nbsp;        super(scriptTask);</b>
+<b class="fc">&nbsp;        this.scriptName = scriptTask.getAttributeValueNs(NAMESPACE, &quot;scriptName&quot;);</b>
+<b class="fc">&nbsp;        this.scriptPath = scriptTask.getAttributeValueNs(NAMESPACE, &quot;scriptPath&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get scriptName.
+&nbsp;     *
+&nbsp;     * @return value of scriptName
+&nbsp;     */
+&nbsp;    public String getScriptName() {
+<b class="fc">&nbsp;        return scriptName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set scriptName.
+&nbsp;     *
+&nbsp;     * @param scriptName
+&nbsp;     *            as String
+&nbsp;     */
+&nbsp;    public void setScriptName(String scriptName) {
+<b class="nc">&nbsp;        this.scriptName = scriptName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get scriptPath.
+&nbsp;     *
+&nbsp;     * @return value of scriptPath
+&nbsp;     */
+&nbsp;    public String getScriptPath() {
+<b class="fc">&nbsp;        return scriptPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set scriptPath.
+&nbsp;     *
+&nbsp;     * @param scriptPath
+&nbsp;     *            as java.lang.String
+&nbsp;     */
+&nbsp;    public void setScriptPath(String scriptPath) {
+<b class="nc">&nbsp;        this.scriptPath = scriptPath;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,396 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SeqType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.metskitodo</a>
+</div>
+
+<h1>Coverage Summary for Class: SeqType (org.kitodo.dataformat.metskitodo)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SeqType</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/42)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;//
+&nbsp;// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.0 generiert 
+&nbsp;// Siehe &lt;a href=&quot;https://javaee.github.io/jaxb-v2/&quot;&gt;https://javaee.github.io/jaxb-v2/&lt;/a&gt; 
+&nbsp;// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+&nbsp;// Generiert: 2023.05.12 um 01:28:08 PM CEST 
+&nbsp;//
+&nbsp;
+&nbsp;
+&nbsp;package org.kitodo.dataformat.metskitodo;
+&nbsp;
+&nbsp;import java.math.BigInteger;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAnyAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;import javax.xml.bind.annotation.XmlElements;
+&nbsp;import javax.xml.bind.annotation.XmlID;
+&nbsp;import javax.xml.bind.annotation.XmlSchemaType;
+&nbsp;import javax.xml.bind.annotation.XmlType;
+&nbsp;import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+&nbsp;import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+&nbsp;import javax.xml.namespace.QName;
+&nbsp;import org.jvnet.jaxb2_commons.lang.Equals2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.EqualsStrategy2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+&nbsp;import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+&nbsp;import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * seqType: Complex Type for Sequences of Files
+&nbsp; * 					The seq element should be used to link a div to a set of content files when those files should be played/displayed sequentially to deliver content to a user.  Individual &lt;area&gt; subelements within the seq element provide the links to the files or portions thereof.
+&nbsp; * 				
+&nbsp; * 
+&nbsp; * &lt;p&gt;Java-Klasse für seqType complex type.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * &amp;lt;complexType name=&quot;seqType&quot;&amp;gt;
+&nbsp; *   &amp;lt;complexContent&amp;gt;
+&nbsp; *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *       &amp;lt;choice maxOccurs=&quot;unbounded&quot;&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;area&quot; type=&quot;{http://www.loc.gov/METS/}areaType&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;par&quot; type=&quot;{http://www.loc.gov/METS/}parType&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp; *       &amp;lt;/choice&amp;gt;
+&nbsp; *       &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}ORDERLABELS&quot;/&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *       &amp;lt;anyAttribute processContents=&#39;lax&#39; namespace=&#39;##other&#39;/&amp;gt;
+&nbsp; *     &amp;lt;/restriction&amp;gt;
+&nbsp; *   &amp;lt;/complexContent&amp;gt;
+&nbsp; * &amp;lt;/complexType&amp;gt;
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * 
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;@XmlType(name = &quot;seqType&quot;, propOrder = {
+&nbsp;    &quot;areaOrPar&quot;
+&nbsp;})
+<b class="nc">&nbsp;public class SeqType implements Equals2</b>
+&nbsp;{
+&nbsp;
+&nbsp;    @XmlElements({
+&nbsp;        @XmlElement(name = &quot;area&quot;, type = AreaType.class),
+&nbsp;        @XmlElement(name = &quot;par&quot;, type = ParType.class)
+&nbsp;    })
+&nbsp;    protected List&lt;Object&gt; areaOrPar;
+&nbsp;    @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;    @XmlID
+&nbsp;    @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;    protected String id;
+&nbsp;    @XmlAttribute(name = &quot;ORDER&quot;)
+&nbsp;    protected BigInteger order;
+&nbsp;    @XmlAttribute(name = &quot;ORDERLABEL&quot;)
+&nbsp;    protected String orderlabel;
+&nbsp;    @XmlAttribute(name = &quot;LABEL&quot;)
+&nbsp;    protected String label;
+<b class="nc">&nbsp;    @XmlAnyAttribute</b>
+&nbsp;    private Map&lt;QName, String&gt; otherAttributes = new HashMap&lt;QName, String&gt;();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the areaOrPar property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the areaOrPar property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getAreaOrPar().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link AreaType }
+&nbsp;     * {@link ParType }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;Object&gt; getAreaOrPar() {
+<b class="nc">&nbsp;        if (areaOrPar == null) {</b>
+<b class="nc">&nbsp;            areaOrPar = new ArrayList&lt;Object&gt;();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.areaOrPar;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getID() {
+<b class="nc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der id-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setID(String value) {
+<b class="nc">&nbsp;        this.id = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der order-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link BigInteger }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public BigInteger getORDER() {
+<b class="nc">&nbsp;        return order;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der order-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link BigInteger }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setORDER(BigInteger value) {
+<b class="nc">&nbsp;        this.order = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der orderlabel-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getORDERLABEL() {
+<b class="nc">&nbsp;        return orderlabel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der orderlabel-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setORDERLABEL(String value) {
+<b class="nc">&nbsp;        this.orderlabel = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der label-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getLABEL() {
+<b class="nc">&nbsp;        return label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der label-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setLABEL(String value) {
+<b class="nc">&nbsp;        this.label = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets a map that contains attributes that aren&#39;t bound to any typed property on this class.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * the map is keyed by the name of the attribute and 
+&nbsp;     * the value is the string value of the attribute.
+&nbsp;     * 
+&nbsp;     * the map returned by this method is live, and you can add new attribute
+&nbsp;     * by updating the map directly. Because of this design, there&#39;s no setter.
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     always non-null
+&nbsp;     */
+&nbsp;    public Map&lt;QName, String&gt; getOtherAttributes() {
+<b class="nc">&nbsp;        return otherAttributes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="nc">&nbsp;        if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        final SeqType that = ((SeqType) object);</b>
+&nbsp;        {
+&nbsp;            List&lt;Object&gt; lhsAreaOrPar;
+<b class="nc">&nbsp;            lhsAreaOrPar = (((this.areaOrPar!= null)&amp;&amp;(!this.areaOrPar.isEmpty()))?this.getAreaOrPar():null);</b>
+&nbsp;            List&lt;Object&gt; rhsAreaOrPar;
+<b class="nc">&nbsp;            rhsAreaOrPar = (((that.areaOrPar!= null)&amp;&amp;(!that.areaOrPar.isEmpty()))?that.getAreaOrPar():null);</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;areaOrPar&quot;, lhsAreaOrPar), LocatorUtils.property(thatLocator, &quot;areaOrPar&quot;, rhsAreaOrPar), lhsAreaOrPar, rhsAreaOrPar, ((this.areaOrPar!= null)&amp;&amp;(!this.areaOrPar.isEmpty())), ((that.areaOrPar!= null)&amp;&amp;(!that.areaOrPar.isEmpty())))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsID;
+<b class="nc">&nbsp;            lhsID = this.getID();</b>
+&nbsp;            String rhsID;
+<b class="nc">&nbsp;            rhsID = that.getID();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            BigInteger lhsORDER;
+<b class="nc">&nbsp;            lhsORDER = this.getORDER();</b>
+&nbsp;            BigInteger rhsORDER;
+<b class="nc">&nbsp;            rhsORDER = that.getORDER();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;order&quot;, lhsORDER), LocatorUtils.property(thatLocator, &quot;order&quot;, rhsORDER), lhsORDER, rhsORDER, (this.order!= null), (that.order!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsORDERLABEL;
+<b class="nc">&nbsp;            lhsORDERLABEL = this.getORDERLABEL();</b>
+&nbsp;            String rhsORDERLABEL;
+<b class="nc">&nbsp;            rhsORDERLABEL = that.getORDERLABEL();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;orderlabel&quot;, lhsORDERLABEL), LocatorUtils.property(thatLocator, &quot;orderlabel&quot;, rhsORDERLABEL), lhsORDERLABEL, rhsORDERLABEL, (this.orderlabel!= null), (that.orderlabel!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsLABEL;
+<b class="nc">&nbsp;            lhsLABEL = this.getLABEL();</b>
+&nbsp;            String rhsLABEL;
+<b class="nc">&nbsp;            rhsLABEL = that.getLABEL();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;label&quot;, lhsLABEL), LocatorUtils.property(thatLocator, &quot;label&quot;, rhsLABEL), lhsLABEL, rhsLABEL, (this.label!= null), (that.label!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(Object object) {
+<b class="nc">&nbsp;        final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;        return equals(null, null, object, strategy);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

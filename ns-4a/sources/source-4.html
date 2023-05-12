@@ -1,0 +1,518 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > HierarchyMigrationTask</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.tasks</a>
+</div>
+
+<h1>Coverage Summary for Class: HierarchyMigrationTask (org.kitodo.production.helper.tasks)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HierarchyMigrationTask</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,5%
+  </span>
+  <span class="absValue">
+    (13/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71%
+  </span>
+  <span class="absValue">
+    (93/131)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.tasks;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.dataformat.mets.LinkedMetsResource;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.exceptions.CommandException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.process.ProcessGenerator;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.dataeditor.DataEditorService;
+&nbsp;import org.kitodo.production.services.dataformat.MetsService;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;
+&nbsp;public class HierarchyMigrationTask extends EmptyTask {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(HierarchyMigrationTask.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service that contains the meta-data editor.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final DataEditorService dataEditorService = ServiceManager.getDataEditorService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service to access files on the storage.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final FileService fileService = ServiceManager.getFileService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service to read and write METS file format.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final MetsService metsService = ServiceManager.getMetsService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service to generate processes.
+&nbsp;     */
+<b class="fc">&nbsp;    private final ProcessGenerator processGenerator = new ProcessGenerator();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Service to read and write Process objects in the database or search
+&nbsp;     * engine index.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final ProcessService processService = ServiceManager.getProcessService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This map contains information about parent processes that have already
+&nbsp;     * been created. Key is the identifier, the value is the process ID, then
+&nbsp;     * the current numbers of child links already inserted. The current number
+&nbsp;     * should not be confused with the process ID. It is not the process ID, but
+&nbsp;     * a sort criterion that is read from the metadata. The background is that
+&nbsp;     * during the migration the issues or volumes are found in any order, but
+&nbsp;     * should be linked in ascending order according to their current number in
+&nbsp;     * the parent process. Therefore, the sequential numbers of the already
+&nbsp;     * linked children must be stored temporarily during the migration in order
+&nbsp;     * to be able to determine the correct insertion position of another link.
+&nbsp;     */
+<b class="fc">&nbsp;    private Map&lt;String, List&lt;Integer&gt;&gt; parentProcesses = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * List of all processes to migrate.
+&nbsp;     */
+&nbsp;    private List&lt;Integer&gt; processesList;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * All processes belong to a project.
+&nbsp;     */
+&nbsp;    private Collection&lt;Project&gt; projects;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The progress, for the progress bar.
+&nbsp;     */
+<b class="fc">&nbsp;    private int progress = 0;</b>
+&nbsp;
+&nbsp;    public HierarchyMigrationTask(Collection&lt;Project&gt; projects) {
+<b class="fc">&nbsp;        super(projects.stream().map(Project::getTitle).collect(Collectors.joining(&quot;, &quot;)));</b>
+<b class="fc">&nbsp;        this.projects = projects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Clone constructor. Provides the ability to restart the task if it was
+&nbsp;     * previously interrupted.
+&nbsp;     *
+&nbsp;     * @param source
+&nbsp;     *            terminated thread
+&nbsp;     */
+&nbsp;    private HierarchyMigrationTask(HierarchyMigrationTask source) {
+<b class="nc">&nbsp;        super(source);</b>
+<b class="nc">&nbsp;        this.processesList = source.processesList;</b>
+<b class="nc">&nbsp;        this.projects = source.projects;</b>
+<b class="nc">&nbsp;        this.progress = source.progress;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Defines the display name of the task in the task manager. Usually this is
+&nbsp;     * the class name, but here it is different from the class name in lower
+&nbsp;     * case.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String getDisplayName() {
+<b class="fc">&nbsp;        return Helper.getTranslation(getClass().getSimpleName().toLowerCase());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The {@code run()} method is called when the thread starts. It initializes
+&nbsp;     * the process list (if this has not already been done), processes it and
+&nbsp;     * updates the progress display in the screen output.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void run() {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (Objects.isNull(processesList)) {</b>
+<b class="nc">&nbsp;                processesList = projects.parallelStream().flatMap(project -&gt; project.getProcesses().parallelStream())</b>
+<b class="nc">&nbsp;                        .map(Process::getId).collect(Collectors.toList());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            while (progress &lt; processesList.size()) {</b>
+<b class="nc">&nbsp;                Process process = processService.getById(processesList.get(progress));</b>
+<b class="nc">&nbsp;                if (fileService.processOwnsAnchorXML(process) &amp;&amp; !fileService.processOwnsYearXML(process)) {</b>
+<b class="nc">&nbsp;                    setWorkDetail(process.getTitle());</b>
+<b class="nc">&nbsp;                    migrate(process);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                super.setProgress(100 * ++progress / processesList.size());</b>
+<b class="nc">&nbsp;                if (Thread.currentThread().isInterrupted()) {</b>
+&nbsp;                    return;
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (IOException | DAOException | ProcessGenerationException | CommandException e) {</b>
+<b class="nc">&nbsp;            setException(e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This function does the actual work and migrates exactly one process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process to migrate
+&nbsp;     */
+&nbsp;    void migrate(Process process) throws IOException, ProcessGenerationException, DAOException, CommandException {
+<b class="fc">&nbsp;        logger.info(&quot;Starting to convert process {} (ID {})...&quot;, process.getTitle(), process.getId());</b>
+<b class="fc">&nbsp;        long begin = System.nanoTime();</b>
+<b class="fc">&nbsp;        migrateMetadataFiles(process);</b>
+<b class="fc">&nbsp;        Optional&lt;String&gt; parentId = getParentRecordId(process);</b>
+<b class="fc">&nbsp;        if (parentId.isPresent()) {</b>
+<b class="fc">&nbsp;            if (parentProcesses.containsKey(parentId.get())) {</b>
+<b class="nc">&nbsp;                linkProcessInParent(process, parentProcesses.get(parentId.get()));</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                parentProcesses.put(parentId.get(), createParentProcess(process));</b>
+&nbsp;            }
+<b class="fc">&nbsp;            renameAnchorFile(process);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            logger.warn(&quot;Process {} (ID {}): Parent has no identifier! Cannot create parent process.&quot;,</b>
+<b class="nc">&nbsp;                process.getTitle(), process.getId());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (logger.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;            logger.trace(&quot;Converting {} took {} ms.&quot;, process.getTitle(),</b>
+<b class="nc">&nbsp;                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The metadata file and the anchor file are converted to the new internal
+&nbsp;     * format using XSLT.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process to migrate
+&nbsp;     */
+&nbsp;    private static void migrateMetadataFiles(Process process) throws IOException {
+<b class="fc">&nbsp;        URI metadataFilePath = fileService.getMetadataFilePath(process, true, true);</b>
+<b class="fc">&nbsp;        dataEditorService.readData(metadataFilePath);</b>
+<b class="fc">&nbsp;        URI anchorFilePath = fileService.createAnchorFile(metadataFilePath);</b>
+<b class="fc">&nbsp;        dataEditorService.readData(anchorFilePath);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads the parent record identifier from the anchor file.
+&nbsp;     */
+&nbsp;    private static Optional&lt;String&gt; getParentRecordId(Process process) throws IOException {
+<b class="fc">&nbsp;        URI metadataFilePath = fileService.getMetadataFilePath(process);</b>
+<b class="fc">&nbsp;        URI anchorFilePath = fileService.createAnchorFile(metadataFilePath);</b>
+<b class="fc">&nbsp;        Workpiece anchorWorkpiece = metsService.loadWorkpiece(anchorFilePath);</b>
+<b class="fc">&nbsp;        Optional&lt;String&gt; parentRecordId = anchorWorkpiece.getLogicalStructure().getMetadata().parallelStream()</b>
+<b class="fc">&nbsp;                .filter(metadata -&gt; metadata.getKey().equals(&quot;CatalogIDDigital&quot;))</b>
+<b class="fc">&nbsp;                .filter(MetadataEntry.class::isInstance).map(MetadataEntry.class::cast).map(MetadataEntry::getValue)</b>
+<b class="fc">&nbsp;                .findFirst();</b>
+<b class="fc">&nbsp;        return parentRecordId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new parent process. The process is created in the database, the
+&nbsp;     * process folder is created on the file system and the METS file is
+&nbsp;     * written. The METS file of the child process is migrated and a link
+&nbsp;     * between the processes is written in the database.
+&nbsp;     *
+&nbsp;     * @param childProcess
+&nbsp;     *            process to migrate
+&nbsp;     * @return a data object with the ID of the created parent process and the
+&nbsp;     *         current number of the child process
+&nbsp;     */
+&nbsp;    private List&lt;Integer&gt; createParentProcess(Process childProcess)
+&nbsp;            throws ProcessGenerationException, IOException, CommandException, DAOException {
+&nbsp;
+<b class="fc">&nbsp;        processGenerator.generateProcess(childProcess.getTemplate().getId(), childProcess.getProject().getId());</b>
+<b class="fc">&nbsp;        Process parentProcess = processGenerator.getGeneratedProcess();</b>
+<b class="fc">&nbsp;        processService.saveToDatabase(parentProcess);</b>
+<b class="fc">&nbsp;        fileService.createProcessLocation(parentProcess);</b>
+<b class="fc">&nbsp;        createParentMetsFile(childProcess);</b>
+<b class="fc">&nbsp;        checkTaskAndId(parentProcess);</b>
+<b class="fc">&nbsp;        processService.saveToDatabase(parentProcess);</b>
+<b class="fc">&nbsp;        parentProcess = ServiceManager.getProcessService().getById(parentProcess.getId());</b>
+<b class="fc">&nbsp;        ArrayList&lt;Integer&gt; parentData = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        parentData.add(parentProcess.getId());</b>
+<b class="fc">&nbsp;        URI metadataFilePath = fileService.getMetadataFilePath(childProcess);</b>
+<b class="fc">&nbsp;        parentData.add(convertChildMetsFile(metadataFilePath));</b>
+<b class="fc">&nbsp;        linkParentProcessWithChildProcess(parentProcess, childProcess);</b>
+<b class="fc">&nbsp;        return parentData;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void checkTaskAndId(Process parentProcess) throws IOException {
+<b class="fc">&nbsp;        URI parentMetadataFilePath = fileService.getMetadataFilePath(parentProcess, true, true);</b>
+<b class="fc">&nbsp;        Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(parentMetadataFilePath);</b>
+<b class="fc">&nbsp;        ProcessService.checkTasks(parentProcess, workpiece.getLogicalStructure().getType());</b>
+<b class="fc">&nbsp;        Collection&lt;Metadata&gt; metadata = workpiece.getLogicalStructure().getMetadata();</b>
+<b class="fc">&nbsp;        String shortedTitle = &quot;&quot;;</b>
+<b class="fc">&nbsp;        String catalogIdentifier = &quot;&quot;;</b>
+<b class="fc">&nbsp;        for (Metadata metadatum : metadata) {</b>
+<b class="fc">&nbsp;            if (metadatum.getKey().equals(&quot;TSL_ATS&quot;)) {</b>
+<b class="fc">&nbsp;                shortedTitle = ((MetadataEntry) metadatum).getValue();</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (metadatum.getKey().equals(&quot;CatalogIDDigital&quot;)) {</b>
+<b class="fc">&nbsp;                catalogIdentifier = ((MetadataEntry) metadatum).getValue();</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        String title = &quot;&quot;;</b>
+<b class="fc">&nbsp;        if (!shortedTitle.isEmpty()) {</b>
+<b class="fc">&nbsp;            title += shortedTitle + &#39;_&#39;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!catalogIdentifier.isEmpty()) {</b>
+<b class="fc">&nbsp;            title += catalogIdentifier;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        parentProcess.setTitle(title);</b>
+<b class="fc">&nbsp;        workpiece.setId(parentProcess.getId().toString());</b>
+<b class="fc">&nbsp;        ServiceManager.getMetsService().saveWorkpiece(workpiece,parentMetadataFilePath);</b>
+<b class="fc">&nbsp;        if (WorkflowControllerService.allChildrenClosed(parentProcess)) {</b>
+<b class="nc">&nbsp;            parentProcess.setSortHelperStatus(&quot;100000000&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Links parent process and child process in the database. The processes are
+&nbsp;     * saved.
+&nbsp;     *
+&nbsp;     * @param parentProcess
+&nbsp;     *            parent process to link
+&nbsp;     * @param childProcess
+&nbsp;     *            child process to link
+&nbsp;     */
+&nbsp;    private static void linkParentProcessWithChildProcess(Process parentProcess, Process childProcess)
+&nbsp;            throws DAOException {
+&nbsp;
+<b class="fc">&nbsp;        parentProcess.getChildren().add(childProcess);</b>
+<b class="fc">&nbsp;        childProcess.setParent(parentProcess);</b>
+<b class="fc">&nbsp;        processService.saveToDatabase(childProcess);</b>
+<b class="fc">&nbsp;        processService.saveToDatabase(parentProcess);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates the METS file for the parent process from the process anchor
+&nbsp;     * file.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process to migrate
+&nbsp;     */
+&nbsp;    private void createParentMetsFile(Process process) throws IOException {
+<b class="fc">&nbsp;        URI metadataFileUri = fileService.getMetadataFilePath(process);</b>
+<b class="fc">&nbsp;        URI anchorFileUri = fileService.createAnchorFile(metadataFileUri);</b>
+<b class="fc">&nbsp;        Workpiece workpiece = metsService.loadWorkpiece(anchorFileUri);</b>
+<b class="fc">&nbsp;        LogicalDivision firstChild = workpiece.getLogicalStructure().getChildren().get(0);</b>
+<b class="fc">&nbsp;        firstChild.setType(null);</b>
+<b class="fc">&nbsp;        LinkedMetsResource link = firstChild.getLink();</b>
+<b class="fc">&nbsp;        link.setLoctype(&quot;Kitodo.Production&quot;);</b>
+<b class="fc">&nbsp;        link.setUri(processService.getProcessURI(process));</b>
+<b class="fc">&nbsp;        URI parentMetadataFileUri = fileService.getMetadataFilePath(processGenerator.getGeneratedProcess(), false,</b>
+&nbsp;            false);
+<b class="fc">&nbsp;        metsService.saveWorkpiece(workpiece, parentMetadataFileUri);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Changes the METS file of the child process.
+&nbsp;     *
+&nbsp;     * @param metadataFilePath
+&nbsp;     *            URI of the metadata file
+&nbsp;     * @return the current number, may be {@code null}
+&nbsp;     */
+&nbsp;    private static Integer convertChildMetsFile(URI metadataFilePath) throws IOException {
+<b class="fc">&nbsp;        Workpiece workpiece = metsService.loadWorkpiece(metadataFilePath);</b>
+<b class="fc">&nbsp;        LogicalDivision childStructureRoot = workpiece.getLogicalStructure().getChildren().get(0);</b>
+<b class="fc">&nbsp;        workpiece.setLogicalStructure(childStructureRoot);</b>
+<b class="fc">&nbsp;        metsService.saveWorkpiece(workpiece, metadataFilePath);</b>
+<b class="fc">&nbsp;        return getCurrentNoSorting(childStructureRoot);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Extracts the CurrentNo from the metadata. The current number is an
+&nbsp;     * integer sorting criterion, which specifies the order of the subordinate
+&nbsp;     * units within their superordinate entirety. In case of journal issues,
+&nbsp;     * this can be the same as the issue number if the issue number continues to
+&nbsp;     * be counted at the turn of the year. In the case of multi-volume works,
+&nbsp;     * this number can correspond to the part number, or (for lexica, for
+&nbsp;     * example) it is counted up according to the alphabetical order of the
+&nbsp;     * volumes, supplementary volumes are counted on afterwards (thus, in the
+&nbsp;     * order in which the books are usually placed on a shelf).
+&nbsp;     *
+&nbsp;     * @param logicalDivision
+&nbsp;     *            outline element with metadata
+&nbsp;     * @return the CurrentNo, or {@code null}
+&nbsp;     */
+&nbsp;    private static Integer getCurrentNoSorting(LogicalDivision logicalDivision) {
+<b class="fc">&nbsp;        Integer currentNo = logicalDivision.getMetadata().parallelStream()</b>
+<b class="fc">&nbsp;                .filter(metadata -&gt; metadata.getKey().equals(&quot;CurrentNoSorting&quot;)).filter(MetadataEntry.class::isInstance)</b>
+<b class="fc">&nbsp;                .map(MetadataEntry.class::cast).map(MetadataEntry::getValue).filter(value -&gt; value.matches(&quot;\\d+&quot;))</b>
+<b class="fc">&nbsp;                .map(Integer::valueOf).findFirst().orElse(null);</b>
+<b class="fc">&nbsp;        return currentNo;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Links a child process in an existing parent process.
+&nbsp;     *
+&nbsp;     * @param childProcess
+&nbsp;     *            child process to link
+&nbsp;     * @param parentData
+&nbsp;     *            a data object with the ID of the parent process and the
+&nbsp;     *            current numbers of the child processes already linked with the
+&nbsp;     *            parent
+&nbsp;     */
+&nbsp;    private static void linkProcessInParent(Process childProcess, List&lt;Integer&gt; parentData)
+&nbsp;            throws IOException, DAOException {
+&nbsp;
+<b class="nc">&nbsp;        URI metadataFilePath = fileService.getMetadataFilePath(childProcess);</b>
+<b class="nc">&nbsp;        Integer currentNo = convertChildMetsFile(metadataFilePath);</b>
+<b class="nc">&nbsp;        Process parentProcess = processService.getById(parentData.get(0));</b>
+<b class="nc">&nbsp;        int insertionPosition = calculateInsertionPosition(parentData, currentNo);</b>
+<b class="nc">&nbsp;        MetadataEditor.addLink(parentProcess, Integer.toString(insertionPosition), childProcess.getId());</b>
+<b class="nc">&nbsp;        parentData.add(insertionPosition + 1, currentNo);</b>
+<b class="nc">&nbsp;        linkParentProcessWithChildProcess(parentProcess, childProcess);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculates the point at which the child process must be inserted in the
+&nbsp;     * parent hierarchy.
+&nbsp;     *
+&nbsp;     * @param parentData
+&nbsp;     *            a data object with the ID of the parent process (here unused)
+&nbsp;     *            and the current numbers of the child processes already linked
+&nbsp;     *            with the parent, which may be {@code null}
+&nbsp;     * @param currentNo
+&nbsp;     *            the current number of the child process to link, may be
+&nbsp;     *            {@code null}
+&nbsp;     * @return the insertion position
+&nbsp;     */
+&nbsp;    private static int calculateInsertionPosition(List&lt;Integer&gt; parentData, Integer currentNo) {
+<b class="nc">&nbsp;        int currentNumber = Objects.isNull(currentNo) ? Integer.MIN_VALUE : currentNo;</b>
+<b class="nc">&nbsp;        int insertionPosition = 0;</b>
+<b class="nc">&nbsp;        for (int index = 1; index &lt; parentData.size(); index++) {</b>
+<b class="nc">&nbsp;            int comparee = Objects.isNull(parentData.get(index)) ? Integer.MIN_VALUE : parentData.get(index);</b>
+<b class="nc">&nbsp;            if (currentNumber &gt;= comparee) {</b>
+<b class="nc">&nbsp;                insertionPosition++;</b>
+&nbsp;            } else {
+&nbsp;                break;
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return insertionPosition;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Renames the anchor file. It is clear that this has been migrated.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process to migrate
+&nbsp;     */
+&nbsp;    private static void renameAnchorFile(Process process) throws IOException {
+<b class="fc">&nbsp;        URI anchorFile = fileService.createAnchorFile(fileService.getMetadataFilePath(process));</b>
+<b class="fc">&nbsp;        fileService.renameFile(anchorFile, &quot;meta_anchor.migrated&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

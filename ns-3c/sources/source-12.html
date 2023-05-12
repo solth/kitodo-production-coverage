@@ -1,0 +1,541 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ImportConfigurationEditView</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: ImportConfigurationEditView (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImportConfigurationEditView</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/35)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/89)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.function.Function;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;import javax.faces.view.ViewScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.externaldatamanagement.ImportConfigurationType;
+&nbsp;import org.kitodo.api.externaldatamanagement.SearchInterfaceType;
+&nbsp;import org.kitodo.api.schemaconverter.FileFormat;
+&nbsp;import org.kitodo.api.schemaconverter.MetadataFormat;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.beans.MappingFile;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.SearchField;
+&nbsp;import org.kitodo.data.database.beans.UrlParameter;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.primefaces.model.DualListModel;
+&nbsp;
+&nbsp;@Named
+&nbsp;@ViewScoped
+<b class="nc">&nbsp;public class ImportConfigurationEditView extends BaseForm {</b>
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(ImportConfigurationEditView.class);</b>
+<b class="nc">&nbsp;    private ImportConfiguration importConfiguration = new ImportConfiguration();</b>
+<b class="nc">&nbsp;    private List&lt;SelectItem&gt; searchFields = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;    private static final List&lt;String&gt; SRU_VERSIONS = List.of(&quot;1.1&quot;, &quot;1.2&quot;, &quot;2.0&quot;);</b>
+<b class="nc">&nbsp;    private static final List&lt;String&gt; SCHEMES = List.of(&quot;https&quot;, &quot;http&quot;, &quot;ftp&quot;);</b>
+<b class="nc">&nbsp;    private static final List&lt;String&gt; PARENT_ELEMENT_TYPES = Collections.singletonList(&quot;reference&quot;);</b>
+<b class="nc">&nbsp;    private static final List&lt;String&gt; PARENT_ELEMENT_TRIM_MODES = Collections.singletonList(&quot;parenthesis&quot;);</b>
+&nbsp;    private static final List&lt;String&gt; DEFAULT_ID_XPATHS;
+&nbsp;    private static final List&lt;String&gt; DEFAULT_TITLE_XPATHS;
+&nbsp;    private static final String URL_PARAMETER_UNIQUE = &quot;importConfig.urlParameters.conditionUnique&quot;;
+&nbsp;
+&nbsp;    static {
+<b class="nc">&nbsp;        DEFAULT_ID_XPATHS = List.of(</b>
+&nbsp;                &quot;.//*[local-name()=&#39;recordInfo&#39;]/*[local-name()=&#39;recordIdentifier&#39;]/text()&quot;,
+&nbsp;                &quot;.//*[local-name()=&#39;datafield&#39;][@tag=&#39;245&#39;]/*[local-name()=&#39;subfield&#39;][@code=&#39;a&#39;]/text()&quot;,
+&nbsp;                &quot;.//*[local-name()=&#39;datafield&#39;][@tag=&#39;003@&#39;]/*[local-name()=&#39;subfield&#39;][@code=&#39;0&#39;]/text()&quot;
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    static {
+<b class="nc">&nbsp;        DEFAULT_TITLE_XPATHS = List.of(</b>
+&nbsp;                &quot;.//*[local-name()=&#39;titleInfo&#39;]/*[local-name()=&#39;title&#39;]/text()&quot;,
+&nbsp;                &quot;.//*[local-name()=&#39;controlfield&#39;][@tag=&#39;001&#39;]/text()&quot;,
+&nbsp;                &quot;.//*[local-name()=&#39;datafield&#39;][@tag=&#39;021A&#39;]/*[local-name()=&#39;subfield&#39;][@code=&#39;a&#39;]/text()&quot;
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of default record ID XPaths.
+&nbsp;     *
+&nbsp;     * @return list of default record ID XPaths
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getRecordIdXPathDefault() {
+<b class="nc">&nbsp;        return DEFAULT_ID_XPATHS;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of default record title XPaths.
+&nbsp;     *
+&nbsp;     * @return list of default record title XPaths.
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getRecordTitleXPathDefault() {
+<b class="nc">&nbsp;        return DEFAULT_TITLE_XPATHS;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load import configuration by ID.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            ID of import configuration to load
+&nbsp;     */
+&nbsp;    public void load(int id) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (id &gt; 0) {</b>
+<b class="nc">&nbsp;                importConfiguration = ServiceManager.getImportConfigurationService().getById(id);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                importConfiguration = new ImportConfiguration();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            setSaveDisabled(true);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE,</b>
+<b class="nc">&nbsp;                    new Object[] { ObjectType.IMPORT_CONFIGURATION.getTranslationSingular(), id }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save import configuration.
+&nbsp;     *
+&nbsp;     * @return page or empty String
+&nbsp;     */
+&nbsp;    public String save() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getImportConfigurationService().saveToDatabase(importConfiguration);</b>
+<b class="nc">&nbsp;            return projectsPage;</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING,</b>
+<b class="nc">&nbsp;                    new Object[] {ObjectType.IMPORT_CONFIGURATION.getTranslationSingular()}, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get importConfiguration.
+&nbsp;     *
+&nbsp;     * @return value of importConfiguration
+&nbsp;     */
+&nbsp;    public ImportConfiguration getImportConfiguration() {
+<b class="nc">&nbsp;        return importConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set importConfiguration.
+&nbsp;     *
+&nbsp;     * @param importConfiguration as org.kitodo.data.database.beans.ImportConfiguration
+&nbsp;     */
+&nbsp;    public void setImportConfiguration(ImportConfiguration importConfiguration) {
+<b class="nc">&nbsp;        this.importConfiguration = importConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get interface types.
+&nbsp;     *
+&nbsp;     * @return interface types
+&nbsp;     */
+&nbsp;    public List&lt;SearchInterfaceType&gt; getInterfaceTypes() {
+<b class="nc">&nbsp;        return List.of(SearchInterfaceType.values());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get metadata formats.
+&nbsp;     *
+&nbsp;     * @return metadata formats
+&nbsp;     */
+&nbsp;    public List&lt;MetadataFormat&gt; getMetadataFormats() {
+<b class="nc">&nbsp;        return List.of(MetadataFormat.values());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get file formats. Currently only XML is supported.
+&nbsp;     *
+&nbsp;     * @return file formats
+&nbsp;     */
+&nbsp;    public List&lt;FileFormat&gt; getFileFormats() {
+<b class="nc">&nbsp;        return Collections.singletonList(FileFormat.XML);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get import configuration types.
+&nbsp;     *
+&nbsp;     * @return import configuration types
+&nbsp;     */
+&nbsp;    public List&lt;ImportConfigurationType&gt; getImportConfigurationTypes() {
+<b class="nc">&nbsp;        return List.of(ImportConfigurationType.values());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get schemes.
+&nbsp;     *
+&nbsp;     * @return schemes
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getSchemes() {
+<b class="nc">&nbsp;        return SCHEMES;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add given SearchField to ImportConfiguration.
+&nbsp;     *
+&nbsp;     * @param searchField SearchField
+&nbsp;     */
+&nbsp;    public void addSearchField(SearchField searchField) {
+<b class="nc">&nbsp;        if (importConfiguration.getSearchFields().stream().map(SearchField::getLabel).collect(Collectors.toList())</b>
+<b class="nc">&nbsp;                .contains(searchField.getLabel())) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;SearchField labels must be unique (&#39;&quot; + searchField.getLabel()</b>
+&nbsp;                    + &quot;&#39; already exists!)&quot;);
+&nbsp;        } else {
+<b class="nc">&nbsp;            searchField.setImportConfiguration(importConfiguration);</b>
+<b class="nc">&nbsp;            importConfiguration.getSearchFields().add(searchField);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Replace SearchField with index &#39;searchFieldIndex&#39; in ImportConfiguration&#39;s SearchField list with given
+&nbsp;     * SearchField &#39;searchField&#39;.
+&nbsp;     * @param searchField new SearchField
+&nbsp;     * @param searchFieldIndex index in ImportConfigurations SearchField list
+&nbsp;     */
+&nbsp;    public void updateSearchField(SearchField searchField, int searchFieldIndex) {
+<b class="nc">&nbsp;        importConfiguration.getSearchFields().remove(searchFieldIndex);</b>
+<b class="nc">&nbsp;        importConfiguration.getSearchFields().add(searchFieldIndex, searchField);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove given SearchField from ImportConfiguration.
+&nbsp;     *
+&nbsp;     * @param searchField SearchField
+&nbsp;     */
+&nbsp;    public void removeSearchField(SearchField searchField) {
+<b class="nc">&nbsp;        searchField.setImportConfiguration(null);</b>
+<b class="nc">&nbsp;        importConfiguration.getSearchFields().remove(searchField);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add given UrlParameter to importConfiguration.
+&nbsp;     *
+&nbsp;     * @param urlParameter UrlParameter to add
+&nbsp;     */
+&nbsp;    public void addUrlParameter(UrlParameter urlParameter) {
+<b class="nc">&nbsp;        if (importConfiguration.getUrlParameters().stream().map(UrlParameter::getParameterKey)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList()).contains(urlParameter.getParameterKey())) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(URL_PARAMETER_UNIQUE, new Object[]{urlParameter.getParameterKey()});</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            urlParameter.setImportConfiguration(importConfiguration);</b>
+<b class="nc">&nbsp;            importConfiguration.getUrlParameters().add(urlParameter);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Replace UrlParameter with index &#39;urlParameterIndex&#39; in ImportConfiguration&#39;s UrlParameter list with given
+&nbsp;     * UrlParameter &#39;urlParameter&#39;.
+&nbsp;     * @param urlParameter new UrlParameter
+&nbsp;     * @param urlParameterIndex index in ImportConfigurations UrlParameter list
+&nbsp;     */
+&nbsp;    public void updateUrlParameter(UrlParameter urlParameter, int urlParameterIndex) {
+<b class="nc">&nbsp;        importConfiguration.getUrlParameters().remove(urlParameterIndex);</b>
+<b class="nc">&nbsp;        importConfiguration.getUrlParameters().add(urlParameterIndex, urlParameter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove give UrlParameter from importConfiguration.
+&nbsp;     *
+&nbsp;     * @param urlParameter UrlParameter to remove
+&nbsp;     */
+&nbsp;    public void removeUrlParameter(UrlParameter urlParameter) {
+<b class="nc">&nbsp;        urlParameter.setImportConfiguration(null);</b>
+<b class="nc">&nbsp;        importConfiguration.getUrlParameters().remove(urlParameter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of available trim modes.
+&nbsp;     *
+&nbsp;     * @return list of available trim modes.
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getParentElementTrimModes() {
+<b class="nc">&nbsp;        return PARENT_ELEMENT_TRIM_MODES;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of available parent element types.
+&nbsp;     *
+&nbsp;     * @return list of available parent element types
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getParentElementTypes() {
+<b class="nc">&nbsp;        return PARENT_ELEMENT_TYPES;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get mapping files that can be assigned to the current import configuration.
+&nbsp;     *
+&nbsp;     * @return list of mapping files assignable to the current import configuration
+&nbsp;     */
+&nbsp;    public DualListModel&lt;MappingFile&gt; getAvailableMappingFiles() {
+<b class="nc">&nbsp;        List&lt;MappingFile&gt; assignedMappingFiles = importConfiguration.getMappingFiles();</b>
+<b class="nc">&nbsp;        List&lt;MappingFile&gt; assignableMappingFiles = new ArrayList&lt;&gt;();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            assignableMappingFiles = ServiceManager.getMappingFileService().getAll();</b>
+<b class="nc">&nbsp;            assignableMappingFiles.removeAll(assignedMappingFiles);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return new DualListModel&lt;&gt;(assignableMappingFiles</b>
+<b class="nc">&nbsp;                .stream().sorted(Comparator.comparing(MappingFile::getTitle)).collect(Collectors.toList()),</b>
+&nbsp;                assignedMappingFiles);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get mapping files.
+&nbsp;     *
+&nbsp;     * @return mapping files
+&nbsp;     */
+&nbsp;    public List&lt;MappingFile&gt; getMappingFiles() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getMappingFileService().getAll();</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;            return new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set mapping files that can be assigned to the current import configuration.
+&nbsp;     *
+&nbsp;     * @param mappingFilesModel DualListModel containing the mapping files assignable and assigned
+&nbsp;     *                          to the current import configuration
+&nbsp;     */
+&nbsp;    public void setAvailableMappingFiles(DualListModel&lt;MappingFile&gt; mappingFilesModel) {
+<b class="nc">&nbsp;        importConfiguration.setMappingFiles(new ArrayList&lt;&gt;(mappingFilesModel.getTarget()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get SRU versions.
+&nbsp;     *
+&nbsp;     * @return SRU versions
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getSruVersions() {
+<b class="nc">&nbsp;        return SRU_VERSIONS;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of template processes.
+&nbsp;     *
+&nbsp;     * @return list of template processes
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; getTemplateProcesses() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getProcessService().getTemplateProcesses();</b>
+<b class="nc">&nbsp;        } catch (DataException | DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;            return new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get searchFields.
+&nbsp;     *
+&nbsp;     * @return value of searchFields
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getSearchFields() {
+<b class="nc">&nbsp;        searchFields = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (SearchField searchField : importConfiguration.getSearchFields()) {</b>
+<b class="nc">&nbsp;            searchFields.add(new SelectItem(searchField.getLabel(), searchField.getLabel()));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return searchFields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set searchFields.
+&nbsp;     *
+&nbsp;     * @param searchFields as List of SelectItems
+&nbsp;     */
+&nbsp;    public void setSearchFields(List&lt;SelectItem&gt; searchFields) {
+<b class="nc">&nbsp;        this.searchFields = searchFields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get search field map.
+&nbsp;     *
+&nbsp;     * @return search field map
+&nbsp;     */
+&nbsp;    public Map&lt;String, SearchField&gt; getSearchFieldMap() {
+<b class="nc">&nbsp;        return importConfiguration.getSearchFields().parallelStream()</b>
+<b class="nc">&nbsp;                .collect(Collectors.toMap(SearchField::getLabel, Function.identity()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get idSearchField.
+&nbsp;     *
+&nbsp;     * @return idSearchField
+&nbsp;     */
+&nbsp;    public String getIdSearchField() {
+<b class="nc">&nbsp;        SearchField idSearchField = importConfiguration.getIdSearchField();</b>
+<b class="nc">&nbsp;        return Objects.isNull(idSearchField) ? null : idSearchField.getLabel();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set idSearchField.
+&nbsp;     *
+&nbsp;     * @param idSearchField new idSearchField
+&nbsp;     */
+&nbsp;    public void setIdSearchField(String idSearchField) {
+<b class="nc">&nbsp;        importConfiguration.setIdSearchField(getSearchFieldMap().get(idSearchField));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get defaultSearchField.
+&nbsp;     *
+&nbsp;     * @return defaultSearchField
+&nbsp;     */
+&nbsp;    public String getDefaultSearchField() {
+<b class="nc">&nbsp;        SearchField defaultSearchField = importConfiguration.getDefaultSearchField();</b>
+<b class="nc">&nbsp;        return Objects.isNull(defaultSearchField) ? null : defaultSearchField.getLabel();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set defaultSearchField.
+&nbsp;     *
+&nbsp;     * @param defaultSearchField new defaultSearchField
+&nbsp;     */
+&nbsp;    public void setDefaultSearchField(String defaultSearchField) {
+<b class="nc">&nbsp;        importConfiguration.setDefaultSearchField(getSearchFieldMap().get(defaultSearchField));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get parentIdSearchField.
+&nbsp;     *
+&nbsp;     * @return parentIdSearchField
+&nbsp;     */
+&nbsp;    public String getParentIdSearchField() {
+<b class="nc">&nbsp;        SearchField parentIdSearchField = importConfiguration.getParentSearchField();</b>
+<b class="nc">&nbsp;        return Objects.isNull(parentIdSearchField) ? null : parentIdSearchField.getLabel();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set parentIdSearchField.
+&nbsp;     *
+&nbsp;     * @param parentIdSearchField new parentIdSearchField
+&nbsp;     */
+&nbsp;    public void setParentIdSearchField(String parentIdSearchField) {
+<b class="nc">&nbsp;        importConfiguration.setParentSearchField(getSearchFieldMap().get(parentIdSearchField));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,451 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Paginator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.metadata.pagination</a>
+</div>
+
+<h1>Coverage Summary for Class: Paginator (org.kitodo.production.helper.metadata.pagination)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Paginator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,7%
+  </span>
+  <span class="absValue">
+    (8/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,5%
+  </span>
+  <span class="absValue">
+    (138/143)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.metadata.pagination;
+&nbsp;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;/**
+&nbsp; * Class to generate different sorts of paginations.
+&nbsp; */
+&nbsp;public class Paginator implements Iterator&lt;String&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Fragments a pagination is composed of (text elements, counters, …).
+&nbsp;     */
+<b class="fc">&nbsp;    private final LinkedList&lt;Fragment&gt; fragments = new LinkedList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Supports rigth-to-left double page counting (2 1, 4 3, 6 5, …).
+&nbsp;     */
+<b class="fc">&nbsp;    private boolean operateReverse = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Current counter value.
+&nbsp;     */
+&nbsp;    private HalfInteger value;
+&nbsp;
+&nbsp;    private void parse(String initializer) {
+&nbsp;
+<b class="fc">&nbsp;        StringBuilder stringBuilder = new StringBuilder();</b>
+<b class="fc">&nbsp;        PaginatorState paginatorState = PaginatorState.EMPTY;</b>
+&nbsp;
+&nbsp;        /*
+&nbsp;         * iterate through the code points of the initializer string plus one more
+&nbsp;         * iteration to process the last content of the stringBuilder
+&nbsp;         */
+<b class="fc">&nbsp;        Boolean page = null;</b>
+<b class="fc">&nbsp;        int length = initializer.length();</b>
+<b class="fc">&nbsp;        for (int offset = 0; offset &lt;= length;) {</b>
+&nbsp;            int codePoint;
+&nbsp;            PaginatorState codePointClass;
+<b class="fc">&nbsp;            if (offset == length) {</b>
+<b class="fc">&nbsp;                codePointClass = PaginatorState.END;</b>
+<b class="fc">&nbsp;                codePoint = 0;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                codePoint = initializer.codePointAt(offset);</b>
+<b class="fc">&nbsp;                codePointClass = codePointClassOf(codePoint);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // Whatever is in back-ticks is not interpreted
+<b class="fc">&nbsp;            if (codePointClass.equals(PaginatorState.TEXT_ESCAPE_TRANSITION)) {</b>
+<b class="fc">&nbsp;                if (paginatorState.equals(PaginatorState.EMPTY)) {</b>
+<b class="fc">&nbsp;                    paginatorState = PaginatorState.TEXT_ESCAPE_TRANSITION;</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    createFragment(stringBuilder, paginatorState, page);</b>
+<b class="fc">&nbsp;                    page = null;</b>
+<b class="fc">&nbsp;                    paginatorState = paginatorState.equals(PaginatorState.TEXT_ESCAPE_TRANSITION) ? PaginatorState.EMPTY</b>
+<b class="fc">&nbsp;                            : PaginatorState.TEXT_ESCAPE_TRANSITION;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            } else if (paginatorState.equals(PaginatorState.TEXT_ESCAPE_TRANSITION)) {</b>
+<b class="fc">&nbsp;                stringBuilder.appendCodePoint(codePoint);</b>
+<b class="fc">&nbsp;            } else if (codePointClass.equals(PaginatorState.HALF_INTEGER)</b>
+<b class="fc">&nbsp;                    || codePointClass.equals(PaginatorState.FULL_INTEGER)) {</b>
+&nbsp;                /*
+&nbsp;                 * Recto/verso-only symbols cause a stringBuilder write (or they would be
+&nbsp;                 * applied to the current stringBuilder content (modify their left side), but
+&nbsp;                 * they shall be applied on the next write (modify their right side)). They set
+&nbsp;                 * the page variable and are not written to the stringBuilder by themselves.
+&nbsp;                 */
+<b class="fc">&nbsp;                if (!paginatorState.equals(PaginatorState.EMPTY)) {</b>
+<b class="fc">&nbsp;                    createFragment(stringBuilder, paginatorState, page);</b>
+<b class="fc">&nbsp;                    paginatorState = PaginatorState.EMPTY;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                page = codePointClass.equals(PaginatorState.HALF_INTEGER);</b>
+<b class="fc">&nbsp;            } else if (paginatorState.equals(codePointClass) || paginatorState.equals(PaginatorState.EMPTY)</b>
+<b class="fc">&nbsp;                    || paginatorState.equals(PaginatorState.TEXT) &amp;&amp; codePointClass.equals(PaginatorState.SYMBOL)</b>
+<b class="fc">&nbsp;                    || paginatorState.equals(PaginatorState.SYMBOL) &amp;&amp; codePointClass.equals(PaginatorState.TEXT)) {</b>
+&nbsp;                /*
+&nbsp;                 * If the stringBuilder is empty or contains the same sort of content as the
+&nbsp;                 * current input, just write it to the stringBuilder. If the stringBuilder
+&nbsp;                 * contains text, we can write symbols as well, the same is true the other way
+&nbsp;                 * ‘round.
+&nbsp;                 */
+<b class="fc">&nbsp;                stringBuilder.appendCodePoint(codePoint);</b>
+<b class="fc">&nbsp;                paginatorState = codePointClass;</b>
+&nbsp;
+<b class="fc">&nbsp;            } else if (paginatorState.equals(PaginatorState.TEXT)</b>
+<b class="fc">&nbsp;                    &amp;&amp; (codePointClass.equals(PaginatorState.LOWERCASE_ROMAN)</b>
+<b class="fc">&nbsp;                            || codePointClass.equals(PaginatorState.UPPERCASE_ROMAN))</b>
+<b class="fc">&nbsp;                    || (paginatorState.equals(PaginatorState.LOWERCASE_ROMAN)</b>
+<b class="fc">&nbsp;                            || paginatorState.equals(PaginatorState.UPPERCASE_ROMAN))</b>
+<b class="fc">&nbsp;                            &amp;&amp; codePointClass.equals(PaginatorState.TEXT)) {</b>
+&nbsp;                /*
+&nbsp;                 * If we got text, and the content of the stringBuilder is a Roman numeral, or
+&nbsp;                 * the other way round, we can still write to the stringBuilder, but the result
+&nbsp;                 * of the operation is always text. This is an important catch in order to, for
+&nbsp;                 * example, prevent the C in ‘Chapter’ start counting. (Remember, Roman numeral
+&nbsp;                 * C is 100.)
+&nbsp;                 */
+<b class="fc">&nbsp;                stringBuilder.appendCodePoint(codePoint);</b>
+<b class="fc">&nbsp;                paginatorState = PaginatorState.TEXT;</b>
+&nbsp;
+&nbsp;            } else {
+&nbsp;                // In any other case, we have to write out the stringBuilder.
+<b class="fc">&nbsp;                createFragment(stringBuilder, paginatorState, page);</b>
+<b class="fc">&nbsp;                page = null;</b>
+<b class="fc">&nbsp;                stringBuilder.appendCodePoint(codePoint);</b>
+<b class="fc">&nbsp;                paginatorState = codePointClass;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            offset += Character.charCount(codePoint);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Stores the stringBuilder as fragment and resets the stringBuilder. The type
+&nbsp;     * of fragment is derived from the the stringBuilder’s PaginatorState and the
+&nbsp;     * page directive. A page directive causes what is immediately thereafter to be
+&nbsp;     * treated as text in any case.
+&nbsp;     *
+&nbsp;     * @param stringBuilder
+&nbsp;     *            characters
+&nbsp;     * @param fragmentType
+&nbsp;     *            type of fragment to create
+&nbsp;     * @param pageType
+&nbsp;     *            page information
+&nbsp;     */
+&nbsp;    private void createFragment(StringBuilder stringBuilder, PaginatorState fragmentType, Boolean pageType) {
+<b class="fc">&nbsp;        if (pageType == null &amp;&amp; fragmentType.equals(PaginatorState.DECIMAL)) {</b>
+<b class="fc">&nbsp;            fragments.addLast(new DecimalNumeral(stringBuilder.toString()));</b>
+<b class="fc">&nbsp;        } else if (pageType == null &amp;&amp; (fragmentType.equals(PaginatorState.UPPERCASE_ROMAN)</b>
+<b class="fc">&nbsp;                || fragmentType.equals(PaginatorState.LOWERCASE_ROMAN))) {</b>
+<b class="fc">&nbsp;            fragments.addLast(</b>
+<b class="fc">&nbsp;                new RomanNumeral(stringBuilder.toString(), fragmentType.equals(PaginatorState.UPPERCASE_ROMAN)));</b>
+<b class="fc">&nbsp;        } else if (fragmentType.equals(PaginatorState.INCREMENT)) {</b>
+<b class="fc">&nbsp;            if (fragments.isEmpty() || Objects.isNull(fragments.peekLast())) {</b>
+<b class="nc">&nbsp;                fragments.addLast(new StaticText(&quot;&quot;, pageType));</b>
+&nbsp;            }
+<b class="fc">&nbsp;            fragments.peekLast().setIncrement(HalfInteger.valueOf(stringBuilder.toString()));</b>
+<b class="fc">&nbsp;        } else if (!fragmentType.equals(PaginatorState.EMPTY)) {</b>
+<b class="fc">&nbsp;            fragments.addLast(new StaticText(stringBuilder.toString(), pageType));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        stringBuilder.setLength(0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new paginator.
+&nbsp;     *
+&nbsp;     * @param initializer
+&nbsp;     *            initial value
+&nbsp;     */
+<b class="fc">&nbsp;    public Paginator(String initializer) {</b>
+&nbsp;
+&nbsp;        /*
+&nbsp;         * If the initialisation string starts with a half increment marker this
+&nbsp;         * increments the initial counter value by one half. This is to allow starting
+&nbsp;         * with an interemdiate (verso) subpage.
+&nbsp;         */
+<b class="fc">&nbsp;        boolean halfAboveValue = !initializer.isEmpty() &amp;&amp; initializer.codePointAt(0) == &#39;½&#39;;</b>
+<b class="fc">&nbsp;        String paginatorInitializer = halfAboveValue ? initializer.substring(1) : initializer;</b>
+<b class="fc">&nbsp;        parse(paginatorInitializer);</b>
+<b class="fc">&nbsp;        initializeIncrements(halfAboveValue);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initializes missing increments, finds the initial value and, optional, a
+&nbsp;     * reverse operation mode.
+&nbsp;     */
+&nbsp;    private void initializeIncrements(boolean aHalf) {
+<b class="fc">&nbsp;        Fragment firstFragment = null;</b>
+<b class="fc">&nbsp;        Fragment lastFragment = null;</b>
+&nbsp;        int valueFull;
+&nbsp;
+<b class="fc">&nbsp;        for (Fragment fragment : fragments) {</b>
+<b class="fc">&nbsp;            if (fragment.getInitialValue() == null) {</b>
+<b class="fc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (firstFragment == null) {</b>
+<b class="fc">&nbsp;                firstFragment = fragment;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            lastFragment = fragment;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (firstFragment == null) { // static text only</b>
+<b class="nc">&nbsp;            valueFull = 0;</b>
+<b class="fc">&nbsp;        } else if (firstFragment.equals(lastFragment)) { // only one counting element</b>
+<b class="fc">&nbsp;            valueFull = firstFragment.getInitialValue();</b>
+<b class="fc">&nbsp;            if (firstFragment.getIncrement() == null) {</b>
+<b class="fc">&nbsp;                firstFragment.setIncrement(new HalfInteger(1, false));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } else if (firstFragment.getInitialValue() &lt;= lastFragment.getInitialValue()) {</b>
+<b class="fc">&nbsp;            valueFull = initializeLeftToRightMode(firstFragment, lastFragment);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            valueFull = initializeRightToLeftMode(firstFragment, lastFragment);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        value = new HalfInteger(valueFull, aHalf);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * More than one counting element in left-to-right order.
+&nbsp;     */
+&nbsp;    private int initializeLeftToRightMode(Fragment firstFragment, Fragment lastFragment) {
+&nbsp;        int valueFull;
+<b class="fc">&nbsp;        valueFull = firstFragment.getInitialValue();</b>
+<b class="fc">&nbsp;        Fragment previousFragment = null;</b>
+<b class="fc">&nbsp;        int howMany = 0;</b>
+<b class="fc">&nbsp;        for (Fragment fragment : fragments) {</b>
+<b class="fc">&nbsp;            if (fragment.getInitialValue() == null) {</b>
+<b class="fc">&nbsp;                continue;</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            if (previousFragment != null &amp;&amp; previousFragment.getIncrement() == null) {</b>
+<b class="fc">&nbsp;                previousFragment.setIncrement(</b>
+<b class="fc">&nbsp;                    new HalfInteger(fragment.getInitialValue() - previousFragment.getInitialValue(), false));</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            previousFragment = fragment;</b>
+<b class="fc">&nbsp;            howMany++;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (lastFragment.getIncrement() == null) {</b>
+<b class="fc">&nbsp;            lastFragment.setIncrement(new HalfInteger(</b>
+<b class="fc">&nbsp;                    (lastFragment.getInitialValue() - firstFragment.getInitialValue()) / (howMany - 1), false));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return valueFull;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * More than one counting element in right-to-left order.
+&nbsp;     */
+&nbsp;    private int initializeRightToLeftMode(Fragment firstFragment, Fragment lastFragment) {
+&nbsp;        int valueFull;
+<b class="fc">&nbsp;        this.operateReverse = true;</b>
+<b class="fc">&nbsp;        valueFull = lastFragment.getInitialValue();</b>
+<b class="fc">&nbsp;        Fragment previousFragment = null;</b>
+<b class="fc">&nbsp;        int howMany = 0;</b>
+<b class="fc">&nbsp;        for (Iterator&lt;Fragment&gt; iterator = fragments.descendingIterator(); iterator.hasNext();) {</b>
+<b class="fc">&nbsp;            Fragment fragment = iterator.next();</b>
+&nbsp;
+<b class="fc">&nbsp;            if (fragment.getInitialValue() == null) {</b>
+<b class="fc">&nbsp;                continue;</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            if (previousFragment != null &amp;&amp; previousFragment.getIncrement() == null) {</b>
+<b class="fc">&nbsp;                previousFragment.setIncrement(</b>
+<b class="fc">&nbsp;                    new HalfInteger(fragment.getInitialValue() - previousFragment.getInitialValue(), false));</b>
+&nbsp;            }
+<b class="fc">&nbsp;            previousFragment = fragment;</b>
+<b class="fc">&nbsp;            howMany++;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (firstFragment.getIncrement() == null) {</b>
+<b class="fc">&nbsp;            firstFragment.setIncrement(new HalfInteger(</b>
+<b class="fc">&nbsp;                    (firstFragment.getInitialValue() - lastFragment.getInitialValue()) / (howMany - 1), false));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return valueFull;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static PaginatorState codePointClassOf(int codePoint) {
+<b class="fc">&nbsp;        switch (codePoint) {</b>
+&nbsp;            case &#39;0&#39;: case &#39;1&#39;: case &#39;2&#39;: case &#39;3&#39;: case &#39;4&#39;: case &#39;5&#39;:
+&nbsp;            case &#39;6&#39;: case &#39;7&#39;: case &#39;8&#39;: case &#39;9&#39;:
+<b class="fc">&nbsp;                return PaginatorState.DECIMAL;</b>
+&nbsp;            case &#39;C&#39;: case &#39;D&#39;: case &#39;I&#39;: case &#39;L&#39;: case &#39;M&#39;: case &#39;V&#39;:
+&nbsp;            case &#39;X&#39;:
+<b class="fc">&nbsp;                return PaginatorState.UPPERCASE_ROMAN;</b>
+&nbsp;            case &#39;`&#39;:
+<b class="fc">&nbsp;                return PaginatorState.TEXT_ESCAPE_TRANSITION;</b>
+&nbsp;            case &#39;c&#39;: case &#39;d&#39;: case &#39;i&#39;: case &#39;l&#39;: case &#39;m&#39;: case &#39;v&#39;:
+&nbsp;            case &#39;x&#39;:
+<b class="fc">&nbsp;                return PaginatorState.LOWERCASE_ROMAN;</b>
+&nbsp;            case &#39;¡&#39;:
+<b class="fc">&nbsp;                return PaginatorState.FULL_INTEGER;</b>
+&nbsp;            case &#39;°&#39;: case &#39;²&#39;: case &#39;³&#39;: case &#39;¹&#39;: case &#39;½&#39;:
+<b class="fc">&nbsp;                return PaginatorState.INCREMENT;</b>
+&nbsp;            case &#39;¿&#39;:
+<b class="fc">&nbsp;                return PaginatorState.HALF_INTEGER;</b>
+&nbsp;            default:
+<b class="fc">&nbsp;                switch (Character.getType(codePoint)) {</b>
+&nbsp;                    case Character.UPPERCASE_LETTER:
+&nbsp;                    case Character.LOWERCASE_LETTER:
+&nbsp;                    case Character.TITLECASE_LETTER:
+&nbsp;                    case Character.MODIFIER_LETTER:
+&nbsp;                    case Character.OTHER_LETTER:
+&nbsp;                    case Character.NON_SPACING_MARK:
+<b class="fc">&nbsp;                        return PaginatorState.TEXT;</b>
+&nbsp;                    default:
+<b class="fc">&nbsp;                        return PaginatorState.SYMBOL;</b>
+&nbsp;                }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * To prevent infinite loops by using hasNext as condition, a
+&nbsp;     * UnsupportedOperationException is thrown because there are always next
+&nbsp;     * elements.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean hasNext() {
+<b class="nc">&nbsp;        throw new UnsupportedOperationException(&quot;Paginator.hasNext()&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String next() {
+<b class="fc">&nbsp;        StringBuilder result = new StringBuilder();</b>
+<b class="fc">&nbsp;        if (operateReverse) {</b>
+<b class="fc">&nbsp;            for (Iterator&lt;Fragment&gt; iterator = fragments.descendingIterator(); iterator.hasNext();) {</b>
+<b class="fc">&nbsp;                Fragment fragment = iterator.next();</b>
+<b class="fc">&nbsp;                result.insert(0, fragment.format(value));</b>
+<b class="fc">&nbsp;                value = value.add(fragment.getIncrement());</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            for (Fragment fragment : fragments) {</b>
+<b class="fc">&nbsp;                result.append(fragment.format(value));</b>
+<b class="fc">&nbsp;                value = value.add(fragment.getIncrement());</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return result.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The iterator does not support {@code remove()}.
+&nbsp;     *
+&nbsp;     * @throws UnsupportedOperationException
+&nbsp;     *             if invoked.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void remove() {
+<b class="nc">&nbsp;        throw new UnsupportedOperationException(&quot;Paginator.remove()&quot;);</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a concise string representation of this instance.
+&nbsp;     *
+&nbsp;     * @return a string representing this instance
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return value + (operateReverse ? &quot;, reversed, &quot; : &quot;, &quot;) + fragments;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

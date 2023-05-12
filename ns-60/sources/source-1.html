@@ -1,0 +1,191 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ContentToBeGenerated</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.image</a>
+</div>
+
+<h1>Coverage Summary for Class: ContentToBeGenerated (org.kitodo.production.services.image)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ContentToBeGenerated</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.image;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.kitodo.production.model.Subfolder;
+&nbsp;
+&nbsp;/**
+&nbsp; * Content to be generated. The object can be considered as an instruction to
+&nbsp; * the producer. At the moment, only images can be generated, but later, e.g.
+&nbsp; * OCR can also be generated. That depends only on the configuration of the
+&nbsp; * subfolder.
+&nbsp; */
+&nbsp;public class ContentToBeGenerated {
+&nbsp;    /**
+&nbsp;     * The canonical part of the file name.
+&nbsp;     */
+&nbsp;    private final String canonical;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The source URI of the content to be generated.
+&nbsp;     */
+&nbsp;    private final URI sourceURI;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies the subfolders for which content is to be generated. What
+&nbsp;     * content is specified in the subfolder.
+&nbsp;     */
+&nbsp;    private final List&lt;Subfolder&gt; subfoldersWhoseContentsAreToBeGenerated;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new content to generate.
+&nbsp;     *
+&nbsp;     * @param canonical
+&nbsp;     *            the canonical part of the file name
+&nbsp;     * @param sourceURI
+&nbsp;     *            the source URI of the content to be generated
+&nbsp;     * @param subfoldersWhoseContentsAreToBeGenerated
+&nbsp;     *            the subfolders for which content is to be generated
+&nbsp;     */
+&nbsp;    public ContentToBeGenerated(String canonical, URI sourceURI,
+<b class="fc">&nbsp;            List&lt;Subfolder&gt; subfoldersWhoseContentsAreToBeGenerated) {</b>
+<b class="fc">&nbsp;        this.canonical = canonical;</b>
+<b class="fc">&nbsp;        this.sourceURI = sourceURI;</b>
+<b class="fc">&nbsp;        this.subfoldersWhoseContentsAreToBeGenerated = subfoldersWhoseContentsAreToBeGenerated;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the canonical part of the file name of the content to be
+&nbsp;     * generated.
+&nbsp;     *
+&nbsp;     * @return the canonical part of the file name
+&nbsp;     */
+&nbsp;    public String getCanonical() {
+<b class="fc">&nbsp;        return canonical;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the subfolders for which content is to be generated of the
+&nbsp;     * content to be generated.
+&nbsp;     *
+&nbsp;     * @return the subfolders for which content is to be generated
+&nbsp;     */
+&nbsp;    public List&lt;Subfolder&gt; getSubfoldersWhoseContentsAreToBeGenerated() {
+<b class="fc">&nbsp;        return subfoldersWhoseContentsAreToBeGenerated;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the source URI of the content to be generated.
+&nbsp;     *
+&nbsp;     * @return the source URI
+&nbsp;     */
+&nbsp;    public URI getSourceURI() {
+<b class="fc">&nbsp;        return sourceURI;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

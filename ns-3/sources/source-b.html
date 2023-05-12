@@ -1,0 +1,147 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetadataViewInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataeditor.rulesetmanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: MetadataViewInterface (org.kitodo.api.dataeditor.rulesetmanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">MetadataViewInterface</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataeditor.rulesetmanagement;
+&nbsp;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides a shared super interface for type view services. Type view services
+&nbsp; * provide filtered views on metadata types.
+&nbsp; */
+&nbsp;public interface MetadataViewInterface {
+&nbsp;    /**
+&nbsp;     * Returns the domain that determines in which of the six available
+&nbsp;     * containers the metadata entry is stored. The domain is optional. It is
+&nbsp;     * not present on undefined metadata keys or if it is not written in the
+&nbsp;     * ruleset. Here the program has to know for itself what it has to do.
+&nbsp;     * 
+&nbsp;     * @return the domain
+&nbsp;     */
+&nbsp;    Optional&lt;Domain&gt; getDomain();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the string used to encode this key in the metadata file.
+&nbsp;     *
+&nbsp;     * @return the ID of this key
+&nbsp;     */
+&nbsp;    String getId();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a label to display to the user.
+&nbsp;     *
+&nbsp;     * @return a label to display to the user
+&nbsp;     */
+&nbsp;    String getLabel();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the maximum number of occurrences for this type of metadata.
+&nbsp;     * 
+&nbsp;     * @return the maximum number
+&nbsp;     */
+&nbsp;    int getMaxOccurs();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the minimum number of occurrences for this type of metadata.
+&nbsp;     * 
+&nbsp;     * @return the minimum number
+&nbsp;     */
+&nbsp;    int getMinOccurs();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the key is a complex key. A complex key consists of
+&nbsp;     * subfields, which in turn can be complex, while a simple key only takes a
+&nbsp;     * single value. This can also be determined by type checking, but if it&#39;s
+&nbsp;     * just about displaying two different icons or filling two different lists,
+&nbsp;     * then this boolean is a helpful thing.
+&nbsp;     *
+&nbsp;     * @return whether the key is a complex key
+&nbsp;     */
+&nbsp;    boolean isComplex();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the key is undefined. This can happen when opening a METS
+&nbsp;     * file that contains metadata that was not defined in the rule set. The
+&nbsp;     * application should indicate this fact. In this case, the label
+&nbsp;     * corresponds to the transferred key ID string, regardless of the language.
+&nbsp;     * If the key is not complex, it is configured as a simple text-type key.
+&nbsp;     *
+&nbsp;     * @return whether the key is undefined
+&nbsp;     */
+&nbsp;    boolean isUndefined();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

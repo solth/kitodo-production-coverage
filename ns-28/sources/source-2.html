@@ -1,0 +1,338 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > AuxiliaryTableRow</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset</a>
+</div>
+
+<h1>Coverage Summary for Class: AuxiliaryTableRow (org.kitodo.dataeditor.ruleset)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuxiliaryTableRow</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (37/37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;
+&nbsp;/**
+&nbsp; * Class of the data row objects of the auxiliary table. You can imagine the
+&nbsp; * list of these objects in the metadata acquisition mask builder as a large
+&nbsp; * table in which all relevant information is entered, one row per metadata
+&nbsp; * type, in the order in which the metadata types must be displayed later.
+&nbsp; */
+&nbsp;class AuxiliaryTableRow {
+&nbsp;    /**
+&nbsp;     * Returns the umpteenth set member as the only element of a list, if that
+&nbsp;     * exists. Otherwise the empty list.
+&nbsp;     *
+&nbsp;     * @param unnumbered
+&nbsp;     *            unnumbered collection
+&nbsp;     * @param fictitiousNumber
+&nbsp;     *            fictitious number of the element
+&nbsp;     * @return element with the fictional number
+&nbsp;     */
+&nbsp;    private static &lt;T&gt; Collection&lt;T&gt; unorderedCollectionMemberByIndexAsList(Collection&lt;T&gt; unnumbered,
+&nbsp;            int fictitiousNumber) {
+&nbsp;
+<b class="fc">&nbsp;        List&lt;T&gt; unorderedCollectionMemberAsList = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        Iterator&lt;T&gt; currentMetaDataObject = unnumbered.iterator();</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; fictitiousNumber; i++) {</b>
+<b class="fc">&nbsp;            if (currentMetaDataObject.hasNext()) {</b>
+<b class="fc">&nbsp;                currentMetaDataObject.next();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        if (currentMetaDataObject.hasNext()) {</b>
+<b class="fc">&nbsp;            unorderedCollectionMemberAsList.add(currentMetaDataObject.next());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return unorderedCollectionMemberAsList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The key declaration provides information about the key.
+&nbsp;     */
+&nbsp;    private KeyDeclaration key;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The rule plays a role in terms of repeatability (e.g., single versus
+&nbsp;     * multiple choice) and possible restrictions on list of values.
+&nbsp;     */
+&nbsp;    private Rule rule;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If there are edit settings for this metadata type.
+&nbsp;     */
+&nbsp;    private Settings settings;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field is ticked if for this type a (possibly additional) white field
+&nbsp;     * is to be created.
+&nbsp;     */
+<b class="fc">&nbsp;    private boolean oneAdditionalField = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The metadata values for this type. Although the table is agnostic about
+&nbsp;     * which class these objects have, it still accepts them and provides for
+&nbsp;     * possibly necessary grouping.
+&nbsp;     */
+<b class="fc">&nbsp;    private Collection&lt;Metadata&gt; metaDataObjects = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new data row object and enters a key into the table.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            key for this row
+&nbsp;     */
+<b class="fc">&nbsp;    AuxiliaryTableRow(KeyDeclaration key, Settings settings) {</b>
+<b class="fc">&nbsp;        this.key = key;</b>
+<b class="fc">&nbsp;        this.settings = settings;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a metadata value object to this metadata type.
+&nbsp;     *
+&nbsp;     * @param metaDataObject
+&nbsp;     *            valuable object added
+&nbsp;     */
+&nbsp;    void add(Metadata metaDataObject) {
+<b class="fc">&nbsp;        metaDataObjects.add(metaDataObject);</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds an additional (empty) input field to this metadata type.
+&nbsp;     */
+&nbsp;    void addOneAdditionalField() {
+<b class="fc">&nbsp;        oneAdditionalField = true;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the data object(s). If the metadata type is a multiple-choice,
+&nbsp;     * all objects in the first (and only) element are returned, otherwise one
+&nbsp;     * will be used, which in turn must be included in a list as a container
+&nbsp;     * because of the method signature.
+&nbsp;     *
+&nbsp;     * @param i
+&nbsp;     *            which object should be returned
+&nbsp;     * @return the data object(s)
+&nbsp;     */
+&nbsp;    Collection&lt;Metadata&gt; getDataObjects(int i) {
+<b class="fc">&nbsp;        if (isMultipleChoice() || isContainingExcludedData()) {</b>
+<b class="fc">&nbsp;            return metaDataObjects;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return unorderedCollectionMemberByIndexAsList(metaDataObjects, i);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the identification of the key. The key ID is of fundamental
+&nbsp;     * importance because it links everything together.
+&nbsp;     *
+&nbsp;     * @return the ID
+&nbsp;     */
+&nbsp;    String getId() {
+<b class="fc">&nbsp;        return key.getId();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the key handled in this row.
+&nbsp;     *
+&nbsp;     * @return the key
+&nbsp;     */
+&nbsp;    KeyDeclaration getKey() {
+<b class="fc">&nbsp;        return key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a label in the named priority list.
+&nbsp;     *
+&nbsp;     * @param priorityList
+&nbsp;     *            favorites list of human languages
+&nbsp;     * @return the best fitting language label
+&nbsp;     */
+&nbsp;    String getLabel(List&lt;LanguageRange&gt; priorityList) {
+<b class="fc">&nbsp;        return key.getLabel(priorityList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns how many type views need to be generated in the result list.
+&nbsp;     *
+&nbsp;     * @return how many type views need to be generated in the result list
+&nbsp;     */
+&nbsp;    int getNumberOfTypeViewsToGenerate() {
+<b class="fc">&nbsp;        if (settings.isExcluded(key.getId())) {</b>
+<b class="fc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        int objects = metaDataObjects.size();</b>
+<b class="fc">&nbsp;        int fields = Math.max(</b>
+<b class="fc">&nbsp;            Math.max(settings.isAlwaysShowing(key.getId()) ? 1 : 0, rule.getMinOccurs()),</b>
+<b class="fc">&nbsp;            objects + (oneAdditionalField &amp;&amp; rule.getMaxOccurs() &gt; objects ? 1 : 0));</b>
+<b class="fc">&nbsp;        return isMultipleChoice() ? Math.min(fields, 1) : fields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether there are data values for a hidden metadata entry. These
+&nbsp;     * must persist when the view is saved and must not be deleted simply
+&nbsp;     * because they no longer appear in the display.
+&nbsp;     *
+&nbsp;     * @return whether there are hidden values
+&nbsp;     */
+&nbsp;    boolean isContainingExcludedData() {
+<b class="fc">&nbsp;        return settings.isExcluded(key.getId()) &amp;&amp; !metaDataObjects.isEmpty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the metadata type is a multiple choice.
+&nbsp;     *
+&nbsp;     * @return whether the metadata type is a multiple choice
+&nbsp;     */
+&nbsp;    private boolean isMultipleChoice() {
+<b class="fc">&nbsp;        return key.isWithOptions() &amp;&amp; rule.isRepeatable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether you can add another field to this metadata type. For
+&nbsp;     * excluded keys you cannot add a field, and for multiple selection keys
+&nbsp;     * only if there is no metadata entry for this key. Otherwise it must be
+&nbsp;     * looked out if one more is possible after the rule.
+&nbsp;     *
+&nbsp;     * @return whether you can add another field
+&nbsp;     */
+&nbsp;    boolean isPossibleToExpandAnotherField() {
+<b class="fc">&nbsp;        int previous = oneAdditionalField ? metaDataObjects.size() + 1 : metaDataObjects.size();</b>
+<b class="fc">&nbsp;        if (settings.isExcluded(key.getId()) || rule.getMinOccurs() &gt; previous</b>
+<b class="fc">&nbsp;                || isMultipleChoice() &amp;&amp; !metaDataObjects.isEmpty()) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return rule.getMaxOccurs() &gt; previous;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether a complex or simple key is to be generated for this key.
+&nbsp;     *
+&nbsp;     * @return whether a complex key is to be generated
+&nbsp;     */
+&nbsp;    boolean isComplexKey() {
+<b class="fc">&nbsp;        return key.isComplex();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set method for setting the rule if there is one.
+&nbsp;     *
+&nbsp;     * @param rule
+&nbsp;     *            rule to be set
+&nbsp;     */
+&nbsp;    void setRule(Rule rule) {
+<b class="fc">&nbsp;        this.rule = rule;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

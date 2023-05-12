@@ -1,0 +1,471 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DivXmlElementAccess</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.access</a>
+</div>
+
+<h1>Coverage Summary for Class: DivXmlElementAccess (org.kitodo.dataformat.access)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DivXmlElementAccess</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,9%
+  </span>
+  <span class="absValue">
+    (10/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,3%
+  </span>
+  <span class="absValue">
+    (126/138)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataformat.access;
+&nbsp;
+&nbsp;import java.math.BigInteger;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.function.Function;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.stream.StreamSupport;
+&nbsp;
+&nbsp;import javax.xml.bind.JAXBElement;
+&nbsp;import javax.xml.namespace.QName;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.MetadataGroup;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.api.dataformat.mets.KitodoUUID;
+&nbsp;import org.kitodo.dataformat.metskitodo.AmdSecType;
+&nbsp;import org.kitodo.dataformat.metskitodo.DivType;
+&nbsp;import org.kitodo.dataformat.metskitodo.KitodoType;
+&nbsp;import org.kitodo.dataformat.metskitodo.MdSecType;
+&nbsp;import org.kitodo.dataformat.metskitodo.MdSecType.MdWrap;
+&nbsp;import org.kitodo.dataformat.metskitodo.MdSecType.MdWrap.XmlData;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetadataGroupType;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetadataType;
+&nbsp;import org.kitodo.dataformat.metskitodo.Mets;
+&nbsp;
+&nbsp;/**
+&nbsp; * The tree-like outline structure for digital representation. This structuring
+&nbsp; * structure can be subdivided into arbitrary finely granular.
+&nbsp; */
+&nbsp;public class DivXmlElementAccess extends LogicalDivision {
+&nbsp;    /**
+&nbsp;     * The qualified name of the Kitodo metadata format, needed to assemble the
+&nbsp;     * metadata entries in METS using JAXB.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final QName KITODO_QNAME = new QName(&quot;http://meta.kitodo.org/v1/&quot;, &quot;kitodo&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Some magic numbers that are used in the METS XML file representation of
+&nbsp;     * this structure to describe relations between XML elements. They need to
+&nbsp;     * be stored because some scatty third-party scripts rely on them not being
+&nbsp;     * changed anymore once assigned.
+&nbsp;     */
+&nbsp;    private final String metsReferrerId;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new DivXmlElementAccess.
+&nbsp;     */
+&nbsp;    public DivXmlElementAccess() {
+<b class="nc">&nbsp;        super();</b>
+<b class="nc">&nbsp;        metsReferrerId = KitodoUUID.randomUUID();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new DivXmlElementAccess for an existing structure.
+&nbsp;     */
+&nbsp;    DivXmlElementAccess(LogicalDivision logicalDivision) {
+<b class="fc">&nbsp;        super(logicalDivision);</b>
+<b class="fc">&nbsp;        metsReferrerId = logicalDivision instanceof DivXmlElementAccess</b>
+<b class="fc">&nbsp;                ? ((DivXmlElementAccess) logicalDivision).metsReferrerId</b>
+<b class="fc">&nbsp;                : KitodoUUID.randomUUID();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor to read a structure from METS.
+&nbsp;     *
+&nbsp;     * @param div
+&nbsp;     *            METS {@code &lt;div&gt;} element from which the structure is to be
+&nbsp;     *            built
+&nbsp;     * @param mets
+&nbsp;     *            METS data structure from which it is possible to determine
+&nbsp;     *            what kind of metadata section is linked
+&nbsp;     * @param physicalDivisionsMap
+&nbsp;     *            From this map, the physical divisions are read, which must be
+&nbsp;     *            referenced here by their ID.
+&nbsp;     * @param parentOrder
+&nbsp;     *            This represents the value of the parent&#39;s {@code ORDER} attribute. It is not required for logical elements by the
+&nbsp;     *            mets standard but is used in Kitodo internal data format. It helps to display logical and physical elements in an
+&nbsp;     *            advanced combined tree.
+&nbsp;     */
+&nbsp;    DivXmlElementAccess(DivType div, Mets mets, Map&lt;String, List&lt;FileXmlElementAccess&gt;&gt; physicalDivisionsMap, int parentOrder) {
+<b class="fc">&nbsp;        super();</b>
+<b class="fc">&nbsp;        div.getCONTENTIDS().parallelStream().map(URI::create).forEachOrdered(super.getContentIds()::add);</b>
+<b class="fc">&nbsp;        super.setLabel(div.getLABEL());</b>
+<b class="fc">&nbsp;        for (Object mdSecType : div.getDMDID()) {</b>
+<b class="fc">&nbsp;            super.getMetadata().addAll(readMetadata((MdSecType) mdSecType, MdSec.DMD_SEC));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        for (Object mdSecType : div.getADMID()) {</b>
+<b class="fc">&nbsp;            super.getMetadata().addAll(readMetadata((MdSecType) mdSecType, amdSecTypeOf(mets, (MdSecType) mdSecType)));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        metsReferrerId = div.getID();</b>
+<b class="fc">&nbsp;        BigInteger order = div.getORDER();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(order) &amp;&amp; order.intValue() &gt; 0) {</b>
+<b class="fc">&nbsp;            setOrder(order.intValue());</b>
+<b class="fc">&nbsp;        } else if (parentOrder &gt; 0) {</b>
+<b class="fc">&nbsp;            setOrder(parentOrder);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            setOrder(1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        super.setOrderlabel(div.getORDERLABEL());</b>
+<b class="fc">&nbsp;        for (DivType child : div.getDiv()) {</b>
+<b class="fc">&nbsp;            getChildren().add(new DivXmlElementAccess(child, mets, physicalDivisionsMap, getOrder()));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        super.setType(div.getTYPE());</b>
+<b class="fc">&nbsp;        List&lt;FileXmlElementAccess&gt; fileXmlElementAccesses = physicalDivisionsMap.get(div.getID());</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(fileXmlElementAccesses)) {</b>
+<b class="fc">&nbsp;            for (FileXmlElementAccess fileXmlElementAccess : fileXmlElementAccesses) {</b>
+<b class="fc">&nbsp;                if (Objects.nonNull(fileXmlElementAccess)</b>
+<b class="fc">&nbsp;                    &amp;&amp; !fileXmlElementAccessIsLinkedToChildren(fileXmlElementAccess, div.getDiv(), physicalDivisionsMap)) {</b>
+<b class="fc">&nbsp;                    super.getViews().add(new AreaXmlElementAccess(fileXmlElementAccess).getView());</b>
+<b class="fc">&nbsp;                    fileXmlElementAccess.getPhysicalDivision().getLogicalDivisions().add(this);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        super.setLink(MptrXmlElementAccess.getLinkFromDiv(div));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean fileXmlElementAccessIsLinkedToChildren(FileXmlElementAccess fileXmlElementAccess,
+&nbsp;                                                           List&lt;DivType&gt; divs,
+&nbsp;                                                           Map&lt;String, List&lt;FileXmlElementAccess&gt;&gt; physicalDivisionsMap) {
+<b class="fc">&nbsp;        if (divs.size() == 0) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        boolean test = false;</b>
+<b class="fc">&nbsp;        for (DivType div : divs) {</b>
+<b class="fc">&nbsp;            List&lt;FileXmlElementAccess&gt; fileXmlElementAccesses = physicalDivisionsMap.get(div.getID());</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(fileXmlElementAccesses) &amp;&amp; fileXmlElementAccesses.contains(fileXmlElementAccess)) {</b>
+<b class="fc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (div.getDiv().size() &gt; 0</b>
+<b class="fc">&nbsp;                    &amp;&amp; fileXmlElementAccessIsLinkedToChildren(fileXmlElementAccess, div.getDiv(), physicalDivisionsMap)) {</b>
+<b class="fc">&nbsp;                test = true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return test;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines from a METS data structure of which type is a metadata
+&nbsp;     * section.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Implementation note: This method would be a good candidate for
+&nbsp;     * parallelization.
+&nbsp;     *
+&nbsp;     * @param mets
+&nbsp;     *            METS data structure that determines what type of metadata
+&nbsp;     *            section is
+&nbsp;     * @param mdSec
+&nbsp;     *            administrative metadata section whose type is to be
+&nbsp;     *            determined
+&nbsp;     * @return the type of administrative metadata section
+&nbsp;     */
+&nbsp;    static final MdSec amdSecTypeOf(Mets mets, MdSecType mdSec) {
+<b class="fc">&nbsp;        for (AmdSecType amdSec : mets.getAmdSec()) {</b>
+<b class="fc">&nbsp;            if (amdSec.getSourceMD().contains(mdSec)) {</b>
+<b class="fc">&nbsp;                return MdSec.SOURCE_MD;</b>
+<b class="nc">&nbsp;            } else if (amdSec.getDigiprovMD().contains(mdSec)) {</b>
+<b class="nc">&nbsp;                return MdSec.DIGIPROV_MD;</b>
+<b class="nc">&nbsp;            } else if (amdSec.getRightsMD().contains(mdSec)) {</b>
+<b class="nc">&nbsp;                return MdSec.RIGHTS_MD;</b>
+<b class="nc">&nbsp;            } else if (amdSec.getTechMD().contains(mdSec)) {</b>
+<b class="nc">&nbsp;                return MdSec.TECH_MD;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        throw new NoSuchElementException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads a metadata section and adds the metadata to the structure.
+&nbsp;     *
+&nbsp;     * @param mdSecType
+&nbsp;     *            type of metadata section
+&nbsp;     * @param mdSec
+&nbsp;     *            metadata section to be read
+&nbsp;     *
+&nbsp;     * @return a collection of type Metadata
+&nbsp;     */
+&nbsp;    static final Collection&lt;Metadata&gt; readMetadata(MdSecType mdSecType, MdSec mdSec) {
+<b class="fc">&nbsp;        Collection&lt;Metadata&gt; metadata = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(mdSecType) &amp;&amp; Objects.nonNull(mdSecType.getMdWrap())) {</b>
+<b class="fc">&nbsp;            for (Object object : mdSecType.getMdWrap().getXmlData().getAny()) {</b>
+<b class="fc">&nbsp;                if (object instanceof JAXBElement) {</b>
+<b class="fc">&nbsp;                    JAXBElement&lt;?&gt; jaxbElement = (JAXBElement&lt;?&gt;) object;</b>
+<b class="fc">&nbsp;                    Object value = jaxbElement.getValue();</b>
+<b class="fc">&nbsp;                    if (value instanceof KitodoType) {</b>
+<b class="fc">&nbsp;                        KitodoType kitodoType = (KitodoType) value;</b>
+<b class="fc">&nbsp;                        for (MetadataType metadataEntry : kitodoType.getMetadata()) {</b>
+<b class="fc">&nbsp;                            if (!metadataEntry.getValue().isEmpty()) {</b>
+<b class="fc">&nbsp;                                metadata.add(new MetadataXmlElementAccess(mdSec, metadataEntry).getMetadataEntry());</b>
+&nbsp;                            }
+<b class="fc">&nbsp;                        }</b>
+<b class="fc">&nbsp;                        for (MetadataGroupType metadataGroup : kitodoType.getMetadataGroup()) {</b>
+<b class="fc">&nbsp;                            metadata.add(new MetadataGroupXmlElementAccess(mdSec, metadataGroup).getMetadataGroup());</b>
+<b class="fc">&nbsp;                        }</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return metadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a METS {@code &lt;div&gt;} element from this structure.
+&nbsp;     *
+&nbsp;     * @param physicalDivisionIDs
+&nbsp;     *            the assigned identifier for each physical division so that the link
+&nbsp;     *            pairs of the struct link section can be formed later
+&nbsp;     * @param smLinkData
+&nbsp;     *            the link pairs of the struct link section are added to this
+&nbsp;     *            list
+&nbsp;     * @param mets
+&nbsp;     *            the METS structure in which the metadata is added
+&nbsp;     * @return a METS {@code &lt;div&gt;} element
+&nbsp;     */
+&nbsp;    DivType toDiv(Map&lt;PhysicalDivision, String&gt; physicalDivisionIDs, LinkedList&lt;Pair&lt;String, String&gt;&gt; smLinkData, Mets mets) {
+<b class="fc">&nbsp;        DivType div = new DivType();</b>
+<b class="fc">&nbsp;        div.setID(metsReferrerId);</b>
+<b class="fc">&nbsp;        if (!super.getContentIds().isEmpty()) {</b>
+<b class="nc">&nbsp;            super.getContentIds().parallelStream().map(URI::toString).forEachOrdered(div.getCONTENTIDS()::add);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        div.setLABEL(super.getLabel());</b>
+<b class="fc">&nbsp;        if (getOrder() &gt; 0) {</b>
+<b class="fc">&nbsp;            div.setORDER(BigInteger.valueOf(getOrder()));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        div.setORDERLABEL(super.getOrderlabel());</b>
+<b class="fc">&nbsp;        div.setTYPE(super.getType());</b>
+<b class="fc">&nbsp;        smLinkData.addAll(super.getViews().stream().map(View::getPhysicalDivision).map(physicalDivisionIDs::get)</b>
+<b class="fc">&nbsp;                .map(physicalDivisionId -&gt; Pair.of(metsReferrerId, physicalDivisionId)).collect(Collectors.toList()));</b>
+&nbsp;
+<b class="fc">&nbsp;        Optional&lt;MdSecType&gt; optionalDmdSec = createMdSec(super.getMetadata(), MdSec.DMD_SEC);</b>
+<b class="fc">&nbsp;        if (optionalDmdSec.isPresent()) {</b>
+<b class="fc">&nbsp;            MdSecType dmdSec = optionalDmdSec.get();</b>
+<b class="fc">&nbsp;            String name = metsReferrerId + &#39;:&#39; + MdSec.DMD_SEC.toString();</b>
+<b class="fc">&nbsp;            dmdSec.setID(KitodoUUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)));</b>
+<b class="fc">&nbsp;            mets.getDmdSec().add(dmdSec);</b>
+<b class="fc">&nbsp;            div.getDMDID().add(dmdSec);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Optional&lt;AmdSecType&gt; optionalAmdSec = createAmdSec(super.getMetadata(), metsReferrerId, div);</b>
+<b class="fc">&nbsp;        if (optionalAmdSec.isPresent()) {</b>
+<b class="fc">&nbsp;            AmdSecType admSec = optionalAmdSec.get();</b>
+<b class="fc">&nbsp;            mets.getAmdSec().add(admSec);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.nonNull(super.getLink())) {</b>
+<b class="fc">&nbsp;            MptrXmlElementAccess.addMptrToDiv(super.getLink(), div);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (LogicalDivision subLogicalDivision : super.getChildren()) {</b>
+<b class="fc">&nbsp;            div.getDiv().add(new DivXmlElementAccess(subLogicalDivision).toDiv(physicalDivisionIDs, smLinkData, mets));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return div;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a metadata section of the specified domain of the Kitodo type
+&nbsp;     * and returns it with its connection to the METS if there is data for it.
+&nbsp;     *
+&nbsp;     * @param domain
+&nbsp;     *            Domain for which a metadata section is to be generated
+&nbsp;     * @return a metadata section, if there is data for it
+&nbsp;     */
+&nbsp;    static Optional&lt;MdSecType&gt; createMdSec(Iterable&lt;Metadata&gt; metadata, MdSec domain) {
+<b class="fc">&nbsp;        if (StreamSupport.stream(metadata.spliterator(), false)</b>
+<b class="fc">&nbsp;                .noneMatch(piece -&gt; Objects.equals(piece.getDomain(), domain))) {</b>
+<b class="fc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        KitodoType kitodoType = new KitodoType();</b>
+<b class="fc">&nbsp;        for (Metadata entry : metadata) {</b>
+<b class="fc">&nbsp;            if (domain.equals(entry.getDomain())) {</b>
+<b class="fc">&nbsp;                if (entry instanceof MetadataEntry) {</b>
+<b class="fc">&nbsp;                    kitodoType.getMetadata().add(new MetadataXmlElementAccess((MetadataEntry) entry).toMetadata());</b>
+<b class="fc">&nbsp;                } else if (entry instanceof MetadataGroup) {</b>
+<b class="fc">&nbsp;                    kitodoType.getMetadataGroup()</b>
+<b class="fc">&nbsp;                            .add(new MetadataGroupXmlElementAccess((MetadataGroup) entry).toXMLMetadataGroup());</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        XmlData xmlData = new XmlData();</b>
+<b class="fc">&nbsp;        xmlData.getAny().add(new JAXBElement&lt;&gt;(KITODO_QNAME, KitodoType.class, kitodoType));</b>
+<b class="fc">&nbsp;        MdWrap mdWrap = new MdWrap();</b>
+<b class="fc">&nbsp;        mdWrap.setXmlData(xmlData);</b>
+<b class="fc">&nbsp;        MdSecType dmdSec = new MdSecType();</b>
+<b class="fc">&nbsp;        dmdSec.setMdWrap(mdWrap);</b>
+<b class="fc">&nbsp;        return Optional.of(dmdSec);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates an {@code &lt;amdSec&gt;} if administrative metadata exists on this
+&nbsp;     * structure.
+&nbsp;     *
+&nbsp;     * @param div
+&nbsp;     *            div where ADMID references must be added to the generated
+&nbsp;     *            metadata sections
+&nbsp;     * @return an {@code &lt;amdSec&gt;}, if necessary
+&nbsp;     */
+&nbsp;    static Optional&lt;AmdSecType&gt; createAmdSec(Iterable&lt;Metadata&gt; metadata, String metsReferrerId, DivType div) {
+<b class="fc">&nbsp;        AmdSecType amdSec = new AmdSecType();</b>
+<b class="fc">&nbsp;        boolean source = addMdSec(createMdSec(metadata, MdSec.SOURCE_MD), metsReferrerId, MdSec.SOURCE_MD,</b>
+&nbsp;            AmdSecType::getSourceMD, amdSec, div);
+<b class="fc">&nbsp;        boolean digiprov = addMdSec(createMdSec(metadata, MdSec.DIGIPROV_MD), metsReferrerId, MdSec.DIGIPROV_MD,</b>
+&nbsp;            AmdSecType::getDigiprovMD, amdSec, div);
+<b class="fc">&nbsp;        boolean rights = addMdSec(createMdSec(metadata, MdSec.RIGHTS_MD), metsReferrerId, MdSec.RIGHTS_MD,</b>
+&nbsp;            AmdSecType::getRightsMD, amdSec, div);
+<b class="fc">&nbsp;        boolean tech = addMdSec(createMdSec(metadata, MdSec.TECH_MD), metsReferrerId, MdSec.TECH_MD,</b>
+&nbsp;            AmdSecType::getTechMD, amdSec, div);
+<b class="fc">&nbsp;        return source || digiprov || rights || tech ? Optional.of(amdSec) : Optional.empty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a metadata section to an administrative metadata section, if there
+&nbsp;     * is one. This function deduplicates fourfold existing function for four
+&nbsp;     * different metadata sections.
+&nbsp;     *
+&nbsp;     * @param optionalMdSec
+&nbsp;     *            perhaps existing metadata section to be added if it exists
+&nbsp;     * @param mdSecType
+&nbsp;     *            the type of the mdSec, used in ID generation
+&nbsp;     * @param mdSecTypeGetter
+&nbsp;     *            the getter via which the metadata section can be added to the
+&nbsp;     *            administrative metadata section
+&nbsp;     * @param amdSec
+&nbsp;     *            administrative metadata section to which the metadata
+&nbsp;     *            section should be added, if any
+&nbsp;     * @param div
+&nbsp;     *            div where ADMID references must be added to the generated
+&nbsp;     *            metadata sections
+&nbsp;     * @return whether something has been added to the administrative metadata
+&nbsp;     *         section
+&nbsp;     */
+&nbsp;    private static boolean addMdSec(Optional&lt;MdSecType&gt; optionalMdSec, String metsReferrerId, MdSec mdSecType,
+&nbsp;            Function&lt;AmdSecType, List&lt;MdSecType&gt;&gt; mdSecTypeGetter, AmdSecType amdSec, DivType div) {
+&nbsp;
+<b class="fc">&nbsp;        if (!optionalMdSec.isPresent()) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            MdSecType mdSec = optionalMdSec.get();</b>
+<b class="fc">&nbsp;            String name = metsReferrerId + &#39;:&#39; + mdSecType.toString();</b>
+<b class="fc">&nbsp;            mdSec.setID(KitodoUUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)));</b>
+<b class="fc">&nbsp;            mdSecTypeGetter.apply(amdSec).add(mdSec);</b>
+<b class="fc">&nbsp;            div.getADMID().add(mdSec);</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

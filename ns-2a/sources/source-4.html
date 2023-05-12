@@ -1,0 +1,227 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FLocatXmlElementAccess</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.access</a>
+</div>
+
+<h1>Coverage Summary for Class: FLocatXmlElementAccess (org.kitodo.dataformat.access)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FLocatXmlElementAccess</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (22/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataformat.access;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import org.kitodo.api.dataformat.mets.KitodoUUID;
+&nbsp;import org.kitodo.dataformat.metskitodo.FileType;
+&nbsp;import org.kitodo.dataformat.metskitodo.FileType.FLocat;
+&nbsp;
+&nbsp;/**
+&nbsp; * A media file is a reference to a computer file on the data store. Since it is
+&nbsp; * referenced by URI, it can also be in the world wide web.
+&nbsp; */
+&nbsp;public class FLocatXmlElementAccess {
+&nbsp;    /**
+&nbsp;     * Pattern used to identify (and subsequently correct) ill-formed URIs
+&nbsp;     * created with Production v. 2 under Windows. These may still be present in
+&nbsp;     * old, converted Production v. 2 processes.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Pattern MALFORMED_WINDOWS_URI = Pattern.compile(&quot;file:/([C-Z]:\\\\.*)&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Some magic numbers that are used in the METS XML file representation of
+&nbsp;     * this structure to describe relations between XML elements. They need to
+&nbsp;     * be stored because some scatty third-party scripts rely on them not being
+&nbsp;     * changed anymore once assigned.
+&nbsp;     */
+&nbsp;    private String metsReferrerId;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * References computer file.
+&nbsp;     */
+&nbsp;    private final URI uri;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Public constructor for creating a new media file reference. This
+&nbsp;     * constructor can be used with the service manager to create a new instance
+&nbsp;     * of media file.
+&nbsp;     */
+<b class="fc">&nbsp;    FLocatXmlElementAccess(URI uri) {</b>
+<b class="fc">&nbsp;        this.uri = uri;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor for creating a new media file reference from METS F locat.
+&nbsp;     *
+&nbsp;     * @param file
+&nbsp;     *            File to create a new media file reference from
+&nbsp;     */
+<b class="fc">&nbsp;    FLocatXmlElementAccess(FileType file) {</b>
+<b class="fc">&nbsp;        metsReferrerId = file.getID();</b>
+<b class="fc">&nbsp;        uri = getAndRepairUri(file);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private final URI getAndRepairUri(FileType file) {
+<b class="fc">&nbsp;        String href = file.getFLocat().get(0).getHref();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            return new URI(href);</b>
+<b class="fc">&nbsp;        } catch (URISyntaxException exception) {</b>
+<b class="fc">&nbsp;            Matcher malformedWindowsUriMatcher = MALFORMED_WINDOWS_URI.matcher(href);</b>
+<b class="fc">&nbsp;            if (malformedWindowsUriMatcher.matches()) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    return new URI(&quot;file:///&quot;.concat(malformedWindowsUriMatcher.group(1).replace(&#39;\\&#39;, &#39;/&#39;)));</b>
+<b class="nc">&nbsp;                } catch (URISyntaxException suppressed) {</b>
+<b class="nc">&nbsp;                    exception.addSuppressed(suppressed);</b>
+<b class="nc">&nbsp;                    throw new IllegalArgumentException(exception.getMessage(), exception);</b>
+&nbsp;                }
+&nbsp;            } else {
+<b class="nc">&nbsp;                throw new IllegalArgumentException(exception.getMessage(), exception);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the METS file ID of the F locat XML element access.
+&nbsp;     *
+&nbsp;     * @return the ID
+&nbsp;     */
+&nbsp;    String getFileId() {
+<b class="fc">&nbsp;        return metsReferrerId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the URI of the F locat XML element access.
+&nbsp;     *
+&nbsp;     * @return the URI
+&nbsp;     */
+&nbsp;    public URI getUri() {
+<b class="fc">&nbsp;        return uri;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new METS {@code &lt;file&gt;} element with this media file reference
+&nbsp;     * in it.
+&nbsp;     *
+&nbsp;     * @param mimeType
+&nbsp;     *            possible Internet MIME type of a computer file that can be
+&nbsp;     *            obtained when the URI is downloaded
+&nbsp;     * @return a METS {@code &lt;file&gt;} element
+&nbsp;     */
+&nbsp;    FileType toFile(String mimeType, String metsReferrerId) {
+<b class="fc">&nbsp;        FileType file = new FileType();</b>
+<b class="fc">&nbsp;        file.setID(metsReferrerId == null ? KitodoUUID.randomUUID() : metsReferrerId);</b>
+<b class="fc">&nbsp;        file.setMIMETYPE(mimeType);</b>
+<b class="fc">&nbsp;        FLocat fLocat = new FLocat();</b>
+<b class="fc">&nbsp;        fLocat.setLOCTYPE(&quot;URL&quot;);</b>
+<b class="fc">&nbsp;        fLocat.setHref(uri.toString());</b>
+<b class="fc">&nbsp;        file.getFLocat().add(fLocat);</b>
+<b class="fc">&nbsp;        return file;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

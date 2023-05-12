@@ -1,0 +1,379 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PaginatorMode</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.metadata.pagination</a>
+</div>
+
+<h1>Coverage Summary for Class: PaginatorMode (org.kitodo.production.helper.metadata.pagination)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PaginatorMode</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,5%
+  </span>
+  <span class="absValue">
+    (13/17)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PaginatorMode$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PaginatorMode$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PaginatorMode$3</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PaginatorMode$4</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PaginatorMode$5</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PaginatorMode$6</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    93,3%
+  </span>
+  <span class="absValue">
+    (14/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,2%
+  </span>
+  <span class="absValue">
+    (37/41)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.metadata.pagination;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Constants for the pagination modes selectable by image buttons.
+&nbsp; */
+<b class="fc">&nbsp;public enum PaginatorMode {</b>
+&nbsp;    /**
+&nbsp;     * Only even, or only odd numbers, always skipping one (1, 3, 5, 7, … / [1],
+&nbsp;     * [3], [5], [7], …).
+&nbsp;     */
+<b class="fc">&nbsp;    COLUMNS(2) {</b>
+&nbsp;        @Override
+&nbsp;        String format(String value, String next, boolean fictitious, String separator) {
+<b class="fc">&nbsp;            if (fictitious) {</b>
+<b class="fc">&nbsp;                return &#39;[&#39; + value + &quot;²]&quot;;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return value.concat(&quot;²&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Two subsequent numbers on one image (1␣2, 3␣4, 5␣6, 7␣8, … / [1]␣[2],
+&nbsp;     * [3]␣[4], [5]␣[6], [7]␣[8], …).
+&nbsp;     */
+<b class="fc">&nbsp;    DOUBLE_PAGES(6) {</b>
+&nbsp;        @Override
+&nbsp;        String format(String value, String next, boolean fictitious, String separator) {
+<b class="fc">&nbsp;            if (fictitious) {</b>
+<b class="fc">&nbsp;                return &#39;[&#39; + value + &quot;]`&quot; + separator + &quot;`[&quot; + next + &quot;]&quot;;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return value + &quot;`&quot; + separator + &#39;`&#39; + next;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Each digit appears two times (1, 1, 2, 2, … / [1], [1], [2], [2], …).
+&nbsp;     */
+<b class="fc">&nbsp;    FOLIATION(3) {</b>
+&nbsp;        @Override
+&nbsp;        String format(String value, String next, boolean fictitious, String separator) {
+<b class="fc">&nbsp;            if (fictitious) {</b>
+<b class="fc">&nbsp;                return &#39;[&#39; + value + &quot;½]&quot;;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return value.concat(&quot;½&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Normal pagination (1, 2, 3, 4, … / [1], [2], [3], [4], …).
+&nbsp;     */
+<b class="fc">&nbsp;    PAGES(1) {</b>
+&nbsp;        @Override
+&nbsp;        String format(String value, String next, boolean fictitious, String separator) {
+<b class="fc">&nbsp;            if (fictitious) {</b>
+<b class="fc">&nbsp;                return &#39;[&#39; + value + &quot;]&quot;;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return value;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * One back side (“v”) with the subsequent front side (“r”) on one image (1v␣2r,
+&nbsp;     * 2v␣3r, 3v␣4r, 4v␣5r, … / [1]v␣[2]r, [2]v␣[3]r, [3]v␣[4]r, [4]v␣[5]r, …).
+&nbsp;     */
+<b class="fc">&nbsp;    RECTOVERSO(4) {</b>
+&nbsp;        @Override
+&nbsp;        String format(String value, String next, boolean fictitious, String separator) {
+<b class="fc">&nbsp;            if (fictitious) {</b>
+<b class="fc">&nbsp;                return &#39;[&#39; + value + &quot;`]v&quot; + separator + &quot;[`&quot; + next + &quot;°]r&quot;;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return value + &quot;`v&quot; + separator + &#39;`&#39; + next + &quot;°r&quot;;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Alternating a front side (“r”), then a back side (“v”) (1r, 1v, 2r, 2v, … /
+&nbsp;     * [1]r, [1]v, [2]r, [2]v, …).
+&nbsp;     */
+<b class="fc">&nbsp;    RECTOVERSO_FOLIATION(5) {</b>
+&nbsp;        @Override
+&nbsp;        String format(String value, String next, boolean fictitious, String separator) {
+<b class="fc">&nbsp;            if (fictitious) {</b>
+<b class="fc">&nbsp;                return &#39;[&#39; + value + &quot;°]¡r¿v½&quot;;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return value.concat(&quot;°¡r¿v½&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    };
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Map for the look-up of codes.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Map&lt;Integer, PaginatorMode&gt; codeMap = new HashMap&lt;&gt;(</b>
+<b class="fc">&nbsp;            (int) Math.ceil(values().length / .75));</b>
+&nbsp;
+&nbsp;    static {
+<b class="fc">&nbsp;        for (PaginatorMode member : PaginatorMode.values()) {</b>
+<b class="fc">&nbsp;            codeMap.put(member.code, member);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the enum constant of this type with the specified code.
+&nbsp;     *
+&nbsp;     * @param code
+&nbsp;     *            code of the enum constant to be returned
+&nbsp;     * @return the enum constant with the specified code
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if this enum type has no constant with the specified code
+&nbsp;     */
+&nbsp;    public static PaginatorMode valueOf(int code) {
+<b class="nc">&nbsp;        PaginatorMode valueOf = codeMap.get(code);</b>
+<b class="nc">&nbsp;        if (valueOf == null) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;For int: &quot; + code);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return valueOf;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Code of the enum constant.
+&nbsp;     */
+&nbsp;    private final int code;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Enum constant constructor that takes a code.
+&nbsp;     *
+&nbsp;     * @param code
+&nbsp;     *            code of the enum constant.
+&nbsp;     */
+<b class="fc">&nbsp;    PaginatorMode(int code) {</b>
+<b class="fc">&nbsp;        this.code = code;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    abstract String format(String value, String next, boolean fictitious, String separator);
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

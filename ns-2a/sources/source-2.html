@@ -1,0 +1,154 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > AreaXmlElementAccess</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.access</a>
+</div>
+
+<h1>Coverage Summary for Class: AreaXmlElementAccess (org.kitodo.dataformat.access)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AreaXmlElementAccess</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataformat.access;
+&nbsp;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;
+&nbsp;/**
+&nbsp; * A view on a physical division. The individual levels of the {@link DivXmlElementAccess} refer
+&nbsp; * to {@code View}s on {@link FileXmlElementAccess}s. At the moment, each {@code View}
+&nbsp; * refers to exactly one {@code PhysicalDivision} as a whole. This concept level has
+&nbsp; * been added here in order to be able to expand it in the future in order to be
+&nbsp; * able to refer to individual parts of a {@code PhysicalDivision}.
+&nbsp; */
+&nbsp;public class AreaXmlElementAccess {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The data object of this area XML element access.
+&nbsp;     */
+<b class="fc">&nbsp;    private final View view = new View();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new view. This constructor can be called via the service loader
+&nbsp;     * to create a new view.
+&nbsp;     */
+<b class="nc">&nbsp;    public AreaXmlElementAccess() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new view that points to a media device. This constructor is
+&nbsp;     * called module-internally when loading a METS file.
+&nbsp;     * 
+&nbsp;     * @param fileXmlElementAccess
+&nbsp;     *            physical division in view
+&nbsp;     */
+<b class="fc">&nbsp;    AreaXmlElementAccess(FileXmlElementAccess fileXmlElementAccess) {</b>
+<b class="fc">&nbsp;        view.setPhysicalDivision(fileXmlElementAccess.getPhysicalDivision());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    View getView() {
+<b class="fc">&nbsp;        return view;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

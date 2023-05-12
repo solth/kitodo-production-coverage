@@ -1,0 +1,352 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RangeStreamContentHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: RangeStreamContentHandler (org.kitodo.production.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RangeStreamContentHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65%
+  </span>
+  <span class="absValue">
+    (76/117)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.handler;
+&nbsp;
+&nbsp;import static org.kitodo.production.helper.RangeStreamHelper.DEFAULT_BUFFER_SIZE;
+&nbsp;import static org.kitodo.production.helper.RangeStreamHelper.copy;
+&nbsp;import static org.kitodo.production.helper.RangeStreamHelper.sublong;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.el.ValueExpression;
+&nbsp;import javax.faces.context.ExternalContext;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.servlet.ServletOutputStream;
+&nbsp;import javax.servlet.http.HttpServletRequest;
+&nbsp;import javax.servlet.http.HttpServletResponse;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.apache.logging.log4j.message.ParameterizedMessage;
+&nbsp;import org.kitodo.production.beans.Range;
+&nbsp;import org.primefaces.application.resource.BaseDynamicContentHandler;
+&nbsp;import org.primefaces.model.StreamedContent;
+&nbsp;import org.primefaces.util.Constants;
+&nbsp;
+&nbsp;/**
+&nbsp; * This handler allows to stream files e.g. video and audio partially to the browser. Only parts of the file that are
+&nbsp; * requested by the browser are returned. This means, for example, that a video does not have to be loaded completely,
+&nbsp; * but byte parts are returned as a response of a so-called HTTP range requests.
+&nbsp; *
+&nbsp; * &lt;p&gt;For example, in HTML video component you can jump back and forth in the player without the file being completely
+&nbsp; * loaded or the player is jumping back to the beginning. At the current requested position we preload the file with a
+&nbsp; * small buffer size.&lt;/p&gt;
+&nbsp; */
+<b class="fc">&nbsp;public class RangeStreamContentHandler extends BaseDynamicContentHandler {</b>
+&nbsp;
+&nbsp;    private static final String MULTIPART_BOUNDARY = &quot;MULTIPART_BYTERANGES&quot;;
+&nbsp;
+&nbsp;    private static final String CLIENT_ABORT_EXCEPTION_CANONICAL_NAME = &quot;org.apache.catalina.connector.ClientAbortException&quot;;
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(RangeStreamContentHandler.class);</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void handle(FacesContext context) throws IOException {
+<b class="fc">&nbsp;        Map&lt;String, String&gt; params = context.getExternalContext().getRequestParameterMap();</b>
+<b class="fc">&nbsp;        String library = params.get(&quot;ln&quot;);</b>
+<b class="fc">&nbsp;        String resourceKey = params.get(Constants.DYNAMIC_CONTENT_PARAM);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.nonNull(resourceKey) &amp;&amp; Objects.nonNull(library) &amp;&amp; library.equals(Constants.LIBRARY)) {</b>
+<b class="fc">&nbsp;            StreamedContent streamedContent = null;</b>
+<b class="fc">&nbsp;            boolean cache = Boolean.parseBoolean(params.get(Constants.DYNAMIC_CONTENT_CACHE_PARAM));</b>
+<b class="fc">&nbsp;            ExternalContext externalContext = context.getExternalContext();</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                Map&lt;String, Object&gt; session = externalContext.getSessionMap();</b>
+<b class="fc">&nbsp;                Map&lt;String, String&gt; dynamicResourcesMapping = (Map) session.get(Constants.DYNAMIC_RESOURCES_MAPPING);</b>
+&nbsp;
+<b class="fc">&nbsp;                if (Objects.nonNull(dynamicResourcesMapping)) {</b>
+<b class="fc">&nbsp;                    String dynamicContentEL = dynamicResourcesMapping.get(resourceKey);</b>
+&nbsp;
+<b class="fc">&nbsp;                    if (Objects.nonNull(dynamicContentEL)) {</b>
+<b class="fc">&nbsp;                        ValueExpression ve = context.getApplication().getExpressionFactory()</b>
+<b class="fc">&nbsp;                                .createValueExpression(context.getELContext(), dynamicContentEL, StreamedContent.class);</b>
+<b class="fc">&nbsp;                        streamedContent = (StreamedContent) ve.getValue(context.getELContext());</b>
+&nbsp;
+<b class="fc">&nbsp;                        if (isErrorResponse(streamedContent, externalContext)) {</b>
+&nbsp;                            return;
+&nbsp;                        }
+&nbsp;
+<b class="fc">&nbsp;                        handleCache(externalContext, cache);</b>
+<b class="fc">&nbsp;                        process(streamedContent, externalContext);</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="fc">&nbsp;                externalContext.responseFlushBuffer();</b>
+<b class="fc">&nbsp;                context.responseComplete();</b>
+<b class="nc">&nbsp;            } catch (Exception e) {</b>
+<b class="nc">&nbsp;                if (CLIENT_ABORT_EXCEPTION_CANONICAL_NAME.equals(e.getClass()</b>
+<b class="nc">&nbsp;                        .getCanonicalName()) &amp;&amp; externalContext.getRequest() instanceof HttpServletRequest) {</b>
+<b class="nc">&nbsp;                    final HttpServletRequest request = (HttpServletRequest) externalContext.getRequest();</b>
+<b class="nc">&nbsp;                    logger.warn(new ParameterizedMessage(&quot;ClientAbortException generated by request {} {}&quot;,</b>
+<b class="nc">&nbsp;                            request.getMethod(), request.getRequestURL().toString()));</b>
+<b class="nc">&nbsp;                } else {</b>
+<b class="nc">&nbsp;                    logger.error(&quot;Error in streaming dynamic resource.&quot;);</b>
+<b class="nc">&nbsp;                    throw new IOException(e);</b>
+&nbsp;                }
+&nbsp;            } finally {
+<b class="fc">&nbsp;                if (Objects.nonNull(streamedContent) &amp;&amp; Objects.nonNull(streamedContent.getStream())) {</b>
+<b class="fc">&nbsp;                    streamedContent.getStream().close();</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isErrorResponse(StreamedContent streamedContent, ExternalContext externalContext)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;        if (Objects.isNull(streamedContent) || Objects.isNull(streamedContent.getStream())) {</b>
+<b class="nc">&nbsp;            if (externalContext.getRequest() instanceof HttpServletRequest) {</b>
+<b class="nc">&nbsp;                externalContext.responseSendError(HttpServletResponse.SC_NOT_FOUND,</b>
+<b class="nc">&nbsp;                        ((HttpServletRequest) externalContext.getRequest()).getRequestURI());</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                externalContext.responseSendError(HttpServletResponse.SC_NOT_FOUND, null);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void process(StreamedContent streamedContent, ExternalContext externalContext) throws IOException {
+<b class="fc">&nbsp;        externalContext.setResponseStatus(HttpServletResponse.SC_OK);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.nonNull(streamedContent.getContentEncoding())) {</b>
+<b class="nc">&nbsp;            externalContext.setResponseHeader(&quot;Content-Encoding&quot;, streamedContent.getContentEncoding());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Adapt implementation of Warren Dew
+&nbsp;        // (https://stackoverflow.com/questions/28427339/how-to-implement-http-byte-range-requests-in-spring-mvc)
+&nbsp;        // using org.primefaces.application.resource.StreamedContentHandler
+<b class="fc">&nbsp;        HttpServletResponse response = (HttpServletResponse) externalContext.getResponse();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.nonNull(streamedContent.getName())) {</b>
+<b class="fc">&nbsp;            response.setHeader(&quot;Content-Disposition&quot;, &quot;inline;filename=\&quot;&quot; + streamedContent.getName() + &quot;\&quot;&quot;);</b>
+<b class="fc">&nbsp;            response.setHeader(&quot;ETag&quot;, streamedContent.getName());</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        response.setHeader(&quot;Accept-Ranges&quot;, &quot;bytes&quot;);</b>
+<b class="fc">&nbsp;        response.setBufferSize(DEFAULT_BUFFER_SIZE);</b>
+&nbsp;
+<b class="fc">&nbsp;        processInputStreamToOutputStream((HttpServletRequest) externalContext.getRequest(), response, streamedContent,</b>
+<b class="fc">&nbsp;                externalContext.getResponseOutputStream());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processInputStreamToOutputStream(HttpServletRequest request, HttpServletResponse response,
+&nbsp;            StreamedContent streamedContent, OutputStream outputStream) throws IOException {
+<b class="fc">&nbsp;        InputStream inputStream = streamedContent.getStream();</b>
+&nbsp;        // Prepare some variables. The full Range represents the complete file.
+<b class="fc">&nbsp;        int length = inputStream.available(); // Length of file</b>
+<b class="fc">&nbsp;        Range full = new Range(0, length - 1, length);</b>
+<b class="fc">&nbsp;        List&lt;Range&gt; ranges = getRanges(request, response, length, streamedContent.getName());</b>
+&nbsp;
+<b class="fc">&nbsp;        if (ranges.isEmpty() || Objects.equals(ranges.get(0), full)) {</b>
+&nbsp;            // Return full file.
+<b class="fc">&nbsp;            logger.info(&quot;Return full file&quot;);</b>
+<b class="fc">&nbsp;            response.setContentType(streamedContent.getContentType());</b>
+<b class="fc">&nbsp;            response.setHeader(&quot;Content-Range&quot;,</b>
+<b class="fc">&nbsp;                    &quot;bytes &quot; + full.getStart() + &quot;-&quot; + full.getEnd() + &quot;/&quot; + full.getTotal());</b>
+<b class="fc">&nbsp;            response.setHeader(&quot;Content-Length&quot;, String.valueOf(full.getLength()));</b>
+<b class="fc">&nbsp;            copy(inputStream, outputStream, length, full.getStart(), full.getLength());</b>
+<b class="fc">&nbsp;        } else if (ranges.size() == 1) {</b>
+&nbsp;            // Return single part of file.
+<b class="fc">&nbsp;            Range r = ranges.get(0);</b>
+<b class="fc">&nbsp;            logger.info(&quot;Returning part of file : from (&quot; + r.getStart() + &quot;) to (&quot; + r.getEnd() + &quot;)&quot;);</b>
+<b class="fc">&nbsp;            response.setContentType(streamedContent.getContentType());</b>
+<b class="fc">&nbsp;            response.setHeader(&quot;Content-Range&quot;, &quot;bytes &quot; + r.getStart() + &quot;-&quot; + r.getEnd() + &quot;/&quot; + r.getTotal());</b>
+<b class="fc">&nbsp;            response.setHeader(&quot;Content-Length&quot;, String.valueOf(r.getLength()));</b>
+<b class="fc">&nbsp;            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.</b>
+&nbsp;            // Copy single part range.
+<b class="fc">&nbsp;            copy(inputStream, outputStream, length, r.getStart(), r.getLength());</b>
+<b class="fc">&nbsp;        } else {</b>
+&nbsp;            // Return multiple parts of file.
+<b class="nc">&nbsp;            response.setContentType(&quot;multipart/byteranges; boundary=&quot; + MULTIPART_BOUNDARY);</b>
+<b class="nc">&nbsp;            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.</b>
+&nbsp;            // Cast back to ServletOutputStream to get the easy println methods.
+<b class="nc">&nbsp;            ServletOutputStream servletOutputStream = (ServletOutputStream) outputStream;</b>
+&nbsp;            // Copy multi part range.
+<b class="nc">&nbsp;            for (Range r : ranges) {</b>
+<b class="nc">&nbsp;                logger.info(&quot;Return multi part of file : from (&quot; + r.getStart() + &quot;) to (&quot; + r.getEnd() + &quot;)&quot;);</b>
+&nbsp;                // Add multipart boundary and header fields for every range.
+<b class="nc">&nbsp;                servletOutputStream.println();</b>
+<b class="nc">&nbsp;                servletOutputStream.println(&quot;--&quot; + MULTIPART_BOUNDARY);</b>
+<b class="nc">&nbsp;                servletOutputStream.println(&quot;Content-Type: &quot; + streamedContent.getContentType());</b>
+<b class="nc">&nbsp;                servletOutputStream.println(</b>
+<b class="nc">&nbsp;                        &quot;Content-Range: bytes &quot; + r.getStart() + &quot;-&quot; + r.getEnd() + &quot;/&quot; + r.getTotal());</b>
+&nbsp;
+&nbsp;                // Copy single part range of multipart range.
+<b class="nc">&nbsp;                copy(inputStream, outputStream, length, r.getStart(), r.getLength());</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;            // End with multipart boundary.
+<b class="nc">&nbsp;            servletOutputStream.println();</b>
+<b class="nc">&nbsp;            servletOutputStream.println(&quot;--&quot; + MULTIPART_BOUNDARY + &quot;--&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static List&lt;Range&gt; getRanges(HttpServletRequest request, HttpServletResponse response, int length,
+&nbsp;            String fileName) throws IOException {
+<b class="fc">&nbsp;        Range full = new Range(0, length - 1, length);</b>
+<b class="fc">&nbsp;        List&lt;Range&gt; ranges = new ArrayList&lt;&gt;();</b>
+&nbsp;        // Validate and process Range and If-Range headers.
+<b class="fc">&nbsp;        String range = request.getHeader(&quot;Range&quot;);</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(range)) {</b>
+&nbsp;            // Range header should match format &quot;bytes=n-n,n-n,n-n...&quot;. If not, then return
+&nbsp;            // 416.
+<b class="fc">&nbsp;            if (!range.matches(&quot;^bytes=\\d*-\\d*(,\\d*-\\d*)*$&quot;)) {</b>
+<b class="fc">&nbsp;                response.setHeader(&quot;Content-Range&quot;, &quot;bytes */&quot; + length); // Required in 416.</b>
+<b class="fc">&nbsp;                response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);</b>
+<b class="fc">&nbsp;                return ranges;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            String ifRange = request.getHeader(&quot;If-Range&quot;);</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(ifRange) &amp;&amp; !ifRange.equals(fileName)) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    long ifRangeTime = request.getDateHeader(&quot;If-Range&quot;); // Throws IAE if invalid.</b>
+<b class="nc">&nbsp;                    if (ifRangeTime != -1) {</b>
+<b class="nc">&nbsp;                        ranges.add(full);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                } catch (IllegalArgumentException ignore) {</b>
+<b class="nc">&nbsp;                    ranges.add(full);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;            // If any valid If-Range header, then process each part of byte range.
+<b class="fc">&nbsp;            if (ranges.isEmpty()) {</b>
+<b class="fc">&nbsp;                for (String part : range.substring(6).split(&quot;,&quot;)) {</b>
+&nbsp;                    // Assuming a file with length of 100, the following examples returns bytes at:
+&nbsp;                    // 50-80 (50 to 80), 40- (40 to length=100), -20 (length-20=80 to length=100).
+<b class="fc">&nbsp;                    long start = sublong(part, 0, part.indexOf(&quot;-&quot;));</b>
+<b class="fc">&nbsp;                    long end = sublong(part, part.indexOf(&quot;-&quot;) + 1, part.length());</b>
+<b class="fc">&nbsp;                    if (start == -1) {</b>
+<b class="nc">&nbsp;                        start = length - end;</b>
+<b class="nc">&nbsp;                        end = length - 1;</b>
+<b class="fc">&nbsp;                    } else if (end == -1 || end &gt; length - 1) {</b>
+<b class="fc">&nbsp;                        end = length - 1;</b>
+&nbsp;                    }
+&nbsp;                    // Check if Range is syntactically valid. If not, then return 416.
+<b class="fc">&nbsp;                    if (start &gt; end) {</b>
+<b class="nc">&nbsp;                        response.setHeader(&quot;Content-Range&quot;, &quot;bytes */&quot; + length); // Required in 416.</b>
+<b class="nc">&nbsp;                        response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);</b>
+<b class="nc">&nbsp;                        return ranges;</b>
+&nbsp;                    }
+&nbsp;                    // Add range.
+<b class="fc">&nbsp;                    ranges.add(new Range(start, end, length));</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return ranges;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

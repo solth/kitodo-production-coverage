@@ -1,0 +1,267 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LegalTextEditor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.editor</a>
+</div>
+
+<h1>Coverage Summary for Class: LegalTextEditor (org.kitodo.production.editor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LegalTextEditor</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/31)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.editor;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.faces.view.ViewScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.LegalTexts;
+&nbsp;
+&nbsp;@Named(&quot;LegalTextEditor&quot;)
+&nbsp;@ViewScoped
+&nbsp;public class LegalTextEditor implements Serializable {
+&nbsp;
+&nbsp;    private static List&lt;String&gt; legalTextTitles;
+&nbsp;    private String currentLegalTextTitle;
+&nbsp;    private String currentLegalTextContent;
+<b class="nc">&nbsp;    private List&lt;Locale&gt; availableLocales = new ArrayList&lt;&gt;();</b>
+&nbsp;    private String currentLanguage;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Default constructor.
+&nbsp;     */
+<b class="nc">&nbsp;    public LegalTextEditor() {</b>
+<b class="nc">&nbsp;        legalTextTitles = new LinkedList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        legalTextTitles.add(LegalTexts.TERMS_OF_USE);</b>
+<b class="nc">&nbsp;        legalTextTitles.add(LegalTexts.DATA_PRIVACY);</b>
+<b class="nc">&nbsp;        legalTextTitles.add(LegalTexts.IMPRINT);</b>
+&nbsp;
+<b class="nc">&nbsp;        currentLegalTextTitle = legalTextTitles.get(0);</b>
+&nbsp;
+<b class="nc">&nbsp;        FacesContext.getCurrentInstance().getApplication().getSupportedLocales()</b>
+<b class="nc">&nbsp;                .forEachRemaining(availableLocales::add);</b>
+<b class="nc">&nbsp;        if (!availableLocales.isEmpty()) {</b>
+<b class="nc">&nbsp;            currentLanguage = availableLocales.get(0).getLanguage();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        loadText();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load currently selected legal file and set it&#39;s text content to
+&nbsp;     * &#39;currentLegalTextContent&#39;.
+&nbsp;     */
+&nbsp;    private void loadText() {
+<b class="nc">&nbsp;        currentLegalTextContent = LegalTexts.loadText(this.currentLegalTextTitle, this.currentLanguage);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save text of currently selected legal text to file.
+&nbsp;     */
+&nbsp;    public void saveText() {
+<b class="nc">&nbsp;        String filePath = ConfigCore.getKitodoConfigDirectory() + &quot;legal_&quot; + this.currentLegalTextTitle + &quot;_&quot;</b>
+&nbsp;                + this.currentLanguage + &quot;.html&quot;;
+&nbsp;        try {
+<b class="nc">&nbsp;            Files.write(Paths.get(filePath), this.currentLegalTextContent.getBytes());</b>
+<b class="nc">&nbsp;            LegalTexts.updateTexts(this.currentLanguage);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;ERROR: unable to save file &#39;&quot; + filePath + &quot;&#39;!&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return list of legal texts.
+&nbsp;     *
+&nbsp;     * @return list of legal texts
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getLegalTextTitles() {
+<b class="nc">&nbsp;        return legalTextTitles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return current legal text.
+&nbsp;     *
+&nbsp;     * @return current legal text
+&nbsp;     */
+&nbsp;    public String getCurrentLegalTextTitle() {
+<b class="nc">&nbsp;        return this.currentLegalTextTitle;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set current legal text.
+&nbsp;     *
+&nbsp;     * @param text
+&nbsp;     *            current legal text
+&nbsp;     */
+&nbsp;    public void setCurrentLegalTextTitle(String text) {
+<b class="nc">&nbsp;        if (!Objects.equals(text, this.currentLegalTextTitle)) {</b>
+<b class="nc">&nbsp;            this.currentLegalTextTitle = text;</b>
+<b class="nc">&nbsp;            loadText();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return current legal text content as String.
+&nbsp;     *
+&nbsp;     * @return current legal text content as String
+&nbsp;     */
+&nbsp;    public String getCurrentLegalTextContent() {
+<b class="nc">&nbsp;        return currentLegalTextContent;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set current legal text content to given String &#39;textString&#39;.
+&nbsp;     *
+&nbsp;     * @param textString
+&nbsp;     *            current legal text String
+&nbsp;     */
+&nbsp;    public void setCurrentLegalTextContent(String textString) {
+<b class="nc">&nbsp;        this.currentLegalTextContent = textString;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of available locales.
+&nbsp;     *
+&nbsp;     * @return list of available locales
+&nbsp;     */
+&nbsp;    public List&lt;Locale&gt; getAvailableLocales() {
+<b class="nc">&nbsp;        return availableLocales;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get language currently selected in the editor.
+&nbsp;     *
+&nbsp;     * @return language currently selected in the editor
+&nbsp;     */
+&nbsp;    public String getCurrentLanguage() {
+<b class="nc">&nbsp;        return currentLanguage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set current language.
+&nbsp;     *
+&nbsp;     * @param language
+&nbsp;     *            new current language
+&nbsp;     */
+&nbsp;    public void setCurrentLanguage(String language) {
+<b class="nc">&nbsp;        if (!Objects.equals(language, this.currentLanguage)) {</b>
+<b class="nc">&nbsp;            this.currentLanguage = language;</b>
+<b class="nc">&nbsp;            loadText();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

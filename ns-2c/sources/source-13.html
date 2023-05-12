@@ -1,0 +1,348 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > StructMapType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.metskitodo</a>
+</div>
+
+<h1>Coverage Summary for Class: StructMapType (org.kitodo.dataformat.metskitodo)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">StructMapType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (9/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (25/35)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;//
+&nbsp;// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.0 generiert 
+&nbsp;// Siehe &lt;a href=&quot;https://javaee.github.io/jaxb-v2/&quot;&gt;https://javaee.github.io/jaxb-v2/&lt;/a&gt; 
+&nbsp;// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+&nbsp;// Generiert: 2023.05.12 um 01:28:08 PM CEST 
+&nbsp;//
+&nbsp;
+&nbsp;
+&nbsp;package org.kitodo.dataformat.metskitodo;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAnyAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;import javax.xml.bind.annotation.XmlID;
+&nbsp;import javax.xml.bind.annotation.XmlSchemaType;
+&nbsp;import javax.xml.bind.annotation.XmlType;
+&nbsp;import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+&nbsp;import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+&nbsp;import javax.xml.namespace.QName;
+&nbsp;import org.jvnet.jaxb2_commons.lang.Equals2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.EqualsStrategy2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+&nbsp;import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+&nbsp;import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * structMapType: Complex Type for Structural Maps
+&nbsp; * 			The structural map (structMap) outlines a hierarchical structure for the original object being encoded, using a series of nested div elements.
+&nbsp; * 			
+&nbsp; * 
+&nbsp; * &lt;p&gt;Java-Klasse für structMapType complex type.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * &amp;lt;complexType name=&quot;structMapType&quot;&amp;gt;
+&nbsp; *   &amp;lt;complexContent&amp;gt;
+&nbsp; *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *       &amp;lt;sequence&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;div&quot; type=&quot;{http://www.loc.gov/METS/}divType&quot;/&amp;gt;
+&nbsp; *       &amp;lt;/sequence&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;TYPE&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;LABEL&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *       &amp;lt;anyAttribute processContents=&#39;lax&#39; namespace=&#39;##other&#39;/&amp;gt;
+&nbsp; *     &amp;lt;/restriction&amp;gt;
+&nbsp; *   &amp;lt;/complexContent&amp;gt;
+&nbsp; * &amp;lt;/complexType&amp;gt;
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * 
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;@XmlType(name = &quot;structMapType&quot;, propOrder = {
+&nbsp;    &quot;div&quot;
+&nbsp;})
+<b class="fc">&nbsp;public class StructMapType implements Equals2</b>
+&nbsp;{
+&nbsp;
+&nbsp;    @XmlElement(required = true)
+&nbsp;    protected DivType div;
+&nbsp;    @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;    @XmlID
+&nbsp;    @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;    protected String id;
+&nbsp;    @XmlAttribute(name = &quot;TYPE&quot;)
+&nbsp;    protected String type;
+&nbsp;    @XmlAttribute(name = &quot;LABEL&quot;)
+&nbsp;    protected String label;
+<b class="fc">&nbsp;    @XmlAnyAttribute</b>
+&nbsp;    private Map&lt;QName, String&gt; otherAttributes = new HashMap&lt;QName, String&gt;();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der div-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link DivType }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public DivType getDiv() {
+<b class="fc">&nbsp;        return div;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der div-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link DivType }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setDiv(DivType value) {
+<b class="fc">&nbsp;        this.div = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getID() {
+<b class="fc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der id-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setID(String value) {
+<b class="nc">&nbsp;        this.id = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der type-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getTYPE() {
+<b class="fc">&nbsp;        return type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der type-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setTYPE(String value) {
+<b class="fc">&nbsp;        this.type = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der label-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getLABEL() {
+<b class="fc">&nbsp;        return label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der label-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setLABEL(String value) {
+<b class="nc">&nbsp;        this.label = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets a map that contains attributes that aren&#39;t bound to any typed property on this class.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * the map is keyed by the name of the attribute and 
+&nbsp;     * the value is the string value of the attribute.
+&nbsp;     * 
+&nbsp;     * the map returned by this method is live, and you can add new attribute
+&nbsp;     * by updating the map directly. Because of this design, there&#39;s no setter.
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     always non-null
+&nbsp;     */
+&nbsp;    public Map&lt;QName, String&gt; getOtherAttributes() {
+<b class="nc">&nbsp;        return otherAttributes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="fc">&nbsp;        if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (this == object) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        final StructMapType that = ((StructMapType) object);</b>
+&nbsp;        {
+&nbsp;            DivType lhsDiv;
+<b class="fc">&nbsp;            lhsDiv = this.getDiv();</b>
+&nbsp;            DivType rhsDiv;
+<b class="fc">&nbsp;            rhsDiv = that.getDiv();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;div&quot;, lhsDiv), LocatorUtils.property(thatLocator, &quot;div&quot;, rhsDiv), lhsDiv, rhsDiv, (this.div!= null), (that.div!= null))) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsID;
+<b class="fc">&nbsp;            lhsID = this.getID();</b>
+&nbsp;            String rhsID;
+<b class="fc">&nbsp;            rhsID = that.getID();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsTYPE;
+<b class="fc">&nbsp;            lhsTYPE = this.getTYPE();</b>
+&nbsp;            String rhsTYPE;
+<b class="fc">&nbsp;            rhsTYPE = that.getTYPE();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;type&quot;, lhsTYPE), LocatorUtils.property(thatLocator, &quot;type&quot;, rhsTYPE), lhsTYPE, rhsTYPE, (this.type!= null), (that.type!= null))) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsLABEL;
+<b class="nc">&nbsp;            lhsLABEL = this.getLABEL();</b>
+&nbsp;            String rhsLABEL;
+<b class="nc">&nbsp;            rhsLABEL = that.getLABEL();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;label&quot;, lhsLABEL), LocatorUtils.property(thatLocator, &quot;label&quot;, rhsLABEL), lhsLABEL, rhsLABEL, (this.label!= null), (that.label!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(Object object) {
+<b class="fc">&nbsp;        final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="fc">&nbsp;        return equals(null, null, object, strategy);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

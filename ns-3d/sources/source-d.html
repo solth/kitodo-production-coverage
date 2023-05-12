@@ -1,0 +1,189 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DeleteProcessDialog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: DeleteProcessDialog (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DeleteProcessDialog</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (2/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    9,1%
+  </span>
+  <span class="absValue">
+    (2/22)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.List;
+&nbsp;import java.util.concurrent.CopyOnWriteArrayList;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;
+<b class="fc">&nbsp;public class DeleteProcessDialog {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(DeleteProcessDialog.class);</b>
+&nbsp;    private Process process;
+&nbsp;    private static final String ERROR_SAVING = &quot;errorSaving&quot;;
+&nbsp;    private static final String ERROR_DELETING = &quot;errorDeleting&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process.
+&nbsp;     *
+&nbsp;     * @return process
+&nbsp;     */
+&nbsp;    public Process getProcess() {
+<b class="nc">&nbsp;        return this.process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set process.
+&nbsp;     *
+&nbsp;     * @param process Process
+&nbsp;     */
+&nbsp;    public void setProcess(Process process) {
+<b class="nc">&nbsp;        this.process = process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete with children processes.
+&nbsp;     */
+&nbsp;    public void deleteWithChildren() {
+<b class="nc">&nbsp;        List&lt;Process&gt; children = new CopyOnWriteArrayList&lt;&gt;(process.getChildren());</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            for (Process child : children) {</b>
+<b class="nc">&nbsp;                ProcessService.deleteProcess(child);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            ProcessService.deleteProcess(process);</b>
+<b class="nc">&nbsp;        } catch (DataException | IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DELETING, new Object[] {ObjectType.PROCESS.getTranslationSingular() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete without children processes.
+&nbsp;     */
+&nbsp;    public void deleteWithoutChildren() {
+<b class="nc">&nbsp;        List&lt;Process&gt; children = new CopyOnWriteArrayList&lt;&gt;(process.getChildren());</b>
+<b class="nc">&nbsp;        process.getChildren().clear();</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Process child : children) {</b>
+<b class="nc">&nbsp;            child.setParent(null);</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getProcessService().save(child);</b>
+<b class="nc">&nbsp;                ProcessService.deleteProcess(process);</b>
+<b class="nc">&nbsp;            } catch (DataException | IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[]{ObjectType.PROCESS.getTranslationSingular()}, logger,</b>
+&nbsp;                        e);
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

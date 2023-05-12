@@ -1,0 +1,263 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LdapGroupForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: LdapGroupForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LdapGroupForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/42)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.LdapGroup;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;@Named(&quot;LdapGroupForm&quot;)
+&nbsp;@SessionScoped
+<b class="nc">&nbsp;public class LdapGroupForm extends BaseForm {</b>
+<b class="nc">&nbsp;    private LdapGroup myLdapGruppe = new LdapGroup();</b>
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(LdapGroupForm.class);</b>
+&nbsp;    private static final String LDAP_GROUP = &quot;ldapGroup&quot;;
+<b class="nc">&nbsp;    private final String ldapGroupEditPath = MessageFormat.format(REDIRECT_PATH, &quot;ldapgroupEdit&quot;);</b>
+&nbsp;
+&nbsp;    protected static final String ERROR_DELETING_LDAP_GROUPE = &quot;ldapGroupInUse&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new LDAP group.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String newLdapGroup() {
+<b class="nc">&nbsp;        this.myLdapGruppe = new LdapGroup();</b>
+<b class="nc">&nbsp;        return ldapGroupEditPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets all ldap groups.
+&nbsp;     *
+&nbsp;     * @return list of LdapGroup objects.
+&nbsp;     */
+&nbsp;    public List&lt;LdapGroup&gt; getLdapGroups() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getLdapGroupService().getAll();</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {Helper.getTranslation(&quot;ldapGroups&quot;) }, logger, e);</b>
+<b class="nc">&nbsp;            return new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save LDAP Group.
+&nbsp;     *
+&nbsp;     * @return page or null
+&nbsp;     */
+&nbsp;    public String save() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getLdapGroupService().saveToDatabase(this.myLdapGruppe);</b>
+<b class="nc">&nbsp;            return usersPage;</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {Helper.getTranslation(LDAP_GROUP) }, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Duplicate the selected LDAP group.
+&nbsp;     *
+&nbsp;     * @param itemId
+&nbsp;     *            ID of the LDAP group to duplicate
+&nbsp;     * @return page address; either redirect to the edit LDAP group page or return
+&nbsp;     *         &#39;null&#39; if the LDAP group could not be retrieved, which will prompt
+&nbsp;     *         JSF to remain on the same page and reuse the bean.
+&nbsp;     */
+&nbsp;    public String duplicateLdapGroup(Integer itemId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            LdapGroup baseLdapGroup = ServiceManager.getLdapGroupService().getById(itemId);</b>
+<b class="nc">&nbsp;            this.myLdapGruppe = ServiceManager.getLdapGroupService().duplicateLdapGroup(baseLdapGroup);</b>
+<b class="nc">&nbsp;            return ldapGroupEditPath;</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DUPLICATE, new Object[] {Helper.getTranslation(LDAP_GROUP) }, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove LDAP Group.
+&nbsp;     *
+&nbsp;     * @return page or null
+&nbsp;     */
+&nbsp;    public String delete() {
+<b class="nc">&nbsp;        if (!this.myLdapGruppe.getUsers().isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DELETING_LDAP_GROUPE, new Object[]{Helper.getTranslation(LDAP_GROUP)});</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getLdapGroupService().removeFromDatabase(this.myLdapGruppe);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DELETING, new Object[] {Helper.getTranslation(LDAP_GROUP) }, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return usersPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for ldap group edit form.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            ID of the ldap group to load
+&nbsp;     */
+&nbsp;    public void load(int id) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!Objects.equals(id, 0)) {</b>
+<b class="nc">&nbsp;                setMyLdapGruppe(ServiceManager.getLdapGroupService().getById(id));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {Helper.getTranslation(LDAP_GROUP), id }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        setSaveDisabled(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Getter und Setter
+&nbsp;     */
+&nbsp;
+&nbsp;    public LdapGroup getMyLdapGruppe() {
+<b class="nc">&nbsp;        return this.myLdapGruppe;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMyLdapGruppe(LdapGroup myLdapGruppe) {
+<b class="nc">&nbsp;        this.myLdapGruppe = myLdapGruppe;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set LDAP group by ID.
+&nbsp;     *
+&nbsp;     * @param ldapGroupID
+&nbsp;     *          ID of LDAP group to set.
+&nbsp;     */
+&nbsp;    public void setLdapGroupById(int ldapGroupID) {
+&nbsp;        try {
+<b class="nc">&nbsp;            setMyLdapGruppe(ServiceManager.getLdapGroupService().getById(ldapGroupID));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {Helper.getTranslation(LDAP_GROUP), ldapGroupID }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

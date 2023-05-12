@@ -1,0 +1,297 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ImageManagement</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.imagemanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: ImageManagement (org.kitodo.imagemanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImageManagement</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,4%
+  </span>
+  <span class="absValue">
+    (40/51)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.imagemanagement;
+&nbsp;
+&nbsp;import java.awt.Image;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FileNotFoundException;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.util.function.Function;
+&nbsp;
+&nbsp;import javax.imageio.ImageIO;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.imagemanagement.ImageFileFormat;
+&nbsp;import org.kitodo.api.imagemanagement.ImageManagementInterface;
+&nbsp;import org.kitodo.config.KitodoConfig;
+&nbsp;import org.kitodo.config.enums.ParameterImageManagement;
+&nbsp;
+&nbsp;/**
+&nbsp; * An ImageManagementInterface implementation using ImageMagick.
+&nbsp; */
+<b class="fc">&nbsp;public class ImageManagement implements ImageManagementInterface {</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ImageManagement.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Image format used internally to create image derivatives, optimized for
+&nbsp;     * loss-free image quality, and speed. The format must be supported by both
+&nbsp;     * ImageMagick and {@link javax.imageio.ImageIO}.
+&nbsp;     */
+&nbsp;    private static final String RAW_IMAGE_FORMAT = &quot;.bmp&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Temporary directory location.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final File TMPDIR = new File(</b>
+<b class="fc">&nbsp;            KitodoConfig.getParameter(ParameterImageManagement.DIR_TMP, System.getProperty(&quot;java.io.tmpdir&quot;)));</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Image format used internally to create web images, optimized for small
+&nbsp;     * size. The format must be supported by both ImageMagick and
+&nbsp;     * {@link javax.imageio.ImageIO}.
+&nbsp;     */
+&nbsp;    private static final String WEB_IMAGE_FORMAT = &quot;.jpeg&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@inheritDoc}
+&nbsp;     *
+&nbsp;     * @see org.kitodo.api.imagemanagement.ImageManagementInterface#changeDpi(java.net.URI,
+&nbsp;     *      int)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Image changeDpi(URI sourceUri, int dpi) throws IOException {
+<b class="fc">&nbsp;        if (!new File(sourceUri).exists()) {</b>
+<b class="nc">&nbsp;            throw new FileNotFoundException(&quot;sourceUri must exist: &quot; + sourceUri.getRawPath());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (dpi &lt;= 0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;dpi must be &gt; 0, but was &quot; + dpi);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return summarize(&quot;dpiChangedImage-&quot;, RAW_IMAGE_FORMAT, sourceUri, lambda -&gt; lambda.resizeToDpi(dpi),</b>
+<b class="fc">&nbsp;            &quot;Resizing {} as {} to {} DPI&quot;, dpi);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@inheritDoc}
+&nbsp;     *
+&nbsp;     * @see org.kitodo.api.imagemanagement.ImageManagementInterface#createDerivative(java.net.URI,
+&nbsp;     *      double, java.net.URI,
+&nbsp;     *      org.kitodo.api.imagemanagement.ImageFileFormat)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean createDerivative(URI sourceUri, double factor, URI resultUri, ImageFileFormat format)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;        validateParameters(sourceUri, factor);</b>
+<b class="fc">&nbsp;        if (resultUri == null) {</b>
+<b class="nc">&nbsp;            throw new NullPointerException(&quot;resultUri must not be null&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        ImageConverter imageConverter = new ImageConverter(sourceUri);</b>
+<b class="fc">&nbsp;        imageConverter.addResult(resultUri, format).resize(factor);</b>
+<b class="fc">&nbsp;        logger.info(&quot;Creating derivative from {} as {}, format {}, factor {}%&quot;, sourceUri, resultUri, format,</b>
+<b class="fc">&nbsp;            100 * factor);</b>
+<b class="fc">&nbsp;        imageConverter.run();</b>
+<b class="fc">&nbsp;        return new File(resultUri).exists();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@inheritDoc}
+&nbsp;     *
+&nbsp;     * @see org.kitodo.api.imagemanagement.ImageManagementInterface#getScaledWebImage(java.net.URI,
+&nbsp;     *      double)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Image getScaledWebImage(URI sourceUri, double factor) throws IOException {
+<b class="fc">&nbsp;        validateParameters(sourceUri, factor);</b>
+<b class="fc">&nbsp;        return summarize(&quot;scaledWebImage-&quot;, WEB_IMAGE_FORMAT, sourceUri, lambda -&gt; lambda.resize(factor),</b>
+<b class="fc">&nbsp;            &quot;Generating scaled web image from {} as {}, factor {}%&quot;, 100 * factor);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@inheritDoc}
+&nbsp;     *
+&nbsp;     * @see org.kitodo.api.imagemanagement.ImageManagementInterface#getSizedWebImage(java.net.URI,
+&nbsp;     *      int)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Image getSizedWebImage(URI sourceUri, int width) throws IOException {
+&nbsp;
+<b class="fc">&nbsp;        if (!new File(sourceUri).exists()) {</b>
+<b class="nc">&nbsp;            throw new FileNotFoundException(&quot;sourceUri must exist: &quot; + sourceUri.getRawPath());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (width &lt;= 0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;width must be &gt; 0, but was &quot; + width);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return summarize(&quot;sizedWebImage-&quot;, WEB_IMAGE_FORMAT, sourceUri, lambda -&gt; lambda.resizeToWidth(width),</b>
+<b class="fc">&nbsp;            &quot;Generating sized web image from {} as {}, width {} px&quot;, width);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Summarizes three similar codes.
+&nbsp;     *
+&nbsp;     * @param prefix
+&nbsp;     *            The prefix string to be used in generating the file&#39;s name;
+&nbsp;     *            must be at least three characters long
+&nbsp;     * @param suffix
+&nbsp;     *            The suffix string to be used in generating the file&#39;s name;
+&nbsp;     *            may be {@code null}, in which case the suffix {@code &quot;.tmp&quot;}
+&nbsp;     *            will be used
+&nbsp;     * @param sourceUri
+&nbsp;     *            source image to convert
+&nbsp;     * @param lambda
+&nbsp;     *            lambda expression to apply to the result of the conversion
+&nbsp;     *            process
+&nbsp;     * @param message
+&nbsp;     *            the message to log; the format depends on the message factory.
+&nbsp;     * @param pTwo
+&nbsp;     *            parameter to the message.
+&nbsp;     * @return the generated image
+&nbsp;     * @throws IOException
+&nbsp;     *             if the plug-in is configured incorrectly, the image is
+&nbsp;     *             missing or corrupted, etc.
+&nbsp;     */
+&nbsp;    private static Image summarize(String prefix, String suffix, URI sourceUri, Function&lt;FutureDerivative, ?&gt; lambda,
+&nbsp;            String message, Object pTwo) throws IOException {
+&nbsp;
+<b class="fc">&nbsp;        File tempFile = File.createTempFile(prefix, suffix, TMPDIR);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            tempFile.deleteOnExit();</b>
+<b class="fc">&nbsp;            ImageConverter imageConverter = new ImageConverter(sourceUri);</b>
+<b class="fc">&nbsp;            lambda.apply(imageConverter.addResult(tempFile.toURI()));</b>
+&nbsp;
+<b class="fc">&nbsp;            logger.info(message, sourceUri, tempFile, pTwo);</b>
+<b class="fc">&nbsp;            imageConverter.run();</b>
+&nbsp;
+<b class="fc">&nbsp;            logger.trace(&quot;Loading {}&quot;, tempFile);</b>
+<b class="fc">&nbsp;            Image buffer = ImageIO.read(tempFile);</b>
+<b class="fc">&nbsp;            logger.trace(&quot;{} successfully loaded&quot;, tempFile);</b>
+<b class="fc">&nbsp;            return buffer;</b>
+&nbsp;        } finally {
+<b class="fc">&nbsp;            logger.debug(&quot;Deleting {}&quot;, tempFile);</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                Files.delete(tempFile.toPath());</b>
+<b class="fc">&nbsp;                logger.trace(&quot;Successfully deleted {}&quot;, tempFile);</b>
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                logger.warn(&quot;Couldn’t delete {}&quot;, tempFile, e);</b>
+<b class="fc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void validateParameters(URI sourceUri, double factor) throws FileNotFoundException {
+<b class="fc">&nbsp;        if (!new File(sourceUri).exists()) {</b>
+<b class="nc">&nbsp;            throw new FileNotFoundException(&quot;sourceUri must exist: &quot; + sourceUri.getRawPath());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Double.isNaN(factor)) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;factor must be a number, but was &quot; + factor);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (factor &lt;= 0.0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;factor must be &gt; 0.0, but was &quot; + factor);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

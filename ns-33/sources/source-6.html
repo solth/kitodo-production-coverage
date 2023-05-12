@@ -1,0 +1,217 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ValidationResultState</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.longtermpreservationvalidation</a>
+</div>
+
+<h1>Coverage Summary for Class: ValidationResultState (org.kitodo.longtermpreservationvalidation)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ValidationResultState</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ValidationResultState$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.longtermpreservationvalidation;
+&nbsp;
+&nbsp;import org.kitodo.api.validation.State;
+&nbsp;import org.kitodo.config.KitodoConfig;
+&nbsp;
+&nbsp;/**
+&nbsp; * The validation result state is used to map the two-valued result state of
+&nbsp; * JHove to the Kitodo validation interface.
+&nbsp; */
+&nbsp;public class ValidationResultState {
+&nbsp;    /**
+&nbsp;     * Constant for the error case.
+&nbsp;     */
+<b class="fc">&nbsp;    public static final ValidationResultState ERROR = new ValidationResultState() {</b>
+&nbsp;        @Override
+&nbsp;        public State toState() {
+<b class="nc">&nbsp;            return State.ERROR;</b>
+&nbsp;        }
+&nbsp;    };
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Saves the value of well-formedness.
+&nbsp;     */
+&nbsp;    private TernaryValue wellFormed;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Saves the validation value.
+&nbsp;     */
+&nbsp;    private TernaryValue valid;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a validation result state with the specified wellformedness and
+&nbsp;     * validity values.
+&nbsp;     *
+&nbsp;     * @param wellFormed
+&nbsp;     *            whether the file is well formed
+&nbsp;     * @param valid
+&nbsp;     *            whether the file is valid
+&nbsp;     */
+<b class="fc">&nbsp;    public ValidationResultState(int wellFormed, int valid) {</b>
+<b class="fc">&nbsp;        this.wellFormed = TernaryValue.valueOf(wellFormed);</b>
+<b class="fc">&nbsp;        this.valid = TernaryValue.valueOf(valid);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates an empty result. The value must be contributed elsewhere.
+&nbsp;     */
+<b class="fc">&nbsp;    private ValidationResultState() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Formulates the bivalent validation result of the JHove library as an
+&nbsp;     * expression in English. The result is returned along with (possibly)
+&nbsp;     * further messages in the result object to allow the operator to better
+&nbsp;     * estimate the validation result.
+&nbsp;     * 
+&nbsp;     * @return the validation result in English
+&nbsp;     */
+&nbsp;    public String getResultString() {
+<b class="fc">&nbsp;        return &quot;Examination result:&quot; + wellFormed.toModalAdverb() + &quot; well-formed,&quot; + valid.toModalAdverb() + &quot; valid&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the state of the validation result state.
+&nbsp;     *
+&nbsp;     * @return the state
+&nbsp;     */
+&nbsp;    public State toState() {
+<b class="fc">&nbsp;        return State.valueOf(KitodoConfig.getParameter(LongTermPreservationValidationConfigParameter.valueOf(this)));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="fc">&nbsp;        return wellFormed.toString() + &#39;/&#39; + valid.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

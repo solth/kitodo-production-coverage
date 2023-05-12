@@ -1,0 +1,535 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > BaseForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    11,1%
+  </span>
+  <span class="absValue">
+    (4/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    19,7%
+  </span>
+  <span class="absValue">
+    (14/71)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.text.DateFormat;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Client;
+&nbsp;import org.kitodo.data.database.beans.ListColumn;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Role;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.model.LazyDTOModel;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ClientService;
+&nbsp;import org.kitodo.production.services.data.ProjectService;
+&nbsp;import org.kitodo.production.services.data.RoleService;
+&nbsp;import org.primefaces.component.datatable.DataTable;
+&nbsp;import org.primefaces.event.TabChangeEvent;
+&nbsp;import org.primefaces.event.data.PageEvent;
+&nbsp;
+<b class="fc">&nbsp;public class BaseForm implements Serializable {</b>
+&nbsp;
+<b class="fc">&nbsp;    protected String stayOnCurrentPage = null;</b>
+<b class="fc">&nbsp;    protected String filter = &quot;&quot;;</b>
+&nbsp;    protected User user;
+<b class="fc">&nbsp;    protected LazyDTOModel lazyDTOModel = null;</b>
+&nbsp;    private static final String REDIRECT_PARAMETER = &quot;faces-redirect=true&quot;;
+&nbsp;    private static final String TEMPLATE_ROOT = &quot;/pages/&quot;;
+<b class="fc">&nbsp;    private int activeTabIndex = 0;</b>
+<b class="fc">&nbsp;    private int editActiveTabIndex = 0;</b>
+<b class="fc">&nbsp;    private boolean saveDisabled = true;</b>
+&nbsp;
+&nbsp;    // error messages
+&nbsp;    protected static final String ERROR_OCCURRED = &quot;errorOccurred&quot;;
+&nbsp;    protected static final String ERROR_DATABASE_READING = &quot;errorDatabaseReading&quot;;
+&nbsp;    protected static final String ERROR_DUPLICATE = &quot;errorDuplicate&quot;;
+&nbsp;    protected static final String ERROR_EXPORTING = &quot;errorExporting&quot;;
+&nbsp;    protected static final String ERROR_INCOMPLETE_DATA = &quot;errorDataIncomplete&quot;;
+&nbsp;    protected static final String ERROR_LOADING_MANY = &quot;errorLoadingMany&quot;;
+&nbsp;    protected static final String ERROR_LOADING_ONE = &quot;errorLoadingOne&quot;;
+&nbsp;    protected static final String ERROR_DELETING = &quot;errorDeleting&quot;;
+&nbsp;    public static final String ERROR_READING = &quot;errorReading&quot;;
+&nbsp;    protected static final String ERROR_RELOADING = &quot;errorReloading&quot;;
+&nbsp;    protected static final String ERROR_SAVING = &quot;errorSaving&quot;;
+&nbsp;    protected static final String ERROR_CREATING = &quot;errorCreating&quot;;
+&nbsp;    protected static final String ERROR_PARAMETER_MISSING = &quot;parameterMissing&quot;;
+&nbsp;    protected static final String EXPORT_FINISHED = &quot;exportFinished&quot;;
+&nbsp;
+&nbsp;    protected static final String REDIRECT_PATH = TEMPLATE_ROOT + &quot;{0}?&quot; + REDIRECT_PARAMETER;
+&nbsp;    protected static final String DEFAULT_LINK = &quot;desktop.jsf&quot;;
+&nbsp;    private static final String LIST_PAGE = TEMPLATE_ROOT + &quot;{0}?keepPagination=true&amp;&quot; + REDIRECT_PARAMETER;
+<b class="fc">&nbsp;    protected final String usersPage = MessageFormat.format(LIST_PAGE, &quot;users&quot;);</b>
+<b class="fc">&nbsp;    protected final String processesPage = &quot;processes?&quot; + REDIRECT_PARAMETER;</b>
+<b class="fc">&nbsp;    protected final String projectsPage = MessageFormat.format(LIST_PAGE, &quot;projects&quot;);</b>
+<b class="fc">&nbsp;    protected final String tasksPage = MessageFormat.format(LIST_PAGE, &quot;tasks&quot;);</b>
+&nbsp;
+&nbsp;    protected static final String ID_PARAMETER = &quot;ID&quot;;
+&nbsp;
+&nbsp;    protected List&lt;SelectItem&gt; columns;
+&nbsp;    protected List&lt;ListColumn&gt; selectedColumns;
+&nbsp;
+&nbsp;    protected int firstRow;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get first row to show in datatable.
+&nbsp;     * @return first
+&nbsp;     */
+&nbsp;    public int getFirstRow() {
+<b class="nc">&nbsp;        return this.firstRow;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set first row to show in datatable.
+&nbsp;     * @param firstRow first row to show in datatable
+&nbsp;     */
+&nbsp;    public void setFirstRow(int firstRow) {
+<b class="nc">&nbsp;        this.firstRow = firstRow;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update first row to show in datatable on PageEvent.
+&nbsp;     * @param pageEvent PageEvent triggered by data tables paginator
+&nbsp;     */
+&nbsp;    public void onPageChange(PageEvent pageEvent) {
+<b class="nc">&nbsp;        this.setFirstRow(((DataTable) pageEvent.getSource()).getFirst());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Getter: return lazyDTOModel.
+&nbsp;     *
+&nbsp;     * @return LazyDTOModel
+&nbsp;     */
+&nbsp;    public LazyDTOModel getLazyDTOModel() {
+<b class="nc">&nbsp;        return lazyDTOModel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Setter: set lazyDTOModel.
+&nbsp;     *
+&nbsp;     * @param lazyDTOModel
+&nbsp;     *            LazyDTOModel to set for this class
+&nbsp;     */
+&nbsp;    public void setLazyDTOModel(LazyDTOModel lazyDTOModel) {
+<b class="fc">&nbsp;        this.lazyDTOModel = lazyDTOModel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get overlay for return null.
+&nbsp;     *
+&nbsp;     * @return to current page
+&nbsp;     */
+&nbsp;    public String getStayOnCurrentPage() {
+<b class="nc">&nbsp;        return this.stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set overlay for return null.
+&nbsp;     *
+&nbsp;     * @param stayOnCurrentPage
+&nbsp;     *            overlay for return null which ensures staying on the same page
+&nbsp;     *            where it was called
+&nbsp;     */
+&nbsp;    public void setStayOnCurrentPage(String stayOnCurrentPage) {
+<b class="nc">&nbsp;        this.stayOnCurrentPage = stayOnCurrentPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get User.
+&nbsp;     *
+&nbsp;     * @return User
+&nbsp;     */
+&nbsp;    public User getUser() {
+<b class="nc">&nbsp;        if (Objects.isNull(this.user)) {</b>
+<b class="nc">&nbsp;            this.user = ServiceManager.getUserService().getCurrentUser();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return this.user;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getFilter() {
+<b class="fc">&nbsp;        return this.filter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setFilter(String filter) {
+<b class="nc">&nbsp;        this.filter = filter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add filter to user.
+&nbsp;     */
+&nbsp;    public void addFilterToUser() {
+<b class="nc">&nbsp;        if (Objects.isNull(this.filter) || this.filter.isEmpty()) {</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;        ServiceManager.getUserService().addFilter(getUser(), this.filter);</b>
+<b class="nc">&nbsp;        updateUser();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get user filters.
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getUserFilters() {
+<b class="nc">&nbsp;        return ServiceManager.getUserService().getFilters(getUser());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove filter from user.
+&nbsp;     */
+&nbsp;    public void removeFilterFromUser(String filter) {
+<b class="nc">&nbsp;        if (Objects.isNull(filter) || filter.isEmpty()) {</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;        ServiceManager.getUserService().removeFilter(getUser(), filter);</b>
+<b class="nc">&nbsp;        updateUser();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return index of active tab.
+&nbsp;     *
+&nbsp;     * @return index of active tab
+&nbsp;     */
+&nbsp;    public int getActiveTabIndex() {
+<b class="nc">&nbsp;        return activeTabIndex;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set index of active tab.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            index of active tab
+&nbsp;     */
+&nbsp;    public void setActiveTabIndex(int id) {
+<b class="nc">&nbsp;        this.activeTabIndex = id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set index of active tab. Use this method when setting active tab from templates.
+&nbsp;     * @param tabIndex
+&nbsp;     *            index of active tab as string.
+&nbsp;     *            String is used instead of int to allow a differentiation between a call specifying no index
+&nbsp;     *            and a call specifying index 0.
+&nbsp;     */
+&nbsp;    public void setActiveTabIndexFromTemplate(String tabIndex) {
+<b class="nc">&nbsp;        if (Objects.nonNull(tabIndex) &amp;&amp; !tabIndex.isEmpty()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                this.activeTabIndex = Integer.parseInt(tabIndex);</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                this.activeTabIndex = 0;</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get index of active tab for edit pages.
+&nbsp;     *
+&nbsp;     * @return index of active tab for edit pages
+&nbsp;     */
+&nbsp;    public int getEditActiveTabIndex() {
+<b class="nc">&nbsp;        return editActiveTabIndex;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set index of active tab for edit pages.
+&nbsp;     *
+&nbsp;     * @param editActiveTabIndex
+&nbsp;     *            index of active tab for edit pages as int
+&nbsp;     */
+&nbsp;    public void setEditActiveTabIndex(int editActiveTabIndex) {
+<b class="nc">&nbsp;        this.editActiveTabIndex = editActiveTabIndex;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates the active tab index whenever the TabChangeEvent is fired.
+&nbsp;     *
+&nbsp;     * @param event
+&nbsp;     *            TabChangeEvent is fired when the user changes the tab in the
+&nbsp;     *            current tab view
+&nbsp;     */
+&nbsp;    public void onTabChange(TabChangeEvent event) {
+<b class="nc">&nbsp;        setActiveTabIndex(event.getComponent().getChildren().indexOf(event.getTab()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates the active tab index whenever the TabChangeEvent is fired.
+&nbsp;     *
+&nbsp;     * @param event
+&nbsp;     *            TabChangeEvent is fired when the user changes the tab in the
+&nbsp;     *            current tab view
+&nbsp;     */
+&nbsp;    public void onEditTabChange(TabChangeEvent event) {
+<b class="nc">&nbsp;        setEditActiveTabIndex(event.getComponent().getChildren().indexOf(event.getTab()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return boolean to disable save button.
+&nbsp;     *
+&nbsp;     * @return status of save button
+&nbsp;     */
+&nbsp;    public boolean isSaveDisabled() {
+<b class="nc">&nbsp;        return saveDisabled;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set boolean to disable save button.
+&nbsp;     *
+&nbsp;     * @param saveDisabled
+&nbsp;     *            true or false
+&nbsp;     */
+&nbsp;    public void setSaveDisabled(boolean saveDisabled) {
+<b class="fc">&nbsp;        this.saveDisabled = saveDisabled;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of configurable columns.
+&nbsp;     *
+&nbsp;     * @return list of configurable columns
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getColumns() {
+<b class="nc">&nbsp;        return columns;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of configurable columns.
+&nbsp;     *
+&nbsp;     * @param columns
+&nbsp;     *            list of columns
+&nbsp;     */
+&nbsp;    public void setColumns(List&lt;SelectItem&gt; columns) {
+<b class="nc">&nbsp;        this.columns = columns;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of selected columns.
+&nbsp;     *
+&nbsp;     * @return list of selected columns
+&nbsp;     */
+&nbsp;    public List&lt;ListColumn&gt; getSelectedColumns() {
+<b class="nc">&nbsp;        return selectedColumns;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of selected columns.
+&nbsp;     *
+&nbsp;     * @param columns
+&nbsp;     *            list of selected columns
+&nbsp;     */
+&nbsp;    public void setSelectedColumns(List&lt;ListColumn&gt; columns) {
+<b class="nc">&nbsp;        this.selectedColumns = columns;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks whether the column with the provided name &#39;columnName&#39; should be shown
+&nbsp;     * be displayed in the corresponding list view or not.
+&nbsp;     *
+&nbsp;     * @param columnName
+&nbsp;     *            name of the column
+&nbsp;     * @return true, if column should be displayed; false if column should be hidden
+&nbsp;     */
+&nbsp;    public boolean showColumn(String columnName) {
+<b class="nc">&nbsp;        for (ListColumn listColumn : this.selectedColumns) {</b>
+<b class="nc">&nbsp;            if (listColumn.getTitle().equals(columnName)) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save selected columns to current client.
+&nbsp;     */
+&nbsp;    public void saveSelectedColumns() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getListColumnService().saveSelectedColumnsToClient(selectedColumns);</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get formatted date for beans.
+&nbsp;     *
+&nbsp;     * @param date
+&nbsp;     *            for formatting
+&nbsp;     * @return formatted date or empty string
+&nbsp;     */
+&nbsp;    public String getFormattedDate(Date date) {
+<b class="nc">&nbsp;        if (Objects.nonNull(date)) {</b>
+<b class="nc">&nbsp;            DateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);</b>
+<b class="nc">&nbsp;            return dateFormat.format(date);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return String containing the titles of all given roles joined by a &quot;, &quot;.
+&nbsp;     *
+&nbsp;     * @param roles list of roles
+&nbsp;     * @return String containing role titles
+&nbsp;     */
+&nbsp;    public String getRoleTitles(List&lt;Role&gt; roles) {
+<b class="nc">&nbsp;        return RoleService.getRoleTitles(roles);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return String containing the names of all given clients joined by a &quot;, &quot;.
+&nbsp;     *
+&nbsp;     * @param clients list of roles
+&nbsp;     * @return String containing client names
+&nbsp;     */
+&nbsp;    public String getClientNames(List&lt;Client&gt; clients) {
+<b class="nc">&nbsp;        return ClientService.getClientNames(clients);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return String containing the titles of all given projects joined by a &quot;, &quot;.
+&nbsp;     *
+&nbsp;     * @param projects list of roles
+&nbsp;     * @return String containing project titles
+&nbsp;     */
+&nbsp;    public String getProjectTitles(List&lt;Project&gt; projects) {
+<b class="nc">&nbsp;        return ProjectService.getProjectTitles(projects);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reset first row to 0 if given String &#39;keepPagination&#39; is empty.
+&nbsp;     *
+&nbsp;     * @param keepPagination String parameter indicating if first row should be reset to 0
+&nbsp;     */
+&nbsp;    public void resetPaginator(String keepPagination) {
+<b class="nc">&nbsp;        if (keepPagination.isEmpty()) {</b>
+<b class="nc">&nbsp;            this.setFirstRow(0);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get message translation with replacements.
+&nbsp;     * @param messageKey String
+&nbsp;     * @param replacements list of Strings
+&nbsp;     * @return translated String
+&nbsp;     */
+&nbsp;    public String formatString(String messageKey, String... replacements) {
+<b class="nc">&nbsp;        return Helper.getTranslation(messageKey, replacements);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updateUser() {
+&nbsp;        try {
+<b class="nc">&nbsp;            user = ServiceManager.getUserService().getById(getUser().getId());</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, ObjectType.USER.getTranslationSingular(),</b>
+<b class="nc">&nbsp;                    getUser().getId());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,831 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetadataEditor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.metadata</a>
+</div>
+
+<h1>Coverage Summary for Class: MetadataEditor (org.kitodo.production.metadata)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetadataEditor</td>
+<td class="coverageStat">
+  <span class="percent">
+    60,7%
+  </span>
+  <span class="absValue">
+    (17/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    41,8%
+  </span>
+  <span class="absValue">
+    (100/239)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">MetadataEditor$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    62,1%
+  </span>
+  <span class="absValue">
+    (18/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,3%
+  </span>
+  <span class="absValue">
+    (102/241)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.metadata;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.OptionalInt;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.stream.Stream;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.Level;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.MetadataGroup;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.Domain;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.SimpleMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataformat.Division;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.dataformat.mets.LinkedMetsResource;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class contains some methods to handle metadata (semi) automatically.
+&nbsp; */
+<b class="nc">&nbsp;public class MetadataEditor {</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(MetadataEditor.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Separator for specifying an insertion position.
+&nbsp;     */
+&nbsp;    public static final String INSERTION_POSITION_SEPARATOR = &quot;,&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * LOCTYPE used for internal links.
+&nbsp;     */
+&nbsp;    private static final String INTERNAL_LOCTYPE = &quot;Kitodo.Production&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Connects two processes by means of a link. The link is sorted as a linked
+&nbsp;     * logical division in a logical division of the parent process. The order
+&nbsp;     * is based on the order number specified by the user. This method does not
+&nbsp;     * create a link between the two processes in the database, this must and
+&nbsp;     * can only happen when saving.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            the parent process in which the link is to be added
+&nbsp;     * @param insertionPosition
+&nbsp;     *            at which point the link is to be inserted
+&nbsp;     * @param childProcessId
+&nbsp;     *            Database ID of the child process to be linked
+&nbsp;     * @throws IOException
+&nbsp;     *             if the METS file cannot be read or written
+&nbsp;     */
+&nbsp;    public static void addLink(Process process, String insertionPosition, int childProcessId) throws IOException {
+<b class="fc">&nbsp;        URI metadataFileUri = ServiceManager.getProcessService().getMetadataFileUri(process);</b>
+<b class="fc">&nbsp;        Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(metadataFileUri);</b>
+<b class="fc">&nbsp;        List&lt;String&gt; indices = Arrays.asList(insertionPosition.split(Pattern.quote(INSERTION_POSITION_SEPARATOR)));</b>
+<b class="fc">&nbsp;        LogicalDivision logicalDivision = workpiece.getLogicalStructure();</b>
+<b class="fc">&nbsp;        for (int index = 0; index &lt; indices.size(); index++) {</b>
+<b class="fc">&nbsp;            if (index &lt; indices.size() - 1) {</b>
+<b class="nc">&nbsp;                logicalDivision = logicalDivision.getChildren().get(Integer.parseInt(indices.get(index)));</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                addLink(logicalDivision, Integer.parseInt(indices.get(index)), childProcessId);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        ServiceManager.getFileService().createBackupFile(process);</b>
+<b class="fc">&nbsp;        ServiceManager.getMetsService().saveWorkpiece(workpiece, metadataFileUri);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Connects two processes by means of a link. The link is sorted as a linked
+&nbsp;     * logical division in a logical division of the parent process. The order
+&nbsp;     * is based on the order number specified by the user. This method does not
+&nbsp;     * create a link between the two processes in the database, this must and
+&nbsp;     * can only happen when saving.
+&nbsp;     *
+&nbsp;     * @param parentLogicalDivision
+&nbsp;     *            document logical division of the parent process in which the
+&nbsp;     *            link is to be added
+&nbsp;     * @param childProcessId
+&nbsp;     *            Database ID of the child process to be linked
+&nbsp;     */
+&nbsp;    public static void addLink(LogicalDivision parentLogicalDivision, int childProcessId) {
+<b class="fc">&nbsp;        addLink(parentLogicalDivision, -1, childProcessId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void addLink(LogicalDivision parentLogicalDivision, int index, int childProcessId) {
+&nbsp;
+<b class="fc">&nbsp;        LinkedMetsResource link = new LinkedMetsResource();</b>
+<b class="fc">&nbsp;        link.setLoctype(INTERNAL_LOCTYPE);</b>
+<b class="fc">&nbsp;        URI uri = ServiceManager.getProcessService().getProcessURI(childProcessId);</b>
+<b class="fc">&nbsp;        link.setUri(uri);</b>
+<b class="fc">&nbsp;        LogicalDivision logicalDivision = new LogicalDivision();</b>
+<b class="fc">&nbsp;        logicalDivision.setLink(link);</b>
+<b class="fc">&nbsp;        List&lt;LogicalDivision&gt; children = parentLogicalDivision.getChildren();</b>
+<b class="fc">&nbsp;        if (index &lt; 0) {</b>
+<b class="fc">&nbsp;            children.add(logicalDivision);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            children.add(index, logicalDivision);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove link to process with ID &#39;childProcessId&#39; from workpiece of Process
+&nbsp;     * &#39;parentProcess&#39;.
+&nbsp;     *
+&nbsp;     * @param parentProcess
+&nbsp;     *            Process from which link is removed
+&nbsp;     * @param childProcessId
+&nbsp;     *            ID of process whose link will be remove from workpiece of
+&nbsp;     *            parent process
+&nbsp;     * @throws IOException
+&nbsp;     *             thrown if meta.xml could not be loaded
+&nbsp;     */
+&nbsp;    public static void removeLink(Process parentProcess, int childProcessId) throws IOException {
+<b class="nc">&nbsp;        URI metadataFileUri = ServiceManager.getProcessService().getMetadataFileUri(parentProcess);</b>
+<b class="nc">&nbsp;        Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(metadataFileUri);</b>
+<b class="nc">&nbsp;        if (removeLinkRecursive(workpiece.getLogicalStructure(), childProcessId)) {</b>
+<b class="nc">&nbsp;            ServiceManager.getFileService().createBackupFile(parentProcess);</b>
+<b class="nc">&nbsp;            ServiceManager.getMetsService().saveWorkpiece(workpiece, metadataFileUri);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorDeleting&quot;, new Object[] {Helper.getTranslation(&quot;link&quot;) });</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static boolean removeLinkRecursive(LogicalDivision element, int childId) {
+<b class="nc">&nbsp;        LogicalDivision parentElement = null;</b>
+<b class="nc">&nbsp;        LogicalDivision linkElement = null;</b>
+<b class="nc">&nbsp;        for (LogicalDivision structuralElement : element.getChildren()) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(structuralElement.getLink()) &amp;&amp; Objects.nonNull(structuralElement.getLink().getUri())</b>
+<b class="nc">&nbsp;                    &amp;&amp; structuralElement.getLink().getUri().toString().endsWith(&quot;process.id=&quot; + childId)) {</b>
+<b class="nc">&nbsp;                parentElement = element;</b>
+<b class="nc">&nbsp;                linkElement = structuralElement;</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                if (removeLinkRecursive(structuralElement, childId)) {</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;        // no need to check if &#39;linkElement&#39; is Null since it is set in the same
+&nbsp;        // place as &#39;parentElement&#39;!
+<b class="nc">&nbsp;        if (Objects.nonNull(parentElement)) {</b>
+<b class="nc">&nbsp;            parentElement.getChildren().remove(linkElement);</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void addMultipleStructuresWithMetadataEntry(int number, String type, Workpiece workpiece, LogicalDivision structure,
+&nbsp;            InsertionPosition position, String metadataKey, String metadataValue) {
+<b class="fc">&nbsp;        for (int i = 0; i &lt; number; i++) {</b>
+<b class="fc">&nbsp;            LogicalDivision newStructure = addLogicalDivision(type, workpiece, structure, position,</b>
+<b class="fc">&nbsp;                Collections.emptyList());</b>
+<b class="fc">&nbsp;            if (Objects.isNull(newStructure) || metadataKey.isEmpty()) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (!metadataKey.isEmpty()) {</b>
+<b class="fc">&nbsp;                MetadataEntry metadataEntry = new MetadataEntry();</b>
+<b class="fc">&nbsp;                metadataEntry.setKey(metadataKey);</b>
+<b class="fc">&nbsp;                metadataEntry.setValue(metadataValue + &quot; &quot; + (number - i));</b>
+<b class="fc">&nbsp;                newStructure.getMetadata().add(metadataEntry);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void addMultipleStructuresWithMetadataGroup(int number, String type, Workpiece workpiece, LogicalDivision structure,
+&nbsp;            InsertionPosition position, String metadataKey) {
+&nbsp;
+<b class="fc">&nbsp;        for (int i = 0; i &lt; number; i++) {</b>
+<b class="fc">&nbsp;            LogicalDivision newStructure = addLogicalDivision(type, workpiece, structure, position,</b>
+<b class="fc">&nbsp;                Collections.emptyList());</b>
+<b class="fc">&nbsp;            if (Objects.isNull(newStructure) || metadataKey.isEmpty() || metadataKey == null) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            MetadataGroup metadataGroup = new MetadataGroup();</b>
+<b class="fc">&nbsp;            metadataGroup.setKey(metadataKey);</b>
+<b class="fc">&nbsp;            newStructure.getMetadata().add(metadataGroup);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a given number of new structures and inserts them into the
+&nbsp;     * workpiece. The insertion position is given relative to an existing
+&nbsp;     * structure. In addition, you can specify metadata, which is assigned to
+&nbsp;     * the structures consecutively with a counter.
+&nbsp;     *
+&nbsp;     * @param number
+&nbsp;     *            number of structures to create
+&nbsp;     * @param type
+&nbsp;     *            type of new structure
+&nbsp;     * @param workpiece
+&nbsp;     *            workpiece to which the new structure is to be added
+&nbsp;     * @param structure
+&nbsp;     *            structure relative to which the new structure is to be
+&nbsp;     *            inserted
+&nbsp;     * @param position
+&nbsp;     *            relative insertion position
+&nbsp;     * @param metadataViewInterface
+&nbsp;     *            interface of the metadata to be added
+&nbsp;     * @param metadataValue
+&nbsp;     *            value of the first metadata entry
+&nbsp;     */
+&nbsp;    public static void addMultipleStructuresWithMetadata(int number, String type, Workpiece workpiece, LogicalDivision structure,
+&nbsp;            InsertionPosition position, MetadataViewInterface metadataViewInterface, String metadataValue) {
+&nbsp;
+<b class="fc">&nbsp;        String metadataKey = metadataViewInterface.getId();</b>
+&nbsp;        
+<b class="fc">&nbsp;        if (metadataViewInterface.isComplex()) {</b>
+<b class="fc">&nbsp;            addMultipleStructuresWithMetadataGroup(number, type, workpiece, structure, position, metadataKey);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            addMultipleStructuresWithMetadataEntry(number, type, workpiece, structure, position, metadataKey, metadataValue);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Creates a given number of new structures and inserts them into the
+&nbsp;     * workpiece. The insertion position is given relative to an existing
+&nbsp;     * structure.
+&nbsp;     *
+&nbsp;     * @param number
+&nbsp;     *            number of structures to create
+&nbsp;     * @param type
+&nbsp;     *            type of new structure
+&nbsp;     * @param workpiece
+&nbsp;     *            workpiece to which the new structure is to be added
+&nbsp;     * @param structure
+&nbsp;     *            structure relative to which the new structure is to be
+&nbsp;     *            inserted
+&nbsp;     * @param position
+&nbsp;     *            relative insertion position
+&nbsp;     */
+&nbsp;    public static void addMultipleStructures(int number, String type, Workpiece workpiece, LogicalDivision structure,
+&nbsp;            InsertionPosition position) {
+<b class="fc">&nbsp;        for (int i = 0; i &lt; number; i++) {</b>
+<b class="fc">&nbsp;            LogicalDivision newStructure = addLogicalDivision(type, workpiece, structure, position,</b>
+<b class="fc">&nbsp;                Collections.emptyList());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new structure and inserts it into a workpiece. The insertion
+&nbsp;     * position is determined by the specified structure and mode. The given
+&nbsp;     * views are assigned to the structure and all its parent structures.
+&nbsp;     *
+&nbsp;     * @param type
+&nbsp;     *            type of new structure
+&nbsp;     * @param workpiece
+&nbsp;     *            workpiece to which the new structure is to be added
+&nbsp;     * @param logicalDivision
+&nbsp;     *            structure relative to which the new structure is to be
+&nbsp;     *            inserted
+&nbsp;     * @param position
+&nbsp;     *            relative insertion position
+&nbsp;     * @param viewsToAdd
+&nbsp;     *            views to be assigned to the structure
+&nbsp;     * @return the newly created structure
+&nbsp;     */
+&nbsp;    public static LogicalDivision addLogicalDivision(String type, Workpiece workpiece, LogicalDivision logicalDivision,
+&nbsp;            InsertionPosition position, List&lt;View&gt; viewsToAdd) {
+<b class="fc">&nbsp;        LinkedList&lt;LogicalDivision&gt; parents = getAncestorsOfLogicalDivision(logicalDivision,</b>
+<b class="fc">&nbsp;            workpiece.getLogicalStructure());</b>
+<b class="fc">&nbsp;        List&lt;LogicalDivision&gt; siblings = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (parents.isEmpty()) {</b>
+<b class="fc">&nbsp;            if (position.equals(InsertionPosition.AFTER_CURRENT_ELEMENT)</b>
+<b class="fc">&nbsp;                    || position.equals(InsertionPosition.BEFORE_CURRENT_ELEMENT)</b>
+<b class="fc">&nbsp;                    || position.equals(InsertionPosition.PARENT_OF_CURRENT_ELEMENT)) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;No parent found for currently selected structure to which new structure can be appended!&quot;);</b>
+<b class="nc">&nbsp;                return null;</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            siblings = parents.getLast().getChildren();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        LogicalDivision newStructure = new LogicalDivision();</b>
+<b class="fc">&nbsp;        newStructure.setType(type);</b>
+&nbsp;
+<b class="fc">&nbsp;        handlePosition(workpiece, logicalDivision, position, viewsToAdd, parents, siblings, newStructure);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.nonNull(viewsToAdd) &amp;&amp; !viewsToAdd.isEmpty()) {</b>
+<b class="nc">&nbsp;            handleViewsToAdd(viewsToAdd, newStructure);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return newStructure;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void handlePosition(Workpiece workpiece, LogicalDivision logicalDivision, InsertionPosition position,
+&nbsp;                                       List&lt;View&gt; viewsToAdd, LinkedList&lt;LogicalDivision&gt; parents,
+&nbsp;                                       List&lt;LogicalDivision&gt; siblings, LogicalDivision newStructure) {
+<b class="fc">&nbsp;        switch (position) {</b>
+&nbsp;            case AFTER_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                siblings.add(siblings.indexOf(logicalDivision) + 1, newStructure);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case BEFORE_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                siblings.add(siblings.indexOf(logicalDivision), newStructure);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case CURRENT_POSITION:
+<b class="nc">&nbsp;                OptionalInt minOrder = viewsToAdd.stream().mapToInt(v -&gt; v.getPhysicalDivision().getOrder()).min();</b>
+<b class="nc">&nbsp;                if (minOrder.isPresent()) {</b>
+<b class="nc">&nbsp;                    int structureOrder = minOrder.getAsInt();</b>
+&nbsp;                    // new structure ORDER must be set to same min ORDER value of contained physical divisions
+<b class="nc">&nbsp;                    newStructure.setOrder(structureOrder);</b>
+<b class="nc">&nbsp;                    List&lt;Integer&gt; siblingOrderValues = Stream.concat(logicalDivision.getChildren().stream()</b>
+<b class="nc">&nbsp;                            .map(Division::getOrder), Stream.of(structureOrder)).sorted().collect(Collectors.toList());</b>
+&nbsp;
+&nbsp;                    // new order must be set at correction location between existing siblings
+<b class="nc">&nbsp;                    logicalDivision.getChildren().add(siblingOrderValues.indexOf(structureOrder), newStructure);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;                break;
+&nbsp;            case FIRST_CHILD_OF_CURRENT_ELEMENT:
+<b class="fc">&nbsp;                logicalDivision.getChildren().add(0, newStructure);</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            case LAST_CHILD_OF_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                logicalDivision.getChildren().add(newStructure);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case PARENT_OF_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                newStructure.getChildren().add(logicalDivision);</b>
+<b class="nc">&nbsp;                if (parents.isEmpty()) {</b>
+<b class="nc">&nbsp;                    workpiece.setLogicalStructure(newStructure);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    siblings.set(siblings.indexOf(logicalDivision), newStructure);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalStateException(&quot;complete switch&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void handleViewsToAdd(List&lt;View&gt; viewsToAdd, LogicalDivision newStructure) {
+<b class="nc">&nbsp;        for (View viewToAdd : viewsToAdd) {</b>
+<b class="nc">&nbsp;            List&lt;LogicalDivision&gt; logicalDivisions = viewToAdd.getPhysicalDivision().getLogicalDivisions();</b>
+<b class="nc">&nbsp;            for (LogicalDivision elementToUnassign : logicalDivisions) {</b>
+<b class="nc">&nbsp;                elementToUnassign.getViews().remove(viewToAdd);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            logicalDivisions.clear();</b>
+<b class="nc">&nbsp;            logicalDivisions.add(newStructure);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        newStructure.getViews().addAll(viewsToAdd);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create a new PhysicalDivision and insert it into the passed workpiece. The position of insertion
+&nbsp;     * is determined by the passed parent and position.
+&nbsp;     * @param type type of new PhysicalDivision
+&nbsp;     * @param workpiece workpiece from which the root physical division is retrieved
+&nbsp;     * @param parent parent of the new PhysicalDivision
+&nbsp;     * @param position position relative to the parent element
+&nbsp;     */
+&nbsp;    public static PhysicalDivision addPhysicalDivision(String type, Workpiece workpiece, PhysicalDivision parent,
+&nbsp;            InsertionPosition position) {
+<b class="nc">&nbsp;        LinkedList&lt;PhysicalDivision&gt; grandparents = getAncestorsOfPhysicalDivision(parent, workpiece.getPhysicalStructure());</b>
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; siblings = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (grandparents.isEmpty()) {</b>
+<b class="nc">&nbsp;            if (position.equals(InsertionPosition.AFTER_CURRENT_ELEMENT)</b>
+<b class="nc">&nbsp;                    || position.equals(InsertionPosition.BEFORE_CURRENT_ELEMENT)) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;No parent found for currently selected physical &quot;</b>
+&nbsp;                        + &quot;division to which new physical division can be appended!&quot;);
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            siblings = grandparents.getLast().getChildren();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        PhysicalDivision newPhysicalDivision = new PhysicalDivision();</b>
+<b class="nc">&nbsp;        newPhysicalDivision.setType(type);</b>
+<b class="nc">&nbsp;        switch (position) {</b>
+&nbsp;            case AFTER_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                siblings.add(siblings.indexOf(parent) + 1, newPhysicalDivision);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case BEFORE_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                siblings.add(siblings.indexOf(parent), newPhysicalDivision);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case FIRST_CHILD_OF_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                parent.getChildren().add(0, newPhysicalDivision);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case LAST_CHILD_OF_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                parent.getChildren().add(newPhysicalDivision);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalStateException(&quot;Used InsertionPosition not allowed.&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return newPhysicalDivision;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Assigns all views of all children to the specified included structural
+&nbsp;     * element.
+&nbsp;     *
+&nbsp;     * @param structure
+&nbsp;     *            structure to add all views of all children to
+&nbsp;     */
+&nbsp;    public static void assignViewsFromChildren(LogicalDivision structure) {
+<b class="nc">&nbsp;        Collection&lt;View&gt; viewsToAdd = getViewsFromChildrenRecursive(structure);</b>
+<b class="nc">&nbsp;        Collection&lt;View&gt; assignedViews = structure.getViews();</b>
+<b class="nc">&nbsp;        viewsToAdd.removeAll(assignedViews);</b>
+<b class="nc">&nbsp;        List&lt;View&gt; sortedViews = Stream.concat(assignedViews.stream(), viewsToAdd.stream())</b>
+<b class="nc">&nbsp;                .sorted(Comparator.comparing(view -&gt; view.getPhysicalDivision().getOrder()))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        assignedViews.clear();</b>
+<b class="nc">&nbsp;        assignedViews.addAll(sortedViews);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Collection&lt;View&gt; getViewsFromChildrenRecursive(LogicalDivision structure) {
+<b class="nc">&nbsp;        Set&lt;View&gt; viewsFromChildren = new LinkedHashSet&lt;&gt;(structure.getViews());</b>
+<b class="nc">&nbsp;        for (LogicalDivision child : structure.getChildren()) {</b>
+<b class="nc">&nbsp;            viewsFromChildren.addAll(getViewsFromChildrenRecursive(child));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return viewsFromChildren;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a view on a physical division that is not further restricted; that is,
+&nbsp;     * the entire physical division is displayed.
+&nbsp;     *
+&nbsp;     * @param physicalDivision
+&nbsp;     *            physical division on which a view is to be formed
+&nbsp;     * @return the created physical division
+&nbsp;     */
+&nbsp;    public static View createUnrestrictedViewOn(PhysicalDivision physicalDivision) {
+<b class="nc">&nbsp;        View unrestrictedView = new View();</b>
+<b class="nc">&nbsp;        unrestrictedView.setPhysicalDivision(physicalDivision);</b>
+<b class="nc">&nbsp;        return unrestrictedView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines the path to the logical division of the child. For each level
+&nbsp;     * of the logical structure, the recursion is run through once, that is for
+&nbsp;     * a newspaper year process tree times (year, month, day).
+&nbsp;     *
+&nbsp;     * @param logicalDivision
+&nbsp;     *            logical division of the level stage of recursion (starting
+&nbsp;     *            from the top)
+&nbsp;     * @param number
+&nbsp;     *            number of the record of the process of the child
+&nbsp;     *
+&nbsp;     */
+&nbsp;    public static List&lt;LogicalDivision&gt; determineLogicalDivisionPathToChild(
+&nbsp;            LogicalDivision logicalDivision, int number) {
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.nonNull(logicalDivision.getLink())) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                if (ServiceManager.getProcessService()</b>
+<b class="fc">&nbsp;                        .processIdFromUri(logicalDivision.getLink().getUri()) == number) {</b>
+<b class="fc">&nbsp;                    LinkedList&lt;LogicalDivision&gt; linkedLogicalDivisions = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;                    linkedLogicalDivisions.add(logicalDivision);</b>
+<b class="fc">&nbsp;                    return linkedLogicalDivisions;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (IllegalArgumentException | ClassCastException | SecurityException e) {</b>
+<b class="nc">&nbsp;                logger.catching(Level.TRACE, e);</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (LogicalDivision logicalDivisionChild : logicalDivision.getChildren()) {</b>
+<b class="fc">&nbsp;            List&lt;LogicalDivision&gt; logicalDivisionList = determineLogicalDivisionPathToChild(</b>
+&nbsp;                logicalDivisionChild, number);
+<b class="fc">&nbsp;            if (!logicalDivisionList.isEmpty()) {</b>
+<b class="fc">&nbsp;                logicalDivisionList.add(0, logicalDivision);</b>
+<b class="fc">&nbsp;                return logicalDivisionList;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return Collections.emptyList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Transforms a {@code Domain} specifying object from the ruleset into an
+&nbsp;     * {@code MdSec} specifier for metadata in internal data format. Note that
+&nbsp;     * there is no {@code MdSec} for {@code Domain.METS_DIV}; that has to be
+&nbsp;     * treated differently.
+&nbsp;     *
+&nbsp;     * @param domain
+&nbsp;     *            domain to transform
+&nbsp;     * @return {@code MdSec} is returned
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the {@code Domain} is {@code mets:div}
+&nbsp;     */
+&nbsp;    public static MdSec domainToMdSec(Domain domain) {
+<b class="fc">&nbsp;        switch (domain) {</b>
+&nbsp;            case DESCRIPTION:
+<b class="fc">&nbsp;                return MdSec.DMD_SEC;</b>
+&nbsp;            case DIGITAL_PROVENANCE:
+<b class="nc">&nbsp;                return MdSec.DIGIPROV_MD;</b>
+&nbsp;            case RIGHTS:
+<b class="nc">&nbsp;                return MdSec.RIGHTS_MD;</b>
+&nbsp;            case SOURCE:
+<b class="nc">&nbsp;                return MdSec.SOURCE_MD;</b>
+&nbsp;            case TECHNICAL:
+<b class="nc">&nbsp;                return MdSec.TECH_MD;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalArgumentException(domain.name());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines the ancestors of a tree node.
+&nbsp;     *
+&nbsp;     * @param searched
+&nbsp;     *            node whose ancestor nodes are to be found
+&nbsp;     * @param position
+&nbsp;     *            node to be searched recursively
+&nbsp;     * @return the parent nodes (maybe empty)
+&nbsp;     */
+&nbsp;    public static LinkedList&lt;LogicalDivision&gt; getAncestorsOfLogicalDivision(LogicalDivision searched,
+&nbsp;                                                                                LogicalDivision position) {
+<b class="fc">&nbsp;        return getAncestorsRecursive(searched, position, null)</b>
+<b class="fc">&nbsp;                .stream()</b>
+<b class="fc">&nbsp;                .map(parent -&gt; (LogicalDivision) parent)</b>
+<b class="fc">&nbsp;                .collect(Collectors.toCollection(LinkedList::new));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines the ancestors of a tree node.
+&nbsp;     *
+&nbsp;     * @param searched
+&nbsp;     *            node whose ancestor nodes are to be found
+&nbsp;     * @param position
+&nbsp;     *            node to be searched recursively
+&nbsp;     * @return the parent nodes (maybe empty)
+&nbsp;     */
+&nbsp;    public static LinkedList&lt;PhysicalDivision&gt; getAncestorsOfPhysicalDivision(PhysicalDivision searched, PhysicalDivision position) {
+<b class="nc">&nbsp;        return getAncestorsRecursive(searched, position, null)</b>
+<b class="nc">&nbsp;                .stream()</b>
+<b class="nc">&nbsp;                .map(parent -&gt; (PhysicalDivision) parent)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toCollection(LinkedList::new));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static &lt;T extends Division&lt;T&gt;&gt; LinkedList&lt;Division&lt;T&gt;&gt; getAncestorsRecursive(Division&lt;T&gt; searched,
+&nbsp;            Division&lt;T&gt; position, Division&lt;T&gt; parent) {
+&nbsp;
+<b class="fc">&nbsp;        if (position.equals(searched)) {</b>
+<b class="fc">&nbsp;            if (Objects.isNull(parent)) {</b>
+<b class="fc">&nbsp;                return new LinkedList&lt;&gt;();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            LinkedList&lt;Division&lt;T&gt;&gt; ancestors = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;            ancestors.add(parent);</b>
+<b class="nc">&nbsp;            return ancestors;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (Division&lt;T&gt; child : position.getChildren()) {</b>
+<b class="nc">&nbsp;            LinkedList&lt;Division&lt;T&gt;&gt; maybeFound = getAncestorsRecursive(searched, child, position);</b>
+<b class="nc">&nbsp;            if (!maybeFound.isEmpty()) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(parent)) {</b>
+<b class="nc">&nbsp;                    maybeFound.addFirst(parent);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                return maybeFound;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return new LinkedList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value of the specified metadata entry.
+&nbsp;     *
+&nbsp;     * @param logicalDivision
+&nbsp;     *            logical division from whose metadata the value is
+&nbsp;     *            to be retrieved
+&nbsp;     * @param key
+&nbsp;     *            key of the metadata to be determined
+&nbsp;     * @return the value of the metadata entry, otherwise {@code null}
+&nbsp;     */
+&nbsp;    public static String getMetadataValue(LogicalDivision logicalDivision, String key) {
+<b class="fc">&nbsp;        for (Metadata metadata : logicalDivision.getMetadata()) {</b>
+<b class="fc">&nbsp;            if (metadata.getKey().equals(key) &amp;&amp; metadata instanceof MetadataEntry) {</b>
+<b class="fc">&nbsp;                return ((MetadataEntry) metadata).getValue();</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the first view the given PhysicalDivision is assigned to.
+&nbsp;     * @param physicalDivision PhysicalDivision to get the view for
+&nbsp;     * @return View or null if no View was found
+&nbsp;     */
+&nbsp;    public static View getFirstViewForPhysicalDivision(PhysicalDivision physicalDivision) {
+<b class="nc">&nbsp;        List&lt;LogicalDivision&gt; logicalDivisions = physicalDivision.getLogicalDivisions();</b>
+<b class="nc">&nbsp;        if (!logicalDivisions.isEmpty() &amp;&amp; Objects.nonNull(logicalDivisions.get(0))) {</b>
+<b class="nc">&nbsp;            for (View view : logicalDivisions.get(0).getViews()) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(view) &amp;&amp; Objects.equals(view.getPhysicalDivision(), physicalDivision)) {</b>
+<b class="nc">&nbsp;                    return view;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads the simple metadata from a logical division defined by
+&nbsp;     * the simple metadata view interface, including {@code mets:div} metadata.
+&nbsp;     *
+&nbsp;     * @param division
+&nbsp;     *            logical division from which the metadata should be
+&nbsp;     *            read
+&nbsp;     * @param simpleMetadataView
+&nbsp;     *            simple metadata view interface which formally describes the
+&nbsp;     *            methadata to be read
+&nbsp;     * @return metadata which corresponds to the formal description
+&nbsp;     */
+&nbsp;    public static List&lt;String&gt; readSimpleMetadataValues(LogicalDivision division,
+&nbsp;            SimpleMetadataViewInterface simpleMetadataView) {
+<b class="fc">&nbsp;        Domain domain = simpleMetadataView.getDomain().orElse(Domain.DESCRIPTION);</b>
+<b class="fc">&nbsp;        if (domain.equals(Domain.METS_DIV)) {</b>
+<b class="fc">&nbsp;            switch (simpleMetadataView.getId().toLowerCase()) {</b>
+&nbsp;                case &quot;label&quot;:
+<b class="nc">&nbsp;                    return Collections.singletonList(division.getLabel());</b>
+&nbsp;                case &quot;orderlabel&quot;:
+<b class="fc">&nbsp;                    return Collections.singletonList(division.getOrderlabel());</b>
+&nbsp;                case &quot;type&quot;:
+<b class="nc">&nbsp;                    return Collections.singletonList(division.getType());</b>
+&nbsp;                default:
+<b class="nc">&nbsp;                    throw new IllegalArgumentException(division.getClass().getSimpleName() + &quot; has no field &#39;&quot;</b>
+<b class="nc">&nbsp;                            + simpleMetadataView.getId() + &quot;&#39;.&quot;);</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            return division.getMetadata().parallelStream()</b>
+<b class="nc">&nbsp;                    .filter(metadata -&gt; metadata.getKey().equals(simpleMetadataView.getId()))</b>
+<b class="nc">&nbsp;                    .filter(MetadataEntry.class::isInstance).map(MetadataEntry.class::cast).map(MetadataEntry::getValue)</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toList());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes all metadata of the given key from the given included structural
+&nbsp;     * element.
+&nbsp;     *
+&nbsp;     * @param logicalDivision
+&nbsp;     *            logical division to remove metadata from
+&nbsp;     * @param key
+&nbsp;     *            key of metadata to remove
+&nbsp;     */
+&nbsp;    public static void removeAllMetadata(LogicalDivision logicalDivision, String key) {
+<b class="nc">&nbsp;        logicalDivision.getMetadata().removeIf(metadata -&gt; key.equals(metadata.getKey()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Writes a metadata entry as defined by the ruleset. The ruleset allows the
+&nbsp;     * domain {@code mets:div}. If a metadata entry must be written with the
+&nbsp;     * {@code mets:div} domain, this must set the internal value on the object
+&nbsp;     * model. Otherwise, however, a metadata entry is written in metadata area.
+&nbsp;     *
+&nbsp;     * @param division
+&nbsp;     *            logical division at which the metadata entry is to
+&nbsp;     *            be written
+&nbsp;     * @param simpleMetadataView
+&nbsp;     *            properties of the metadata entry as defined in the ruleset
+&nbsp;     * @param value
+&nbsp;     *            worth writing
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             when trying to write a value to the structure, there is no
+&nbsp;     *             field for it. This is when the domain is {@code mets:div},
+&nbsp;     *             and the value is different from either {@code label} or
+&nbsp;     *             {@code orderlabel}.
+&nbsp;     */
+&nbsp;    public static void writeMetadataEntry(LogicalDivision division,
+&nbsp;            SimpleMetadataViewInterface simpleMetadataView, String value) {
+&nbsp;
+<b class="fc">&nbsp;        Domain domain = simpleMetadataView.getDomain().orElse(Domain.DESCRIPTION);</b>
+<b class="fc">&nbsp;        if (domain.equals(Domain.METS_DIV)) {</b>
+<b class="fc">&nbsp;            switch (simpleMetadataView.getId().toLowerCase()) {</b>
+&nbsp;                case &quot;label&quot;:
+<b class="nc">&nbsp;                    division.setLabel(value);</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                case &quot;orderlabel&quot;:
+<b class="fc">&nbsp;                    division.setOrderlabel(value);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case &quot;type&quot;:
+<b class="nc">&nbsp;                    throw new IllegalArgumentException(</b>
+<b class="nc">&nbsp;                            &quot;&#39;&quot; + simpleMetadataView.getId() + &quot;&#39; is reserved for the key ID.&quot;);</b>
+&nbsp;                default:
+<b class="nc">&nbsp;                    throw new IllegalArgumentException(division.getClass().getSimpleName() + &quot; has no field &#39;&quot;</b>
+<b class="nc">&nbsp;                            + simpleMetadataView.getId() + &quot;&#39;.&quot;);</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            MetadataEntry metadata = new MetadataEntry();</b>
+<b class="fc">&nbsp;            metadata.setKey(simpleMetadataView.getId());</b>
+<b class="fc">&nbsp;            metadata.setDomain(domainToMdSec(domain));</b>
+<b class="fc">&nbsp;            metadata.setValue(value);</b>
+<b class="fc">&nbsp;            division.getMetadata().add(metadata);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

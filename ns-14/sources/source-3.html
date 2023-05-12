@@ -1,0 +1,771 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ParameterCore</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.config.enums</a>
+</div>
+
+<h1>Coverage Summary for Class: ParameterCore (org.kitodo.config.enums)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ParameterCore</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (105/105)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.config.enums;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;
+&nbsp;import org.kitodo.config.beans.Parameter;
+&nbsp;import org.kitodo.config.beans.UndefinedParameter;
+&nbsp;
+&nbsp;/**
+&nbsp; * These constants define configuration parameters usable in the configuration
+&nbsp; * file. This file reflects the order of the global
+&nbsp; * {@code kitodo_config.properties} file (as far as possible), and vice versa.
+&nbsp; */
+<b class="fc">&nbsp;public enum ParameterCore implements ParameterInterface {</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * FILE AND DIRECTORY MANAGEMENT
+&nbsp;     *
+&nbsp;     * Directories
+&nbsp;     */
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Parameters.java has been sorted to corresponding to kitodo_config.properties,
+&nbsp;     * including the section headers as you see. However there is an entry
+&nbsp;     * directory.config in kitodo_config.properties, but there is no constant for it
+&nbsp;     * here. This comment is to explain where the constant is if someone compares
+&nbsp;     * the two files in the future:
+&nbsp;     */
+&nbsp;
+<b class="fc">&nbsp;    DIR_XML_CONFIG(new Parameter&lt;UndefinedParameter&gt;(&quot;directory.config&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Absolute path to the directory that the rule set definition files will be
+&nbsp;     * read from. It must be terminated by a directory separator (&quot;/&quot;).
+&nbsp;     */
+<b class="fc">&nbsp;    DIR_RULESETS(new Parameter&lt;UndefinedParameter&gt;(&quot;directory.rulesets&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Absolute path to the directory that XSLT files are stored in which are used
+&nbsp;     * to transform the &quot;XML log&quot; (as visible from the XML button in the processes
+&nbsp;     * list) to a downloadable PDF docket which can be enclosed with the physical
+&nbsp;     * binding units to digitise. The path must be terminated by a directory
+&nbsp;     * separator (&quot;/&quot;).
+&nbsp;     */
+<b class="fc">&nbsp;    DIR_XSLT(new Parameter&lt;UndefinedParameter&gt;(&quot;directory.xslt&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Parameters.java has been sorted to corresponding to kitodo_config.properties,
+&nbsp;     * including the section headers as you see. However there is an entry
+&nbsp;     * directory.metadata in kitodo_config.properties, but there is no constant for
+&nbsp;     * it here. This comment is to explain where the constant is if someone compares
+&nbsp;     * the two files in the future:
+&nbsp;     */
+&nbsp;
+<b class="fc">&nbsp;    DIR_PROCESSES(new Parameter&lt;UndefinedParameter&gt;(&quot;directory.metadata&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Absolute path to the base directory of the users&#39; home directories,
+&nbsp;     * terminated by a directory separator (&quot;/&quot;). If a user accepts a task to work
+&nbsp;     * on which will require him or her to have access permission to the data of a
+&nbsp;     * process, a symbolic link to the process directory in question will be created
+&nbsp;     * in his or her home directory that will be removed again after finishing the
+&nbsp;     * task. Note: If LDAP is used, the users&#39; home dirs will instead be read from
+&nbsp;     * LDAP
+&nbsp;     */
+<b class="fc">&nbsp;    DIR_USERS(new Parameter&lt;UndefinedParameter&gt;(&quot;directory.users&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Absolute path to a folder the application can temporarily create files in,
+&nbsp;     * terminated by a directory separator (&quot;/&quot;).
+&nbsp;     */
+<b class="fc">&nbsp;    DIR_TEMP(new Parameter&lt;&gt;(&quot;directory.temp&quot;, &quot;/usr/local/kitodo/temp/&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Path to directory in which BPMN diagrams are stored.
+&nbsp;     */
+<b class="fc">&nbsp;    DIR_DIAGRAMS(new Parameter&lt;UndefinedParameter&gt;(&quot;directory.diagrams&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Parameters.java has been sorted to corresponding to kitodo_config.properties,
+&nbsp;     * including the section headers as you see. However there is an entry
+&nbsp;     * directory.modules in kitodo_config.properties, but there is no constant for
+&nbsp;     * it here. This comment is to explain where the constant is if someone compares
+&nbsp;     * the two files in the future:
+&nbsp;     */
+&nbsp;
+<b class="fc">&nbsp;    DIR_MODULES(new Parameter&lt;UndefinedParameter&gt;(&quot;directory.modules&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Points to a folder on the file system that debug files are written to.
+&nbsp;     */
+<b class="fc">&nbsp;    DIR_DEBUG(new Parameter&lt;UndefinedParameter&gt;(&quot;directory.debug&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Directory management
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prefix of image directory name created on process creation.
+&nbsp;     */
+<b class="fc">&nbsp;    DIRECTORY_PREFIX(new Parameter&lt;&gt;(&quot;DIRECTORY_PREFIX&quot;, &quot;orig&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Directory suffix for created image directory on process creation.
+&nbsp;     */
+<b class="fc">&nbsp;    DIRECTORY_SUFFIX(new Parameter&lt;&gt;(&quot;DIRECTORY_SUFFIX&quot;, &quot;tif&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Boolean, defaults to {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    IMPORT_USE_OLD_CONFIGURATION(new Parameter&lt;&gt;(&quot;importUseOldConfiguration&quot;, false)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creation and export of process sub-directories, e.g.
+&nbsp;     * {@code images/(processtitle)_tif&amp;ocr/(processtitle)_pdf}.
+&nbsp;     * {@code (processtitle)} is a placeholder for the process title If you comment
+&nbsp;     * in the parameter processDirs without a value, the result is that the whole
+&nbsp;     * process directory will be exported and no directory well be created. If you
+&nbsp;     * leave the parameter commented out, the whole functionality is disabled. Using
+&nbsp;     * the {@code processDirs} parameter is always an addition to the existing
+&nbsp;     * folder creating and exporting functions of Kitodo.Production.
+&nbsp;     */
+<b class="fc">&nbsp;    PROCESS_DIRS(new Parameter&lt;UndefinedParameter&gt;(&quot;processDirs&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set if master images folder {@code orig_} should be used at all. Boolean,
+&nbsp;     * defaults to {@code true}.
+&nbsp;     */
+<b class="fc">&nbsp;    USE_ORIG_FOLDER(new Parameter&lt;&gt;(&quot;useOrigFolder&quot;, true)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Directory and symbolic link management
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Script to create the user&#39;s home directory when adding a new user.
+&nbsp;     */
+<b class="fc">&nbsp;    SCRIPT_CREATE_DIR_USER_HOME(new Parameter&lt;UndefinedParameter&gt;(&quot;script_createDirUserHome&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Script to create the directory for a new process.
+&nbsp;     */
+<b class="fc">&nbsp;    SCRIPT_CREATE_DIR_META(new Parameter&lt;UndefinedParameter&gt;(&quot;script_createDirMeta&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Script to create a symbolic link in the user home directory and set
+&nbsp;     * permissions for the user.
+&nbsp;     */
+<b class="fc">&nbsp;    SCRIPT_CREATE_SYMLINK(new Parameter&lt;UndefinedParameter&gt;(&quot;script_createSymLink&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Script to remove the symbolic link from the user home directory.
+&nbsp;     */
+<b class="fc">&nbsp;    SCRIPT_DELETE_SYMLINK(new Parameter&lt;UndefinedParameter&gt;(&quot;script_deleteSymLink&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Process property to use in the name of the smLink.
+&nbsp;     */
+<b class="fc">&nbsp;    PROCESS_PROPERTY_SYMLINK_NAME(new Parameter&lt;&gt;(&quot;processProperty_symLinkName&quot;, &quot;&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Runnotes
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filename of the XSLT file for transforming old metadata files which need to
+&nbsp;     * be in the xslt folder above.
+&nbsp;     */
+<b class="fc">&nbsp;    XSLT_FILENAME_METADATA_TRANSFORMATION(new Parameter&lt;UndefinedParameter&gt;(&quot;xsltFilenameMetadataTransformation&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Images
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prefix for image names as regex. Default is 8 digits \\d{8} and gets
+&nbsp;     * validated.
+&nbsp;     */
+<b class="fc">&nbsp;    IMAGE_PREFIX(new Parameter&lt;&gt;(&quot;image.prefix&quot;, &quot;\\d{8}&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sorting of images.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Numeric sorting of images. 1 is lesser then 002, compares the number of
+&nbsp;     * image names, characters other than digits are not supported.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Alphanumeric sorting of images. 1 is greater then 002, compares character
+&nbsp;     * by character of image names, all characters are supported.
+&nbsp;     */
+<b class="fc">&nbsp;    IMAGE_SORTING(new Parameter&lt;&gt;(&quot;image.sorting&quot;, &quot;number&quot;, Arrays.asList(&quot;number&quot;, &quot;alphanumeric&quot;))),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Defaults to {@code fertig/}.
+&nbsp;     */
+<b class="fc">&nbsp;    DONE_DIRECTORY_NAME(new Parameter&lt;&gt;(&quot;image.doneDirectoryName&quot;, &quot;fertig/&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * VISUAL APPEARANCE
+&nbsp;     *
+&nbsp;     * Internationalization
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Absolute path to the directory that the resource bundle files are stored in,
+&nbsp;     * terminated by a directory separator (&quot;/&quot;).
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Note: If this directory DOESN&#39;T EXIST, the internal resource bundles will be
+&nbsp;     * used. If this directory exists BUT DOES NOT CONTAIN suitable resources, the
+&nbsp;     * screens will not work as expected.
+&nbsp;     */
+<b class="fc">&nbsp;    DIR_LOCAL_MESSAGES(new Parameter&lt;&gt;(&quot;directory.messages&quot;, &quot;/usr/local/kitodo/messages/&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    METADATA_LANGUAGE_LIST(new Parameter&lt;&gt;(&quot;metadataLanguage.list&quot;, &quot;Deutsch-de&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Data protection
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The General Data Protection Regulation or local law might require to set this
+&nbsp;     * value to true. anonymized statistics, displaying user on steps, etc. Boolean,
+&nbsp;     * defaults to {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    ANONYMIZE(new Parameter&lt;&gt;(&quot;anonymize&quot;, false)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Enable / disable search for steps done by user. Boolean, defaults to
+&nbsp;     * {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    WITH_USER_STEP_DONE_SEARCH(new Parameter&lt;&gt;(&quot;withUserStepDoneSearch&quot;, false)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * METADATA PROCESSING
+&nbsp;     *
+&nbsp;     * Catalogue search
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Number of hits to show per page on the hitlist when multiple hits were found
+&nbsp;     * on a catalog search. Integer, defaults to 12.
+&nbsp;     */
+<b class="fc">&nbsp;    HITLIST_PAGE_SIZE(new Parameter&lt;&gt;(&quot;catalogue.hitlist.pageSize&quot;, 12)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Indicates the maximum duration an interaction with a library catalog may
+&nbsp;     * take. Milliseconds, defaults to 30 minutes.
+&nbsp;     */
+<b class="fc">&nbsp;    CATALOGUE_TIMEOUT(new Parameter&lt;&gt;(&quot;catalogue.timeout&quot;, TimeUnit.MILLISECONDS.convert(30, TimeUnit.MINUTES))),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Metadata editor behavior
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Use special image folder for METS editor if exists (define suffix here).
+&nbsp;     */
+<b class="fc">&nbsp;    METS_EDITOR_DEFAULT_SUFFIX(new Parameter&lt;UndefinedParameter&gt;(&quot;metsEditor.defaultSuffix&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Enables or disables automatic pagination changes in the metadata editor. If
+&nbsp;     * false, pagination must be updated manually by clicking the link “Read in
+&nbsp;     * pagination from images”. Boolean, defaults to {@code true}.
+&nbsp;     */
+<b class="fc">&nbsp;    WITH_AUTOMATIC_PAGINATION(new Parameter&lt;&gt;(&quot;metsEditor.useAutomaticPagination&quot;, true)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Use special pagination type for automatic default pagination.
+&nbsp;     */
+<b class="fc">&nbsp;    METS_EDITOR_DEFAULT_PAGINATION(new Parameter&lt;&gt;(&quot;metsEditor.defaultPagination&quot;, &quot;uncounted&quot;,</b>
+<b class="fc">&nbsp;            Arrays.asList(&quot;arabic&quot;, &quot;roman&quot;, &quot;uncounted&quot;))),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Use a maximum of characters to display titles in the left part of mets
+&nbsp;     * editor. Integer, the default value is 0 (everything is displayed).
+&nbsp;     */
+<b class="fc">&nbsp;    METS_EDITOR_MAX_TITLE_LENGTH(new Parameter&lt;UndefinedParameter&gt;(&quot;metsEditor.maxTitleLength&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize all sub elements in METS editor to assign default values. Boolean,
+&nbsp;     * defaults to {@code true}.
+&nbsp;     */
+<b class="fc">&nbsp;    METS_EDITOR_ENABLE_DEFAULT_INITIALISATION(new Parameter&lt;&gt;(&quot;metsEditor.enableDefaultInitialisation&quot;, true)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Display the file manipulation dialog within the METS editor.
+&nbsp;     */
+<b class="fc">&nbsp;    METS_EDITOR_DISPLAY_FILE_MANIPULATION(new Parameter&lt;UndefinedParameter&gt;(&quot;metsEditor.displayFileManipulation&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Maximum number of media that can be uploaded at the same time in mets editor.
+&nbsp;     */
+<b class="fc">&nbsp;    METS_EDITOR_MAX_UPLOADED_MEDIA(new Parameter&lt;UndefinedParameter&gt;(&quot;metsEditor.maxUploadedMedia&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Comma-separated list of Strings which may be enclosed in double quotes.
+&nbsp;     * Separators available for double page pagination modes.
+&nbsp;     */
+<b class="fc">&nbsp;    PAGE_SEPARATORS(new Parameter&lt;&gt;(&quot;metsEditor.pageSeparators&quot;, &quot;\&quot; \&quot;&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     # Priority list of metadata keys used to display title information in the metadata editors structure and gallery
+&nbsp;     panels.
+&nbsp;     */
+<b class="fc">&nbsp;    TITLE_KEYS(new Parameter&lt;&gt;(&quot;metsEditor.titleMetadata&quot;, &quot;&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * backup of metadata configuration
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backup of metadata configuration. Integer.
+&nbsp;     */
+<b class="fc">&nbsp;    NUMBER_OF_META_BACKUPS(new Parameter&lt;UndefinedParameter&gt;(&quot;numberOfMetaBackups&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Metadata enrichment
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set to true to enable the feature of automatic meta data inheritance and
+&nbsp;     * enrichment. If this is enabled, all meta data elements from a higher level of
+&nbsp;     * the logical document structure are automatically inherited and lower levels
+&nbsp;     * are enriched with them upon process creation, given they have the same meta
+&nbsp;     * data type addable. Boolean, defaults to false.
+&nbsp;     */
+<b class="fc">&nbsp;    USE_METADATA_ENRICHMENT(new Parameter&lt;UndefinedParameter&gt;(&quot;useMetadataEnrichment&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Data copy rules
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Data copy rules may be used to copy Kitodo internal data and metadata on
+&nbsp;     * catalog query.
+&nbsp;     */
+<b class="fc">&nbsp;    COPY_DATA_ON_CATALOGUE_QUERY(new Parameter&lt;UndefinedParameter&gt;(&quot;copyData.onCatalogueQuery&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Data copy rules may be used to copy Kitodo internal data and metadata on DMS
+&nbsp;     * export.
+&nbsp;     */
+<b class="fc">&nbsp;    COPY_DATA_ON_EXPORT(new Parameter&lt;UndefinedParameter&gt;(&quot;copyData.onExport&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Metadata validation
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Perform basic metadata validation or not. Boolean, defaults to {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    USE_META_DATA_VALIDATION(new Parameter&lt;&gt;(&quot;useMetadatenvalidierung&quot;, false)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Validation of process title via regular expression.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATE_PROCESS_TITLE_REGEX(new Parameter&lt;&gt;(&quot;validateProzessTitelRegex&quot;, &quot;[\\w-]*&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Validation of the identifier via regular expression.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATE_IDENTIFIER_REGEX(new Parameter&lt;&gt;(&quot;validateIdentifierRegex&quot;, &quot;[\\w|-]&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Flag to control whether metadata validation should fail on warnings or just on errors.
+&nbsp;     */
+<b class="fc">&nbsp;    VALIDATION_FAIL_ON_WARNING(new Parameter&lt;&gt;(&quot;validationFailOnWarning&quot;, false)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Colours used to represent the issues in the calendar editor.
+&nbsp;     */
+<b class="fc">&nbsp;    ISSUE_COLOURS(new Parameter&lt;&gt;(&quot;issue.colours&quot;,</b>
+&nbsp;            &quot;#f94a15;#0071bc;#42ba37;#ee7e5b;#1e3946;#ca2f00;#AAAAFF;#000055;#0000FF;#FFFF00;#000000&quot;)),
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Number of pages per process below which the features in the granularity
+&nbsp;     * dialog shall be locked. Long.
+&nbsp;     */
+<b class="fc">&nbsp;    MINIMAL_NUMBER_OF_PAGES(new Parameter&lt;UndefinedParameter&gt;(&quot;numberOfPages.minimum&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Batch processing
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Limits the number of batches showing on the page “Batches”. Defaults to -1
+&nbsp;     * which disables this functionality. If set, only the limited number of batches
+&nbsp;     * will be shown, the other batches will be present but hidden and thus cannot
+&nbsp;     * be modified and not even be deleted. Integer.
+&nbsp;     */
+<b class="fc">&nbsp;    BATCH_DISPLAY_LIMIT(new Parameter&lt;&gt;(&quot;batchMaxSize&quot;, -1)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Turn on or off whether each assignment of processes to or removal from
+&nbsp;     * batches shall result in rewriting each processes&#39; wiki field in order to
+&nbsp;     * leave a note there. Enabling this function may slow down operations in the
+&nbsp;     * batches dialogue. Boolean, defaults to {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    BATCHES_LOG_CHANGES(new Parameter&lt;&gt;(&quot;batches.logChangesToWikiField&quot;, false)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Task manager
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Overrides the limit of tasks run in parallel. Integer, defaults to the number
+&nbsp;     * of available cores.
+&nbsp;     */
+<b class="fc">&nbsp;    TASK_MANAGER_AUTORUN_LIMIT(new Parameter&lt;UndefinedParameter&gt;(&quot;taskManager.autoRunLimit&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the time interval between two inspections of the task list. Long,
+&nbsp;     * defaults to 2000 ms.
+&nbsp;     */
+<b class="fc">&nbsp;    TASK_MANAGER_INSPECTION_INTERVAL_MILLIS(new Parameter&lt;&gt;(&quot;taskManager.inspectionIntervalMillis&quot;,</b>
+<b class="fc">&nbsp;            TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS))),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the maximum number of failed threads to keep around in RAM. Keep in mind
+&nbsp;     * that zombie processes still occupy all their resources and aren&#39;t available
+&nbsp;     * for garbage collection, so choose these values as restrictive as possible.
+&nbsp;     * Integer, defaults to 10.
+&nbsp;     */
+<b class="fc">&nbsp;    TASK_MANAGER_KEEP_FAILED(new Parameter&lt;&gt;(&quot;taskManager.keepThreads.failed.count&quot;, 10)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the maximum time to keep failed threads around in RAM. Keep in mind that
+&nbsp;     * zombie processes still occupy all their resources and aren&#39;t available for
+&nbsp;     * garbage collection, so choose these values as restrictive as possible.
+&nbsp;     * Integer, defaults to 240 minutes.
+&nbsp;     */
+<b class="fc">&nbsp;    TASK_MANAGER_KEEP_FAILED_MINS(</b>
+<b class="fc">&nbsp;            new Parameter&lt;&gt;(&quot;taskManager.keepThreads.failed.minutes&quot;, TimeUnit.MINUTES.convert(4, TimeUnit.HOURS))),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the maximum number of successfully finished threads to keep around in
+&nbsp;     * RAM. Defaults to 3. Keep in mind that zombie processes still occupy all their
+&nbsp;     * resources and aren&#39;t available for garbage collection, so choose these values
+&nbsp;     * as restrictive as possible.
+&nbsp;     */
+<b class="fc">&nbsp;    TASK_MANAGER_KEEP_SUCCESSFUL(new Parameter&lt;&gt;(&quot;taskManager.keepThreads.successful.count&quot;, 3)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the maximum time to keep successfully finished threads around in RAM.
+&nbsp;     * Defaults to 20 minutes. Keep in mind that zombie processes still occupy all
+&nbsp;     * their resources and aren&#39;t available for garbage collection, so choose these
+&nbsp;     * values as restrictive as possible.
+&nbsp;     */
+<b class="fc">&nbsp;    TASK_MANAGER_KEEP_SUCCESSFUL_MINS(new Parameter&lt;&gt;(&quot;taskManager.keepThreads.successful.minutes&quot;,</b>
+<b class="fc">&nbsp;            TimeUnit.MINUTES.convert(20, TimeUnit.MINUTES))),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets whether or not to show an option to &quot;add a sample task&quot; in the task
+&nbsp;     * manager. This is if for anything at all—useful for debugging or demonstration
+&nbsp;     * purposes only. Boolean, defaults to {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    TASK_MANAGER_SHOW_SAMPLE_TASK(new Parameter&lt;&gt;(&quot;taskManager.showSampleTask&quot;, false)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Export to presentation module
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If you set this to true the exports will be done asynchronously (in the
+&nbsp;     * background). This requires that the automatic export was set up in the
+&nbsp;     * project settings. Boolean, defaults to {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    ASYNCHRONOUS_AUTOMATIC_EXPORT(new Parameter&lt;&gt;(&quot;asynchronousAutomaticExport&quot;, false)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether during an export to the DMS the images will be copied. Boolean,
+&nbsp;     * defaults to {@code true}.
+&nbsp;     */
+<b class="fc">&nbsp;    EXPORT_WITH_IMAGES(new Parameter&lt;&gt;(&quot;automaticExportWithImages&quot;, true)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Boolean, defaults to {@code true}.
+&nbsp;     */
+<b class="fc">&nbsp;    AUTOMATIC_EXPORT_WITH_OCR(new Parameter&lt;&gt;(&quot;automaticExportWithOcr&quot;, true)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Boolean, defaults to {@code true}.
+&nbsp;     */
+<b class="fc">&nbsp;    EXPORT_VALIDATE_IMAGES(new Parameter&lt;&gt;(&quot;ExportValidateImages&quot;, true)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Boolean, defaults to {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    EXPORT_WITHOUT_TIME_LIMIT(new Parameter&lt;&gt;(&quot;exportWithoutTimeLimit&quot;, true)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * REMOTE SERVICES
+&nbsp;     *
+&nbsp;     * LDAP Configuration
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Boolean, defaults to {@code true}.
+&nbsp;     */
+<b class="fc">&nbsp;    LDAP_USE(new Parameter&lt;&gt;(&quot;ldap_use&quot;, true)),</b>
+&nbsp;
+<b class="fc">&nbsp;    LDAP_ATTRIBUTE_TO_TEST(new Parameter&lt;UndefinedParameter&gt;(&quot;ldap_AttributeToTest&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    LDAP_VALUE_OF_ATTRIBUTE(new Parameter&lt;UndefinedParameter&gt;(&quot;ldap_ValueOfAttribute&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Boolean, defaults to {@code true}.
+&nbsp;     */
+<b class="fc">&nbsp;    LDAP_USE_LOCAL_DIRECTORY(new Parameter&lt;&gt;(&quot;useLocalDirectory&quot;, true)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Boolean, defaults to {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    LDAP_USE_TLS(new Parameter&lt;&gt;(&quot;ldap_useTLS&quot;, false)),</b>
+&nbsp;
+<b class="fc">&nbsp;    LDAP_USE_SIMPLE_AUTH(new Parameter&lt;UndefinedParameter&gt;(&quot;useSimpleAuthentification&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Authority control configuration
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Which authority identifier to use for a given URI prefix.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Example: authority.http\://d-nb.info/gnd/.id=gnd
+&nbsp;     */
+<b class="fc">&nbsp;    AUTHORITY_ID_FROM_URI(new Parameter&lt;UndefinedParameter&gt;(&quot;authority.{0}.id&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Content to put in the URI field when adding a new metadata element of type
+&nbsp;     * person. This should usually be your preferred norm data file’s URI prefix as
+&nbsp;     * to the user doesn’t have to enter it over and over again.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Example: authority.default=http\://d-nb.info/gnd/
+&nbsp;     */
+<b class="fc">&nbsp;    AUTHORITY_DEFAULT(new Parameter&lt;UndefinedParameter&gt;(&quot;authority.default&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * FUNCTIONAL EXTENSIONS
+&nbsp;     *
+&nbsp;     * OCR service access
+&nbsp;     */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Boolean, defaults to {@code false}.
+&nbsp;     */
+<b class="fc">&nbsp;    SHOW_OCR_BUTTON(new Parameter&lt;&gt;(&quot;showOcrButton&quot;, false)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Base path to OCR, without parameters.
+&nbsp;     */
+<b class="fc">&nbsp;    OCR_URL(new Parameter&lt;UndefinedParameter&gt;(&quot;ocrUrl&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Process properties to display in process list.
+&nbsp;     */
+<b class="fc">&nbsp;    PROCESS_PROPERTIES(new Parameter&lt;&gt;(&quot;processPropertyColumns&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Default client parameter to be returned if no session client could be determined by user service.
+&nbsp;     */
+<b class="fc">&nbsp;    DEFAULT_CLIENT_ID(new Parameter&lt;&gt;(&quot;defaultClientId&quot;, 0)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parameter controlling whether each process in the system needs to have a unique name or not.
+&nbsp;     */
+<b class="fc">&nbsp;    UNIQUE_PROCESS_TITLES(new Parameter&lt;&gt;(&quot;uniqueProcessTitles&quot;, true)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Task custom columns to display in current tasks list.
+&nbsp;     */
+<b class="fc">&nbsp;    TASK_CUSTOM_COLUMNS(new Parameter&lt;&gt;(&quot;taskProcessPropertyColumns&quot;)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * ActiveMQ web services
+&nbsp;     */
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_HOST_URL(new Parameter&lt;UndefinedParameter&gt;(&quot;activeMQ.hostURL&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_USE_SSL(new Parameter&lt;&gt;(&quot;activeMQ.useSSL&quot;, false)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_KEYSTORE(new Parameter&lt;&gt;(&quot;activeMQ.keyStore&quot;, &quot;&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_KEYSTORE_PASSWORD(new Parameter&lt;&gt;(&quot;activeMQ.keyStorePassword&quot;, &quot;&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_TRUSTSTORE(new Parameter&lt;&gt;(&quot;activeMQ.trustStore&quot;, &quot;&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_TRUSTSTORE_PASSWORD(new Parameter&lt;&gt;(&quot;activeMQ.trustStorePassword&quot;, &quot;&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_USE_AUTH(new Parameter&lt;&gt;(&quot;activeMQ.useAuth&quot;, false)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_AUTH_USERNAME(new Parameter&lt;&gt;(&quot;activeMQ.authUsername&quot;, &quot;&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_AUTH_PASSWORD(new Parameter&lt;&gt;(&quot;activeMQ.authPassword&quot;, &quot;&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_FINALIZE_STEP_QUEUE(new Parameter&lt;UndefinedParameter&gt;(&quot;activeMQ.finalizeStep.queue&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_USER(new Parameter&lt;UndefinedParameter&gt;(&quot;activeMQ.user&quot;)),</b>
+&nbsp;
+<b class="fc">&nbsp;    ACTIVE_MQ_RESULTS_TOPIC(new Parameter&lt;UndefinedParameter&gt;(&quot;activeMQ.results.topic&quot;)),</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Long, value in milliseconds.
+&nbsp;     */
+<b class="fc">&nbsp;    ACTIVE_MQ_RESULTS_TTL(new Parameter&lt;&gt;(&quot;activeMQ.results.timeToLive&quot;,</b>
+<b class="fc">&nbsp;            TimeUnit.MILLISECONDS.convert(7, TimeUnit.DAYS))),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Elasticsearch properties
+&nbsp;     */
+<b class="fc">&nbsp;    ELASTICSEARCH_INDEXLIMIT(new Parameter&lt;&gt;(&quot;elasticsearch.indexLimit&quot;, 5000)),</b>
+<b class="fc">&nbsp;    ELASTICSEARCH_BATCH(new Parameter&lt;&gt;(&quot;elasticsearch.batch&quot;, 500)),</b>
+<b class="fc">&nbsp;    ELASTICSEARCH_ATTEMPTS(new Parameter&lt;&gt;(&quot;elasticsearch.attempts&quot;, 10)),</b>
+<b class="fc">&nbsp;    ELASTICSEARCH_TIME_BETWEEN_ATTEMPTS(new Parameter&lt;&gt;(&quot;elasticsearch.timeBetweenAttempts&quot;, 2000)),</b>
+<b class="fc">&nbsp;    ELASTICSEARCH_THREADS(new Parameter&lt;&gt;(&quot;elasticsearch.threads&quot;, 4)),</b>
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Security properties
+&nbsp;     */
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Secret is used to encrypt or decrypt LDAP manager passwords which are stored in the database in encrypted form.
+&nbsp;     * Once the secret value is set, it should not be changed since encrypted data can no longer be decrypted.
+&nbsp;     */
+<b class="fc">&nbsp;    SECURITY_SECRET_LDAPMANAGERPASSWORD(new Parameter&lt;&gt;(&quot;security.secret.ldapManagerPassword&quot;, &quot;&quot;));</b>
+&nbsp;
+&nbsp;
+&nbsp;    private final Parameter&lt;?&gt; parameter;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     *
+&nbsp;     * @param parameter
+&nbsp;     *            for config
+&nbsp;     */
+<b class="fc">&nbsp;    ParameterCore(Parameter&lt;?&gt; parameter) {</b>
+<b class="fc">&nbsp;        this.parameter = parameter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get parameter.
+&nbsp;     *
+&nbsp;     * @return value of parameter
+&nbsp;     */
+&nbsp;    public Parameter&lt;?&gt; getParameter() {
+<b class="fc">&nbsp;        return parameter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="fc">&nbsp;        return this.parameter.getKey();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

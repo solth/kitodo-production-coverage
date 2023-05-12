@@ -1,0 +1,234 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LegacyMetadataHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.metadata.legacytypeimplementations</a>
+</div>
+
+<h1>Coverage Summary for Class: LegacyMetadataHelper (org.kitodo.production.helper.metadata.legacytypeimplementations)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LegacyMetadataHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    20%
+  </span>
+  <span class="absValue">
+    (2/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (5/20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.metadata.legacytypeimplementations;
+&nbsp;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.Domain;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents a legacy metadata. This is a soldering class to keep legacy code
+&nbsp; * operational which is about to be removed. Do not use this class.
+&nbsp; */
+&nbsp;public class LegacyMetadataHelper {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The legacy type of the legacy metadata.
+&nbsp;     */
+&nbsp;    private LegacyMetadataTypeHelper type;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The value of the legacy metadata.
+&nbsp;     */
+&nbsp;    private String value;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The legacy doc struct of the legacy metadata.
+&nbsp;     */
+&nbsp;    private LegacyInnerPhysicalDocStructHelper legacyInnerPhysicalDocStructHelper;
+&nbsp;
+&nbsp;    private BindingSaveInterface bindingSaveInterface;
+&nbsp;
+&nbsp;    private MetadataEntry binding;
+&nbsp;
+&nbsp;    private Domain domain;
+&nbsp;
+&nbsp;    LegacyMetadataHelper(LegacyInnerPhysicalDocStructHelper legacyInnerPhysicalDocStructHelper,
+<b class="fc">&nbsp;            LegacyMetadataTypeHelper type, String value) {</b>
+<b class="fc">&nbsp;        this.type = type;</b>
+<b class="fc">&nbsp;        this.value = value;</b>
+<b class="fc">&nbsp;        this.legacyInnerPhysicalDocStructHelper = legacyInnerPhysicalDocStructHelper;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Deprecated
+<b class="nc">&nbsp;    public LegacyMetadataHelper(LegacyMetadataTypeHelper type) {</b>
+<b class="nc">&nbsp;        this.type = type;</b>
+<b class="nc">&nbsp;        this.value = &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Deprecated
+&nbsp;    public MetadataEntry getBinding() {
+<b class="nc">&nbsp;        return binding;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Deprecated
+&nbsp;    public Domain getDomain() {
+<b class="nc">&nbsp;        return domain;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Deprecated
+&nbsp;    public LegacyMetadataTypeHelper getMetadataType() {
+<b class="nc">&nbsp;        return type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Deprecated
+&nbsp;    public String getValue() {
+<b class="fc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This allows the metadata to be saved.
+&nbsp;     */
+&nbsp;    public void saveToBinding() {
+<b class="nc">&nbsp;        bindingSaveInterface.saveMetadata(this);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the binding to a metadata XML access interface through a binding
+&nbsp;     * save interface. This is needed so that the metadata in its container can
+&nbsp;     * automatically save itself if its value is subsequently changed. In fact,
+&nbsp;     * the value may be, aside from the value of a metadata entry, the value of
+&nbsp;     * a field of the container, which makes the matter a bit unwieldy.
+&nbsp;     *
+&nbsp;     * @param bsi
+&nbsp;     *            thee binding save interface via which the metadata can
+&nbsp;     *            automatically save itself afterwards
+&nbsp;     * @param binding
+&nbsp;     *            the metadata entry where the value should be stored, if
+&nbsp;     *            applicable
+&nbsp;     * @param domain
+&nbsp;     *            the domain where the metadata entry is stored
+&nbsp;     */
+&nbsp;    public void setBinding(BindingSaveInterface bsi, MetadataEntry binding, Domain domain) {
+<b class="nc">&nbsp;        this.bindingSaveInterface = bsi;</b>
+<b class="nc">&nbsp;        this.binding = binding;</b>
+<b class="nc">&nbsp;        this.domain = domain;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the document structure entity to which this object belongs to.
+&nbsp;     *
+&nbsp;     * @param docStruct
+&nbsp;     *            document structure entity to which this object belongs
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    public void setDocStruct(LegacyDocStructHelperInterface docStruct) {
+<b class="nc">&nbsp;        if (docStruct instanceof LegacyInnerPhysicalDocStructHelper) {</b>
+<b class="nc">&nbsp;            this.legacyInnerPhysicalDocStructHelper = (LegacyInnerPhysicalDocStructHelper) docStruct;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set string value.
+&nbsp;     *
+&nbsp;     * @param value String value
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    public void setStringValue(String value) {
+<b class="nc">&nbsp;        this.value = value;</b>
+<b class="nc">&nbsp;        if (bindingSaveInterface != null) {</b>
+<b class="nc">&nbsp;            saveToBinding();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,516 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CommentForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: CommentForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CommentForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/32)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/115)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Comment;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.enums.CommentType;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.batch.BatchTaskHelper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.data.TaskService;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;
+&nbsp;@Named(&quot;CommentForm&quot;)
+&nbsp;@SessionScoped
+<b class="nc">&nbsp;public class CommentForm extends BaseForm {</b>
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(CommentForm.class);</b>
+<b class="nc">&nbsp;    private boolean correctionComment = false;</b>
+&nbsp;    private String commentMessage;
+&nbsp;    private String correctionTaskId;
+&nbsp;    private Task currentTask;
+&nbsp;    private Process process;
+&nbsp;    private BatchTaskHelper batchHelper;
+<b class="nc">&nbsp;    private final WorkflowControllerService workflowControllerService = new WorkflowControllerService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process.
+&nbsp;     *
+&nbsp;     * @return value of process
+&nbsp;     */
+&nbsp;    public Process getProcess() {
+<b class="nc">&nbsp;        return process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set process by ID.
+&nbsp;     *
+&nbsp;     * @param processId process ID
+&nbsp;     */
+&nbsp;    public void setProcessById(int processId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.process = ServiceManager.getProcessService().getById(processId);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorLoadingOne&quot;, new Object[] {ObjectType.PROCESS.getTranslationSingular(),</b>
+<b class="nc">&nbsp;                processId}, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all process Comments in descending order.
+&nbsp;     *
+&nbsp;     * @return List of Comments.
+&nbsp;     */
+&nbsp;    public List&lt;Comment&gt; getAllComments() {
+<b class="nc">&nbsp;        List&lt;Comment&gt; comments = ServiceManager.getCommentService().getAllCommentsByProcess(this.process);</b>
+<b class="nc">&nbsp;        Collections.reverse(comments);</b>
+<b class="nc">&nbsp;        return comments;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get comment&#39;s message.
+&nbsp;     *
+&nbsp;     * @return value of message.
+&nbsp;     */
+&nbsp;    public String getCommentMessage() {
+<b class="nc">&nbsp;        return this.commentMessage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set comment&#39;s message.
+&nbsp;     *
+&nbsp;     * @param commentMessage String
+&nbsp;     */
+&nbsp;    public void setCommentMessage(String commentMessage) {
+<b class="nc">&nbsp;        this.commentMessage = commentMessage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add a new comment to the process.
+&nbsp;     */
+&nbsp;    public String addComment() {
+<b class="nc">&nbsp;        Comment comment = new Comment();</b>
+<b class="nc">&nbsp;        comment.setMessage(getCommentMessage());</b>
+<b class="nc">&nbsp;        comment.setAuthor(ServiceManager.getUserService().getCurrentUser());</b>
+<b class="nc">&nbsp;        comment.setCreationDate(new Date());</b>
+<b class="nc">&nbsp;        comment.setProcess(this.process);</b>
+<b class="nc">&nbsp;        if (isCorrectionComment()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                comment.setCorrectionTask(ServiceManager.getTaskService().getById(Integer.parseInt(getCorrectionTaskId())));</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException | DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[]{ObjectType.TASK.getTranslationSingular(), getCorrectionTaskId()},</b>
+&nbsp;                        logger, e);
+<b class="nc">&nbsp;                return null;</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            comment.setType(CommentType.ERROR);</b>
+<b class="nc">&nbsp;            comment.setCorrected(Boolean.FALSE);</b>
+<b class="nc">&nbsp;            comment.setCurrentTask(this.currentTask);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            comment.setType(CommentType.INFO);</b>
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getCommentService().saveToDatabase(comment);</b>
+<b class="nc">&nbsp;            ServiceManager.getProcessService().saveToIndex(this.process, true);</b>
+<b class="nc">&nbsp;            for (Task task : this.process.getTasks()) {</b>
+&nbsp;                // update tasks in elastic search index, which includes correction comment status 
+<b class="nc">&nbsp;                ServiceManager.getTaskService().saveToIndex(task, true);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (DAOException | CustomResponseException | DataException | IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        newComment(false);</b>
+<b class="nc">&nbsp;        if (comment.getType().equals(CommentType.ERROR)) {</b>
+<b class="nc">&nbsp;            reportProblem(comment);</b>
+<b class="nc">&nbsp;            return MessageFormat.format(REDIRECT_PATH, &quot;tasks&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add a new comment to all batch processes.
+&nbsp;     */
+&nbsp;    public String addCommentToAllBatchProcesses() {
+<b class="nc">&nbsp;        for (Task task : this.batchHelper.getSteps()) {</b>
+<b class="nc">&nbsp;            this.currentTask = task;</b>
+<b class="nc">&nbsp;            addComment();</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return MessageFormat.format(REDIRECT_PATH, &quot;tasks&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Report the problem.
+&nbsp;     */
+&nbsp;    private void reportProblem(Comment comment) {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.workflowControllerService.reportProblem(comment);</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;reportingProblem&quot;, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        refreshProcess(this.currentTask.getProcess());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get correction comment.
+&nbsp;     *
+&nbsp;     * @return value of correction comment
+&nbsp;     */
+&nbsp;    public boolean isCorrectionComment() {
+<b class="nc">&nbsp;        return correctionComment;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set correction comment.
+&nbsp;     *
+&nbsp;     * @param correctionComment as boolean
+&nbsp;     */
+&nbsp;    public void setCorrectionComment(boolean correctionComment) {
+<b class="nc">&nbsp;        this.correctionComment = correctionComment;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get correctionTaskId.
+&nbsp;     *
+&nbsp;     * @return value of correctionTaskId
+&nbsp;     */
+&nbsp;    public String getCorrectionTaskId() {
+<b class="nc">&nbsp;        return correctionTaskId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set correctionTaskId.
+&nbsp;     *
+&nbsp;     * @param correctionTaskId as java.lang.String
+&nbsp;     */
+&nbsp;    public void setCorrectionTaskId(String correctionTaskId) {
+<b class="nc">&nbsp;        this.correctionTaskId = correctionTaskId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Correction message to previous Tasks.
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getPreviousStepsForProblemReporting() {
+<b class="nc">&nbsp;        List&lt;Task&gt; currentTaskOptions = getCurrentTaskOptions();</b>
+<b class="nc">&nbsp;        if (currentTaskOptions.isEmpty()) {</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return ServiceManager.getTaskService().getPreviousTasksForProblemReporting(</b>
+<b class="nc">&nbsp;                    currentTaskOptions.get(0).getOrdering(),</b>
+<b class="nc">&nbsp;                    this.process.getId());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public int getSizeOfPreviousStepsForProblemReporting() {
+<b class="nc">&nbsp;        return getPreviousStepsForProblemReporting().size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Solve the problem.
+&nbsp;     */
+&nbsp;    public String solveProblem(Comment comment) {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.workflowControllerService.solveProblem(comment);</b>
+<b class="nc">&nbsp;        } catch (DataException | DAOException | IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;SolveProblem&quot;, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        refreshProcess(this.currentTask.getProcess());</b>
+<b class="nc">&nbsp;        return MessageFormat.format(REDIRECT_PATH, &quot;tasks&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Solve the problem to all batch processes.
+&nbsp;     */
+&nbsp;    public String solveProblemForAllBatchProcesses(Comment comment) {
+<b class="nc">&nbsp;        for (Task task : batchHelper.getSteps()) {</b>
+<b class="nc">&nbsp;            for (Comment processComment : ServiceManager.getCommentService().getAllCommentsByProcess(task.getProcess())) {</b>
+<b class="nc">&nbsp;                if (!processComment.isCorrected()</b>
+<b class="nc">&nbsp;                        &amp;&amp; processComment.getCorrectionTask().getTitle().equals(comment.getCorrectionTask().getTitle())) {</b>
+<b class="nc">&nbsp;                    solveProblem(processComment);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return MessageFormat.format(REDIRECT_PATH, &quot;tasks&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * refresh the process in the session.
+&nbsp;     *
+&nbsp;     * @param process Object process to refresh
+&nbsp;     */
+&nbsp;    private void refreshProcess(Process process) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!Objects.equals(process.getId(), 0)) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(this.currentTask)) {</b>
+<b class="nc">&nbsp;                    this.currentTask.setProcess(ServiceManager.getProcessService().getById(process.getId()));</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE,</b>
+<b class="nc">&nbsp;                    new Object[] {ObjectType.PROCESS.getTranslationSingular(), this.currentTask.getProcess().getId()},</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set current task by ID.
+&nbsp;     *
+&nbsp;     * @param taskId
+&nbsp;     *          ID of task to set
+&nbsp;     */
+&nbsp;    public void setCurrentTaskById(int taskId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.currentTask = ServiceManager.getTaskService().getById(taskId);</b>
+<b class="nc">&nbsp;            this.setProcessById(this.currentTask.getProcess().getId());</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE,</b>
+<b class="nc">&nbsp;                    new Object[] {ObjectType.TASK.getTranslationSingular(), taskId}, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set batchHelper.
+&nbsp;     *
+&nbsp;     * @param batchHelper as org.kitodo.production.helper.batch.BatchTaskHelper
+&nbsp;     */
+&nbsp;    public void setBatchHelper(BatchTaskHelper batchHelper) {
+<b class="nc">&nbsp;        this.batchHelper = batchHelper;</b>
+<b class="nc">&nbsp;        this.currentTask = this.batchHelper.getCurrentStep();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set default comment.
+&nbsp;     */
+&nbsp;    public void newComment(Boolean isCorrectionComment) {
+<b class="nc">&nbsp;        if (getSizeOfPreviousStepsForProblemReporting() &gt; 0) {</b>
+<b class="nc">&nbsp;            setCorrectionTaskId(getPreviousStepsForProblemReporting().get(0).getId().toString());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            setCorrectionTaskId(&quot;&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        setCommentMessage(&quot;&quot;);</b>
+<b class="nc">&nbsp;        setCorrectionComment(isCorrectionComment);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check whether there are concurrent tasks in work or not.
+&nbsp;     *
+&nbsp;     * @return whether there are concurrent tasks in work or not
+&nbsp;     */
+&nbsp;    public boolean isConcurrentTaskInWork() {
+<b class="nc">&nbsp;        return !TaskService.getTasksInWorkByOtherUsers(</b>
+<b class="nc">&nbsp;                TaskService.getConcurrentTasksOpenOrInWork(this.process, this.currentTask)).isEmpty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether &#39;correction&#39; flag is set to true for any task of the current process,
+&nbsp;     * e.g. if process is currently in a correction workflow.
+&nbsp;     *
+&nbsp;     * @return whether process is in correction workflow or not
+&nbsp;     */
+&nbsp;    public boolean isCorrectionWorkflow() {
+<b class="nc">&nbsp;        return TaskService.isCorrectionWorkflow(this.process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return a tooltip for the correction message switch.
+&nbsp;     *
+&nbsp;     * @return tooltip for correction message switch
+&nbsp;     */
+&nbsp;    public String getCorrectionMessageSwitchTooltip() {
+<b class="nc">&nbsp;        return TaskService.getCorrectionMessageSwitchTooltip(this.process, this.currentTask);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Compute and return list of tasks that are eligible as &#39;currentTask&#39; for a new correction comment.
+&nbsp;     *
+&nbsp;     * @return list of current task options for new correction comment
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getCurrentTaskOptions() {
+<b class="nc">&nbsp;        return TaskService.getCurrentTaskOptions(this.process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get currentTask.
+&nbsp;     *
+&nbsp;     * @return value of currentTask
+&nbsp;     */
+&nbsp;    public Task getCurrentTask() {
+<b class="nc">&nbsp;        return currentTask;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set currentTask.
+&nbsp;     *
+&nbsp;     * @param currentTask as org.kitodo.data.database.beans.Task
+&nbsp;     */
+&nbsp;    public void setCurrentTask(Task currentTask) {
+<b class="nc">&nbsp;        this.currentTask = currentTask;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the process has any correction comments or not.
+&nbsp;     *
+&nbsp;     * @param processId
+&nbsp;     *          identifier of process to check
+&nbsp;     * @return 0, if process has no correction comment
+&nbsp;     *         1, if process has correction comments that are all corrected
+&nbsp;     *         2, if process has at least one open correction comment
+&nbsp;     */
+&nbsp;    public int hasCorrectionComment(int processId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ProcessService.hasCorrectionComment(processId).getValue();</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.PROCESS.getTranslationSingular(), processId }, logger, e);</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the current process has any unresolved problems.
+&nbsp;     *
+&nbsp;     * @return whether the current process has any unresolved problems
+&nbsp;     */
+&nbsp;    public boolean hasUnsolvedProblem() {
+<b class="nc">&nbsp;        return getAllComments().stream()</b>
+<b class="nc">&nbsp;                .anyMatch(comment -&gt; comment.getType().equals(CommentType.ERROR) &amp;&amp; !comment.isCorrected());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return link text for &#39;Close task&#39; link on task details page.
+&nbsp;     *
+&nbsp;     * @return link text for &#39;Close task&#39; link on task details page
+&nbsp;     */
+&nbsp;    public String getTaskCloseLinkText() {
+<b class="nc">&nbsp;        if (isCorrectionWorkflow()) {</b>
+<b class="nc">&nbsp;            return Helper.getTranslation(&quot;closeTask&quot;) + &quot; (&quot; + Helper.getTranslation(&quot;correctionWorkflow&quot;)</b>
+&nbsp;                    + &quot;)&quot;;
+&nbsp;        } else {
+<b class="nc">&nbsp;            return Helper.getTranslation(&quot;closeTask&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns true if a correction comment is allowed to be added.
+&nbsp;     */
+&nbsp;    public boolean isCorrectionCommentAllowed() {
+<b class="nc">&nbsp;        return getSizeOfPreviousStepsForProblemReporting() &gt; 0 &amp;&amp; !isConcurrentTaskInWork() &amp;&amp; !isCorrectionWorkflow();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

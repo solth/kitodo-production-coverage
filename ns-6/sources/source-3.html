@@ -1,0 +1,133 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetsXmlElementAccessInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataformat.mets</a>
+</div>
+
+<h1>Coverage Summary for Class: MetsXmlElementAccessInterface (org.kitodo.api.dataformat.mets)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">MetsXmlElementAccessInterface</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataformat.mets;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.OutputStream;
+&nbsp;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;
+&nbsp;/**
+&nbsp; * Interface for a service that handles access to the {@code &lt;mets:mets&gt;}
+&nbsp; * element.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * METS is a schema that describes possible structures of an XML file. Despite
+&nbsp; * many definitions, it is so variable that the same piece of information can be
+&nbsp; * stored in various ways in the file, so that an extended technical use of the
+&nbsp; * information is not readily possible. To fix this shortcoming, so-called
+&nbsp; * application profiles are defined for the individual uses of METS. This
+&nbsp; * interface implements a specific METS application profile, the
+&nbsp; * Kitodo.Production application profile, which is closely related to the ZVDD
+&nbsp; * DFG-Viewer METS Profile, which was defined by the Central Directory of
+&nbsp; * Digitized Prints (ZVDD), an institution of the Lower Saxony State and
+&nbsp; * University Library of the Georg-August-University Goettingen in Germany, and
+&nbsp; * is widely used in Germany. Although this interface uses METS terminology, it
+&nbsp; * can only be meaningfully used to read and write METS XML files that
+&nbsp; * correspond to the Kitodo.Production METS application profile. For this
+&nbsp; * purpose, only external functionality was made available, which is necessary
+&nbsp; * for editing METS XML files in the Kitodo.Production application profile. This
+&nbsp; * saves the user from the internal complexity and richness of the METS file
+&nbsp; * format.
+&nbsp; */
+&nbsp;public interface MetsXmlElementAccessInterface {
+&nbsp;    /**
+&nbsp;     * Reads a METS file.
+&nbsp;     *
+&nbsp;     * @param in
+&nbsp;     *            open input channel for reading the file
+&nbsp;     * @return the read workpiece
+&nbsp;     * @throws IOException
+&nbsp;     *             if the reading fails
+&nbsp;     */
+&nbsp;    Workpiece read(InputStream in) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Writes the workpiece to a METS file.
+&nbsp;     *
+&nbsp;     * @param workpiece
+&nbsp;     *            workpiece to save
+&nbsp;     * @param out
+&nbsp;     *            open output channel for writing the file
+&nbsp;     * @throws IOException
+&nbsp;     *             if the writing fails
+&nbsp;     */
+&nbsp;    void save(Workpiece workpiece, OutputStream out) throws IOException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

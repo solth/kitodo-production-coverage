@@ -1,0 +1,254 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LazyTaskDTOModel</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model</a>
+</div>
+
+<h1>Coverage Summary for Class: LazyTaskDTOModel (org.kitodo.production.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LazyTaskDTOModel</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    14,3%
+  </span>
+  <span class="absValue">
+    (1/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    20,6%
+  </span>
+  <span class="absValue">
+    (7/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model;
+&nbsp;
+&nbsp;import static java.lang.Math.toIntExact;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.elasticsearch.ElasticsearchStatusException;
+&nbsp;import org.elasticsearch.index.query.QueryShardException;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.FilterException;
+&nbsp;import org.kitodo.production.services.data.FilterService;
+&nbsp;import org.kitodo.production.services.data.TaskService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;import org.primefaces.model.FilterMeta;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;public class LazyTaskDTOModel extends LazyDTOModel {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The elastic search field that is used to sort tasks by their processing status.
+&nbsp;     */
+&nbsp;    private static final String TASK_STATUS_FIELD = &quot;processingStatus&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The elastic search field that is used to sort tasks by their correction comment status.
+&nbsp;     */
+&nbsp;    private static final String CORRECTION_COMMENT_STATUS_FIELD = &quot;correctionCommentStatus&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The elastic search field that is used to sort tasks by the creation date of their process.
+&nbsp;     */
+&nbsp;    private static final String PROCESS_CREATION_DATE_FIELD = &quot;process.creationDate&quot;;
+&nbsp;
+<b class="fc">&nbsp;    private boolean onlyOwnTasks = false;</b>
+<b class="fc">&nbsp;    private boolean showAutomaticTasks = false;</b>
+<b class="fc">&nbsp;    private boolean hideCorrectionTasks = false;</b>
+<b class="fc">&nbsp;    private List&lt;TaskStatus&gt; taskStatusRestriction = new LinkedList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a LazyTaskDTOModel instance that allows fetching data from the data
+&nbsp;     * source lazily, e.g. only the number of datasets that will be displayed in the
+&nbsp;     * frontend.
+&nbsp;     *
+&nbsp;     * @param taskService the TaskService which is used to retrieve data from the data
+&nbsp;     *                      source
+&nbsp;     */
+&nbsp;    public LazyTaskDTOModel(TaskService taskService) {
+<b class="fc">&nbsp;        super(taskService);</b>
+<b class="fc">&nbsp;        this.taskStatusRestriction.add(TaskStatus.OPEN);</b>
+<b class="fc">&nbsp;        this.taskStatusRestriction.add(TaskStatus.INWORK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public List&lt;Object&gt; load(int first, int pageSize, String sortField, SortOrder sortOrder,
+&nbsp;            Map&lt;String, FilterMeta&gt; filters) {
+&nbsp;        // reverse sort order for some task list columns such that first click on column yields more useful ordering
+<b class="nc">&nbsp;        if (sortField.equals(TASK_STATUS_FIELD) || sortField.equals(CORRECTION_COMMENT_STATUS_FIELD) </b>
+<b class="nc">&nbsp;                || sortField.equals(PROCESS_CREATION_DATE_FIELD)) {</b>
+<b class="nc">&nbsp;            sortOrder = sortOrder.equals(SortOrder.ASCENDING) ? SortOrder.DESCENDING : SortOrder.ASCENDING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (indexRunning()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                HashMap&lt;String, String&gt; filterMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;                if (!StringUtils.isBlank(this.filterString)) {</b>
+<b class="nc">&nbsp;                    filterMap.put(FilterService.FILTER_STRING, this.filterString);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                setRowCount(toIntExact(((TaskService)searchService).countResults(filterMap, this.onlyOwnTasks,</b>
+&nbsp;                        this.hideCorrectionTasks, this.showAutomaticTasks, this.taskStatusRestriction)));
+<b class="nc">&nbsp;                entities = ((TaskService)searchService).loadData(first, pageSize, sortField, sortOrder, filterMap,</b>
+&nbsp;                        this.onlyOwnTasks, this.hideCorrectionTasks, this.showAutomaticTasks,
+&nbsp;                        this.taskStatusRestriction);
+<b class="nc">&nbsp;                logger.trace(&quot;{} entities loaded!&quot;, entities.size());</b>
+<b class="nc">&nbsp;                return entities;</b>
+<b class="nc">&nbsp;            } catch (DataException | ElasticsearchStatusException | QueryShardException e) {</b>
+<b class="nc">&nbsp;                setRowCount(0);</b>
+<b class="nc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            } catch (FilterException e) {</b>
+<b class="nc">&nbsp;                setRowCount(0);</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;sticky-notifications&#39;).renderMessage(&quot;</b>
+<b class="nc">&nbsp;                        + &quot;{&#39;summary&#39;:&#39;Filter error&#39;,&#39;detail&#39;:&#39;&quot; + e.getMessage() + &quot;&#39;,&#39;severity&#39;:&#39;error&#39;});&quot;);</b>
+<b class="nc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            logger.info(&quot;Index not found!&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return new LinkedList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set onlyOwnTasks.
+&nbsp;     *
+&nbsp;     * @param onlyOwnTasks as boolean
+&nbsp;     */
+&nbsp;    public void setOnlyOwnTasks(boolean onlyOwnTasks) {
+<b class="nc">&nbsp;        this.onlyOwnTasks = onlyOwnTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set taskStatusRestriction.
+&nbsp;     *
+&nbsp;     * @param taskStatusRestriction as org.kitodo.data.database.enums.TaskStatus
+&nbsp;     */
+&nbsp;    public void setTaskStatusRestriction(List&lt;TaskStatus&gt; taskStatusRestriction) {
+<b class="nc">&nbsp;        this.taskStatusRestriction = taskStatusRestriction;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set showAutomaticTasks.
+&nbsp;     *
+&nbsp;     * @param showAutomaticTasks as boolean
+&nbsp;     */
+&nbsp;    public void setShowAutomaticTasks(boolean showAutomaticTasks) {
+<b class="nc">&nbsp;        this.showAutomaticTasks = showAutomaticTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get hideCorrectionTasks.
+&nbsp;     *
+&nbsp;     * @return value of hideCorrectionTasks
+&nbsp;     */
+&nbsp;    public boolean isHideCorrectionTasks() {
+<b class="nc">&nbsp;        return hideCorrectionTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set hideCorrectionTasks.
+&nbsp;     *
+&nbsp;     * @param hideCorrectionTasks as boolean
+&nbsp;     */
+&nbsp;    public void setHideCorrectionTasks(boolean hideCorrectionTasks) {
+<b class="nc">&nbsp;        this.hideCorrectionTasks = hideCorrectionTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

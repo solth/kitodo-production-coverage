@@ -1,0 +1,169 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FacesUtils</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: FacesUtils (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FacesUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.servlet.http.HttpServletResponse;
+&nbsp;import javax.ws.rs.core.MediaType;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class FacesUtils contains an omnium-gatherum of functions that perform
+&nbsp; * recurring tasks related to JavaServer Faces.
+&nbsp; */
+&nbsp;public class FacesUtils {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private FacesUtils() {
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sends a byte[] of data in the HTTP response
+&nbsp;     * of a user interaction as a file download. Calling this procedure is only
+&nbsp;     * sensible during the invoke application phase of the JSF life cycle, i.e.
+&nbsp;     * in procedures that are designed to provide the action for a JSF command
+&nbsp;     * link or command button.
+&nbsp;     *
+&nbsp;     * @param data
+&nbsp;     *            the content of the file
+&nbsp;     * @param saveAsName
+&nbsp;     *            a file name proposed to the user
+&nbsp;     * @throws IOException
+&nbsp;     *             if an I/O error occurs
+&nbsp;     */
+&nbsp;    public static void sendDownload(byte[] data, String saveAsName) throws IOException {
+&nbsp;        String disposition;
+&nbsp;
+<b class="nc">&nbsp;        FacesContext context = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;        HttpServletResponse response = (HttpServletResponse) context.getExternalContext().getResponse();</b>
+<b class="nc">&nbsp;        response.reset();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            disposition = &quot;attachment; filename*=UTF-8&#39;&#39;&quot;.concat(new URI(null, saveAsName, null).toASCIIString());</b>
+<b class="nc">&nbsp;            response.setHeader(&quot;Content-Disposition&quot;, disposition);</b>
+<b class="nc">&nbsp;        } catch (URISyntaxException e) {</b>
+<b class="nc">&nbsp;            response.setHeader(&quot;Content-Disposition&quot;, &quot;attachment; filename=Course.xml&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        response.setContentType(MediaType.APPLICATION_OCTET_STREAM);</b>
+<b class="nc">&nbsp;        response.setContentLength(data.length);</b>
+<b class="nc">&nbsp;        response.getOutputStream().write(data);</b>
+<b class="nc">&nbsp;        context.responseComplete();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,2819 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessService (org.kitodo.production.services.data)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    47,3%
+  </span>
+  <span class="absValue">
+    (70/148)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,8%
+  </span>
+  <span class="absValue">
+    (437/1020)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data;
+&nbsp;
+&nbsp;import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
+&nbsp;import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
+&nbsp;import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
+&nbsp;import static org.kitodo.data.database.enums.CorrectionComments.NO_CORRECTION_COMMENTS;
+&nbsp;import static org.kitodo.data.database.enums.CorrectionComments.NO_OPEN_CORRECTION_COMMENTS;
+&nbsp;import static org.kitodo.data.database.enums.CorrectionComments.OPEN_CORRECTION_COMMENTS;
+&nbsp;
+&nbsp;import com.itextpdf.text.Document;
+&nbsp;import com.itextpdf.text.DocumentException;
+&nbsp;import com.itextpdf.text.PageSize;
+&nbsp;import com.itextpdf.text.Paragraph;
+&nbsp;import com.itextpdf.text.Rectangle;
+&nbsp;import com.itextpdf.text.pdf.PdfPTable;
+&nbsp;import com.itextpdf.text.pdf.PdfWriter;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FileInputStream;
+&nbsp;import java.io.FilenameFilter;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.net.URI;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.time.Duration;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.concurrent.CopyOnWriteArrayList;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.faces.context.ExternalContext;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;import javax.xml.xpath.XPath;
+&nbsp;import javax.xml.xpath.XPathConstants;
+&nbsp;import javax.xml.xpath.XPathExpressionException;
+&nbsp;import javax.xml.xpath.XPathFactory;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.ConfigurationException;
+&nbsp;import org.apache.commons.io.IOUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.apache.lucene.search.join.ScoreMode;
+&nbsp;import org.apache.poi.hssf.usermodel.HSSFCell;
+&nbsp;import org.apache.poi.hssf.usermodel.HSSFRow;
+&nbsp;import org.apache.poi.hssf.usermodel.HSSFSheet;
+&nbsp;import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+&nbsp;import org.apache.poi.ss.usermodel.Cell;
+&nbsp;import org.apache.poi.ss.usermodel.DataFormatter;
+&nbsp;import org.apache.poi.ss.usermodel.Row;
+&nbsp;import org.elasticsearch.index.query.BoolQueryBuilder;
+&nbsp;import org.elasticsearch.index.query.MatchQueryBuilder;
+&nbsp;import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+&nbsp;import org.elasticsearch.index.query.NestedQueryBuilder;
+&nbsp;import org.elasticsearch.index.query.Operator;
+&nbsp;import org.elasticsearch.index.query.QueryBuilder;
+&nbsp;import org.elasticsearch.index.query.WildcardQueryBuilder;
+&nbsp;import org.elasticsearch.search.sort.SortBuilder;
+&nbsp;import org.elasticsearch.search.sort.SortBuilders;
+&nbsp;import org.elasticsearch.search.sort.SortOrder;
+&nbsp;import org.json.JSONArray;
+&nbsp;import org.json.JSONObject;
+&nbsp;import org.json.XML;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.FunctionalDivision;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.docket.DocketData;
+&nbsp;import org.kitodo.api.docket.DocketInterface;
+&nbsp;import org.kitodo.api.filemanagement.ProcessSubType;
+&nbsp;import org.kitodo.api.filemanagement.filters.FileNameBeginsAndEndsWithFilter;
+&nbsp;import org.kitodo.api.filemanagement.filters.FileNameEndsAndDoesNotBeginWithFilter;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Batch;
+&nbsp;import org.kitodo.data.database.beans.Comment;
+&nbsp;import org.kitodo.data.database.beans.Folder;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.database.beans.Role;
+&nbsp;import org.kitodo.data.database.beans.Ruleset;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.enums.CommentType;
+&nbsp;import org.kitodo.data.database.enums.CorrectionComments;
+&nbsp;import org.kitodo.data.database.enums.IndexAction;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.database.persistence.BaseDAO;
+&nbsp;import org.kitodo.data.database.persistence.ProcessDAO;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.data.elasticsearch.index.Indexer;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.ProcessType;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.BatchTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.index.type.enums.ProcessTypeField;
+&nbsp;import org.kitodo.data.elasticsearch.search.Searcher;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.InvalidImagesException;
+&nbsp;import org.kitodo.export.ExportMets;
+&nbsp;import org.kitodo.production.dto.BatchDTO;
+&nbsp;import org.kitodo.production.dto.ProcessDTO;
+&nbsp;import org.kitodo.production.dto.ProjectDTO;
+&nbsp;import org.kitodo.production.dto.PropertyDTO;
+&nbsp;import org.kitodo.production.dto.TaskDTO;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.SearchResultGeneration;
+&nbsp;import org.kitodo.production.helper.WebDav;
+&nbsp;import org.kitodo.production.helper.metadata.ImageHelper;
+&nbsp;import org.kitodo.production.helper.metadata.MetadataHelper;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyDocStructHelperInterface;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyMetadataHelper;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyMetadataTypeHelper;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyMetsModsDigitalDocumentHelper;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyPrefsHelper;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.metadata.copier.CopierData;
+&nbsp;import org.kitodo.production.metadata.copier.DataCopier;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.base.ProjectSearchService;
+&nbsp;import org.kitodo.production.services.dataformat.MetsService;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;import org.kitodo.production.workflow.KitodoNamespaceContext;
+&nbsp;import org.kitodo.serviceloader.KitodoServiceLoader;
+&nbsp;import org.primefaces.model.charts.ChartData;
+&nbsp;import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearAxes;
+&nbsp;import org.primefaces.model.charts.bar.BarChartOptions;
+&nbsp;import org.primefaces.model.charts.hbar.HorizontalBarChartDataSet;
+&nbsp;import org.primefaces.model.charts.hbar.HorizontalBarChartModel;
+&nbsp;import org.primefaces.model.charts.optionconfig.tooltip.Tooltip;
+&nbsp;import org.primefaces.model.charts.pie.PieChartDataSet;
+&nbsp;import org.primefaces.model.charts.pie.PieChartModel;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;import org.xml.sax.SAXException;
+&nbsp;
+&nbsp;public class ProcessService extends ProjectSearchService&lt;Process, ProcessDTO, ProcessDAO&gt; {
+<b class="fc">&nbsp;    private static final FileService fileService = ServiceManager.getFileService();</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ProcessService.class);</b>
+<b class="fc">&nbsp;    private static volatile ProcessService instance = null;</b>
+&nbsp;    private static final String JSON_TITLE = &quot;title&quot;;
+&nbsp;    private static final String JSON_VALUE = &quot;value&quot;;
+<b class="fc">&nbsp;    private static final String DIRECTORY_PREFIX = ConfigCore.getParameter(ParameterCore.DIRECTORY_PREFIX, &quot;orig&quot;);</b>
+<b class="fc">&nbsp;    private static final String DIRECTORY_SUFFIX = ConfigCore.getParameter(ParameterCore.DIRECTORY_SUFFIX, &quot;tif&quot;);</b>
+<b class="fc">&nbsp;    private static final String SUFFIX = ConfigCore.getParameter(ParameterCore.METS_EDITOR_DEFAULT_SUFFIX, &quot;&quot;);</b>
+&nbsp;    private static final String PROCESS_TITLE = &quot;(processtitle)&quot;;
+<b class="fc">&nbsp;    private static final String METADATA_SEARCH_KEY = ProcessTypeField.METADATA + &quot;.mdWrap.xmlData.kitodo.metadata&quot;;</b>
+<b class="fc">&nbsp;    private static final String METADATA_GROUP_SEARCH_KEY = ProcessTypeField.METADATA + &quot;.mdWrap.xmlData.kitodo.metadataGroup.metadata&quot;;</b>
+&nbsp;    private static final String METADATA_FILE_NAME = &quot;meta.xml&quot;;
+&nbsp;    private static final String NEW_LINE_ENTITY = &quot;\n&quot;;
+<b class="fc">&nbsp;    private static final boolean USE_ORIG_FOLDER = ConfigCore</b>
+<b class="fc">&nbsp;            .getBooleanParameterOrDefaultValue(ParameterCore.USE_ORIG_FOLDER);</b>
+<b class="fc">&nbsp;    private static final Map&lt;Integer, Collection&lt;String&gt;&gt; RULESET_CACHE_FOR_CREATE_FROM_CALENDAR = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;    private static final Map&lt;Integer, Collection&lt;String&gt;&gt; RULESET_CACHE_FOR_CREATE_CHILD_FROM_PARENT = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;    private static final List&lt;String&gt; BG_COLORS = Arrays</b>
+<b class="fc">&nbsp;            .asList(ConfigCore.getParameterOrDefaultValue(ParameterCore.ISSUE_COLOURS).split(&quot;;&quot;));</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor with Searcher and Indexer assigning.
+&nbsp;     */
+&nbsp;    private ProcessService() {
+<b class="fc">&nbsp;        super(new ProcessDAO(), new ProcessType(), new Indexer&lt;&gt;(Process.class), new Searcher(Process.class),</b>
+<b class="fc">&nbsp;                ProcessTypeField.PROJECT_CLIENT_ID.getKey(), ProcessTypeField.PROJECT_ID.getKey());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return singleton variable of type ProcessService.
+&nbsp;     *
+&nbsp;     * @return unique instance of ProcessService
+&nbsp;     */
+&nbsp;    public static ProcessService getInstance() {
+<b class="fc">&nbsp;        ProcessService localReference = instance;</b>
+<b class="fc">&nbsp;        if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;            synchronized (ProcessService.class) {</b>
+<b class="fc">&nbsp;                localReference = instance;</b>
+<b class="fc">&nbsp;                if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;                    localReference = new ProcessService();</b>
+<b class="fc">&nbsp;                    instance = localReference;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return localReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Emptys the cache generated from ruleset, so changes in Ruleset are recognized in new session.
+&nbsp;     */
+&nbsp;    public static void emptyCache() {
+<b class="fc">&nbsp;        RULESET_CACHE_FOR_CREATE_CHILD_FROM_PARENT.clear();</b>
+<b class="fc">&nbsp;        RULESET_CACHE_FOR_CREATE_FROM_CALENDAR.clear();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if an imported Process should be created with Tasks and removes them if not,
+&nbsp;     * depending on the configuration of the doctype.
+&nbsp;     * @param process the process to check.
+&nbsp;     * @param docType the doctype to check in the ruleset.
+&nbsp;     */
+&nbsp;    public static void checkTasks(Process process, String docType) throws IOException {
+&nbsp;        // remove tasks from process, if doctype is configured not to use a workflow
+<b class="fc">&nbsp;        Collection&lt;String&gt; divisionsWithNoWorkflow = ServiceManager.getRulesetService()</b>
+<b class="fc">&nbsp;                .openRuleset(process.getRuleset()).getDivisionsWithNoWorkflow();</b>
+<b class="fc">&nbsp;        if (divisionsWithNoWorkflow.contains(docType)) {</b>
+<b class="fc">&nbsp;            process.getTasks().clear();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countDatabaseRows() throws DAOException {
+<b class="fc">&nbsp;        return countDatabaseRows(&quot;SELECT COUNT(*) FROM Process WHERE &quot; + BaseDAO.getDateFilter(&quot;creationDate&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countNotIndexedDatabaseRows() throws DAOException {
+<b class="nc">&nbsp;        return countDatabaseRows(&quot;SELECT COUNT(*) FROM Process WHERE &quot; + BaseDAO.getDateFilter(&quot;creationDate&quot;)</b>
+&nbsp;                + &quot; AND (indexAction = &#39;INDEX&#39; OR indexAction IS NULL)&quot;);
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countResults(Map filters) throws DataException {
+<b class="nc">&nbsp;        return countResults(filters, false, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Long countResults(Map filters, boolean showClosedProcesses, boolean showInactiveProjects)
+&nbsp;            throws DataException {
+<b class="nc">&nbsp;        return countDocuments(createUserProcessesQuery(filters, showClosedProcesses, showInactiveProjects));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Process&gt; getAllNotIndexed() {
+<b class="nc">&nbsp;        return getByQuery(&quot;FROM Process WHERE &quot; + BaseDAO.getDateFilter(&quot;creationDate&quot;)</b>
+&nbsp;                + &quot; AND (indexAction = &#39;INDEX&#39; OR indexAction IS NULL)&quot;);
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Process&gt; getAllForSelectedClient() {
+<b class="nc">&nbsp;        throw new UnsupportedOperationException();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void save(Process process) throws DataException {
+<b class="fc">&nbsp;        this.save(process, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void save(Process process, boolean updateRelatedObjectsInIndex) throws DataException {
+<b class="fc">&nbsp;        WorkflowControllerService.updateProcessSortHelperStatus(process);</b>
+&nbsp;        
+&nbsp;        // save parent processes if they are new and do not have an id yet
+<b class="fc">&nbsp;        List&lt;Process&gt; parents = findParentProcesses(process);</b>
+<b class="fc">&nbsp;        for (Process parent: parents) {</b>
+<b class="fc">&nbsp;            if (Objects.isNull(parent.getId())) {</b>
+<b class="fc">&nbsp;                super.save(parent, updateRelatedObjectsInIndex);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;        
+<b class="fc">&nbsp;        super.save(process, updateRelatedObjectsInIndex);</b>
+&nbsp;
+&nbsp;        // save parent processes in order to refresh ElasticSearch index
+<b class="fc">&nbsp;        for (Process parent : parents) {</b>
+<b class="fc">&nbsp;            super.save(parent, updateRelatedObjectsInIndex);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void saveToIndex(Process process, boolean forceRefresh)
+&nbsp;            throws CustomResponseException, DataException, IOException {
+&nbsp;
+<b class="fc">&nbsp;        enrichProcessData(process, false);</b>
+&nbsp;
+<b class="fc">&nbsp;        super.saveToIndex(process, forceRefresh);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find all parent processes for a process ordered such that the root parent comes first.
+&nbsp;     * 
+&nbsp;     * @param process the process whose parents are to be found
+&nbsp;     * @return the list of parent processes (direct parents and grand parents, and more)
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; findParentProcesses(Process process) {
+<b class="fc">&nbsp;        List&lt;Process&gt; parents = new ArrayList&lt;Process&gt;();</b>
+<b class="fc">&nbsp;        Process current = process;</b>
+<b class="fc">&nbsp;        while (Objects.nonNull(current.getParent())) {</b>
+<b class="fc">&nbsp;            current = current.getParent();</b>
+<b class="fc">&nbsp;            parents.add(current);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Collections.reverse(parents);</b>
+<b class="fc">&nbsp;        return parents;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private int getNumberOfImagesForIndex(Workpiece workpiece) {
+<b class="fc">&nbsp;        return Math.toIntExact(Workpiece.treeStream(workpiece.getPhysicalStructure())</b>
+<b class="fc">&nbsp;                .filter(physicalDivision -&gt; Objects.equals(physicalDivision.getType(), PhysicalDivision.TYPE_PAGE)).count());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private int getNumberOfMetadata(Workpiece workpiece) {
+<b class="fc">&nbsp;        return Math.toIntExact(MetsService.countLogicalMetadata(workpiece));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private int getNumberOfStructures(Workpiece workpiece) {
+<b class="fc">&nbsp;        return Math.toIntExact(Workpiece.treeStream(workpiece.getLogicalStructure()).count());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void addAllObjectsToIndex(List&lt;Process&gt; processes) throws CustomResponseException, DAOException, IOException {
+<b class="nc">&nbsp;        for (Process process : processes) {</b>
+<b class="nc">&nbsp;            enrichProcessData(process, true);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        super.addAllObjectsToIndex(processes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void enrichProcessData(Process process, boolean forIndexingAll) throws IOException {
+<b class="fc">&nbsp;        process.setMetadata(getMetadataForIndex(process, forIndexingAll));</b>
+<b class="fc">&nbsp;        URI metadataFilePath = fileService.getMetadataFilePath(process, false, forIndexingAll);</b>
+<b class="fc">&nbsp;        if (!fileService.fileExist(metadataFilePath)) {</b>
+<b class="fc">&nbsp;            logger.info(&quot;No metadata file for indexing: {}&quot;, metadataFilePath);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(metadataFilePath);</b>
+<b class="fc">&nbsp;            process.setNumberOfImages(getNumberOfImagesForIndex(workpiece));</b>
+<b class="fc">&nbsp;            process.setNumberOfMetadata(getNumberOfMetadata(workpiece));</b>
+<b class="fc">&nbsp;            process.setNumberOfStructures(getNumberOfStructures(workpiece));</b>
+<b class="fc">&nbsp;            process.setBaseType(getBaseType(workpiece));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * MetadataType aus Preferences eines Prozesses ermitteln.
+&nbsp;     *
+&nbsp;     * @param inProzess
+&nbsp;     *            Process object
+&nbsp;     * @param inName
+&nbsp;     *            String
+&nbsp;     * @return MetadataType
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    public static LegacyMetadataTypeHelper getMetadataType(Process inProzess, String inName) {
+<b class="nc">&nbsp;        LegacyPrefsHelper myPrefs = ServiceManager.getRulesetService().getPreferences(inProzess.getRuleset());</b>
+<b class="nc">&nbsp;        return LegacyPrefsHelper.getMetadataType(myPrefs, inName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;ProcessDTO&gt; loadData(int first, int pageSize, String sortField,
+&nbsp;            org.primefaces.model.SortOrder sortOrder, Map filters) throws DataException {
+<b class="nc">&nbsp;        return loadData(first, pageSize, sortField, sortOrder, filters, false, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load processes with given parameters.
+&nbsp;     * @param first index of first process to load
+&nbsp;     * @param pageSize number of processes to load
+&nbsp;     * @param sortField name of field by which processes are sorted
+&nbsp;     * @param sortOrder SortOrder by which processes are sorted - either ascending or descending
+&nbsp;     * @param filters filter map
+&nbsp;     * @param showClosedProcesses boolean controlling whether to load closed processes or not
+&nbsp;     * @param showInactiveProjects boolean controlling whether to load processes of closed projects or not
+&nbsp;     * @return List of loaded processes
+&nbsp;     * @throws DataException if processes cannot be loaded from search index
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDTO&gt; loadData(int first, int pageSize, String sortField,
+&nbsp;                                     org.primefaces.model.SortOrder sortOrder, Map filters,
+&nbsp;                                     boolean showClosedProcesses, boolean showInactiveProjects) throws DataException {
+<b class="nc">&nbsp;        String filter = ServiceManager.getFilterService().parseFilterString(filters);</b>
+<b class="nc">&nbsp;        return findByQuery(getQueryForFilter(showClosedProcesses, showInactiveProjects, filter),</b>
+<b class="nc">&nbsp;                getSortBuilder(sortField, sortOrder), first, pageSize, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the query for the current processfilter.
+&nbsp;     * @param showClosedProcesses if closed processes are shown
+&nbsp;     * @param showInactiveProjects if inactive projects are shown
+&nbsp;     * @param filter the filter to build the query for
+&nbsp;     * @return the query for the filter.
+&nbsp;     */
+&nbsp;    public BoolQueryBuilder getQueryForFilter(boolean showClosedProcesses, boolean showInactiveProjects, String filter) {
+<b class="fc">&nbsp;        return new SearchResultGeneration(filter, showClosedProcesses,</b>
+<b class="fc">&nbsp;                showInactiveProjects).getQueryForFilter(ObjectType.PROCESS);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    private BoolQueryBuilder readFilters(Map&lt;String, String&gt; filterMap) throws DataException {
+<b class="nc">&nbsp;        BoolQueryBuilder query = new BoolQueryBuilder();</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Map.Entry&lt;String, String&gt; entry : filterMap.entrySet()) {</b>
+<b class="nc">&nbsp;            query.must(</b>
+<b class="nc">&nbsp;                ServiceManager.getFilterService().queryBuilder(entry.getValue(), ObjectType.PROCESS, false, false));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return query;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    private BoolQueryBuilder createUserProcessesQuery(Map filters, boolean showClosedProcesses,
+&nbsp;                                                      boolean showInactiveProjects)
+&nbsp;            throws DataException {
+<b class="nc">&nbsp;        BoolQueryBuilder query = new BoolQueryBuilder();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (Objects.nonNull(filters) &amp;&amp; !filters.isEmpty()) {</b>
+<b class="nc">&nbsp;            query.must(readFilters(filters));</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (!showClosedProcesses) {</b>
+<b class="nc">&nbsp;            query.mustNot(getQueryForClosedProcesses());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (!showInactiveProjects) {</b>
+<b class="nc">&nbsp;            query.mustNot(getQueryProjectActive(false));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return query;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method saves or removes batches, tasks and project related to modified
+&nbsp;     * process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    protected void manageDependenciesForIndex(Process process)
+&nbsp;            throws CustomResponseException, DAOException, DataException, IOException {
+<b class="fc">&nbsp;        manageBatchesDependenciesForIndex(process);</b>
+<b class="fc">&nbsp;        manageProjectDependenciesForIndex(process);</b>
+<b class="fc">&nbsp;        manageTaskDependenciesForIndex(process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if IndexAction flag is delete. If true remove process from list of
+&nbsp;     * processes and re-save batch, if false only re-save batch object.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    private void manageBatchesDependenciesForIndex(Process process)
+&nbsp;            throws CustomResponseException, DataException, IOException {
+<b class="fc">&nbsp;        if (process.getIndexAction() == IndexAction.DELETE) {</b>
+<b class="fc">&nbsp;            for (Batch batch : process.getBatches()) {</b>
+<b class="nc">&nbsp;                batch.getProcesses().remove(process);</b>
+<b class="nc">&nbsp;                ServiceManager.getBatchService().saveToIndex(batch, false);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            for (Batch batch : process.getBatches()) {</b>
+<b class="fc">&nbsp;                ServiceManager.getBatchService().saveToIndex(batch, false);</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add process to project, if project is assigned to process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    private void manageProjectDependenciesForIndex(Process process)
+&nbsp;            throws CustomResponseException, DataException, IOException {
+<b class="fc">&nbsp;        if (Objects.nonNull(process.getProject())) {</b>
+<b class="fc">&nbsp;            ServiceManager.getProjectService().saveToIndex(process.getProject(), false);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check IndexAction flag in for process object. If DELETE remove all tasks
+&nbsp;     * from index, if other call saveOrRemoveTaskInIndex() method.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    private void manageTaskDependenciesForIndex(Process process)
+&nbsp;            throws CustomResponseException, DAOException, IOException, DataException {
+<b class="fc">&nbsp;        if (process.getIndexAction() == IndexAction.DELETE) {</b>
+<b class="fc">&nbsp;            for (Task task : process.getTasks()) {</b>
+<b class="nc">&nbsp;                ServiceManager.getTaskService().removeFromIndex(task, false);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            saveOrRemoveTasksInIndex(process);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Compare index and database, according to comparisons results save or
+&nbsp;     * remove tasks.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    private void saveOrRemoveTasksInIndex(Process process)
+&nbsp;            throws CustomResponseException, DAOException, IOException, DataException {
+<b class="fc">&nbsp;        List&lt;Integer&gt; database = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        List&lt;Integer&gt; index = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="fc">&nbsp;            database.add(task.getId());</b>
+<b class="fc">&nbsp;            ServiceManager.getTaskService().saveToIndex(task, false);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Map&lt;String, Object&gt;&gt; searchResults = ServiceManager.getTaskService().findByProcessId(process.getId());</b>
+<b class="fc">&nbsp;        for (Map&lt;String, Object&gt; object : searchResults) {</b>
+<b class="fc">&nbsp;            index.add(getIdFromJSONObject(object));</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Integer&gt; missingInIndex = findMissingValues(database, index);</b>
+<b class="fc">&nbsp;        List&lt;Integer&gt; notNeededInIndex = findMissingValues(index, database);</b>
+<b class="fc">&nbsp;        for (Integer missing : missingInIndex) {</b>
+<b class="fc">&nbsp;            ServiceManager.getTaskService().saveToIndex(ServiceManager.getTaskService().getById(missing), false);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Integer notNeeded : notNeededInIndex) {</b>
+<b class="nc">&nbsp;            ServiceManager.getTaskService().removeFromIndex(notNeeded, false);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Compare two list and return difference between them.
+&nbsp;     *
+&nbsp;     * @param firstList
+&nbsp;     *            list from which records can be remove
+&nbsp;     * @param secondList
+&nbsp;     *            records stored here will be removed from firstList
+&nbsp;     * @return difference between two lists
+&nbsp;     */
+&nbsp;    private List&lt;Integer&gt; findMissingValues(List&lt;Integer&gt; firstList, List&lt;Integer&gt; secondList) {
+<b class="fc">&nbsp;        List&lt;Integer&gt; newList = new ArrayList&lt;&gt;(firstList);</b>
+<b class="fc">&nbsp;        newList.removeAll(secondList);</b>
+<b class="fc">&nbsp;        return newList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save list of processes to database.
+&nbsp;     *
+&nbsp;     * @param list
+&nbsp;     *            of processes
+&nbsp;     */
+&nbsp;    public void saveList(List&lt;Process&gt; list) throws DAOException {
+<b class="nc">&nbsp;        dao.saveList(list);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void refresh(Process process) {
+<b class="nc">&nbsp;        dao.refresh(process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    List&lt;Map&lt;String, Object&gt;&gt; findForCurrentSessionClient() throws DataException {
+<b class="nc">&nbsp;        return findDocuments(</b>
+<b class="nc">&nbsp;            getQueryProjectIsAssignedToSelectedClient(ServiceManager.getUserService().getSessionClientId()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find processes by metadata. Matches do not need to be exact.
+&nbsp;     *
+&nbsp;     * @param metadata
+&nbsp;     *            key is metadata tag and value is metadata content
+&nbsp;     * @return list of ProcessDTO objects with processes for specific metadata tag
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDTO&gt; findByMetadata(Map&lt;String, String&gt; metadata) throws DataException {
+<b class="fc">&nbsp;        return findByMetadata(metadata, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find processes by metadata.
+&nbsp;     *
+&nbsp;     * @param metadata
+&nbsp;     *            key is metadata tag and value is metadata content
+&nbsp;     * @param exactMatch
+&nbsp;     *            online return exact matches
+&nbsp;     * @return list of ProcessDTO objects with processes for specific metadata tag
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDTO&gt; findByMetadata(Map&lt;String, String&gt; metadata, boolean exactMatch) throws DataException {
+<b class="fc">&nbsp;        String nameSearchKey = METADATA_SEARCH_KEY + &quot;.name&quot;;</b>
+<b class="fc">&nbsp;        String contentSearchKey = METADATA_SEARCH_KEY + &quot;.content&quot;;</b>
+<b class="fc">&nbsp;        if (exactMatch) {</b>
+<b class="fc">&nbsp;            nameSearchKey = nameSearchKey + &quot;.keyword&quot;;</b>
+<b class="fc">&nbsp;            contentSearchKey = contentSearchKey + &quot;.keyword&quot;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        BoolQueryBuilder query = new BoolQueryBuilder();</b>
+<b class="fc">&nbsp;        for (Map.Entry&lt;String, String&gt; entry : metadata.entrySet()) {</b>
+<b class="fc">&nbsp;            BoolQueryBuilder pairQuery = new BoolQueryBuilder();</b>
+<b class="fc">&nbsp;            pairQuery.must(matchQuery(nameSearchKey, entry.getKey()));</b>
+<b class="fc">&nbsp;            pairQuery.must(matchQuery(contentSearchKey, entry.getValue()));</b>
+<b class="fc">&nbsp;            query.must(pairQuery);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return findByQuery(nestedQuery(METADATA_SEARCH_KEY, query, ScoreMode.Total), true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find processes by title.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            the title
+&nbsp;     * @return a list of processes
+&nbsp;     * @throws DataException
+&nbsp;     *             when there is an error on conversion
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDTO&gt; findByTitle(String title) throws DataException {
+<b class="fc">&nbsp;        return convertJSONObjectsToDTOs(findByTitle(title, true), true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Finds processes by searchQuery for a number of fields.
+&nbsp;     *
+&nbsp;     * @param searchQuery
+&nbsp;     *            the query word or phrase
+&nbsp;     * @return a List of found ProcessDTOs
+&nbsp;     * @throws DataException
+&nbsp;     *             when accessing the elasticsearch server fails
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDTO&gt; findByAnything(String searchQuery) throws DataException {
+<b class="fc">&nbsp;        NestedQueryBuilder nestedQueryForMetadataContent = nestedQuery(METADATA_SEARCH_KEY,</b>
+<b class="fc">&nbsp;            matchQuery(METADATA_SEARCH_KEY + &quot;.content&quot;, searchQuery).operator(Operator.AND), ScoreMode.Total);</b>
+<b class="fc">&nbsp;        NestedQueryBuilder nestedQueryForMetadataGroupContent = nestedQuery(METADATA_GROUP_SEARCH_KEY,</b>
+<b class="fc">&nbsp;            matchQuery(METADATA_GROUP_SEARCH_KEY + &quot;.content&quot;, searchQuery).operator(Operator.AND), ScoreMode.Total);</b>
+<b class="fc">&nbsp;        MultiMatchQueryBuilder multiMatchQueryForProcessFields = multiMatchQuery(searchQuery,</b>
+<b class="fc">&nbsp;                ProcessTypeField.TITLE.getKey(),</b>
+<b class="fc">&nbsp;                ProcessTypeField.PROJECT_TITLE.getKey(),</b>
+<b class="fc">&nbsp;                ProcessTypeField.COMMENTS.getKey(),</b>
+<b class="fc">&nbsp;                ProcessTypeField.WIKI_FIELD.getKey(),</b>
+<b class="fc">&nbsp;                ProcessTypeField.TEMPLATE_TITLE.getKey()).operator(Operator.AND);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (searchQuery.matches(&quot;^\\d*$&quot;)) {</b>
+<b class="fc">&nbsp;            multiMatchQueryForProcessFields.fields().put(ProcessTypeField.ID.getKey(), 1.0f);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        BoolQueryBuilder boolQuery = new BoolQueryBuilder();</b>
+<b class="fc">&nbsp;        boolQuery.should(nestedQueryForMetadataContent);</b>
+<b class="fc">&nbsp;        boolQuery.should(nestedQueryForMetadataGroupContent);</b>
+<b class="fc">&nbsp;        boolQuery.should(multiMatchQueryForProcessFields);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!searchQuery.contains(&quot; &quot;)) {</b>
+<b class="fc">&nbsp;            QueryBuilder wildcardQueryForProcessTitle = createSimpleWildcardQuery(ProcessTypeField.TITLE.getKey(),</b>
+&nbsp;                searchQuery);
+<b class="fc">&nbsp;            QueryBuilder wildcardQueryForProjectTitle = createSimpleWildcardQuery(</b>
+<b class="fc">&nbsp;                ProcessTypeField.PROJECT_TITLE.getKey(), searchQuery);</b>
+<b class="fc">&nbsp;            QueryBuilder wildcardQueryForComments = createSimpleWildcardQuery(</b>
+<b class="fc">&nbsp;                    ProcessTypeField.COMMENTS_MESSAGE.getKey(), searchQuery);</b>
+<b class="fc">&nbsp;            boolQuery.should(wildcardQueryForProcessTitle);</b>
+<b class="fc">&nbsp;            boolQuery.should(wildcardQueryForProjectTitle);</b>
+<b class="fc">&nbsp;            boolQuery.should(wildcardQueryForComments);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return findByQuery(boolQuery, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for find process by project title.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            as String
+&nbsp;     * @return QueryBuilder object
+&nbsp;     */
+&nbsp;    public QueryBuilder getQueryProjectTitle(String title) {
+<b class="fc">&nbsp;        return createSimpleQuery(ProcessTypeField.PROJECT_TITLE.getKey(), title, true, Operator.AND);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for find process by project id.
+&nbsp;     *
+&nbsp;     * @param projectId
+&nbsp;     *            as Integer
+&nbsp;     * @return QueryBuilder object
+&nbsp;     */
+&nbsp;    public QueryBuilder getQueryProjectId(Integer projectId) {
+<b class="nc">&nbsp;        return createSimpleQuery(ProcessTypeField.PROJECT_ID.getKey(), projectId.toString(), true, Operator.AND);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find processes by docket id.
+&nbsp;     *
+&nbsp;     * @param docketId
+&nbsp;     *            id of docket for search
+&nbsp;     * @return list of JSON objects with processes for specific docket id
+&nbsp;     */
+&nbsp;    public List&lt;Map&lt;String, Object&gt;&gt; findByDocket(int docketId) throws DataException {
+<b class="nc">&nbsp;        QueryBuilder query = createSimpleQuery(ProcessTypeField.DOCKET.getKey(), docketId, true);</b>
+<b class="nc">&nbsp;        return findDocuments(query);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find processes by template id.
+&nbsp;     *
+&nbsp;     * @param templateId
+&nbsp;     *          id of template for search
+&nbsp;     * @return list of JSON objects with processes for specific template id
+&nbsp;     * @throws DataException if documents cannot be retrieved
+&nbsp;     */
+&nbsp;    public List&lt;Map&lt;String, Object&gt;&gt; findByTemplate(int templateId) throws DataException {
+<b class="nc">&nbsp;        QueryBuilder query = createSimpleQuery(ProcessTypeField.TEMPLATE_ID.getKey(), templateId, true);</b>
+<b class="nc">&nbsp;        return findDocuments(query);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find processes by ruleset id.
+&nbsp;     *
+&nbsp;     * @param rulesetId
+&nbsp;     *            id of ruleset for search
+&nbsp;     * @return list of JSON objects with processes for specific ruleset id
+&nbsp;     */
+&nbsp;    public List&lt;Map&lt;String, Object&gt;&gt; findByRuleset(int rulesetId) throws DataException {
+<b class="nc">&nbsp;        QueryBuilder query = createSimpleQuery(ProcessTypeField.RULESET.getKey(), rulesetId, true);</b>
+<b class="nc">&nbsp;        return findDocuments(query);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for projects assigned to selected client.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of selected client
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    private QueryBuilder getQueryProjectIsAssignedToSelectedClient(int id) {
+<b class="nc">&nbsp;        return createSimpleQuery(ProcessTypeField.PROJECT_CLIENT_ID.getKey(), id, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Searches for linkable processes based on user input. A process can be
+&nbsp;     * linked if it has the same rule set, belongs to the same client, and the
+&nbsp;     * topmost element of the logical outline below the selected parent element
+&nbsp;     * is an allowed child. For the latter, the data file must be read at the
+&nbsp;     * moment. This will be aborted after a timeout so that the user gets an
+&nbsp;     * answer (which may be incomplete) in finite time.
+&nbsp;     *
+&nbsp;     * @param searchInput
+&nbsp;     *            user input
+&nbsp;     * @param rulesetId
+&nbsp;     *            the id of the allowed ruleset
+&nbsp;     * @param allowedStructuralElementTypes
+&nbsp;     *            allowed topmost logical structural elements
+&nbsp;     * @return found processes
+&nbsp;     * @throws DataException
+&nbsp;     *             if the search engine fails
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDTO&gt; findLinkableChildProcesses(String searchInput, int rulesetId,
+&nbsp;            Collection&lt;String&gt; allowedStructuralElementTypes) throws DataException {
+&nbsp;
+<b class="nc">&nbsp;        BoolQueryBuilder query = new BoolQueryBuilder()</b>
+<b class="nc">&nbsp;                .must(new BoolQueryBuilder()</b>
+<b class="nc">&nbsp;                        .should(new MatchQueryBuilder(ProcessTypeField.ID.getKey(), searchInput).lenient(true))</b>
+<b class="nc">&nbsp;                        .should(new WildcardQueryBuilder(ProcessTypeField.TITLE.getKey(), &quot;*&quot; + searchInput + &quot;*&quot;)))</b>
+<b class="nc">&nbsp;                .must(new MatchQueryBuilder(ProcessTypeField.RULESET.getKey(), rulesetId));</b>
+<b class="nc">&nbsp;        List&lt;ProcessDTO&gt; linkableProcesses = new LinkedList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ProcessDTO&gt; processDTOS = findByQuery(query, false);</b>
+<b class="nc">&nbsp;        for (ProcessDTO process : processDTOS) {</b>
+<b class="nc">&nbsp;            if (allowedStructuralElementTypes.contains(getBaseType(process.getId()))) {</b>
+<b class="nc">&nbsp;                linkableProcesses.add(process);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return linkableProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Searches for linkable processes based on user input. A process can be
+&nbsp;     * linked if it has the same rule set, belongs to the same client, and the
+&nbsp;     * topmost element of the logical outline below the selected parent element
+&nbsp;     * is an allowed child. For the latter, the data file must be read at the
+&nbsp;     * moment. This will be aborted after a timeout so that the user gets an
+&nbsp;     * answer (which may be incomplete) in finite time.
+&nbsp;     *
+&nbsp;     * @param searchInput
+&nbsp;     *            user input
+&nbsp;     * @param projectId
+&nbsp;     *            the id of the allowed project
+&nbsp;     * @param rulesetId
+&nbsp;     *            the id of the allowed ruleset
+&nbsp;     * @return found processes
+&nbsp;     * @throws DataException
+&nbsp;     *             if the search engine fails
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDTO&gt; findLinkableParentProcesses(String searchInput, int projectId, int rulesetId)
+&nbsp;            throws DataException {
+&nbsp;
+<b class="fc">&nbsp;        BoolQueryBuilder processQuery = new BoolQueryBuilder()</b>
+<b class="fc">&nbsp;                .should(createSimpleWildcardQuery(ProcessTypeField.TITLE.getKey(), searchInput));</b>
+<b class="fc">&nbsp;        if (searchInput.matches(&quot;\\d*&quot;)) {</b>
+<b class="nc">&nbsp;            processQuery.should(new MatchQueryBuilder(ProcessTypeField.ID.getKey(), searchInput));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        BoolQueryBuilder query = new BoolQueryBuilder().must(processQuery)</b>
+<b class="fc">&nbsp;                .must(new MatchQueryBuilder(ProcessTypeField.PROJECT_ID.getKey(), projectId))</b>
+<b class="fc">&nbsp;                .must(new MatchQueryBuilder(ProcessTypeField.RULESET.getKey(), rulesetId));</b>
+<b class="fc">&nbsp;        return findByQuery(query, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find processes by property.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            of property
+&nbsp;     * @param value
+&nbsp;     *            of property
+&nbsp;     * @return list of JSON objects with processes for specific property
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDTO&gt; findByProperty(String title, String value) throws DataException {
+<b class="fc">&nbsp;        return findByQuery(createPropertyQuery(title, value), true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the query fpr properties with title and value.
+&nbsp;     * @param title the property title
+&nbsp;     * @param value the property value
+&nbsp;     * @return a query for searching for properties.
+&nbsp;     */
+&nbsp;    public QueryBuilder createPropertyQuery(String title, String value) {
+<b class="fc">&nbsp;        String titleSearchKey = ProcessTypeField.PROPERTIES + &quot;.title.keyword&quot;;</b>
+<b class="fc">&nbsp;        String valueSearchKey = ProcessTypeField.PROPERTIES + &quot;.value.keyword&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;        BoolQueryBuilder pairQuery = new BoolQueryBuilder();</b>
+<b class="fc">&nbsp;        if (!WILDCARD.equals(title)) {</b>
+<b class="fc">&nbsp;            pairQuery.must(matchQuery(titleSearchKey, title));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!WILDCARD.equals(value)) {</b>
+<b class="fc">&nbsp;            pairQuery.must(matchQuery(valueSearchKey, value));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return nestedQuery(ProcessTypeField.PROPERTIES.toString(), pairQuery, ScoreMode.Total);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    List&lt;ProcessDTO&gt; findByProjectIds(Set&lt;Integer&gt; projectIds, boolean related) throws DataException {
+<b class="nc">&nbsp;        QueryBuilder query = createSetQuery(&quot;project.id&quot;, projectIds, true);</b>
+<b class="nc">&nbsp;        return findByQuery(query, related);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get Query for closed processes.
+&nbsp;     *
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    public QueryBuilder getQueryForClosedProcesses() {
+<b class="fc">&nbsp;        BoolQueryBuilder query = new BoolQueryBuilder();</b>
+<b class="fc">&nbsp;        query.should(createSimpleQuery(ProcessTypeField.SORT_HELPER_STATUS.getKey(), &quot;100000000&quot;, true));</b>
+<b class="fc">&nbsp;        query.should(createSimpleQuery(ProcessTypeField.SORT_HELPER_STATUS.getKey(), &quot;100000000000&quot;, true));</b>
+<b class="fc">&nbsp;        return query;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get query for active projects.
+&nbsp;     *
+&nbsp;     * @param active
+&nbsp;     *            true or false
+&nbsp;     * @return query as QueryBuilder
+&nbsp;     */
+&nbsp;    public QueryBuilder getQueryProjectActive(boolean active) {
+<b class="fc">&nbsp;        return createSimpleQuery(ProcessTypeField.PROJECT_ACTIVE.getKey(), active, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sort results by creation date.
+&nbsp;     *
+&nbsp;     * @param sortOrder
+&nbsp;     *            ASC or DESC as SortOrder
+&nbsp;     * @return sort
+&nbsp;     */
+&nbsp;    public SortBuilder sortByCreationDate(SortOrder sortOrder) {
+<b class="nc">&nbsp;        return SortBuilders.fieldSort(ProcessTypeField.CREATION_DATE.getKey()).order(sortOrder);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert list of DTOs to list of beans.
+&nbsp;     *
+&nbsp;     * @param dtos
+&nbsp;     *            list of DTO objects
+&nbsp;     * @return list of beans
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; convertDtosToBeans(List&lt;ProcessDTO&gt; dtos) throws DAOException {
+<b class="fc">&nbsp;        List&lt;Process&gt; processes = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (ProcessDTO processDTO : dtos) {</b>
+<b class="fc">&nbsp;            processes.add(getById(processDTO.getId()));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public ProcessDTO convertJSONObjectToDTO(Map&lt;String, Object&gt; jsonObject, boolean related) throws DataException {
+<b class="fc">&nbsp;        ProcessDTO processDTO = new ProcessDTO();</b>
+<b class="fc">&nbsp;        if (!jsonObject.isEmpty()) {</b>
+<b class="fc">&nbsp;            processDTO.setId(getIdFromJSONObject(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setTitle(ProcessTypeField.TITLE.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setWikiField(ProcessTypeField.WIKI_FIELD.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setCreationDate(ProcessTypeField.CREATION_DATE.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setSortHelperArticles(ProcessTypeField.SORT_HELPER_ARTICLES.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setSortHelperDocstructs(ProcessTypeField.SORT_HELPER_DOCSTRUCTS.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setSortHelperImages(ProcessTypeField.SORT_HELPER_IMAGES.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setSortHelperMetadata(ProcessTypeField.SORT_HELPER_METADATA.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setSortHelperStatus(ProcessTypeField.SORT_HELPER_STATUS.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setProcessBaseUri(ProcessTypeField.PROCESS_BASE_URI.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setHasChildren(ProcessTypeField.HAS_CHILDREN.getBooleanValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setParentID(ProcessTypeField.PARENT_ID.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setNumberOfImages(ProcessTypeField.NUMBER_OF_IMAGES.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setNumberOfMetadata(ProcessTypeField.NUMBER_OF_METADATA.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setNumberOfStructures(ProcessTypeField.NUMBER_OF_STRUCTURES.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setBaseType(ProcessTypeField.BASE_TYPE.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setLastEditingUser(ProcessTypeField.LAST_EDITING_USER.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setCorrectionCommentStatus(ProcessTypeField.CORRECTION_COMMENT_STATUS.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;            processDTO.setHasComments(!ProcessTypeField.COMMENTS_MESSAGE.getStringValue(jsonObject).isEmpty());</b>
+<b class="fc">&nbsp;            convertLastProcessingDates(jsonObject, processDTO);</b>
+<b class="fc">&nbsp;            convertTaskProgress(jsonObject, processDTO);</b>
+&nbsp;
+<b class="fc">&nbsp;            List&lt;Map&lt;String, Object&gt;&gt; jsonArray = ProcessTypeField.PROPERTIES.getJsonArray(jsonObject);</b>
+<b class="fc">&nbsp;            List&lt;PropertyDTO&gt; properties = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;            for (Map&lt;String, Object&gt; stringObjectMap : jsonArray) {</b>
+<b class="fc">&nbsp;                PropertyDTO propertyDTO = new PropertyDTO();</b>
+<b class="fc">&nbsp;                Object title = stringObjectMap.get(JSON_TITLE);</b>
+<b class="fc">&nbsp;                Object value = stringObjectMap.get(JSON_VALUE);</b>
+<b class="fc">&nbsp;                if (Objects.nonNull(title)) {</b>
+<b class="fc">&nbsp;                    propertyDTO.setTitle(title.toString());</b>
+<b class="fc">&nbsp;                    propertyDTO.setValue(Objects.nonNull(value) ? value.toString() : &quot;&quot;);</b>
+<b class="fc">&nbsp;                    properties.add(propertyDTO);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            processDTO.setProperties(properties);</b>
+&nbsp;
+<b class="fc">&nbsp;            if (!related) {</b>
+<b class="fc">&nbsp;                convertRelatedJSONObjects(jsonObject, processDTO);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                ProjectDTO projectDTO = new ProjectDTO();</b>
+<b class="fc">&nbsp;                projectDTO.setId(ProcessTypeField.PROJECT_ID.getIntValue(jsonObject));</b>
+<b class="fc">&nbsp;                projectDTO.setTitle(ProcessTypeField.PROJECT_TITLE.getStringValue(jsonObject));</b>
+<b class="fc">&nbsp;                projectDTO.setActive(ProcessTypeField.PROJECT_ACTIVE.getBooleanValue(jsonObject));</b>
+<b class="fc">&nbsp;                processDTO.setProject(projectDTO);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return processDTO;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parses last processing dates from the jsonObject and adds them to the processDTO bean.
+&nbsp;     * 
+&nbsp;     * @param jsonObject the json object retrieved from elastic search
+&nbsp;     * @param processDTO the processDTO bean that will receive the processing dates
+&nbsp;     */
+&nbsp;    private void convertLastProcessingDates(Map&lt;String, Object&gt; jsonObject, ProcessDTO processDTO) throws DataException {
+<b class="fc">&nbsp;        String processingBeginLastTask = ProcessTypeField.PROCESSING_BEGIN_LAST_TASK.getStringValue(jsonObject);</b>
+<b class="fc">&nbsp;        processDTO.setProcessingBeginLastTask(Helper.parseDateFromFormattedString(processingBeginLastTask));</b>
+<b class="fc">&nbsp;        String processingEndLastTask = ProcessTypeField.PROCESSING_END_LAST_TASK.getStringValue(jsonObject);</b>
+<b class="fc">&nbsp;        processDTO.setProcessingEndLastTask(Helper.parseDateFromFormattedString(processingEndLastTask));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parses task progress properties from the jsonObject and adds them to the processDTO bean.
+&nbsp;     * 
+&nbsp;     * @param jsonObject the json object retrieved from elastic search
+&nbsp;     * @param processDTO the processDTO bean that will receive the progress information
+&nbsp;     */
+&nbsp;    private void convertTaskProgress(Map&lt;String, Object&gt; jsonObject, ProcessDTO processDTO) throws DataException {
+<b class="fc">&nbsp;        processDTO.setProgressClosed(ProcessTypeField.PROGRESS_CLOSED.getDoubleValue(jsonObject));</b>
+<b class="fc">&nbsp;        processDTO.setProgressInProcessing(ProcessTypeField.PROGRESS_IN_PROCESSING.getDoubleValue(jsonObject));</b>
+<b class="fc">&nbsp;        processDTO.setProgressOpen(ProcessTypeField.PROGRESS_OPEN.getDoubleValue(jsonObject));</b>
+<b class="fc">&nbsp;        processDTO.setProgressLocked(ProcessTypeField.PROGRESS_LOCKED.getDoubleValue(jsonObject));</b>
+<b class="fc">&nbsp;        processDTO.setProgressCombined(ProcessTypeField.PROGRESS_COMBINED.getStringValue(jsonObject));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void convertRelatedJSONObjects(Map&lt;String, Object&gt; jsonObject, ProcessDTO processDTO) throws DataException {
+<b class="fc">&nbsp;        int project = ProcessTypeField.PROJECT_ID.getIntValue(jsonObject);</b>
+<b class="fc">&nbsp;        if (project &gt; 0) {</b>
+<b class="fc">&nbsp;            processDTO.setProject(ServiceManager.getProjectService().findById(project, true));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        int ruleset = ProcessTypeField.RULESET.getIntValue(jsonObject);</b>
+<b class="fc">&nbsp;        if (ruleset &gt; 0) {</b>
+<b class="fc">&nbsp;            processDTO.setRuleset(ServiceManager.getRulesetService().findById(ruleset, true));</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        processDTO.setBatchID(getBatchID(processDTO));</b>
+<b class="fc">&nbsp;        processDTO.setBatches(getBatchesForProcessDTO(jsonObject));</b>
+&nbsp;        // TODO: leave it for now - right now it displays only status
+<b class="fc">&nbsp;        processDTO.setTasks(convertRelatedJSONObjectToDTO(jsonObject, ProcessTypeField.TASKS.getKey(),</b>
+<b class="fc">&nbsp;            ServiceManager.getTaskService()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;BatchDTO&gt; getBatchesForProcessDTO(Map&lt;String, Object&gt; jsonObject) throws DataException {
+<b class="fc">&nbsp;        List&lt;Map&lt;String, Object&gt;&gt; jsonArray = ProcessTypeField.BATCHES.getJsonArray(jsonObject);</b>
+<b class="fc">&nbsp;        List&lt;BatchDTO&gt; batchDTOList = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Map&lt;String, Object&gt; singleObject : jsonArray) {</b>
+<b class="fc">&nbsp;            BatchDTO batchDTO = new BatchDTO();</b>
+<b class="fc">&nbsp;            batchDTO.setId(BatchTypeField.ID.getIntValue(singleObject));</b>
+<b class="fc">&nbsp;            batchDTO.setTitle(BatchTypeField.TITLE.getStringValue(singleObject));</b>
+<b class="fc">&nbsp;            batchDTOList.add(batchDTO);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return batchDTOList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if process is assigned only to one batch.
+&nbsp;     *
+&nbsp;     * @param batchDTOList
+&nbsp;     *            list of batches for checkout
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    boolean isProcessAssignedToOnlyOneBatch(List&lt;BatchDTO&gt; batchDTOList) {
+<b class="fc">&nbsp;        return batchDTOList.size() == 1;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get directory for TIFF images.
+&nbsp;     *
+&nbsp;     * @param useFallBack
+&nbsp;     *            add description
+&nbsp;     * @param processId
+&nbsp;     *            id of process object
+&nbsp;     * @param processTitle
+&nbsp;     *            title of process object
+&nbsp;     * @param processBaseURI
+&nbsp;     *            base URI of process object
+&nbsp;     * @return tif directory
+&nbsp;     */
+&nbsp;    public URI getImagesTifDirectory(boolean useFallBack, Integer processId, String processTitle, URI processBaseURI) {
+<b class="fc">&nbsp;        URI dir = fileService.getProcessSubTypeURI(processId, processTitle, processBaseURI, ProcessSubType.IMAGE, null);</b>
+&nbsp;
+&nbsp;        /* nur die _tif-Ordner anzeigen, die nicht mir orig_ anfangen */
+<b class="fc">&nbsp;        FilenameFilter filterDirectory = new FileNameEndsAndDoesNotBeginWithFilter(DIRECTORY_PREFIX + &quot;_&quot;,</b>
+&nbsp;                &quot;_&quot; + DIRECTORY_SUFFIX);
+<b class="fc">&nbsp;        URI tifDirectory = null;</b>
+<b class="fc">&nbsp;        List&lt;URI&gt; directories = fileService.getSubUris(filterDirectory, dir);</b>
+<b class="fc">&nbsp;        for (URI directory : directories) {</b>
+<b class="nc">&nbsp;            tifDirectory = directory;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.isNull(tifDirectory) &amp;&amp; useFallBack &amp;&amp; !SUFFIX.isEmpty()) {</b>
+<b class="nc">&nbsp;            List&lt;URI&gt; folderList = fileService.getSubUrisForProcess(null, processId, processTitle, processBaseURI,</b>
+&nbsp;                ProcessSubType.IMAGE, &quot;&quot;);
+<b class="nc">&nbsp;            for (URI folder : folderList) {</b>
+<b class="nc">&nbsp;                if (folder.toString().endsWith(SUFFIX)) {</b>
+<b class="nc">&nbsp;                    tifDirectory = folder;</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        tifDirectory = getImageDirectory(useFallBack, dir, tifDirectory);</b>
+&nbsp;
+<b class="fc">&nbsp;        URI result = fileService.getProcessSubTypeURI(processId, processTitle, processBaseURI, ProcessSubType.IMAGE,</b>
+&nbsp;            null);
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.isNull(tifDirectory)) {</b>
+<b class="fc">&nbsp;            tifDirectory = URI</b>
+<b class="fc">&nbsp;                    .create(result.getRawPath() + Helper.getNormalizedTitle(processTitle) + &quot;_&quot; + DIRECTORY_SUFFIX);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return tifDirectory;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get images origin directory.
+&nbsp;     *
+&nbsp;     * @param useFallBack
+&nbsp;     *            as boolean
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @return path
+&nbsp;     */
+&nbsp;    public URI getImagesOriginDirectory(boolean useFallBack, Process process) {
+<b class="fc">&nbsp;        if (USE_ORIG_FOLDER) {</b>
+<b class="fc">&nbsp;            URI dir = fileService.getProcessSubTypeURI(process, ProcessSubType.IMAGE, null);</b>
+&nbsp;
+&nbsp;            /* nur die _tif-Ordner anzeigen, die mit orig_ anfangen */
+<b class="fc">&nbsp;            FilenameFilter filterDirectory = new FileNameBeginsAndEndsWithFilter(DIRECTORY_PREFIX + &quot;_&quot;,</b>
+&nbsp;                    &quot;_&quot; + DIRECTORY_SUFFIX);
+<b class="fc">&nbsp;            URI origDirectory = null;</b>
+<b class="fc">&nbsp;            List&lt;URI&gt; directories = fileService.getSubUris(filterDirectory, dir);</b>
+<b class="fc">&nbsp;            for (URI directory : directories) {</b>
+<b class="nc">&nbsp;                origDirectory = directory;</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="fc">&nbsp;            if (Objects.isNull(origDirectory) &amp;&amp; useFallBack &amp;&amp; !SUFFIX.isEmpty()) {</b>
+<b class="nc">&nbsp;                List&lt;URI&gt; folderList = fileService.getSubUris(dir);</b>
+<b class="nc">&nbsp;                for (URI folder : folderList) {</b>
+<b class="nc">&nbsp;                    if (folder.toString().endsWith(SUFFIX)) {</b>
+<b class="nc">&nbsp;                        origDirectory = folder;</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            origDirectory = getImageDirectory(useFallBack, dir, origDirectory);</b>
+&nbsp;
+<b class="fc">&nbsp;            URI result = fileService.getProcessSubTypeURI(process, ProcessSubType.IMAGE, null);</b>
+&nbsp;
+<b class="fc">&nbsp;            if (Objects.isNull(origDirectory)) {</b>
+<b class="fc">&nbsp;                origDirectory = URI.create(result.toString() + DIRECTORY_PREFIX + &quot;_&quot;</b>
+<b class="fc">&nbsp;                        + Helper.getNormalizedTitle(process.getTitle()) + &quot;_&quot; + DIRECTORY_SUFFIX);</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            return origDirectory;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return getImagesTifDirectory(useFallBack, process.getId(), process.getTitle(), process.getProcessBaseUri());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private URI getImageDirectory(boolean useFallBack, URI directory, URI imageDirectory) {
+<b class="fc">&nbsp;        if (Objects.nonNull(imageDirectory) &amp;&amp; useFallBack &amp;&amp; !SUFFIX.isEmpty()) {</b>
+<b class="nc">&nbsp;            URI tif = imageDirectory;</b>
+<b class="nc">&nbsp;            List&lt;URI&gt; files = fileService.getSubUris(tif);</b>
+<b class="nc">&nbsp;            if (files.isEmpty()) {</b>
+<b class="nc">&nbsp;                List&lt;URI&gt; folderList = fileService.getSubUris(directory);</b>
+<b class="nc">&nbsp;                for (URI folder : folderList) {</b>
+<b class="nc">&nbsp;                    if (folder.toString().endsWith(SUFFIX) &amp;&amp; !folder.getPath().startsWith(DIRECTORY_PREFIX)) {</b>
+<b class="nc">&nbsp;                        imageDirectory = folder;</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return imageDirectory;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the URI of the metadata file of a process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @return URI
+&nbsp;     */
+&nbsp;    public URI getMetadataFileUri(Process process) {
+<b class="fc">&nbsp;        URI workPathUri = ServiceManager.getFileService().getProcessBaseUriForExistingProcess(process);</b>
+<b class="fc">&nbsp;        String workDirectoryPath = workPathUri.getPath();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            return new URI(workPathUri.getScheme(), workPathUri.getUserInfo(), workPathUri.getHost(),</b>
+<b class="fc">&nbsp;                    workPathUri.getPort(),</b>
+<b class="fc">&nbsp;                workDirectoryPath.endsWith(&quot;/&quot;) ? workDirectoryPath.concat(METADATA_FILE_NAME)</b>
+<b class="fc">&nbsp;                        : workDirectoryPath + &#39;/&#39; + METADATA_FILE_NAME,</b>
+<b class="fc">&nbsp;                    workPathUri.getQuery(), null);</b>
+<b class="nc">&nbsp;        } catch (URISyntaxException e) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process data directory.
+&nbsp;     * Don&#39;t save it to the database, if it is for indexingAll.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @param forIndexingAll
+&nbsp;     *            if the dataDirectory is created for indexingAll
+&nbsp;     * @return path
+&nbsp;     */
+&nbsp;    public URI getProcessDataDirectory(Process process, boolean forIndexingAll) {
+<b class="fc">&nbsp;        if (Objects.isNull(process.getProcessBaseUri())) {</b>
+<b class="fc">&nbsp;            process.setProcessBaseUri(fileService.getProcessBaseUriForExistingProcess(process));</b>
+<b class="fc">&nbsp;            if (!forIndexingAll) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    saveToDatabase(process);</b>
+<b class="nc">&nbsp;                } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                    logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;                    return URI.create(&quot;&quot;);</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return process.getProcessBaseUri();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process data directory.
+&nbsp;     * Don&#39;t save it to the database, if it is for indexingAll.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *            processDTO to get the dataDirectory from
+&nbsp;     * @return path
+&nbsp;     */
+&nbsp;    public String getProcessDataDirectory(ProcessDTO processDTO) {
+<b class="nc">&nbsp;        if (Objects.isNull(processDTO.getProcessBaseUri())) {</b>
+<b class="nc">&nbsp;            processDTO.setProcessBaseUri(fileService.getProcessBaseUriForExistingProcess(processDTO));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return processDTO.getProcessBaseUri();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process data directory.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @return path
+&nbsp;     */
+&nbsp;    public URI getProcessDataDirectory(Process process) {
+<b class="fc">&nbsp;        return getProcessDataDirectory(process, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a URI that identifies the process. The URI has the form
+&nbsp;     * {@code mysql://?process.id=42}, where {@code 42} is the process ID.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process for which a URI is to be formed that identifies it
+&nbsp;     * @return a URI that identifies the process
+&nbsp;     */
+&nbsp;    public URI getProcessURI(Process process) {
+<b class="fc">&nbsp;        return getProcessURI(process.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a URI that identifies the process. The URI has the form
+&nbsp;     * {@code database://?process.id=42}, where {@code 42} is the process ID.
+&nbsp;     *
+&nbsp;     * @param processId
+&nbsp;     *            process ID for which a URI is to be formed that identifies it
+&nbsp;     * @return a URI that identifies the process
+&nbsp;     */
+&nbsp;    public URI getProcessURI(Integer processId) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return new URI(&quot;database&quot;, null, &quot;//&quot;, &quot;process.id=&quot; + processId, null);</b>
+<b class="nc">&nbsp;        } catch (URISyntaxException e) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The function getBatchID returns the batches the process is associated
+&nbsp;     * with as readable text as read-only property &quot;batchID&quot;.
+&nbsp;     *
+&nbsp;     * @return the batches the process is in
+&nbsp;     */
+&nbsp;    public String getBatchID(ProcessDTO process) {
+<b class="fc">&nbsp;        if (process.getBatches().isEmpty()) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        StringBuilder result = new StringBuilder();</b>
+<b class="fc">&nbsp;        for (BatchDTO batch : process.getBatches()) {</b>
+<b class="fc">&nbsp;            if (result.length() &gt; 0) {</b>
+<b class="fc">&nbsp;                result.append(&quot;, &quot;);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            result.append(ServiceManager.getBatchService().getLabel(batch));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return result.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current task.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @return current task
+&nbsp;     */
+&nbsp;    public Task getCurrentTask(Process process) {
+<b class="fc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="fc">&nbsp;            if (task.getProcessingStatus().equals(TaskStatus.OPEN)</b>
+<b class="fc">&nbsp;                    || task.getProcessingStatus().equals(TaskStatus.INWORK)) {</b>
+<b class="fc">&nbsp;                return task;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current tasks.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @return current tasks
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getCurrentTasks(Process process) {
+<b class="fc">&nbsp;        List&lt;Task&gt; currentTasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="fc">&nbsp;            if (task.getProcessingStatus().equals(TaskStatus.OPEN)</b>
+<b class="fc">&nbsp;                    || task.getProcessingStatus().equals(TaskStatus.INWORK)) {</b>
+<b class="fc">&nbsp;                currentTasks.add(task);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return currentTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;TaskDTO&gt; getOpenTasks(ProcessDTO process) {
+<b class="nc">&nbsp;        return process.getTasks().stream()</b>
+<b class="nc">&nbsp;                .filter(t -&gt; TaskStatus.OPEN.equals(t.getProcessingStatus())).collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;TaskDTO&gt; getTasksInWork(ProcessDTO process) {
+<b class="nc">&nbsp;        return process.getTasks().stream()</b>
+<b class="nc">&nbsp;                .filter(t -&gt; TaskStatus.INWORK.equals(t.getProcessingStatus())).collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return String used as progress tooltip for a given process. Tooltip contains OPEN tasks and tasks
+&nbsp;     * INWORK.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *          process for which the tooltop is created
+&nbsp;     * @return String containing the progress tooltip for the given process
+&nbsp;     */
+&nbsp;    public String createProgressTooltip(ProcessDTO processDTO) {
+<b class="nc">&nbsp;        String openTasks = getOpenTasks(processDTO).stream()</b>
+<b class="nc">&nbsp;                .map(t -&gt; &quot; - &quot; + Helper.getTranslation(t.getTitle())).collect(Collectors.joining(NEW_LINE_ENTITY));</b>
+<b class="nc">&nbsp;        if (!openTasks.isEmpty()) {</b>
+<b class="nc">&nbsp;            openTasks = Helper.getTranslation(TaskStatus.OPEN.getTitle()) + &quot;:&quot; + NEW_LINE_ENTITY + openTasks;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        String tasksInWork = getTasksInWork(processDTO).stream()</b>
+<b class="nc">&nbsp;                .map(t -&gt; &quot; - &quot; + Helper.getTranslation(t.getTitle())).collect(Collectors.joining(NEW_LINE_ENTITY));</b>
+<b class="nc">&nbsp;        if (!tasksInWork.isEmpty()) {</b>
+<b class="nc">&nbsp;            tasksInWork = Helper.getTranslation(TaskStatus.INWORK.getTitle()) + &quot;:&quot; + NEW_LINE_ENTITY + tasksInWork;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (openTasks.isEmpty() &amp;&amp; tasksInWork.isEmpty()) {</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+<b class="nc">&nbsp;        } else if (openTasks.isEmpty()) {</b>
+<b class="nc">&nbsp;            return tasksInWork;</b>
+<b class="nc">&nbsp;        } else if (tasksInWork.isEmpty()) {</b>
+<b class="nc">&nbsp;            return openTasks;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return openTasks + NEW_LINE_ENTITY + tasksInWork;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current task.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *            DTOobject
+&nbsp;     * @return current task
+&nbsp;     */
+&nbsp;    public TaskDTO getCurrentTaskDTO(ProcessDTO processDTO) {
+<b class="nc">&nbsp;        for (TaskDTO task : processDTO.getTasks()) {</b>
+<b class="nc">&nbsp;            if (task.getProcessingStatus().equals(TaskStatus.OPEN)</b>
+<b class="nc">&nbsp;                    || task.getProcessingStatus().equals(TaskStatus.INWORK)) {</b>
+<b class="nc">&nbsp;                return task;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Read metadata file.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @return filer format
+&nbsp;     */
+&nbsp;    public LegacyMetsModsDigitalDocumentHelper readMetadataFile(Process process) throws IOException {
+<b class="fc">&nbsp;        URI metadataFileUri = ServiceManager.getFileService().getMetadataFilePath(process);</b>
+&nbsp;
+&nbsp;        // check the format of the metadata - METS, XStream or RDF
+<b class="fc">&nbsp;        String type = MetadataHelper.getMetaFileType(metadataFileUri);</b>
+<b class="fc">&nbsp;        logger.debug(&quot;current meta.xml file type for id {}: {}&quot;, process.getId(), type);</b>
+&nbsp;
+<b class="fc">&nbsp;        LegacyMetsModsDigitalDocumentHelper ff = determineFileFormat(type, process);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            ff.read(ServiceManager.getFileService().getFile(metadataFileUri).toString());</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            if (e.getMessage().startsWith(&quot;Parse error at line -1&quot;)) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;metadataCorrupt&quot;, logger, e);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                throw e;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return ff;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads the metadata File.
+&nbsp;     *
+&nbsp;     * @param metadataFile
+&nbsp;     *            The given metadataFile.
+&nbsp;     * @param prefs
+&nbsp;     *            The Preferences
+&nbsp;     * @return The fileFormat.
+&nbsp;     */
+&nbsp;    public LegacyMetsModsDigitalDocumentHelper readMetadataFile(URI metadataFile, LegacyPrefsHelper prefs)
+&nbsp;            throws IOException {
+<b class="nc">&nbsp;        String type = MetadataHelper.getMetaFileType(metadataFile);</b>
+<b class="nc">&nbsp;        LegacyMetsModsDigitalDocumentHelper fileFormat = determineFileFormat(type, prefs);</b>
+<b class="nc">&nbsp;        fileFormat.read(ConfigCore.getKitodoDataDirectory() + metadataFile.getPath());</b>
+<b class="nc">&nbsp;        return fileFormat;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private LegacyMetsModsDigitalDocumentHelper determineFileFormat(String type, Process process) {
+<b class="fc">&nbsp;        RulesetService rulesetService = ServiceManager.getRulesetService();</b>
+<b class="fc">&nbsp;        return determineFileFormat(type, rulesetService.getPreferences(process.getRuleset()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private LegacyMetsModsDigitalDocumentHelper determineFileFormat(String type, LegacyPrefsHelper prefs) {
+&nbsp;        LegacyMetsModsDigitalDocumentHelper fileFormat;
+&nbsp;
+<b class="fc">&nbsp;        if (&quot;metsmods&quot;.equals(type) || &quot;mets&quot;.equals(type)) {</b>
+<b class="fc">&nbsp;            fileFormat = new LegacyMetsModsDigitalDocumentHelper(prefs.getRuleset());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new UnsupportedOperationException(&quot;Dead code pending removal&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return fileFormat;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Read metadata as template file.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @return file format
+&nbsp;     */
+&nbsp;    public LegacyMetsModsDigitalDocumentHelper readMetadataAsTemplateFile(Process process) throws IOException {
+<b class="fc">&nbsp;        URI processSubTypeURI = fileService.getProcessSubTypeURI(process, ProcessSubType.TEMPLATE, null);</b>
+<b class="fc">&nbsp;        if (fileService.fileExist(processSubTypeURI)) {</b>
+<b class="fc">&nbsp;            String type = MetadataHelper.getMetaFileType(processSubTypeURI);</b>
+<b class="fc">&nbsp;            logger.debug(&quot;current template.xml file type: {}&quot;, type);</b>
+<b class="fc">&nbsp;            LegacyMetsModsDigitalDocumentHelper ff = determineFileFormat(type, process);</b>
+<b class="fc">&nbsp;            String processSubTypePath = fileService.getFile(processSubTypeURI).getAbsolutePath();</b>
+<b class="fc">&nbsp;            ff.read(processSubTypePath);</b>
+<b class="fc">&nbsp;            return ff;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new IOException(&quot;File does not exist: &quot; + processSubTypeURI);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if there is one task in edit mode, where the user has the rights to
+&nbsp;     * write to image folder.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            bean object
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isImageFolderInUse(Process process) {
+<b class="fc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="fc">&nbsp;            if (task.getProcessingStatus() == TaskStatus.INWORK &amp;&amp; task.isTypeImagesWrite()) {</b>
+<b class="fc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get user of task in edit mode with rights to write to image folder.
+&nbsp;     */
+&nbsp;    public User getImageFolderInUseUser(Process process) {
+<b class="fc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="fc">&nbsp;            if (task.getProcessingStatus() == TaskStatus.INWORK &amp;&amp; task.isTypeImagesWrite()) {</b>
+<b class="fc">&nbsp;                return task.getProcessingUser();</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download docket for given process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @throws IOException
+&nbsp;     *             when xslt file could not be loaded, or write to output failed
+&nbsp;     */
+&nbsp;    public void downloadDocket(Process process) throws IOException {
+<b class="nc">&nbsp;        logger.debug(&quot;generate docket for process with id {}&quot;, process.getId());</b>
+<b class="nc">&nbsp;        URI rootPath = Paths.get(ConfigCore.getParameter(ParameterCore.DIR_XSLT)).toUri();</b>
+&nbsp;        URI xsltFile;
+<b class="nc">&nbsp;        if (Objects.nonNull(process.getDocket())) {</b>
+<b class="nc">&nbsp;            xsltFile = ServiceManager.getFileService().createResource(rootPath, process.getDocket().getFile());</b>
+<b class="nc">&nbsp;            if (!fileService.fileExist(xsltFile)) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;docketMissing&quot;);</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            xsltFile = ServiceManager.getFileService().createResource(rootPath, &quot;docket.xsl&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        FacesContext facesContext = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;        if (!facesContext.getResponseComplete()) {</b>
+&nbsp;            // write run note to servlet output stream
+<b class="nc">&nbsp;            DocketInterface module = initialiseDocketModule();</b>
+&nbsp;
+<b class="nc">&nbsp;            File file = module.generateDocket(getDocketData(process), xsltFile);</b>
+<b class="nc">&nbsp;            writeToOutputStream(facesContext, file, Helper.getNormalizedTitle(process.getTitle()) + &quot;.pdf&quot;);</b>
+<b class="nc">&nbsp;            Files.deleteIfExists(file.toPath());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Writes a multi page docket for a list of processes to an output stream.
+&nbsp;     *
+&nbsp;     * @param processes
+&nbsp;     *            The list of processes
+&nbsp;     * @throws IOException
+&nbsp;     *             when xslt file could not be loaded, or write to output failed
+&nbsp;     */
+&nbsp;    public void downloadDocket(List&lt;Process&gt; processes) throws IOException {
+<b class="nc">&nbsp;        logger.debug(&quot;generate docket for processes {}&quot;, processes);</b>
+<b class="nc">&nbsp;        URI rootPath = Paths.get(ConfigCore.getParameter(ParameterCore.DIR_XSLT)).toUri();</b>
+<b class="nc">&nbsp;        URI xsltFile = ServiceManager.getFileService().createResource(rootPath, &quot;docket_multipage.xsl&quot;);</b>
+<b class="nc">&nbsp;        FacesContext facesContext = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;        if (!facesContext.getResponseComplete()) {</b>
+<b class="nc">&nbsp;            DocketInterface module = initialiseDocketModule();</b>
+<b class="nc">&nbsp;            File file = module.generateMultipleDockets(getDocketData(processes),</b>
+&nbsp;                xsltFile);
+&nbsp;
+<b class="nc">&nbsp;            writeToOutputStream(facesContext, file, &quot;batch_docket.pdf&quot;);</b>
+<b class="nc">&nbsp;            Files.deleteIfExists(file.toPath());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate result as PDF.
+&nbsp;     *
+&nbsp;     * @param filter
+&nbsp;     *            for generating search results
+&nbsp;     */
+&nbsp;    public void generateResultAsPdf(String filter, boolean showClosedProcesses, boolean showInactiveProjects)
+&nbsp;            throws DocumentException, IOException {
+<b class="nc">&nbsp;        FacesContext facesContext = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;        if (!facesContext.getResponseComplete()) {</b>
+<b class="nc">&nbsp;            ExternalContext response = prepareHeaderInformation(facesContext, &quot;search.pdf&quot;);</b>
+<b class="nc">&nbsp;            try (OutputStream out = response.getResponseOutputStream()) {</b>
+<b class="nc">&nbsp;                SearchResultGeneration sr = new SearchResultGeneration(filter, showClosedProcesses,</b>
+&nbsp;                        showInactiveProjects);
+<b class="nc">&nbsp;                HSSFWorkbook wb = sr.getResult();</b>
+<b class="nc">&nbsp;                List&lt;List&lt;HSSFCell&gt;&gt; rowList = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;                HSSFSheet mySheet = wb.getSheetAt(0);</b>
+<b class="nc">&nbsp;                Iterator&lt;Row&gt; rowIter = mySheet.rowIterator();</b>
+<b class="nc">&nbsp;                while (rowIter.hasNext()) {</b>
+<b class="nc">&nbsp;                    HSSFRow myRow = (HSSFRow) rowIter.next();</b>
+<b class="nc">&nbsp;                    Iterator&lt;Cell&gt; cellIter = myRow.cellIterator();</b>
+<b class="nc">&nbsp;                    List&lt;HSSFCell&gt; row = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;                    while (cellIter.hasNext()) {</b>
+<b class="nc">&nbsp;                        HSSFCell myCell = (HSSFCell) cellIter.next();</b>
+<b class="nc">&nbsp;                        row.add(myCell);</b>
+<b class="nc">&nbsp;                    }</b>
+<b class="nc">&nbsp;                    rowList.add(row);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                Document document = new Document();</b>
+<b class="nc">&nbsp;                Rectangle rectangle = new Rectangle(PageSize.A3.getHeight(), PageSize.A3.getWidth());</b>
+<b class="nc">&nbsp;                PdfWriter.getInstance(document, out);</b>
+<b class="nc">&nbsp;                document.setPageSize(rectangle);</b>
+<b class="nc">&nbsp;                document.open();</b>
+<b class="nc">&nbsp;                if (!rowList.isEmpty()) {</b>
+<b class="nc">&nbsp;                    Paragraph paragraph = new Paragraph(rowList.get(0).get(0).toString());</b>
+<b class="nc">&nbsp;                    document.add(paragraph);</b>
+<b class="nc">&nbsp;                    document.add(getPdfTable(rowList));</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                document.close();</b>
+<b class="nc">&nbsp;                out.flush();</b>
+<b class="nc">&nbsp;                facesContext.responseComplete();</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate result set.
+&nbsp;     *
+&nbsp;     * @param filter
+&nbsp;     *            for generating search results
+&nbsp;     */
+&nbsp;    public void generateResult(String filter, boolean showClosedProcesses, boolean showInactiveProjects)
+&nbsp;            throws IOException {
+<b class="nc">&nbsp;        FacesContext facesContext = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;        if (!facesContext.getResponseComplete()) {</b>
+<b class="nc">&nbsp;            ExternalContext response = prepareHeaderInformation(facesContext, &quot;search.xls&quot;);</b>
+<b class="nc">&nbsp;            try (OutputStream out = response.getResponseOutputStream()) {</b>
+<b class="nc">&nbsp;                SearchResultGeneration sr = new SearchResultGeneration(filter, showClosedProcesses,</b>
+&nbsp;                        showInactiveProjects);
+<b class="nc">&nbsp;                HSSFWorkbook wb = sr.getResult();</b>
+<b class="nc">&nbsp;                wb.write(out);</b>
+<b class="nc">&nbsp;                out.flush();</b>
+<b class="nc">&nbsp;                facesContext.responseComplete();</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Good explanation how it should be implemented:
+&nbsp;     * https://stackoverflow.com/a/9394237/2701807.
+&nbsp;     *
+&nbsp;     * @param facesContext
+&nbsp;     *            context
+&nbsp;     * @param file
+&nbsp;     *            temporal file which contains content to save
+&nbsp;     * @param fileName
+&nbsp;     *            name of the new docket file
+&nbsp;     */
+&nbsp;    private void writeToOutputStream(FacesContext facesContext, File file, String fileName) throws IOException {
+<b class="nc">&nbsp;        ExternalContext externalContext = prepareHeaderInformation(facesContext, fileName);</b>
+&nbsp;
+<b class="nc">&nbsp;        try (OutputStream outputStream = externalContext.getResponseOutputStream();</b>
+<b class="nc">&nbsp;                FileInputStream fileInputStream = new FileInputStream(file)) {</b>
+<b class="nc">&nbsp;            byte[] bytes = IOUtils.toByteArray(fileInputStream);</b>
+<b class="nc">&nbsp;            outputStream.write(bytes);</b>
+<b class="nc">&nbsp;            outputStream.flush();</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        facesContext.responseComplete();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ExternalContext prepareHeaderInformation(FacesContext facesContext, String outputFileName) {
+<b class="nc">&nbsp;        ExternalContext externalContext = facesContext.getExternalContext();</b>
+<b class="nc">&nbsp;        externalContext.responseReset();</b>
+&nbsp;
+<b class="nc">&nbsp;        String contentType = externalContext.getMimeType(outputFileName);</b>
+<b class="nc">&nbsp;        externalContext.setResponseContentType(contentType);</b>
+<b class="nc">&nbsp;        externalContext.setResponseHeader(&quot;Content-Disposition&quot;, &quot;attachment;filename=\&quot;&quot; + outputFileName + &quot;\&quot;&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        return externalContext;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private PdfPTable getPdfTable(List&lt;List&lt;HSSFCell&gt;&gt; rowList) throws DocumentException {
+&nbsp;        // create formatter for cells with default locale
+<b class="nc">&nbsp;        DataFormatter formatter = new DataFormatter();</b>
+&nbsp;
+<b class="nc">&nbsp;        PdfPTable table = new PdfPTable(8);</b>
+<b class="nc">&nbsp;        table.setSpacingBefore(20);</b>
+<b class="nc">&nbsp;        table.setWidths(new int[] {4, 1, 2, 1, 1, 1, 2, 2 });</b>
+<b class="nc">&nbsp;        for (List&lt;HSSFCell&gt; row : rowList) {</b>
+<b class="nc">&nbsp;            for (HSSFCell hssfCell : row) {</b>
+<b class="nc">&nbsp;                String stringCellValue = formatter.formatCellValue(hssfCell);</b>
+<b class="nc">&nbsp;                table.addCell(stringCellValue);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return table;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static DocketInterface initialiseDocketModule() {
+<b class="nc">&nbsp;        KitodoServiceLoader&lt;DocketInterface&gt; loader = new KitodoServiceLoader&lt;&gt;(DocketInterface.class);</b>
+<b class="nc">&nbsp;        return loader.loadModule();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the digital act of this process.
+&nbsp;     *
+&nbsp;     * @return the digital act of this process
+&nbsp;     * @throws IOException
+&nbsp;     *             if creating the process directory or reading the meta data file
+&nbsp;     *             fails
+&nbsp;     */
+&nbsp;    public LegacyMetsModsDigitalDocumentHelper getDigitalDocument(Process process) throws IOException {
+<b class="fc">&nbsp;        return readMetadataFile(process).getDigitalDocument();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the type of the top element of the logical structure, and thus the
+&nbsp;     * type of the workpiece of the process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process whose root type is to be determined
+&nbsp;     * @return the type of the logical structure of the workpiece, &quot;&quot; if unreadable
+&nbsp;     */
+&nbsp;    public String getBaseType(Process process) {
+&nbsp;        try {
+<b class="nc">&nbsp;            URI metadataFilePath = ServiceManager.getFileService().getMetadataFilePath(process);</b>
+<b class="nc">&nbsp;            return ServiceManager.getMetsService().getBaseType(metadataFilePath);</b>
+<b class="nc">&nbsp;        } catch (IOException | IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            logger.info(&quot;Could not determine base type for process {}: {}&quot;, process, e.getMessage());</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the type of the top element of the logical structure, and thus the
+&nbsp;     * type of the workpiece of the process.
+&nbsp;     *
+&nbsp;     * @param workpiece
+&nbsp;     *            workpiece whose root type is to be determined
+&nbsp;     * @return the type of the logical structure of the workpiece, &quot;&quot; if unreadable
+&nbsp;     */
+&nbsp;    public String getBaseType(Workpiece workpiece) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return ServiceManager.getMetsService().getBaseType(workpiece);</b>
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            logger.info(&quot;Could not determine base type for process {}: {}&quot;, workpiece.getId(), e.getMessage());</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the type of the top element of the logical structure, and thus the
+&nbsp;     * type of the workpiece of the process.
+&nbsp;     *
+&nbsp;     * @param processId
+&nbsp;     *          id of the process whose root type is to be determined
+&nbsp;     * @return the type of root element of the logical structure of the workpiece
+&nbsp;     * @throws DataException
+&nbsp;     *          if the type cannot be found in the index (e.g. because the process
+&nbsp;     *          cannot be found in the index)
+&nbsp;     */
+&nbsp;    public String getBaseType(int processId) throws DataException {
+<b class="nc">&nbsp;        ProcessDTO processDTO = findById(processId, true);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(processDTO)) {</b>
+<b class="nc">&nbsp;            return processDTO.getBaseType();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filter for correction / solution messages.
+&nbsp;     *
+&nbsp;     * @param lpe
+&nbsp;     *            List of process properties
+&nbsp;     * @return List of filtered correction / solution messages
+&nbsp;     */
+&nbsp;    private List&lt;PropertyDTO&gt; filterForCorrectionSolutionMessages(List&lt;PropertyDTO&gt; lpe) {
+<b class="nc">&nbsp;        List&lt;PropertyDTO&gt; filteredList = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (lpe.isEmpty()) {</b>
+<b class="nc">&nbsp;            return filteredList;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;String&gt; translationList = Arrays.asList(&quot;Correction required&quot;, &quot;Correction performed&quot;,</b>
+&nbsp;            &quot;Korrektur notwendig&quot;, &quot;Korrektur durchgef\u00FChrt&quot;);
+&nbsp;
+&nbsp;        // filtering for correction and solution messages
+<b class="nc">&nbsp;        for (PropertyDTO property : lpe) {</b>
+<b class="nc">&nbsp;            if (translationList.contains(property.getTitle())) {</b>
+<b class="nc">&nbsp;                filteredList.add(property);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return filteredList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find amount of processes for given title.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            as String
+&nbsp;     * @return amount as Long
+&nbsp;     */
+&nbsp;    public Long findNumberOfProcessesWithTitle(String title) throws DataException {
+<b class="fc">&nbsp;        return count(createSimpleQuery(ProcessTypeField.TITLE.getKey(), title, true, Operator.AND));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sanitizes a possibly dirty reference URI and extracts from it the
+&nbsp;     * operation ID of the referenced process. In case of error, a speaking
+&nbsp;     * exception is thrown.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            URI of the reference to the process number
+&nbsp;     * @return process number
+&nbsp;     * @throws SecurityException
+&nbsp;     *             if the URI names a forbidden protocol or column
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the URI tries to reference a foreign database or if the
+&nbsp;     *             query has a wrong format
+&nbsp;     * @throws ClassCastException
+&nbsp;     *             if the URI references a wrong class / table
+&nbsp;     */
+&nbsp;    public int processIdFromUri(URI uri) {
+<b class="fc">&nbsp;        if (!&quot;database&quot;.equals(uri.getScheme())) {</b>
+<b class="nc">&nbsp;            throw new SecurityException(&quot;Protocol not allowed: &quot; + uri.getScheme());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.nonNull(uri.getAuthority()) || Objects.nonNull(uri.getPath()) &amp;&amp; !uri.getPath().isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Linking across databases is not supported&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.isNull(uri.getQuery())) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;No query in database request&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String[] queryArguments = uri.getQuery().split(&quot;&amp;&quot;);</b>
+<b class="fc">&nbsp;        String[] key = queryArguments[0].split(&quot;=&quot;, 2);</b>
+<b class="fc">&nbsp;        String[] keySegments = key[0].split(&quot;\\.&quot;);</b>
+<b class="fc">&nbsp;        if (queryArguments.length &gt; 1 || keySegments.length &gt; 2) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Complex queries is not supported&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (keySegments.length &gt; 1 &amp;&amp; !&quot;id&quot;.equals(keySegments[1])) {</b>
+<b class="nc">&nbsp;            throw new SecurityException(&quot;Filtering on &#39;&quot; + keySegments[1] + &quot;&#39; is not allowed&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!&quot;process&quot;.equals(keySegments[0])) {</b>
+<b class="nc">&nbsp;            throw new ClassCastException(&quot;&#39;&quot; + keySegments[0] + &quot;&#39; cannot be cast to &#39;process&#39;&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return Integer.parseInt(key[1]);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method for avoiding redundant code for exception handling. //TODO: should
+&nbsp;     * this exceptions be handled that way?
+&nbsp;     *
+&nbsp;     * @param newFile
+&nbsp;     *            as Fileformat
+&nbsp;     * @param process
+&nbsp;     *            as Process object
+&nbsp;     * @return false if no exception appeared
+&nbsp;     */
+&nbsp;    public boolean handleExceptionsForConfiguration(LegacyMetsModsDigitalDocumentHelper newFile, Process process) {
+<b class="fc">&nbsp;        Optional&lt;String&gt; rules = ConfigCore.getOptionalString(ParameterCore.COPY_DATA_ON_EXPORT);</b>
+<b class="fc">&nbsp;        if (rules.isPresent()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                new DataCopier(rules.get()).process(new CopierData(newFile, process));</b>
+<b class="nc">&nbsp;            } catch (ConfigurationException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;dataCopier.syntaxError&quot;, logger, e);</b>
+<b class="nc">&nbsp;                return true;</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Run through all metadata and children of given docStruct to trim the strings
+&nbsp;     * calls itself recursively.
+&nbsp;     *
+&nbsp;     * @param docStruct
+&nbsp;     *            metadata to be trimmed
+&nbsp;     */
+&nbsp;    private void trimAllMetadata(LegacyDocStructHelperInterface docStruct) {
+&nbsp;        // trim all metadata values
+<b class="nc">&nbsp;        for (LegacyMetadataHelper md : docStruct.getAllMetadata()) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(md.getValue())) {</b>
+<b class="nc">&nbsp;                md.setStringValue(md.getValue().trim());</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // run through all children of docStruct
+<b class="nc">&nbsp;        for (LegacyDocStructHelperInterface child : docStruct.getAllChildren()) {</b>
+<b class="nc">&nbsp;            trimAllMetadata(child);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download full text.
+&nbsp;     *
+&nbsp;     * @param userHome
+&nbsp;     *            safe file
+&nbsp;     * @param atsPpnBand
+&nbsp;     *            String
+&nbsp;     */
+&nbsp;    private void downloadFullText(Process process, URI userHome, String atsPpnBand) throws IOException {
+<b class="nc">&nbsp;        downloadSources(process, userHome, atsPpnBand);</b>
+<b class="nc">&nbsp;        downloadOCR(process, userHome, atsPpnBand);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void downloadSources(Process process, URI userHome, String atsPpnBand) throws IOException {
+<b class="nc">&nbsp;        URI source = fileService.getSourceDirectory(process);</b>
+<b class="nc">&nbsp;        if (fileService.fileExist(source) &amp;&amp; !fileService.getSubUris(source).isEmpty()) {</b>
+<b class="nc">&nbsp;            URI destination = userHome.resolve(File.separator + atsPpnBand + &quot;_src&quot;);</b>
+<b class="nc">&nbsp;            if (!fileService.fileExist(destination)) {</b>
+<b class="nc">&nbsp;                fileService.createDirectory(userHome, atsPpnBand + &quot;_src&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            copyProcessFiles(source, destination, null);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void downloadOCR(Process process, URI userHome, String atsPpnBand) throws IOException {
+<b class="nc">&nbsp;        URI ocr = fileService.getOcrDirectory(process);</b>
+<b class="nc">&nbsp;        if (fileService.fileExist(ocr)) {</b>
+<b class="nc">&nbsp;            List&lt;URI&gt; directories = fileService.getSubUris(ocr);</b>
+<b class="nc">&nbsp;            for (URI directory : directories) {</b>
+<b class="nc">&nbsp;                if (fileService.isDirectory(directory) &amp;&amp; !fileService.getSubUris(directory).isEmpty()</b>
+<b class="nc">&nbsp;                        &amp;&amp; fileService.getFileName(directory).contains(&quot;_&quot;)) {</b>
+<b class="nc">&nbsp;                    String suffix = fileService.getFileNameWithExtension(directory)</b>
+<b class="nc">&nbsp;                            .substring(fileService.getFileNameWithExtension(directory).lastIndexOf(&#39;_&#39;));</b>
+<b class="nc">&nbsp;                    URI destination = userHome.resolve(File.separator + atsPpnBand + suffix);</b>
+<b class="nc">&nbsp;                    if (!fileService.fileExist(destination)) {</b>
+<b class="nc">&nbsp;                        fileService.createDirectory(userHome, atsPpnBand + suffix);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    copyProcessFiles(directory, destination, null);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download images.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process object
+&nbsp;     * @param userHome
+&nbsp;     *            save file
+&nbsp;     * @param atsPpnBand
+&nbsp;     *            String
+&nbsp;     * @param directorySuffix
+&nbsp;     *            String
+&nbsp;     */
+&nbsp;    public void downloadImages(Process process, URI userHome, String atsPpnBand, final String directorySuffix)
+&nbsp;            throws IOException {
+<b class="nc">&nbsp;        Project project = process.getProject();</b>
+&nbsp;
+&nbsp;        // determine the output path
+<b class="nc">&nbsp;        URI tifDirectory = getImagesTifDirectory(true, process.getId(), process.getTitle(),</b>
+<b class="nc">&nbsp;            process.getProcessBaseUri());</b>
+&nbsp;
+&nbsp;        // copy the source folder to the destination folder
+<b class="nc">&nbsp;        if (fileService.fileExist(tifDirectory) &amp;&amp; !fileService.getSubUris(tifDirectory).isEmpty()) {</b>
+<b class="nc">&nbsp;            URI destination = userHome.resolve(File.separator + atsPpnBand + directorySuffix);</b>
+&nbsp;
+&nbsp;            // with Agora import simply create the folder
+<b class="nc">&nbsp;            if (!fileService.fileExist(destination)) {</b>
+<b class="nc">&nbsp;                fileService.createDirectory(userHome, atsPpnBand + directorySuffix);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            copyProcessFiles(tifDirectory, destination, ImageHelper.dataFilter);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void copyProcessFiles(URI source, URI destination, FilenameFilter filter) throws IOException {
+<b class="nc">&nbsp;        List&lt;URI&gt; files = fileService.getSubUris(filter, source);</b>
+&nbsp;
+<b class="nc">&nbsp;        for (URI file : files) {</b>
+<b class="nc">&nbsp;            if (fileService.isFile(file)) {</b>
+<b class="nc">&nbsp;                URI target = destination.resolve(File.separator + fileService.getFileNameWithExtension(file));</b>
+<b class="nc">&nbsp;                fileService.copyFile(file, target);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * write MetsFile to given Path.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            the Process to use
+&nbsp;     * @param targetFileName
+&nbsp;     *            the filename where the metsfile should be written
+&nbsp;     * @param gdzfile
+&nbsp;     *            the FileFormat-Object to use for Mets-Writing
+&nbsp;     */
+&nbsp;    protected boolean writeMetsFile(Process process, String targetFileName, LegacyMetsModsDigitalDocumentHelper gdzfile)
+&nbsp;            throws IOException {
+<b class="nc">&nbsp;        LegacyPrefsHelper preferences = ServiceManager.getRulesetService().getPreferences(process.getRuleset());</b>
+<b class="nc">&nbsp;        LegacyMetsModsDigitalDocumentHelper mm = new LegacyMetsModsDigitalDocumentHelper(preferences.getRuleset());</b>
+&nbsp;        // before creating mets file, change relative path to absolute -
+<b class="nc">&nbsp;        LegacyMetsModsDigitalDocumentHelper dd = gdzfile.getDigitalDocument();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(dd.getFileSet())) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(process.getTitle() + &quot;: digital document does not contain images; aborting&quot;);</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        //get the topstruct element of the digital document depending on anchor property
+<b class="nc">&nbsp;        LegacyDocStructHelperInterface topElement = dd.getLogicalDocStruct();</b>
+&nbsp;
+&nbsp;        //if the top element does not have any image related, set them all
+<b class="nc">&nbsp;        if (topElement.getAllToReferences(&quot;logical_physical&quot;).isEmpty()) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(dd.getPhysicalDocStruct()) &amp;&amp; dd.getPhysicalDocStruct().getAllChildren().isEmpty()) {</b>
+<b class="nc">&nbsp;                Helper.setMessage(process.getTitle()</b>
+&nbsp;                        + &quot;: topstruct element does not have any referenced images yet; temporarily adding them &quot;
+&nbsp;                        + &quot;for mets file creation&quot;);
+<b class="nc">&nbsp;                for (LegacyDocStructHelperInterface mySeitenDocStruct : dd.getPhysicalDocStruct().getAllChildren()) {</b>
+<b class="nc">&nbsp;                    topElement.addReferenceTo(mySeitenDocStruct, &quot;logical_physical&quot;);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                Helper.setErrorMessage(process.getTitle() + &quot;: could not find any referenced images, export aborted&quot;);</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        mm.setDigitalDocument(dd);</b>
+<b class="nc">&nbsp;        mm.write(targetFileName);</b>
+<b class="nc">&nbsp;        Helper.setMessage(process.getTitle() + &quot;: &quot;, &quot;exportFinished&quot;);</b>
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get data files.
+&nbsp;     *
+&nbsp;     * @return String
+&nbsp;     */
+&nbsp;    public List&lt;URI&gt; getDataFiles(Process process) throws InvalidImagesException {
+&nbsp;        URI dir;
+&nbsp;        try {
+<b class="nc">&nbsp;            dir = getImagesTifDirectory(true, process.getId(), process.getTitle(), process.getProcessBaseUri());</b>
+<b class="nc">&nbsp;        } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;            throw new InvalidImagesException(e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;URI&gt; dataList = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;URI&gt; files = fileService.getSubUris(ImageHelper.dataFilter, dir);</b>
+<b class="nc">&nbsp;        if (!files.isEmpty()) {</b>
+<b class="nc">&nbsp;            dataList.addAll(files);</b>
+<b class="nc">&nbsp;            Collections.sort(dataList);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return dataList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Starts copying all directories configured in kitodo_config.properties
+&nbsp;     * parameter &quot;processDirs&quot; to export folder.
+&nbsp;     *
+&nbsp;     * @param myProcess
+&nbsp;     *            the process object
+&nbsp;     * @param targetDirectory
+&nbsp;     *            the destination directory
+&nbsp;     */
+&nbsp;    private void directoryDownload(Process myProcess, URI targetDirectory) throws IOException {
+<b class="nc">&nbsp;        String[] processDirs = ConfigCore.getStringArrayParameter(ParameterCore.PROCESS_DIRS);</b>
+<b class="nc">&nbsp;        String normalizedTitle = Helper.getNormalizedTitle(myProcess.getTitle());</b>
+&nbsp;
+<b class="nc">&nbsp;        for (String processDir : processDirs) {</b>
+<b class="nc">&nbsp;            URI sourceDirectory = URI.create(getProcessDataDirectory(myProcess).toString() + &quot;/&quot;</b>
+<b class="nc">&nbsp;                    + processDir.replace(PROCESS_TITLE, normalizedTitle));</b>
+<b class="nc">&nbsp;            URI destinationDirectory = URI</b>
+<b class="nc">&nbsp;                    .create(targetDirectory.toString() + &quot;/&quot; + processDir.replace(PROCESS_TITLE, normalizedTitle));</b>
+&nbsp;
+<b class="nc">&nbsp;            if (fileService.isDirectory(sourceDirectory)) {</b>
+<b class="nc">&nbsp;                fileService.copyFile(sourceDirectory, destinationDirectory);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a List of Docket data for the given processes.
+&nbsp;     *
+&nbsp;     * @param processes
+&nbsp;     *            the process to create the docket data for.
+&nbsp;     * @return A List of DocketData objects
+&nbsp;     */
+&nbsp;    private List&lt;DocketData&gt; getDocketData(List&lt;Process&gt; processes) throws IOException {
+<b class="nc">&nbsp;        List&lt;DocketData&gt; docketData = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Process process : processes) {</b>
+<b class="nc">&nbsp;            docketData.add(getDocketData(process));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return docketData;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the DocketData for a given Process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            The process to create the docket data for.
+&nbsp;     * @return The DocketData for the process.
+&nbsp;     */
+&nbsp;    private static DocketData getDocketData(Process process) throws IOException {
+<b class="nc">&nbsp;        DocketData docketdata = new DocketData();</b>
+&nbsp;
+<b class="nc">&nbsp;        docketdata.setCreationDate(process.getCreationDate().toString());</b>
+<b class="nc">&nbsp;        URI metadataFilePath = fileService.getMetadataFilePath(process);</b>
+<b class="nc">&nbsp;        docketdata.setMetadataFile(fileService.getFile(metadataFilePath).toURI());</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(process.getParent())) {</b>
+<b class="nc">&nbsp;            docketdata.setParent(getDocketData(process.getParent()));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        docketdata.setProcessId(process.getId().toString());</b>
+<b class="nc">&nbsp;        docketdata.setProcessName(process.getTitle());</b>
+<b class="nc">&nbsp;        docketdata.setProjectName(process.getProject().getTitle());</b>
+<b class="nc">&nbsp;        docketdata.setRulesetName(process.getRuleset().getTitle());</b>
+<b class="nc">&nbsp;        docketdata.setComment(process.getWikiField());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!process.getTemplates().isEmpty()) {</b>
+<b class="nc">&nbsp;            docketdata.setTemplateProperties(getDocketDataForProperties(process.getTemplates()));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!process.getWorkpieces().isEmpty()) {</b>
+<b class="nc">&nbsp;            docketdata.setWorkpieceProperties(getDocketDataForProperties(process.getWorkpieces()));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        docketdata.setProcessProperties(getDocketDataForProperties(process.getProperties()));</b>
+&nbsp;
+<b class="nc">&nbsp;        return docketdata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static ArrayList&lt;org.kitodo.api.docket.Property&gt; getDocketDataForProperties(List&lt;Property&gt; properties) {
+<b class="nc">&nbsp;        ArrayList&lt;org.kitodo.api.docket.Property&gt; propertiesForDocket = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Property property : properties) {</b>
+<b class="nc">&nbsp;            org.kitodo.api.docket.Property propertyForDocket = new org.kitodo.api.docket.Property();</b>
+<b class="nc">&nbsp;            propertyForDocket.setId(property.getId());</b>
+<b class="nc">&nbsp;            propertyForDocket.setTitle(property.getTitle());</b>
+<b class="nc">&nbsp;            propertyForDocket.setValue(property.getValue());</b>
+&nbsp;
+<b class="nc">&nbsp;            propertiesForDocket.add(propertyForDocket);</b>
+&nbsp;
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return propertiesForDocket;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Map&lt;String, Object&gt;&gt; getMetadataForIndex(Process process) {
+<b class="nc">&nbsp;        return getMetadataForIndex(process, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    private List&lt;Map&lt;String, Object&gt;&gt; getMetadataForIndex(Process process, boolean forIndexingAll) {
+&nbsp;        try {
+<b class="fc">&nbsp;            URI metadataFileUri = ServiceManager.getFileService().getMetadataFilePath(process, false, true);</b>
+<b class="fc">&nbsp;            if (!ServiceManager.getFileService().fileExist(metadataFileUri)) {</b>
+<b class="fc">&nbsp;                logger.info(&quot;No metadata file for indexing: {}&quot;, metadataFileUri);</b>
+<b class="fc">&nbsp;                return Collections.emptyList();</b>
+&nbsp;            }
+&nbsp;            String metadataFile;
+<b class="fc">&nbsp;            try (InputStream inputStream = ServiceManager.getFileService().readMetadataFile(process, forIndexingAll)) {</b>
+<b class="fc">&nbsp;                metadataFile = IOUtils.toString(inputStream, StandardCharsets.UTF_8);</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            JSONObject xmlJSONObject = XML.toJSONObject(metadataFile);</b>
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; json = iterateOverJsonObject(xmlJSONObject);</b>
+<b class="fc">&nbsp;            if (json.containsKey(&quot;mets&quot;)) {</b>
+<b class="fc">&nbsp;                Map&lt;String, Object&gt; mets = (Map&lt;String, Object&gt;) json.get(&quot;mets&quot;);</b>
+<b class="fc">&nbsp;                Object dmdSec = mets.get(&quot;dmdSec&quot;);</b>
+<b class="fc">&nbsp;                List&lt;Map&lt;String, Object&gt;&gt; metadata = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;                if (dmdSec instanceof List) {</b>
+<b class="fc">&nbsp;                    metadata = (List&lt;Map&lt;String, Object&gt;&gt;) dmdSec;</b>
+<b class="fc">&nbsp;                } else if (dmdSec instanceof Map) {</b>
+<b class="fc">&nbsp;                    metadata.add((Map&lt;String, Object&gt;) dmdSec);</b>
+&nbsp;                }
+<b class="fc">&nbsp;                return metadata;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (NullPointerException | IOException e) {</b>
+<b class="nc">&nbsp;            logger.warn(e.getMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return Collections.emptyList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Map&lt;String, Object&gt; iterateOverJsonObject(JSONObject xmlJSONObject) {
+<b class="fc">&nbsp;        Iterator&lt;String&gt; keys = xmlJSONObject.keys();</b>
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; json = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        while (keys.hasNext()) {</b>
+<b class="fc">&nbsp;            String key = keys.next();</b>
+<b class="fc">&nbsp;            Object value = xmlJSONObject.get(key);</b>
+<b class="fc">&nbsp;            if (value instanceof String || value instanceof Integer) {</b>
+<b class="fc">&nbsp;                json.put(prepareKey(key), value);</b>
+<b class="fc">&nbsp;            } else if (value instanceof JSONObject) {</b>
+<b class="fc">&nbsp;                JSONObject jsonObject = (JSONObject) value;</b>
+<b class="fc">&nbsp;                Map&lt;String, Object&gt; map = iterateOverJsonObject(jsonObject);</b>
+<b class="fc">&nbsp;                json.put(prepareKey(key), map);</b>
+<b class="fc">&nbsp;            } else if (value instanceof JSONArray) {</b>
+<b class="fc">&nbsp;                json.put(prepareKey(key), iterateOverJsonArray((JSONArray) value));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return json;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Object iterateOverJsonArray(JSONArray jsonArray) {
+<b class="fc">&nbsp;        int jsonArraySize = jsonArray.length();</b>
+<b class="fc">&nbsp;        List&lt;Object&gt; json = new ArrayList&lt;&gt;(jsonArraySize);</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; jsonArraySize; i++) {</b>
+<b class="fc">&nbsp;            Object value = jsonArray.get(i);</b>
+<b class="fc">&nbsp;            if (value instanceof JSONObject) {</b>
+<b class="fc">&nbsp;                json.add(iterateOverJsonObject((JSONObject) value));</b>
+<b class="nc">&nbsp;            } else if (value instanceof String) {</b>
+<b class="nc">&nbsp;                json.add(value);</b>
+<b class="nc">&nbsp;            } else if (value instanceof JSONArray) {</b>
+<b class="nc">&nbsp;                json.add(iterateOverJsonArray((JSONArray) value));</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return json;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String prepareKey(String key) {
+<b class="fc">&nbsp;        if (key.contains(&quot;:&quot;)) {</b>
+<b class="fc">&nbsp;            return key.substring(key.indexOf(&#39;:&#39;) + 1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return process property value of property with given name
+&nbsp;     * &#39;propertyName&#39; from given ProcessDTO &#39;process&#39;.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            the ProcessDTO object from which the property value is retrieved
+&nbsp;     * @param propertyName
+&nbsp;     *            name of the property for the property value is retrieved
+&nbsp;     * @return property value if process has property with name &#39;propertyName&#39;,
+&nbsp;     *         empty String otherwise
+&nbsp;     */
+&nbsp;    public static String getPropertyValue(ProcessDTO process, String propertyName) {
+<b class="nc">&nbsp;        for (PropertyDTO property : process.getProperties()) {</b>
+<b class="nc">&nbsp;            if (property.getTitle().equals(propertyName)) {</b>
+<b class="nc">&nbsp;                return property.getValue();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculate and return duration/age of given process as a String.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            ProcessDTO object for which duration/age is calculated
+&nbsp;     * @return process age of given process
+&nbsp;     */
+&nbsp;    public static String getProcessDuration(ProcessDTO process) {
+<b class="nc">&nbsp;        String creationDateTimeString = process.getCreationDate();</b>
+<b class="nc">&nbsp;        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;);</b>
+<b class="nc">&nbsp;        LocalDateTime createLocalDate = LocalDateTime.parse(creationDateTimeString, formatter);</b>
+<b class="nc">&nbsp;        Duration duration = Duration.between(createLocalDate, LocalDateTime.now());</b>
+<b class="nc">&nbsp;        return String.format(&quot;%sd; %sh&quot;, duration.toDays(),</b>
+<b class="nc">&nbsp;            duration.toHours() - TimeUnit.DAYS.toHours(duration.toDays()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates the linked child processes to the level specified in the root
+&nbsp;     * element. Processes linked in the logical structure are linked in the database.
+&nbsp;     * For processes that are not linked in the logical structure, the link in the
+&nbsp;     * database is removed.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            parent process
+&nbsp;     * @param logicalStructure
+&nbsp;     *            the current state of the logical structure
+&nbsp;     * @throws DAOException
+&nbsp;     *             if a process is referenced with a URI whose ID does not
+&nbsp;     *             appear in the database
+&nbsp;     * @throws DataException
+&nbsp;     *             if the process cannot be saved
+&nbsp;     */
+&nbsp;    public void updateChildrenFromLogicalStructure(Process process, LogicalDivision logicalStructure)
+&nbsp;            throws DAOException, DataException {
+<b class="fc">&nbsp;        removeLinksFromNoLongerLinkedProcesses(process, logicalStructure);</b>
+<b class="fc">&nbsp;        addNewLinks(process, logicalStructure);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void removeLinksFromNoLongerLinkedProcesses(Process process, LogicalDivision logicalStructure)
+&nbsp;            throws DAOException, DataException {
+<b class="fc">&nbsp;        ArrayList&lt;Process&gt; childrenToRemove = new ArrayList&lt;&gt;(process.getChildren());</b>
+<b class="fc">&nbsp;        childrenToRemove.removeAll(getProcessesLinkedInLogicalDivision(logicalStructure));</b>
+<b class="fc">&nbsp;        for (Process childToRemove : childrenToRemove) {</b>
+<b class="fc">&nbsp;            childToRemove.setParent(null);</b>
+<b class="fc">&nbsp;            process.getChildren().remove(childToRemove);</b>
+<b class="fc">&nbsp;            save(childToRemove);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (!childrenToRemove.isEmpty()) {</b>
+<b class="fc">&nbsp;            save(process);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addNewLinks(Process process, LogicalDivision logicalStructure)
+&nbsp;            throws DAOException, DataException {
+<b class="fc">&nbsp;        HashSet&lt;Process&gt; childrenToAdd = getProcessesLinkedInLogicalDivision(logicalStructure);</b>
+<b class="fc">&nbsp;        process.getChildren().forEach(childrenToAdd::remove);</b>
+<b class="fc">&nbsp;        for (Process childToAdd : childrenToAdd) {</b>
+<b class="fc">&nbsp;            childToAdd.setParent(process);</b>
+<b class="fc">&nbsp;            process.getChildren().add(childToAdd);</b>
+<b class="fc">&nbsp;            save(childToAdd);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (!childrenToAdd.isEmpty()) {</b>
+<b class="fc">&nbsp;            save(process);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private HashSet&lt;Process&gt; getProcessesLinkedInLogicalDivision(
+&nbsp;            LogicalDivision logicalDivision) throws DAOException {
+<b class="fc">&nbsp;        HashSet&lt;Process&gt; processesLinkedInLogicalDivision = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(logicalDivision.getLink())) {</b>
+<b class="fc">&nbsp;            int processId = processIdFromUri(logicalDivision.getLink().getUri());</b>
+<b class="fc">&nbsp;            processesLinkedInLogicalDivision.add(getById(processId));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (LogicalDivision child : logicalDivision.getChildren()) {</b>
+<b class="fc">&nbsp;            processesLinkedInLogicalDivision.addAll(getProcessesLinkedInLogicalDivision(child));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return processesLinkedInLogicalDivision;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set given Process &quot;parentProcess&quot; as parent of given Process &quot;childProcess&quot; and Process &quot;childProcess&quot; as child
+&nbsp;     * of given Process &quot;parentProcess&quot;.
+&nbsp;     * @param parentProcess
+&nbsp;     *          parentProcess of given childProcess
+&nbsp;     * @param childProcess
+&nbsp;     *          childProcess of given parentProcess
+&nbsp;     */
+&nbsp;    public static void setParentRelations(Process parentProcess, Process childProcess) {
+<b class="nc">&nbsp;        childProcess.setParent(parentProcess);</b>
+<b class="nc">&nbsp;        parentProcess.getChildren().add(childProcess);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all parent processes of given Process recursively.
+&nbsp;     * @param process the Process to get the parent process for
+&nbsp;     * @return List of parent Processes
+&nbsp;     */
+&nbsp;    public static List&lt;Process&gt; getAllParentProcesses(Process process) {
+<b class="nc">&nbsp;        List&lt;Process&gt; parents = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        while (Objects.nonNull(process.getParent())) {</b>
+<b class="nc">&nbsp;            parents.add(0, process.getParent());</b>
+<b class="nc">&nbsp;            process = process.getParent();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return parents;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the number of direct children of the given process.
+&nbsp;     * @param processId id of the process
+&nbsp;     * @return number of direct children as int
+&nbsp;     * @throws DAOException when query to database fails
+&nbsp;     */
+&nbsp;    public int getNumberOfChildren(int processId) throws DAOException {
+<b class="nc">&nbsp;        return Math.toIntExact(countDatabaseRows(&quot;SELECT COUNT(*) FROM Process WHERE parent_id = &quot; + processId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static void deleteProcess(int processID) throws DAOException, DataException, IOException {
+<b class="nc">&nbsp;        Process process = ServiceManager.getProcessService().getById(processID);</b>
+<b class="nc">&nbsp;        deleteProcess(process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete given process.
+&nbsp;     *
+&nbsp;     * @param processToDelete process to delete
+&nbsp;     */
+&nbsp;    public static void deleteProcess(Process processToDelete) throws DataException, IOException {
+<b class="nc">&nbsp;        deleteMetadataDirectory(processToDelete);</b>
+&nbsp;
+<b class="nc">&nbsp;        processToDelete.getProject().getProcesses().remove(processToDelete);</b>
+<b class="nc">&nbsp;        processToDelete.setProject(null);</b>
+<b class="nc">&nbsp;        processToDelete.getTemplate().getProcesses().remove(processToDelete);</b>
+<b class="nc">&nbsp;        processToDelete.setTemplate(null);</b>
+<b class="nc">&nbsp;        Process parent = processToDelete.getParent();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(parent)) {</b>
+<b class="nc">&nbsp;            parent.getChildren().remove(processToDelete);</b>
+<b class="nc">&nbsp;            processToDelete.setParent(null);</b>
+<b class="nc">&nbsp;            MetadataEditor.removeLink(parent, processToDelete.getId());</b>
+<b class="nc">&nbsp;            ServiceManager.getProcessService().save(processToDelete);</b>
+<b class="nc">&nbsp;            ServiceManager.getProcessService().save(parent);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        List&lt;Batch&gt; batches = new CopyOnWriteArrayList&lt;&gt;(processToDelete.getBatches());</b>
+<b class="nc">&nbsp;        for (Batch batch : batches) {</b>
+<b class="nc">&nbsp;            batch.getProcesses().remove(processToDelete);</b>
+<b class="nc">&nbsp;            processToDelete.getBatches().remove(batch);</b>
+<b class="nc">&nbsp;            ServiceManager.getBatchService().save(batch);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        ServiceManager.getProcessService().remove(processToDelete);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void deleteMetadataDirectory(Process process) {
+<b class="nc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="nc">&nbsp;            deleteSymlinksFromUserHomes(task);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            FileService fileService = ServiceManager.getFileService();</b>
+<b class="nc">&nbsp;            fileService.delete(ServiceManager.getProcessService().getProcessDataDirectory(process));</b>
+<b class="nc">&nbsp;            URI ocrDirectory = fileService.getOcrDirectory(process);</b>
+<b class="nc">&nbsp;            if (fileService.fileExist(ocrDirectory)) {</b>
+<b class="nc">&nbsp;                fileService.delete(ocrDirectory);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorDirectoryDeleting&quot;, new Object[] {Helper.getTranslation(&quot;metadata&quot;) }, logger,</b>
+&nbsp;                    e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete symlinks from user home directories.
+&nbsp;     *
+&nbsp;     * @param task Task for which symlinks are removed
+&nbsp;     */
+&nbsp;    public static void deleteSymlinksFromUserHomes(Task task) {
+<b class="nc">&nbsp;        if (Objects.nonNull(task.getProcessingUser()) &amp;&amp; (task.isTypeImagesRead() || task.isTypeImagesWrite())) {</b>
+<b class="nc">&nbsp;            WebDav webDav = new WebDav();</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                webDav.uploadFromHome(task.getProcessingUser(), task.getProcess());</b>
+<b class="nc">&nbsp;            } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the node list from metadata file by the xpath.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            The process for which the metadata file is searched for
+&nbsp;     * @param xpath
+&nbsp;     *            The xpath to get to the node list
+&nbsp;     * @return The node list of process by the of xpath
+&nbsp;     */
+&nbsp;    public NodeList getNodeListFromMetadataFile(Process process, String xpath) throws IOException {
+<b class="fc">&nbsp;        try (InputStream fileInputStream = ServiceManager.getFileService().readMetadataFile(process)) {</b>
+<b class="fc">&nbsp;            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();</b>
+<b class="fc">&nbsp;            builderFactory.setNamespaceAware(true);</b>
+<b class="fc">&nbsp;            DocumentBuilder builder = builderFactory.newDocumentBuilder();</b>
+<b class="fc">&nbsp;            org.w3c.dom.Document xmlDocument = builder.parse(fileInputStream);</b>
+&nbsp;
+<b class="fc">&nbsp;            XPath xPath = XPathFactory.newInstance().newXPath();</b>
+<b class="fc">&nbsp;            xPath.setNamespaceContext(new KitodoNamespaceContext());</b>
+<b class="fc">&nbsp;            return (NodeList) xPath.compile(xpath).evaluate(xmlDocument, XPathConstants.NODESET);</b>
+<b class="fc">&nbsp;        } catch (ParserConfigurationException | SAXException | XPathExpressionException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            throw new IOException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Export Mets.
+&nbsp;     *
+&nbsp;     * @param processId
+&nbsp;     *            Id of which process should be exported
+&nbsp;     * @throws DAOException
+&nbsp;     *             Thrown on database error
+&nbsp;     * @throws DataException
+&nbsp;     *             Thrown on index error
+&nbsp;     * @throws IOException
+&nbsp;     *             Thrown on I/O error
+&nbsp;     */
+&nbsp;    public static void exportMets(int processId) throws DAOException, DataException, IOException {
+<b class="nc">&nbsp;        Process process = ServiceManager.getProcessService().getById(processId);</b>
+<b class="nc">&nbsp;        ExportMets export = new ExportMets();</b>
+<b class="nc">&nbsp;        export.startExport(process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Link a list of given processes to user home directory.
+&nbsp;     *
+&nbsp;     * @param processes List of processes
+&nbsp;     * @throws DAOException Thrown on database like error
+&nbsp;     */
+&nbsp;    public static void downloadToHome(List&lt;Process&gt; processes) throws DAOException {
+<b class="nc">&nbsp;        WebDav webDav = new WebDav();</b>
+<b class="nc">&nbsp;        for (Process processForDownload : processes) {</b>
+<b class="nc">&nbsp;            downloadToHome(webDav, processForDownload.getId());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download to home for single process. First check if this volume is currently
+&nbsp;     * being edited by another user and placed in his home directory, otherwise
+&nbsp;     * download.
+&nbsp;     *
+&nbsp;     * @param webDav
+&nbsp;     *            for download
+&nbsp;     * @param processId
+&nbsp;     *            ID of process for which download is going to be performed
+&nbsp;     */
+&nbsp;    public static void downloadToHome(WebDav webDav, int processId) throws DAOException {
+<b class="nc">&nbsp;        Process process = ServiceManager.getProcessService().getById(processId);</b>
+<b class="nc">&nbsp;        if (ServiceManager.getProcessService().isImageFolderInUse(process)) {</b>
+<b class="nc">&nbsp;            Helper.setMessage(</b>
+<b class="nc">&nbsp;                    Helper.getTranslation(&quot;directory &quot;) + &quot; &quot; + process.getTitle() + &quot; &quot;</b>
+<b class="nc">&nbsp;                            + Helper.getTranslation(&quot;isInUse&quot;),</b>
+<b class="nc">&nbsp;                    ServiceManager.getUserService()</b>
+<b class="nc">&nbsp;                            .getFullName(ServiceManager.getProcessService().getImageFolderInUseUser(process)));</b>
+<b class="nc">&nbsp;            webDav.downloadToHome(process, true);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            webDav.downloadToHome(process, false);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /** 
+&nbsp;     * Upload from home for list of processes for current user. 
+&nbsp;     * Deletes symlinks in home directory of current user.
+&nbsp;     * 
+&nbsp;     * @param processes the list of processes
+&nbsp;     */
+&nbsp;    public static void uploadFromHome(List&lt;Process&gt; processes) {
+<b class="nc">&nbsp;        WebDav webDav = new WebDav();</b>
+<b class="nc">&nbsp;        User currentUser = ServiceManager.getUserService().getCurrentUser();</b>
+<b class="nc">&nbsp;        for (Process process : processes) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                webDav.uploadFromHome(currentUser, process);</b>
+<b class="nc">&nbsp;            } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the process with the ID &#39;processId&#39; has any correction comments or not.
+&nbsp;     *
+&nbsp;     * @param processID
+&nbsp;     *          ID of process to check
+&nbsp;     * @return CorrectionComment status of process
+&nbsp;     */
+&nbsp;    public static CorrectionComments hasCorrectionComment(int processID) throws DAOException {
+<b class="nc">&nbsp;        Process process = ServiceManager.getProcessService().getById(processID);</b>
+<b class="nc">&nbsp;        List&lt;Comment&gt; correctionComments = ServiceManager.getCommentService().getAllCommentsByProcess(process)</b>
+<b class="nc">&nbsp;                .stream().filter(c -&gt; CommentType.ERROR.equals(c.getType())).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        if (correctionComments.size() &lt; 1) {</b>
+<b class="nc">&nbsp;            return NO_CORRECTION_COMMENTS;</b>
+<b class="nc">&nbsp;        } else if (correctionComments.stream().anyMatch(c -&gt; !c.isCorrected())) {</b>
+<b class="nc">&nbsp;            return OPEN_CORRECTION_COMMENTS;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return NO_OPEN_CORRECTION_COMMENTS;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve comments for the given process.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *          process for which the tooltip is created
+&nbsp;     * @return List containing comments of given process
+&nbsp;     *
+&nbsp;     * @throws DAOException thrown when process cannot be loaded from database
+&nbsp;     */
+&nbsp;    public List&lt;Comment&gt; getComments(ProcessDTO processDTO) throws DAOException {
+<b class="nc">&nbsp;        Process process = ServiceManager.getProcessService().getById(processDTO.getId());</b>
+<b class="nc">&nbsp;        return ServiceManager.getCommentService().getAllCommentsByProcess(process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return if child process for given ProcessDTO processDTO can be created via calendar or not.
+&nbsp;     *
+&nbsp;     * @param processDTO ProcessDTO for which child processes may be created via calendar
+&nbsp;     * @return whether child processes for the given ProcessDTO can be created via the calendar or not
+&nbsp;     * @throws DAOException if process could not be loaded from database
+&nbsp;     * @throws IOException if ruleset file could not be read
+&nbsp;     */
+&nbsp;    public static boolean canCreateProcessWithCalendar(ProcessDTO processDTO)
+&nbsp;            throws DAOException, IOException {
+&nbsp;        Collection&lt;String&gt; functionalDivisions;
+<b class="nc">&nbsp;        if (Objects.isNull(processDTO.getRuleset())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Integer rulesetId = processDTO.getRuleset().getId();</b>
+<b class="nc">&nbsp;        if (RULESET_CACHE_FOR_CREATE_FROM_CALENDAR.containsKey(rulesetId)) {</b>
+<b class="nc">&nbsp;            functionalDivisions = RULESET_CACHE_FOR_CREATE_FROM_CALENDAR.get(rulesetId);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Ruleset ruleset = ServiceManager.getRulesetService().getById(rulesetId);</b>
+<b class="nc">&nbsp;            functionalDivisions = ServiceManager.getRulesetService().openRuleset(ruleset)</b>
+<b class="nc">&nbsp;                    .getFunctionalDivisions(FunctionalDivision.CREATE_CHILDREN_WITH_CALENDAR);</b>
+<b class="nc">&nbsp;            RULESET_CACHE_FOR_CREATE_FROM_CALENDAR.put(rulesetId, functionalDivisions);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return functionalDivisions.contains(processDTO.getBaseType());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return if child process for given ProcessDTO processDTO can be created or not.
+&nbsp;     *
+&nbsp;     * @param processDTO ProcessDTO for which child processes may be created
+&nbsp;     * @return whether child processes for the given ProcessDTO can be created via the calendar or not
+&nbsp;     * @throws DAOException if process could not be loaded from database
+&nbsp;     * @throws IOException if ruleset file could not be read
+&nbsp;     */
+&nbsp;    public static boolean canCreateChildProcess(ProcessDTO processDTO) throws DAOException,
+&nbsp;            IOException {
+&nbsp;        Collection&lt;String&gt; functionalDivisions;
+<b class="nc">&nbsp;        if (Objects.isNull(processDTO.getRuleset())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Integer rulesetId = processDTO.getRuleset().getId();</b>
+<b class="nc">&nbsp;        if (RULESET_CACHE_FOR_CREATE_CHILD_FROM_PARENT.containsKey(rulesetId)) {</b>
+<b class="nc">&nbsp;            functionalDivisions = RULESET_CACHE_FOR_CREATE_CHILD_FROM_PARENT.get(rulesetId);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Ruleset ruleset = ServiceManager.getRulesetService().getById(rulesetId);</b>
+<b class="nc">&nbsp;            functionalDivisions = ServiceManager.getRulesetService().openRuleset(ruleset)</b>
+<b class="nc">&nbsp;                    .getFunctionalDivisions(FunctionalDivision.CREATE_CHILDREN_FROM_PARENT);</b>
+<b class="nc">&nbsp;            RULESET_CACHE_FOR_CREATE_CHILD_FROM_PARENT.put(rulesetId, functionalDivisions);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return functionalDivisions.contains(processDTO.getBaseType());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Starts generation of xml logfile for current process.
+&nbsp;     */
+&nbsp;    public static void createXML(Process process, User user) throws IOException {
+<b class="nc">&nbsp;        DocketInterface xmlExport = initialiseDocketModule();</b>
+<b class="nc">&nbsp;        String directory = new File(ServiceManager.getUserService().getHomeDirectory(user)).getPath();</b>
+<b class="nc">&nbsp;        String destination = directory + &quot;/&quot; + Helper.getNormalizedTitle(process.getTitle()) + &quot;_log.xml&quot;;</b>
+<b class="nc">&nbsp;        xmlExport.exportXmlLog(getDocketData(process), destination);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return PieChartModel for given process values.
+&nbsp;     *
+&nbsp;     * @param processValues Map containing process values
+&nbsp;     * @return PieChartModel
+&nbsp;     */
+&nbsp;    public PieChartModel getPieChardModel(Map&lt;String, Integer&gt; processValues) {
+&nbsp;
+<b class="nc">&nbsp;        PieChartDataSet dataSet = new PieChartDataSet();</b>
+<b class="nc">&nbsp;        List&lt;Number&gt; values = new ArrayList&lt;&gt;(processValues.values());</b>
+<b class="nc">&nbsp;        dataSet.setData(values);</b>
+&nbsp;
+<b class="nc">&nbsp;        dataSet.setBackgroundColor(BG_COLORS);</b>
+&nbsp;
+<b class="nc">&nbsp;        ChartData data = new ChartData();</b>
+<b class="nc">&nbsp;        data.addChartDataSet(dataSet);</b>
+<b class="nc">&nbsp;        ArrayList&lt;String&gt; labels = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Map.Entry&lt;String, Integer&gt; processValueEntry : processValues.entrySet()) {</b>
+<b class="nc">&nbsp;            labels.add(processValueEntry.getKey().concat(&quot; &quot;).concat(processValueEntry.getValue().toString()));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        data.setLabels(labels);</b>
+&nbsp;
+<b class="nc">&nbsp;        PieChartModel pieModel = new PieChartModel();</b>
+<b class="nc">&nbsp;        pieModel.setData(data);</b>
+<b class="nc">&nbsp;        return pieModel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return HorizontalBarChartModel for given processes.
+&nbsp;     *
+&nbsp;     * @param processes List of processes
+&nbsp;     * @return HorizontalBarChartModel
+&nbsp;     */
+&nbsp;    public HorizontalBarChartModel getBarChartModel(List&lt;Process&gt; processes) {
+<b class="nc">&nbsp;        LinkedHashMap&lt;String, LinkedHashMap&lt;String,Integer&gt;&gt; durationOfTasks = new LinkedHashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Process selectedProcess : processes) {</b>
+<b class="nc">&nbsp;            LinkedHashMap&lt;String,Integer&gt; taskValues = new LinkedHashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (Task task  : selectedProcess.getTasks()) {</b>
+<b class="nc">&nbsp;                long durationInDays = ServiceManager.getTaskService().getDurationInDays(task);</b>
+<b class="nc">&nbsp;                taskValues.put(task.getTitle(), Math.toIntExact(durationInDays));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            durationOfTasks.put(selectedProcess.getTitle(), taskValues);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        ChartData data = new ChartData();</b>
+&nbsp;        boolean isTask;
+<b class="nc">&nbsp;        int i = 0;</b>
+&nbsp;        while (true) {
+<b class="nc">&nbsp;            isTask = false;</b>
+<b class="nc">&nbsp;            HorizontalBarChartDataSet barDataSet = new HorizontalBarChartDataSet();</b>
+<b class="nc">&nbsp;            List&lt;Number&gt; taskDurations = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (String processTitle : durationOfTasks.keySet()) {</b>
+<b class="nc">&nbsp;                LinkedHashMap&lt;String, Integer&gt; tasksForProcess = durationOfTasks.get(processTitle);</b>
+<b class="nc">&nbsp;                ArrayList&lt;Integer&gt; durations = new ArrayList&lt;&gt;(tasksForProcess.values());</b>
+<b class="nc">&nbsp;                Integer taskDuration = 0;</b>
+<b class="nc">&nbsp;                if (durations.size() &gt; i) {</b>
+<b class="nc">&nbsp;                    barDataSet.setLabel(new ArrayList&lt;&gt;(tasksForProcess.keySet()).get(i));</b>
+<b class="nc">&nbsp;                    taskDuration = durations.get(i);</b>
+<b class="nc">&nbsp;                    isTask = true;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                taskDurations.add(taskDuration);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            if (isTask) {</b>
+<b class="nc">&nbsp;                barDataSet.setStack(&quot;Stack 0&quot;);</b>
+<b class="nc">&nbsp;                barDataSet.setBackgroundColor(BG_COLORS.get(i % BG_COLORS.size()));</b>
+<b class="nc">&nbsp;                barDataSet.setData(taskDurations);</b>
+<b class="nc">&nbsp;                data.addChartDataSet(barDataSet);</b>
+<b class="nc">&nbsp;                i++;</b>
+&nbsp;            } else {
+&nbsp;                break;
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        List&lt;String&gt; labels = new ArrayList&lt;&gt;(durationOfTasks.keySet());</b>
+<b class="nc">&nbsp;        data.setLabels(labels);</b>
+&nbsp;
+<b class="nc">&nbsp;        HorizontalBarChartModel horizontalBarChartModel = new HorizontalBarChartModel();</b>
+<b class="nc">&nbsp;        horizontalBarChartModel.setData(data);</b>
+<b class="nc">&nbsp;        horizontalBarChartModel.setOptions(getBarChartOptions());</b>
+<b class="nc">&nbsp;        return horizontalBarChartModel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private BarChartOptions getBarChartOptions() {
+<b class="nc">&nbsp;        CartesianLinearAxes linearAxes = new CartesianLinearAxes();</b>
+<b class="nc">&nbsp;        linearAxes.setStacked(true);</b>
+<b class="nc">&nbsp;        BarChartOptions options = new BarChartOptions();</b>
+&nbsp;
+<b class="nc">&nbsp;        Tooltip tooltip = new Tooltip();</b>
+<b class="nc">&nbsp;        tooltip.setMode(&quot;index&quot;);</b>
+<b class="nc">&nbsp;        tooltip.setIntersect(false);</b>
+<b class="nc">&nbsp;        options.setTooltip(tooltip);</b>
+<b class="nc">&nbsp;        return options;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Aggregate and return statistical data about task status of given processes.
+&nbsp;     *
+&nbsp;     * @param processes List of processes for which statistical data is aggregated.
+&nbsp;     * @return statistical data about tasks status of given processes
+&nbsp;     */
+&nbsp;    public Map&lt;String, Integer&gt; getProcessTaskStates(List&lt;Process&gt; processes) {
+<b class="nc">&nbsp;        Map&lt;String, Integer&gt; processTaskStates = new LinkedHashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Process process : processes) {</b>
+<b class="nc">&nbsp;            Task currentTask = ServiceManager.getProcessService().getCurrentTask(process);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(currentTask)) {</b>
+<b class="nc">&nbsp;                String currentTaskTitle = currentTask.getTitle();</b>
+<b class="nc">&nbsp;                if (processTaskStates.containsKey(currentTaskTitle)) {</b>
+<b class="nc">&nbsp;                    processTaskStates.put(currentTaskTitle, Math.addExact(processTaskStates.get(currentTaskTitle), 1));</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    processTaskStates.put(currentTaskTitle, 1);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return processTaskStates;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all tasks of given process which should be visible to the user.
+&nbsp;     * @param processDTO process as DTO object
+&nbsp;     * @param user user to filter the tasks for
+&nbsp;     * @return List of filtered tasks as DTO objects
+&nbsp;     */
+&nbsp;    public List&lt;TaskDTO&gt; getCurrentTasksForUser(ProcessDTO processDTO, User user) {
+<b class="nc">&nbsp;        Set&lt;Integer&gt; userRoles = user.getRoles().stream()</b>
+<b class="nc">&nbsp;                .map(Role::getId)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toSet());</b>
+<b class="nc">&nbsp;        return processDTO.getTasks().stream()</b>
+<b class="nc">&nbsp;                .filter(task -&gt; TaskStatus.OPEN.equals(task.getProcessingStatus()) || TaskStatus.INWORK.equals(task.getProcessingStatus()))</b>
+<b class="nc">&nbsp;                .filter(task -&gt; !task.getRoleIds().stream()</b>
+<b class="nc">&nbsp;                        .filter(userRoles::contains)</b>
+<b class="nc">&nbsp;                        .collect(Collectors.toSet()).isEmpty())</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks and returns whether the process with the given ID &#39;processId&#39; can be exported or not.
+&nbsp;     * @param processId process ID
+&nbsp;     * @return whether process can be exported or not
+&nbsp;     */
+&nbsp;    public static boolean canBeExported(int processId) throws IOException, DAOException {
+<b class="nc">&nbsp;        Process process = ServiceManager.getProcessService().getById(processId);</b>
+&nbsp;        // superordinate processes normally do not contain images but should always be exportable
+<b class="nc">&nbsp;        if (!process.getChildren().isEmpty()) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Folder generatorSource = process.getProject().getGeneratorSource();</b>
+&nbsp;        // processes without a generator source should be exportable because they may contain multimedia files
+&nbsp;        // that are not used as generator sources
+<b class="nc">&nbsp;        if (Objects.isNull(generatorSource)) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return FileService.hasImages(process, generatorSource);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get template processes sorted by title.
+&nbsp;     * @return template processes sorted by title
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; getTemplateProcesses() throws DataException, DAOException {
+<b class="fc">&nbsp;        List&lt;Process&gt; templateProcesses = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        BoolQueryBuilder inChoiceListShownQuery = new BoolQueryBuilder();</b>
+<b class="fc">&nbsp;        MatchQueryBuilder matchQuery = matchQuery(ProcessTypeField.IN_CHOICE_LIST_SHOWN.getKey(), true);</b>
+<b class="fc">&nbsp;        inChoiceListShownQuery.must(matchQuery);</b>
+<b class="fc">&nbsp;        for (ProcessDTO processDTO : ServiceManager.getProcessService().findByQuery(matchQuery, true)) {</b>
+<b class="fc">&nbsp;            templateProcesses.add(getById(processDTO.getId()));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        templateProcesses.sort(Comparator.comparing(Process::getTitle));</b>
+<b class="fc">&nbsp;        return templateProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sort results by id.
+&nbsp;     *
+&nbsp;     * @param order
+&nbsp;     *            ASC or DESC as SortOrder
+&nbsp;     * @return sort as String
+&nbsp;     */
+&nbsp;    public SortBuilder sortById(SortOrder order) {
+<b class="nc">&nbsp;        return SortBuilders.fieldSort(ProcessTypeField.ID.getKey()).order(order);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,254 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LegalTexts</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: LegalTexts (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LegalTexts</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.annotation.PostConstruct;
+&nbsp;import javax.enterprise.context.ApplicationScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.omnifaces.cdi.Eager;
+&nbsp;import org.omnifaces.util.Ajax;
+&nbsp;import org.omnifaces.util.Faces;
+&nbsp;
+&nbsp;@Named(&quot;LegalTexts&quot;)
+&nbsp;@ApplicationScoped
+&nbsp;@Eager
+<b class="nc">&nbsp;public class LegalTexts implements Serializable {</b>
+&nbsp;
+&nbsp;    public static final String TERMS_OF_USE = &quot;termsOfUse&quot;;
+&nbsp;    public static final String DATA_PRIVACY = &quot;dataPrivacy&quot;;
+&nbsp;    public static final String IMPRINT = &quot;imprint&quot;;
+&nbsp;
+<b class="nc">&nbsp;    private static String termsOfUseText = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private static String dataPrivacyText = &quot;&quot;;</b>
+<b class="nc">&nbsp;    private static String imprintText = &quot;&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;    private static final String DEFAULT_LANGUAGE = Locale.GERMAN.getLanguage();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get terms of use text.
+&nbsp;     *
+&nbsp;     * @return terms of use text
+&nbsp;     */
+&nbsp;    public String getTermsOfUseText() {
+<b class="nc">&nbsp;        return termsOfUseText;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set terms of use texts.
+&nbsp;     *
+&nbsp;     * @param newText
+&nbsp;     *            new terms of use text
+&nbsp;     */
+&nbsp;    public void setTermsOfUseText(String newText) {
+<b class="nc">&nbsp;        termsOfUseText = newText;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get data privacy text.
+&nbsp;     *
+&nbsp;     * @return data privacy text
+&nbsp;     */
+&nbsp;    public String getDataPrivacyText() {
+<b class="nc">&nbsp;        return dataPrivacyText;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set data privacy text.
+&nbsp;     *
+&nbsp;     * @param newText
+&nbsp;     *            new data privacy text
+&nbsp;     */
+&nbsp;    public void setDataPrivacyText(String newText) {
+<b class="nc">&nbsp;        dataPrivacyText = newText;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get imprint text.
+&nbsp;     *
+&nbsp;     * @return imprint text
+&nbsp;     */
+&nbsp;    public String getImprintText() {
+<b class="nc">&nbsp;        return imprintText;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set imprint text.
+&nbsp;     *
+&nbsp;     * @param newText
+&nbsp;     *            new imprint text
+&nbsp;     */
+&nbsp;    public void setImprintText(String newText) {
+<b class="nc">&nbsp;        imprintText = newText;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize legal texts.
+&nbsp;     */
+&nbsp;    @PostConstruct
+&nbsp;    public static void initializeTexts() {
+<b class="nc">&nbsp;        updateTexts(DEFAULT_LANGUAGE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reload all legal texts in the given language.
+&nbsp;     *
+&nbsp;     * @param language
+&nbsp;     *            language in which legal texts are loaded
+&nbsp;     */
+&nbsp;    public static void updateTexts(String language) {
+<b class="nc">&nbsp;        termsOfUseText = loadText(TERMS_OF_USE, language);</b>
+<b class="nc">&nbsp;        dataPrivacyText = loadText(DATA_PRIVACY, language);</b>
+<b class="nc">&nbsp;        imprintText = loadText(IMPRINT, language);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(Faces.getContext())) {</b>
+<b class="nc">&nbsp;            Ajax.update(&quot;imprintDialog&quot;, &quot;dataPrivacyDialog&quot;, &quot;termsOfUseDialog&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load legal text file identified by given String &#39;legalTextName&#39; and in the
+&nbsp;     * given language and return its text content. If no file for the given
+&nbsp;     * parameters can be found, a corresponding default text from the message
+&nbsp;     * properties files will be used.
+&nbsp;     *
+&nbsp;     * @param legalTextName
+&nbsp;     *            String identifying the legal text file to load
+&nbsp;     * @param language
+&nbsp;     *            String specifying in which language the legal text is to be loaded
+&nbsp;     * @return the text content of the legal text
+&nbsp;     */
+&nbsp;    public static String loadText(String legalTextName, String language) {
+<b class="nc">&nbsp;        String filePath = ConfigCore.getKitodoConfigDirectory() + &quot;legal_&quot; + legalTextName + &quot;_&quot; + language + &quot;.html&quot;;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            return new String(Files.readAllBytes(Paths.get(filePath)));</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            return getDefaultText(legalTextName, language);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getDefaultText(String legalText, String language) {
+<b class="nc">&nbsp;        return &quot;&lt;p&gt;&quot; + Helper.getString(Locale.forLanguageTag(language), legalText + &quot;DefaultText&quot;) + &quot;&lt;/p&gt;&lt;br/&gt;&quot;</b>
+<b class="nc">&nbsp;                + &quot;&lt;p&gt;&quot; + Helper.getString(Locale.forLanguageTag(language), &quot;adjustSettingText&quot;) + &quot;&lt;/p&gt;&quot;;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

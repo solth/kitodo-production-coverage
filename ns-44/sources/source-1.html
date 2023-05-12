@@ -1,0 +1,196 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > BatchHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.batch</a>
+</div>
+
+<h1>Coverage Summary for Class: BatchHelper (org.kitodo.production.helper.batch)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BatchHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.batch;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;
+<b class="nc">&nbsp;public class BatchHelper {</b>
+&nbsp;
+&nbsp;    protected List&lt;Property&gt; properties;
+&nbsp;    protected Property property;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get property for process.
+&nbsp;     *
+&nbsp;     * @return property for process
+&nbsp;     */
+&nbsp;    public Property getProperty() {
+<b class="nc">&nbsp;        return this.property;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set property for process.
+&nbsp;     *
+&nbsp;     * @param property
+&nbsp;     *            for process as Property object
+&nbsp;     */
+&nbsp;    public void setProperty(Property property) {
+<b class="nc">&nbsp;        this.property = property;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of process properties.
+&nbsp;     *
+&nbsp;     * @return list of process properties
+&nbsp;     */
+&nbsp;    public List&lt;Property&gt; getProperties() {
+<b class="nc">&nbsp;        return this.properties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of process properties.
+&nbsp;     *
+&nbsp;     * @param properties
+&nbsp;     *            for process as Property objects
+&nbsp;     */
+&nbsp;    public void setProperties(List&lt;Property&gt; properties) {
+<b class="nc">&nbsp;        this.properties = properties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    Process prepareProcessWithProperty(Process process, Property processProperty) {
+<b class="nc">&nbsp;        if (Objects.nonNull(processProperty.getTitle())) {</b>
+<b class="nc">&nbsp;            boolean match = false;</b>
+<b class="nc">&nbsp;            for (Property processPe : process.getProperties()) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(processPe.getTitle()) &amp;&amp; processProperty.getTitle().equals(processPe.getTitle())) {</b>
+<b class="nc">&nbsp;                    processPe.setValue(processProperty.getValue());</b>
+<b class="nc">&nbsp;                    match = true;</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            if (!match) {</b>
+<b class="nc">&nbsp;                Property newProperty = new Property();</b>
+<b class="nc">&nbsp;                newProperty.setTitle(processProperty.getTitle());</b>
+<b class="nc">&nbsp;                newProperty.setValue(processProperty.getValue());</b>
+<b class="nc">&nbsp;                newProperty.setDataType(processProperty.getDataType());</b>
+<b class="nc">&nbsp;                newProperty.getProcesses().add(process);</b>
+<b class="nc">&nbsp;                process.getProperties().add(newProperty);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void validateProperties(Process process) {
+<b class="nc">&nbsp;        List&lt;Property&gt; propertyList = process.getProperties();</b>
+<b class="nc">&nbsp;        for (Property nextProcessProperty : propertyList) {</b>
+<b class="nc">&nbsp;            if (Objects.isNull(nextProcessProperty.getTitle())) {</b>
+<b class="nc">&nbsp;                process.getProperties().remove(nextProcessProperty);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

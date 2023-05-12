@@ -1,0 +1,175 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > InputType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataeditor.rulesetmanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: InputType (org.kitodo.api.dataeditor.rulesetmanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">InputType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataeditor.rulesetmanagement;
+&nbsp;
+&nbsp;/**
+&nbsp; * Enumerates the possible instructions for displaying the input field.
+&nbsp; */
+<b class="fc">&nbsp;public enum InputType {</b>
+&nbsp;    /**
+&nbsp;     * Instruction to represent the element as a boolean selection. The design,
+&nbsp;     * such as a checkbox, two radio buttons, or drop-down with two values, is
+&nbsp;     * left to the application.
+&nbsp;     */
+<b class="fc">&nbsp;    BOOLEAN,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Instruction to represent the element as a date input. The design is left
+&nbsp;     * to the application. In the simplest case, a single-line text field is
+&nbsp;     * sufficient here, but a comfortable date selection can also be realized.
+&nbsp;     * Importantly, the date entry must support dates prior to 1970.
+&nbsp;     */
+<b class="fc">&nbsp;    DATE,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Instruction to represent the element as integer input. The design is left
+&nbsp;     * to the application. In the simplest case, a single-line text field is
+&nbsp;     * sufficient here, but rotary or slider controls can also be implemented.
+&nbsp;     * It is important that you can always enter an exact number.
+&nbsp;     */
+<b class="fc">&nbsp;    INTEGER,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Instruction to represent the element as a single-selection list. The
+&nbsp;     * design, for example as a list box or as a sequence of radio buttons, is
+&nbsp;     * left to the application.
+&nbsp;     */
+<b class="fc">&nbsp;    MULTI_LINE_SINGLE_SELECTION,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Instruction to represent the element as a larger text input field for
+&nbsp;     * multi-line texts.
+&nbsp;     */
+<b class="fc">&nbsp;    MULTI_LINE_TEXT,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Instruction to represent the element as a list with multiple selections.
+&nbsp;     * The design is left to the application. However, it is important to make
+&nbsp;     * it obvious to the user that he has an easy way to select more than one
+&nbsp;     * value here.
+&nbsp;     */
+<b class="fc">&nbsp;    MULTIPLE_SELECTION,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Instruction to present the element as a one-line selection option. The
+&nbsp;     * design, for example, as a drop-down list, is left to the application.
+&nbsp;     */
+<b class="fc">&nbsp;    ONE_LINE_SINGLE_SELECTION,</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Instruction to represent the element as a small, one-line text field.
+&nbsp;     */
+<b class="fc">&nbsp;    ONE_LINE_TEXT</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

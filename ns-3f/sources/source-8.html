@@ -1,0 +1,1082 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > GalleryPanel</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: GalleryPanel (org.kitodo.production.forms.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GalleryPanel</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4,3%
+  </span>
+  <span class="absValue">
+    (2/47)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4,3%
+  </span>
+  <span class="absValue">
+    (19/440)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.dataeditor;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.UUID;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.lang3.tuple.ImmutablePair;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.MediaVariant;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.data.database.beans.Folder;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.production.enums.MediaContentType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.model.Subfolder;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;
+&nbsp;/**
+&nbsp; * Backing bean for the gallery panel of the metadata editor.
+&nbsp; */
+&nbsp;public class GalleryPanel {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(GalleryPanel.class);</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final FileService fileService = ServiceManager.getFileService();</b>
+&nbsp;
+&nbsp;    // Structured media
+<b class="fc">&nbsp;    private static final Pattern DRAG_STRIPE_IMAGE = Pattern.compile(</b>
+&nbsp;            &quot;imagePreviewForm:structuredPages:(\\d+):structureElementDataList:(\\d+):structuredPagePanel&quot;);
+&nbsp;
+<b class="fc">&nbsp;    private static final Pattern DROP_STRIPE = Pattern.compile(</b>
+&nbsp;            &quot;imagePreviewForm:structuredPages:(\\d+):structureElementDataList&quot;);
+&nbsp;
+<b class="fc">&nbsp;    private static final Pattern DROP_MEDIA_AREA = Pattern.compile(</b>
+&nbsp;            &quot;imagePreviewForm:structuredPages:(\\d+):structureElementDataList:(\\d+):structuredPageDropArea&quot;);
+&nbsp;
+<b class="fc">&nbsp;    private static final Pattern DROP_MEDIA_LAST_AREA = Pattern.compile(</b>
+&nbsp;            &quot;imagePreviewForm:structuredPages:(\\d+):structureElementDataList:(\\d+):structuredPageLastDropArea&quot;);
+&nbsp;
+&nbsp;    // Unstructured media
+<b class="fc">&nbsp;    private static final Pattern DRAG_UNSTRUCTURED_MEDIA = Pattern.compile(</b>
+&nbsp;            &quot;imagePreviewForm:unstructuredMediaList:(\\d+):unstructuredMediaPanel&quot;);
+&nbsp;
+<b class="fc">&nbsp;    private static final Pattern DROP_UNSTRUCTURED_STRIPE = Pattern.compile(&quot;imagePreviewForm:unstructuredMediaList&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Pattern DROP_UNSTRUCTURED_MEDIA_AREA = Pattern.compile(</b>
+&nbsp;            &quot;imagePreviewForm:unstructuredMediaList:(\\d+):unstructuredPageDropArea&quot;);
+&nbsp;
+<b class="fc">&nbsp;    private static final Pattern DROP_UNSTRUCTURED_MEDIA_LAST_AREA = Pattern.compile(</b>
+&nbsp;            &quot;imagePreviewForm:unstructuredMediaList:(\\d+):unstructuredPageLastDropArea&quot;);
+&nbsp;
+&nbsp;    private final DataEditorForm dataEditor;
+<b class="fc">&nbsp;    private GalleryViewMode galleryViewMode = GalleryViewMode.LIST;</b>
+<b class="fc">&nbsp;    private List&lt;GalleryMediaContent&gt; medias = Collections.emptyList();</b>
+&nbsp;
+<b class="fc">&nbsp;    private Map&lt;String, GalleryMediaContent&gt; previewImageResolver = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    private Map&lt;MediaContentType, Map&lt;GalleryViewMode, MediaVariant&gt;&gt; mediaContentTypeVariants = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    private Map&lt;MediaContentType, Subfolder&gt; mediaContentTypePreviewFolder = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    private List&lt;GalleryStripe&gt; stripes;
+&nbsp;
+<b class="fc">&nbsp;    private String cachingUUID = &quot;&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Comparator&lt;Pair&lt;View, LogicalDivision&gt;&gt; IMAGE_ORDER_COMPARATOR = Comparator.comparing(</b>
+<b class="nc">&nbsp;            pair -&gt; pair.getLeft().getPhysicalDivision().getOrder());</b>
+&nbsp;
+<b class="fc">&nbsp;    GalleryPanel(DataEditorForm dataEditor) {</b>
+<b class="fc">&nbsp;        this.dataEditor = dataEditor;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    String getAcquisitionStage() {
+<b class="nc">&nbsp;        return dataEditor.getAcquisitionStage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get galleryViewMode.
+&nbsp;     *
+&nbsp;     * @return value of galleryViewMode
+&nbsp;     */
+&nbsp;    public String getGalleryViewMode() {
+<b class="nc">&nbsp;        return galleryViewMode.toString().toLowerCase();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get lastSelection.
+&nbsp;     *
+&nbsp;     * @return value of lastSelection
+&nbsp;     */
+&nbsp;    public Pair&lt;PhysicalDivision, LogicalDivision&gt; getLastSelection() {
+<b class="nc">&nbsp;        if (dataEditor.getSelectedMedia().size() &gt; 0) {</b>
+<b class="nc">&nbsp;            return dataEditor.getSelectedMedia().get(dataEditor.getSelectedMedia().size() - 1);</b>
+<b class="nc">&nbsp;        } else if (dataEditor.getSelectedStructure().isPresent()</b>
+<b class="nc">&nbsp;                &amp;&amp; !dataEditor.getSelectedStructure().get().getViews().isEmpty()) {</b>
+<b class="nc">&nbsp;            return new ImmutablePair&lt;&gt;(</b>
+<b class="nc">&nbsp;                    dataEditor.getSelectedStructure().get().getViews().getFirst().getPhysicalDivision(),</b>
+<b class="nc">&nbsp;                    dataEditor.getSelectedStructure().get());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if passed galleryMediaContent is the last selection.
+&nbsp;     * @param galleryMediaContent GalleryMediaContent to be checked
+&nbsp;     * @return boolean
+&nbsp;     */
+&nbsp;    public boolean isLastSelection(GalleryMediaContent galleryMediaContent, GalleryStripe galleryStripe) {
+<b class="nc">&nbsp;        if (isSelected(galleryMediaContent, galleryStripe) &amp;&amp; dataEditor.getSelectedMedia().size() &gt; 0</b>
+<b class="nc">&nbsp;                &amp;&amp; Objects.nonNull(galleryMediaContent)) {</b>
+<b class="nc">&nbsp;            return Objects.equals(galleryMediaContent.getView().getPhysicalDivision(),</b>
+<b class="nc">&nbsp;                    dataEditor.getSelectedMedia().get(dataEditor.getSelectedMedia().size() - 1).getKey());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the list of image file paths for the current process.
+&nbsp;     *
+&nbsp;     * @return List of fullsize PNG images
+&nbsp;     */
+&nbsp;    public List&lt;GalleryMediaContent&gt; getMedias() {
+<b class="nc">&nbsp;        return medias;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    List&lt;LanguageRange&gt; getPriorityList() {
+<b class="nc">&nbsp;        return dataEditor.getPriorityList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    RulesetManagementInterface getRuleset() {
+<b class="nc">&nbsp;        return dataEditor.getRulesetManagement();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of all logical structure elements for this process.
+&nbsp;     *
+&nbsp;     * @return List of logical elements
+&nbsp;     */
+&nbsp;    public List&lt;GalleryStripe&gt; getStripes() {
+<b class="nc">&nbsp;        return stripes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Handle event of page being dragged and dropped in gallery. Parameters are provided by
+&nbsp;     * remoteCommand &quot;triggerOnPageDrop&quot;, see gallery.xhtml.
+&nbsp;     */
+&nbsp;    public void onPageDrop() {
+<b class="nc">&nbsp;        FacesContext context = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;        Map&lt;String,String&gt; params = context.getExternalContext().getRequestParameterMap();</b>
+<b class="nc">&nbsp;        String dragId = params.get(&quot;dragId&quot;);</b>
+<b class="nc">&nbsp;        String dropId = params.get(&quot;dropId&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        int toStripeIndex = getDropStripeIndex(dropId);</b>
+<b class="nc">&nbsp;        if (toStripeIndex == -1 || !dragStripeIndexMatches(dragId)) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Unsupported drag&#39;n&#39;drop event from {} to {}&quot;, dragId, dropId);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        GalleryStripe toStripe = stripes.get(toStripeIndex);</b>
+&nbsp;
+&nbsp;        // move views
+<b class="nc">&nbsp;        List&lt;Pair&lt;View, LogicalDivision&gt;&gt; viewsToBeMoved = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Pair&lt;PhysicalDivision, LogicalDivision&gt; selectedElement : dataEditor.getSelectedMedia()) {</b>
+<b class="nc">&nbsp;            for (View view : selectedElement.getValue().getViews()) {</b>
+<b class="nc">&nbsp;                if (Objects.equals(view.getPhysicalDivision(), selectedElement.getKey())) {</b>
+<b class="nc">&nbsp;                    viewsToBeMoved.add(new ImmutablePair&lt;&gt;(view, selectedElement.getValue()));</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        viewsToBeMoved.sort(IMAGE_ORDER_COMPARATOR);</b>
+&nbsp;
+<b class="nc">&nbsp;        int toMediaIndex = getMediaIndex(dropId);</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            updateData(toStripe, viewsToBeMoved, toMediaIndex);</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;$(&#39;#loadingScreen&#39;).hide();&quot;);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;corruptDataWarning&#39;).show();&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        dataEditor.getStructurePanel().show();</b>
+<b class="nc">&nbsp;        dataEditor.getPaginationPanel().show();</b>
+<b class="nc">&nbsp;        this.updateStripes();</b>
+<b class="nc">&nbsp;        dataEditor.getSelectedMedia().clear();</b>
+&nbsp;
+&nbsp;        // mark previously selected thumbnail in new stripe as selected
+<b class="nc">&nbsp;        List&lt;View&gt; movedViews = viewsToBeMoved.stream().map(Pair::getKey).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        for (GalleryMediaContent toStripeMedia : toStripe.getMedias()) {</b>
+<b class="nc">&nbsp;            if (movedViews.contains(toStripeMedia.getView())) {</b>
+<b class="nc">&nbsp;                select(toStripeMedia, toStripe, &quot;multi&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean dragStripeIndexMatches(String dragId) {
+<b class="nc">&nbsp;        Matcher dragStripeImageMatcher = DRAG_STRIPE_IMAGE.matcher(dragId);</b>
+<b class="nc">&nbsp;        Matcher dragUnstructuredMediaMatcher = DRAG_UNSTRUCTURED_MEDIA.matcher(dragId);</b>
+<b class="nc">&nbsp;        return dragUnstructuredMediaMatcher.matches() || dragStripeImageMatcher.matches();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private int getDropStripeIndex(String dropId) {
+&nbsp;        // empty stripe of structure element
+<b class="nc">&nbsp;        Matcher dropStripeMatcher = DROP_STRIPE.matcher(dropId);</b>
+&nbsp;        // between two pages of structure element
+<b class="nc">&nbsp;        Matcher dropMediaAreaMatcher = DROP_MEDIA_AREA.matcher(dropId);</b>
+&nbsp;        // after last page of structure element
+<b class="nc">&nbsp;        Matcher dropMediaLastAreaMatcher = DROP_MEDIA_LAST_AREA.matcher(dropId);</b>
+&nbsp;        // empty unstructured media stripe
+<b class="nc">&nbsp;        Matcher dropUnstructuredMediaStripeMatcher = DROP_UNSTRUCTURED_STRIPE.matcher(dropId);</b>
+&nbsp;        // between two pages of unstructured media stripe
+<b class="nc">&nbsp;        Matcher dropUnstructuredMediaAreaMatcher = DROP_UNSTRUCTURED_MEDIA_AREA.matcher(dropId);</b>
+&nbsp;        // after last page of unstructured media stripe
+<b class="nc">&nbsp;        Matcher dropUnstructuredMediaLastAreaMatcher = DROP_UNSTRUCTURED_MEDIA_LAST_AREA.matcher(dropId);</b>
+<b class="nc">&nbsp;        if (dropStripeMatcher.matches()) {</b>
+<b class="nc">&nbsp;            return Integer.parseInt(dropStripeMatcher.group(1));</b>
+<b class="nc">&nbsp;        } else if (dropMediaAreaMatcher.matches()) {</b>
+<b class="nc">&nbsp;            return Integer.parseInt(dropMediaAreaMatcher.group(1));</b>
+<b class="nc">&nbsp;        } else if (dropMediaLastAreaMatcher.matches()) {</b>
+<b class="nc">&nbsp;            return Integer.parseInt(dropMediaLastAreaMatcher.group(1));</b>
+<b class="nc">&nbsp;        } else if (dropUnstructuredMediaStripeMatcher.matches()</b>
+<b class="nc">&nbsp;                || dropUnstructuredMediaLastAreaMatcher.matches()</b>
+<b class="nc">&nbsp;                || dropUnstructuredMediaAreaMatcher.matches()) {</b>
+&nbsp;            // First (0) stripe represents logical structure (unstructured media)
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return -1;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private int getMediaIndex(String dropId) {
+<b class="nc">&nbsp;        Matcher dropMediaAreaMatcher = DROP_MEDIA_AREA.matcher(dropId);</b>
+<b class="nc">&nbsp;        Matcher dropMediaLastAreaMatcher = DROP_MEDIA_LAST_AREA.matcher(dropId);</b>
+<b class="nc">&nbsp;        Matcher dropUnstructuredMediaAreaMatcher = DROP_UNSTRUCTURED_MEDIA_AREA.matcher(dropId);</b>
+<b class="nc">&nbsp;        Matcher dropUnstructuredMediaLastAreaMatcher = DROP_UNSTRUCTURED_MEDIA_LAST_AREA.matcher(dropId);</b>
+<b class="nc">&nbsp;        if (dropMediaAreaMatcher.matches()) {</b>
+<b class="nc">&nbsp;            return Integer.parseInt(dropMediaAreaMatcher.group(2));</b>
+<b class="nc">&nbsp;        } else if (dropMediaLastAreaMatcher.matches()) {</b>
+<b class="nc">&nbsp;            return Integer.parseInt(dropMediaLastAreaMatcher.group(2)) + 1;</b>
+<b class="nc">&nbsp;        } else if (dropUnstructuredMediaAreaMatcher.matches()) {</b>
+<b class="nc">&nbsp;            return Integer.parseInt(dropUnstructuredMediaAreaMatcher.group(1));</b>
+<b class="nc">&nbsp;        } else if (dropUnstructuredMediaLastAreaMatcher.matches()) {</b>
+<b class="nc">&nbsp;            return Integer.parseInt(dropUnstructuredMediaLastAreaMatcher.group(1)) + 1;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return -1;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updateData(GalleryStripe toStripe, List&lt;Pair&lt;View, LogicalDivision&gt;&gt; viewsToBeMoved, int toMediaIndex) {
+<b class="nc">&nbsp;        dataEditor.getStructurePanel().changeLogicalOrderFields(toStripe.getStructure(), viewsToBeMoved, toMediaIndex);</b>
+<b class="nc">&nbsp;        dataEditor.getStructurePanel().reorderPhysicalDivisions(toStripe.getStructure(), viewsToBeMoved, toMediaIndex);</b>
+<b class="nc">&nbsp;        dataEditor.getStructurePanel().moveViews(toStripe.getStructure(), viewsToBeMoved, toMediaIndex);</b>
+<b class="nc">&nbsp;        dataEditor.getStructurePanel().changePhysicalOrderFields();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set galleryViewMode.
+&nbsp;     *
+&nbsp;     * @param galleryViewMode
+&nbsp;     *            as java.lang.String
+&nbsp;     */
+&nbsp;    public void setGalleryViewMode(String galleryViewMode) {
+<b class="nc">&nbsp;        this.galleryViewMode = GalleryViewMode.valueOf(galleryViewMode.toUpperCase());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set galleryViewMode.
+&nbsp;     * The new value can be passed from a {@code &lt;p:remoteCommand/&gt;} as request parameter.
+&nbsp;     */
+&nbsp;    public void setGalleryViewMode() {
+<b class="nc">&nbsp;        Map&lt;String, String&gt; params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();</b>
+<b class="nc">&nbsp;        this.galleryViewMode = GalleryViewMode.valueOf(params.get(&quot;galleryViewMode&quot;).toUpperCase());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update the selected TreeNode in the physical structure tree.
+&nbsp;     */
+&nbsp;    private void updateStructure(GalleryMediaContent galleryMediaContent, LogicalDivision structure) {
+<b class="nc">&nbsp;        dataEditor.getStructurePanel().updateNodeSelection(galleryMediaContent, structure);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void updateSelection(PhysicalDivision physicalDivision, LogicalDivision structuralElement) {
+<b class="nc">&nbsp;        if (physicalDivision.getMediaFiles().size() &gt; 0) {</b>
+&nbsp;
+&nbsp;            // Update structured view
+<b class="nc">&nbsp;            if (this.galleryViewMode.equals(GalleryViewMode.LIST)) {</b>
+<b class="nc">&nbsp;                for (GalleryStripe galleryStripe : getStripes()) {</b>
+<b class="nc">&nbsp;                    if (Objects.isNull(structuralElement) || Objects.equals(structuralElement, galleryStripe.getStructure())) {</b>
+<b class="nc">&nbsp;                        for (GalleryMediaContent galleryMediaContent : galleryStripe.getMedias()) {</b>
+<b class="nc">&nbsp;                            if (Objects.equals(physicalDivision, galleryMediaContent.getView().getPhysicalDivision())) {</b>
+<b class="nc">&nbsp;                                dataEditor.getSelectedMedia().clear();</b>
+<b class="nc">&nbsp;                                dataEditor.getSelectedMedia().add(new ImmutablePair&lt;&gt;(physicalDivision, galleryStripe.getStructure()));</b>
+<b class="nc">&nbsp;                                break;</b>
+&nbsp;                            }
+<b class="nc">&nbsp;                        }</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;            // Update unstructured view
+&nbsp;            else {
+<b class="nc">&nbsp;                for (GalleryMediaContent galleryMediaContent : getMedias()) {</b>
+<b class="nc">&nbsp;                    if (Objects.equals(physicalDivision, galleryMediaContent.getView().getPhysicalDivision())) {</b>
+<b class="nc">&nbsp;                        dataEditor.getSelectedMedia().clear();</b>
+<b class="nc">&nbsp;                        dataEditor.getSelectedMedia().add(new ImmutablePair&lt;&gt;(</b>
+<b class="nc">&nbsp;                                physicalDivision, getLogicalStructureOfMedia(galleryMediaContent).getStructure()));</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    void show() {
+<b class="nc">&nbsp;        Process process = dataEditor.getProcess();</b>
+<b class="nc">&nbsp;        Project project = process.getProject();</b>
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; physicalDivisions = dataEditor.getWorkpiece()</b>
+<b class="nc">&nbsp;                .getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted();</b>
+&nbsp;
+<b class="nc">&nbsp;        mediaContentTypeVariants.clear();</b>
+<b class="nc">&nbsp;        mediaContentTypePreviewFolder.clear();</b>
+&nbsp;
+<b class="nc">&nbsp;        initMediaContentType(physicalDivisions, project.getPreview(), project.getMediaView(), MediaContentType.IMAGE);</b>
+<b class="nc">&nbsp;        initMediaContentType(physicalDivisions, project.getAudioPreview(), project.getAudioMediaView(),</b>
+&nbsp;                MediaContentType.AUDIO);
+<b class="nc">&nbsp;        initMediaContentType(physicalDivisions, project.getVideoPreview(), project.getVideoMediaView(),</b>
+&nbsp;                MediaContentType.VIDEO);
+&nbsp;
+<b class="nc">&nbsp;        medias = new ArrayList&lt;&gt;(physicalDivisions.size());</b>
+<b class="nc">&nbsp;        stripes = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        dataEditor.getMediaProvider().resetMediaResolverForProcess(process.getId());</b>
+<b class="nc">&nbsp;        cachingUUID = UUID.randomUUID().toString();</b>
+&nbsp;
+<b class="nc">&nbsp;        updateStripes();</b>
+&nbsp;
+<b class="nc">&nbsp;        int imagesInStructuredView = stripes.parallelStream().mapToInt(stripe -&gt; stripe.getMedias().size()).sum();</b>
+<b class="nc">&nbsp;        if (imagesInStructuredView &gt; 200) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Number of images in structured view: {}&quot;, imagesInStructuredView);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void initMediaContentType(List&lt;PhysicalDivision&gt; physicalDivisions, Folder previewSettings,
+&nbsp;            Folder mediaViewSettings, MediaContentType mediaContentType) {
+<b class="nc">&nbsp;        Map&lt;GalleryViewMode, MediaVariant&gt; galleryViewModeMediaVariant = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(previewSettings)) {</b>
+<b class="nc">&nbsp;            galleryViewModeMediaVariant.put(GalleryViewMode.LIST, getMediaVariant(previewSettings, physicalDivisions));</b>
+<b class="nc">&nbsp;            mediaContentTypePreviewFolder.put(mediaContentType,</b>
+<b class="nc">&nbsp;                    new Subfolder(dataEditor.getProcess(), previewSettings));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(mediaViewSettings)) {</b>
+<b class="nc">&nbsp;            galleryViewModeMediaVariant.put(GalleryViewMode.PREVIEW,</b>
+<b class="nc">&nbsp;                    getMediaVariant(mediaViewSettings, physicalDivisions));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        mediaContentTypeVariants.put(mediaContentType, galleryViewModeMediaVariant);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Recreate media list from workpiece, which provides medias in correct order after drag and drop.
+&nbsp;     */
+&nbsp;    private void updateMedia() {
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; physicalDivisions = dataEditor.getWorkpiece()</b>
+<b class="nc">&nbsp;                .getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted();</b>
+<b class="nc">&nbsp;        medias = new ArrayList&lt;&gt;(physicalDivisions.size());</b>
+<b class="nc">&nbsp;        dataEditor.getMediaProvider().resetMediaResolverForProcess(dataEditor.getProcess().getId());</b>
+<b class="nc">&nbsp;        for (PhysicalDivision physicalDivision : physicalDivisions) {</b>
+<b class="nc">&nbsp;            View wholeMediaUnitView = new View();</b>
+<b class="nc">&nbsp;            wholeMediaUnitView.setPhysicalDivision(physicalDivision);</b>
+<b class="nc">&nbsp;            GalleryMediaContent galleryMediaContent = createGalleryMediaContent(wholeMediaUnitView, null, null);</b>
+<b class="nc">&nbsp;            medias.add(galleryMediaContent);</b>
+<b class="nc">&nbsp;            dataEditor.getMediaProvider().addMediaContent(dataEditor.getProcess().getId(), galleryMediaContent);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Recreate gallery stripes, e.g., after drag and drop.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Always update media when recreating gallery stripes such that horizontal
+&nbsp;     * gallery stripes and vertical thumbnail list of detail view are in sync.&lt;/p&gt;
+&nbsp;     */
+&nbsp;    public void updateStripes() {
+<b class="nc">&nbsp;        updateMedia();</b>
+<b class="nc">&nbsp;        stripes = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        addStripesRecursive(dataEditor.getWorkpiece().getLogicalStructure());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static MediaVariant getMediaVariant(Folder folderSettings, List&lt;PhysicalDivision&gt; physicalDivisions) {
+<b class="nc">&nbsp;        String use = folderSettings.getFileGroup();</b>
+<b class="nc">&nbsp;        Optional&lt;MediaVariant&gt; optionalMediaVariant = physicalDivisions.parallelStream().map(PhysicalDivision::getMediaFiles)</b>
+<b class="nc">&nbsp;                .flatMap(mediaFiles -&gt; mediaFiles.entrySet().parallelStream()).map(Entry::getKey)</b>
+<b class="nc">&nbsp;                .filter(mediaVariant -&gt; use.equals(mediaVariant.getUse())).findAny();</b>
+<b class="nc">&nbsp;        if (optionalMediaVariant.isPresent()) {</b>
+<b class="nc">&nbsp;            return optionalMediaVariant.get();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            MediaVariant mediaVariant = new MediaVariant();</b>
+<b class="nc">&nbsp;            mediaVariant.setMimeType(folderSettings.getMimeType());</b>
+<b class="nc">&nbsp;            mediaVariant.setUse(use);</b>
+<b class="nc">&nbsp;            return mediaVariant;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addStripesRecursive(LogicalDivision structure) {
+<b class="nc">&nbsp;        List&lt;Integer&gt; treeNodeIdList = new ArrayList&lt;Integer&gt;();</b>
+<b class="nc">&nbsp;        Integer idx = 0;</b>
+<b class="nc">&nbsp;        Process process = dataEditor.getProcess();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(process) &amp;&amp; Objects.nonNull(process.getParent())) {</b>
+&nbsp;            // determine how many additional tree nodes are added for parent processes
+&nbsp;            // before the actual logical structure
+<b class="nc">&nbsp;            idx = dataEditor.getStructurePanel().getNumberOfParentLinkRootNodesAdded();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        treeNodeIdList.add(idx);</b>
+<b class="nc">&nbsp;        addStripesRecursive(structure, treeNodeIdList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addStripesRecursive(LogicalDivision structure, List&lt;Integer&gt; treeNodeIdList) {
+<b class="nc">&nbsp;        String stripeTreeNodeId = treeNodeIdList.stream().map(String::valueOf).collect(Collectors.joining(&quot;_&quot;));</b>
+<b class="nc">&nbsp;        GalleryStripe galleryStripe = new GalleryStripe(this, structure, stripeTreeNodeId);</b>
+<b class="nc">&nbsp;        stripes.add(galleryStripe);</b>
+&nbsp;
+<b class="nc">&nbsp;        int siblingWithViewsIdx = 0;</b>
+<b class="nc">&nbsp;        int siblingWithoutViewsIdx = 0;</b>
+<b class="nc">&nbsp;        for (Pair&lt;View, LogicalDivision&gt; pair : StructurePanel.mergeLogicalStructureViewsAndChildren(structure)) {</b>
+<b class="nc">&nbsp;            View view = pair.getLeft();</b>
+<b class="nc">&nbsp;            LogicalDivision child = pair.getRight();</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(child)) {</b>
+&nbsp;                // add child
+<b class="nc">&nbsp;                if (Objects.isNull(child.getLink())) {</b>
+<b class="nc">&nbsp;                    List&lt;Integer&gt; childTreeNodeIdList = new ArrayList&lt;&gt;(treeNodeIdList);</b>
+<b class="nc">&nbsp;                    if (!dataEditor.getStructurePanel().logicalStructureTreeContainsMedia()) {</b>
+<b class="nc">&nbsp;                        childTreeNodeIdList.add(siblingWithoutViewsIdx);</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        childTreeNodeIdList.add(siblingWithViewsIdx);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    addStripesRecursive(child, childTreeNodeIdList);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                siblingWithViewsIdx += 1;</b>
+<b class="nc">&nbsp;                siblingWithoutViewsIdx += 1;</b>
+&nbsp;            } else {
+&nbsp;                // add view
+<b class="nc">&nbsp;                for (GalleryMediaContent galleryMediaContent : medias) {</b>
+<b class="nc">&nbsp;                    if (Objects.equals(view.getPhysicalDivision(), galleryMediaContent.getView().getPhysicalDivision())) {</b>
+<b class="nc">&nbsp;                        galleryStripe.getMedias().add(galleryMediaContent);</b>
+<b class="nc">&nbsp;                        List&lt;Integer&gt; viewTreeNodeIdList = new ArrayList&lt;&gt;(treeNodeIdList);</b>
+<b class="nc">&nbsp;                        viewTreeNodeIdList.add(siblingWithViewsIdx);</b>
+<b class="nc">&nbsp;                        String viewTreeNodeId = viewTreeNodeIdList.stream().map(String::valueOf).collect(Collectors.joining(&quot;_&quot;));</b>
+<b class="nc">&nbsp;                        galleryMediaContent.setLogicalTreeNodeId(viewTreeNodeId);</b>
+<b class="nc">&nbsp;                        dataEditor.getMediaProvider().addMediaContent(dataEditor.getProcess().getId(), galleryMediaContent);</b>
+<b class="nc">&nbsp;                        siblingWithViewsIdx += 1;</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private GalleryMediaContent createGalleryMediaContent(View view, String stripeTreeNodeId, Integer index) {
+<b class="nc">&nbsp;        PhysicalDivision physicalDivision = view.getPhysicalDivision();</b>
+&nbsp;
+<b class="nc">&nbsp;        MediaContentType mediaContentType = MediaContentType.IMAGE;</b>
+<b class="nc">&nbsp;        if (physicalDivision.getMediaFiles().keySet().stream()</b>
+<b class="nc">&nbsp;                .anyMatch(mediaFile -&gt; mediaFile.getMimeType().startsWith(&quot;video&quot;))) {</b>
+<b class="nc">&nbsp;            mediaContentType = MediaContentType.VIDEO;</b>
+<b class="nc">&nbsp;        } else if (physicalDivision.getMediaFiles().keySet().stream()</b>
+<b class="nc">&nbsp;                .anyMatch(mediaFile -&gt; mediaFile.getMimeType().startsWith(&quot;audio&quot;))) {</b>
+<b class="nc">&nbsp;            mediaContentType = MediaContentType.AUDIO;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return buildGalleryMediaContent(view, stripeTreeNodeId, index, mediaContentType, physicalDivision);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private GalleryMediaContent buildGalleryMediaContent(View view, String stripeTreeNodeId, Integer index,
+&nbsp;            MediaContentType mediaContentType, PhysicalDivision physicalDivision) {
+&nbsp;
+<b class="nc">&nbsp;        MediaVariant previewMediaVariant = mediaContentTypeVariants.get(mediaContentType).get(GalleryViewMode.LIST);</b>
+<b class="nc">&nbsp;        URI previewUri = physicalDivision.getMediaFiles()</b>
+<b class="nc">&nbsp;                .get(previewMediaVariant);</b>
+&nbsp;
+<b class="nc">&nbsp;        URI resourceListUri = null;</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(previewUri)) {</b>
+<b class="nc">&nbsp;            resourceListUri = previewUri.isAbsolute()</b>
+<b class="nc">&nbsp;                    ? previewUri</b>
+<b class="nc">&nbsp;                    : fileService.getResourceUriForProcessRelativeUri(dataEditor.getProcess(), previewUri);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // prefer canonical of preview folder
+<b class="nc">&nbsp;        MediaVariant mediaViewMediaVariant = mediaContentTypeVariants.get(mediaContentType)</b>
+<b class="nc">&nbsp;                .get(GalleryViewMode.PREVIEW);</b>
+<b class="nc">&nbsp;        URI mediaViewUri = physicalDivision.getMediaFiles().get(mediaViewMediaVariant);</b>
+<b class="nc">&nbsp;        URI resourceMediaViewUri = null;</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(mediaViewUri)) {</b>
+<b class="nc">&nbsp;            resourceMediaViewUri = mediaViewUri.isAbsolute()</b>
+<b class="nc">&nbsp;                    ? mediaViewUri</b>
+<b class="nc">&nbsp;                    : fileService.getResourceUriForProcessRelativeUri(dataEditor.getProcess(), mediaViewUri);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // prefer canonical of preview folder
+<b class="nc">&nbsp;        String canonical = Objects.nonNull(resourceListUri) &amp;&amp; mediaContentTypePreviewFolder.containsKey(</b>
+<b class="nc">&nbsp;                mediaContentType) &amp;&amp; Objects.nonNull(mediaContentTypePreviewFolder.get(mediaContentType))</b>
+<b class="nc">&nbsp;                ? mediaContentTypePreviewFolder.get(mediaContentType).getCanonical(resourceListUri)</b>
+<b class="nc">&nbsp;                : null;</b>
+<b class="nc">&nbsp;        if (Objects.isNull(canonical)) {</b>
+&nbsp;            // if preview media not available, load canonical id from other folders
+<b class="nc">&nbsp;            canonical = dataEditor.getStructurePanel().findCanonicalIdForView(view);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        String treeNodeId = &quot;unknown&quot;;</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(stripeTreeNodeId) &amp;&amp; Objects.nonNull(index)) {</b>
+<b class="nc">&nbsp;            treeNodeId = stripeTreeNodeId + &quot;_&quot; + index;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return new GalleryMediaContent(mediaContentType, view, canonical,</b>
+<b class="nc">&nbsp;                Objects.nonNull(previewMediaVariant) ? previewMediaVariant.getMimeType() : null,</b>
+&nbsp;                resourceListUri,
+<b class="nc">&nbsp;                Objects.nonNull(mediaViewMediaVariant) ? mediaViewMediaVariant.getMimeType() : null,</b>
+&nbsp;                resourceMediaViewUri, treeNodeId);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the GalleryStripe instance representing the logical structure element to which the Media represented
+&nbsp;     * by the given GalleryMediaContent instance is assigned. Return null, if Media is not assigned to any logical
+&nbsp;     * structure element.
+&nbsp;     *
+&nbsp;     * @param galleryMediaContent
+&nbsp;     *          Media
+&nbsp;     * @return GalleryStripe representing the logical structure element to which the Media is assigned
+&nbsp;     */
+&nbsp;    GalleryStripe getLogicalStructureOfMedia(GalleryMediaContent galleryMediaContent) {
+<b class="nc">&nbsp;        for (GalleryStripe galleryStripe : stripes) {</b>
+<b class="nc">&nbsp;            for (GalleryMediaContent mediaContent : galleryStripe.getMedias()) {</b>
+<b class="nc">&nbsp;                if (galleryMediaContent.getId().equals(mediaContent.getId())) {</b>
+<b class="nc">&nbsp;                    return galleryStripe;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    GalleryMediaContent getGalleryMediaContent(View view) {
+<b class="nc">&nbsp;        if (Objects.nonNull(view)) {</b>
+<b class="nc">&nbsp;            for (GalleryMediaContent galleryMediaContent : this.medias) {</b>
+<b class="nc">&nbsp;                if (galleryMediaContent.getView().getPhysicalDivision().equals(view.getPhysicalDivision())) {</b>
+<b class="nc">&nbsp;                    return galleryMediaContent;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the GalleryMediaContent object of the passed PhysicalDivision.
+&nbsp;     * @param physicalDivision Object to find the GalleryMediaContent for
+&nbsp;     * @return GalleryMediaContent
+&nbsp;     */
+&nbsp;    public GalleryMediaContent getGalleryMediaContent(PhysicalDivision physicalDivision) {
+<b class="nc">&nbsp;        for (GalleryStripe galleryStripe : stripes) {</b>
+<b class="nc">&nbsp;            for (GalleryMediaContent media : galleryStripe.getMedias()) {</b>
+<b class="nc">&nbsp;                if (Objects.equals(media.getView().getPhysicalDivision(), physicalDivision)) {</b>
+<b class="nc">&nbsp;                    return media;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a List of all PhysicalDivisions and the LogicalDivisions they are
+&nbsp;     * assigned to which are displayed between two selected PhysicalDivisions.
+&nbsp;     * This method selects the Stripes that are affected by the selection and
+&nbsp;     * delegates the selection of the contained PhysicalDivisions.
+&nbsp;     *
+&nbsp;     * @param first
+&nbsp;     *            First selected PhysicalDivision. A Pair of the
+&nbsp;     *            PhysicalDivision and the LogicalDivision to which the
+&nbsp;     *            PhysicalDivision is assigned.
+&nbsp;     * @param last
+&nbsp;     *            Last selected PhysicalDivision. A Pair of the PhysicalDivision
+&nbsp;     *            and the Logical Division to which the PhysicalDivision is
+&nbsp;     *            assigned.
+&nbsp;     * @return A List of all selected PhysicalDivisions
+&nbsp;     */
+&nbsp;    private List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; getMediaWithinRange(Pair&lt;PhysicalDivision, LogicalDivision&gt; first,
+&nbsp;                                                          Pair&lt;PhysicalDivision, LogicalDivision&gt; last) {
+&nbsp;        // Pairs of stripe index and media index
+<b class="nc">&nbsp;        Pair&lt;Integer, Integer&gt; firstIndices = getIndices(first.getKey(), first.getValue());</b>
+<b class="nc">&nbsp;        Pair&lt;Integer, Integer&gt; lastIndices = getIndices(last.getKey(), last.getValue());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!Objects.nonNull(firstIndices) || !Objects.nonNull(lastIndices)) {</b>
+<b class="nc">&nbsp;            return new LinkedList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;GalleryStripe&gt; stripesWithinRange = new LinkedList&lt;&gt;();</b>
+&nbsp;
+&nbsp;        /* Stripe with index 0 represents &quot;unstructured media&quot;.
+&nbsp;           This stripe is displayed last, but is actually the logical structure (first stripe). */
+<b class="nc">&nbsp;        if (Objects.equals(firstIndices.getKey(), lastIndices.getKey())) {</b>
+<b class="nc">&nbsp;            stripesWithinRange.add(stripes.get(firstIndices.getKey()));</b>
+<b class="nc">&nbsp;        } else if (lastIndices.getKey() == 0) {</b>
+&nbsp;            // count up, last stripe is &quot;unstructured media&quot;
+<b class="nc">&nbsp;            for (int i = firstIndices.getKey(); i &lt;= stripes.size() - 1; i++) {</b>
+<b class="nc">&nbsp;                stripesWithinRange.add(stripes.get(i));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            stripesWithinRange.add(stripes.get(0));</b>
+<b class="nc">&nbsp;        } else if (firstIndices.getKey() != 0 &amp;&amp; firstIndices.getKey() &lt; lastIndices.getKey()) {</b>
+&nbsp;            // count up first stripe and last stripe are not &quot;unstructured media&quot;
+<b class="nc">&nbsp;            for (int i = firstIndices.getKey(); i &lt;= lastIndices.getKey(); i++) {</b>
+<b class="nc">&nbsp;                stripesWithinRange.add(stripes.get(i));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else if (firstIndices.getKey() == 0) {</b>
+&nbsp;            // count down, first stripe is &quot;unstructured media&quot;
+<b class="nc">&nbsp;            stripesWithinRange.add(stripes.get(0));</b>
+<b class="nc">&nbsp;            for (int i = stripes.size() - 1; i &gt;= lastIndices.getKey(); i--) {</b>
+<b class="nc">&nbsp;                stripesWithinRange.add(stripes.get(i));</b>
+&nbsp;            }
+&nbsp;        } else {
+&nbsp;            // count down
+<b class="nc">&nbsp;            for (int i = firstIndices.getKey(); i &gt;= lastIndices.getKey(); i--) {</b>
+<b class="nc">&nbsp;                stripesWithinRange.add(stripes.get(i));</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return getMediaWithinRangeFromSelectedStripes(firstIndices, lastIndices, stripesWithinRange);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get a List of all PhysicalDivisions and the LogicalDivisions they are
+&nbsp;     * assigned to which are displayed between two selected PhysicalDivisions.
+&nbsp;     * This method selected the PhysicalDivisions between and including the two
+&nbsp;     * indices.
+&nbsp;     *
+&nbsp;     * @param firstIndices
+&nbsp;     *            First selected PhysicalDivision. A Pair of indices of the
+&nbsp;     *            PhysicalDivision and the LogicalDivision to which the
+&nbsp;     *            PhysicalDivision is assigned.
+&nbsp;     * @param lastIndices
+&nbsp;     *            Last selected PhysicalDivision. A Pair of indices of the
+&nbsp;     *            PhysicalDivision and the Logical Division to which the
+&nbsp;     *            PhysicalDivision is assigned.
+&nbsp;     * @param galleryStripes
+&nbsp;     *            A List of GalleryStripes which contain the two selected
+&nbsp;     *            PhysicalDivisions and all in between
+&nbsp;     * @return A List of all selected PhysicalDivisions
+&nbsp;     */
+&nbsp;    private List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; getMediaWithinRangeFromSelectedStripes(
+&nbsp;            Pair&lt;Integer, Integer&gt; firstIndices, Pair&lt;Integer, Integer&gt; lastIndices, List&lt;GalleryStripe&gt; galleryStripes) {
+<b class="nc">&nbsp;        boolean countDown = false;</b>
+&nbsp;
+&nbsp;        /* Count down if firstIndices are larger than lastIndices.
+&nbsp;           (Each Pair represents a stripe index and the index of the selected media within this stripe.)
+&nbsp;         */
+<b class="nc">&nbsp;        if (firstIndices.getKey() &gt; lastIndices.getKey() &amp;&amp; lastIndices.getKey() != 0</b>
+<b class="nc">&nbsp;                || Objects.equals(firstIndices.getKey(), lastIndices.getKey()) &amp;&amp; firstIndices.getValue() &gt; lastIndices.getValue()</b>
+<b class="nc">&nbsp;                || !Objects.equals(firstIndices.getKey(), lastIndices.getKey()) &amp;&amp; firstIndices.getKey() == 0) {</b>
+<b class="nc">&nbsp;            countDown = true;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (galleryStripes.size() == 0) {</b>
+<b class="nc">&nbsp;            return new LinkedList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (countDown) {</b>
+<b class="nc">&nbsp;            return getMediaBackwards(firstIndices.getValue(), lastIndices.getValue(), galleryStripes);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return getMediaForwards(firstIndices.getValue(), lastIndices.getValue(), galleryStripes);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; getMediaForwards(Integer firstIndex, Integer lastIndex,
+&nbsp;                                                                              List&lt;GalleryStripe&gt; galleryStripes) {
+<b class="nc">&nbsp;        List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; mediaWithinRange = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        GalleryStripe firstStripe = galleryStripes.get(0);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (galleryStripes.size() == 1) {</b>
+<b class="nc">&nbsp;            for (int i = firstIndex; i &lt;= lastIndex; i++) {</b>
+<b class="nc">&nbsp;                mediaWithinRange.add(</b>
+<b class="nc">&nbsp;                        new ImmutablePair&lt;&gt;(firstStripe.getMedias().get(i).getView().getPhysicalDivision(), firstStripe.getStructure()));</b>
+&nbsp;            }
+&nbsp;        } else {
+&nbsp;
+<b class="nc">&nbsp;            for (int i = firstIndex; i &lt;= firstStripe.getMedias().size() - 1; i++) {</b>
+<b class="nc">&nbsp;                mediaWithinRange.add(</b>
+<b class="nc">&nbsp;                        new ImmutablePair&lt;&gt;(firstStripe.getMedias().get(i).getView().getPhysicalDivision(), firstStripe.getStructure()));</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            for (int i = 1; i &lt;= galleryStripes.size() - 2; i++) {</b>
+<b class="nc">&nbsp;                GalleryStripe galleryStripe = galleryStripes.get(i);</b>
+<b class="nc">&nbsp;                for (GalleryMediaContent media : galleryStripe.getMedias()) {</b>
+<b class="nc">&nbsp;                    mediaWithinRange.add(new ImmutablePair&lt;&gt;(media.getView().getPhysicalDivision(), galleryStripe.getStructure()));</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            GalleryStripe lastStripe = galleryStripes.get(galleryStripes.size() - 1);</b>
+<b class="nc">&nbsp;            for (int i = 0; i &lt;= lastIndex; i++) {</b>
+<b class="nc">&nbsp;                mediaWithinRange.add(</b>
+<b class="nc">&nbsp;                        new ImmutablePair&lt;&gt;(lastStripe.getMedias().get(i).getView().getPhysicalDivision(), lastStripe.getStructure()));</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return mediaWithinRange;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; getMediaBackwards(Integer firstIndex, Integer lastIndex,
+&nbsp;                                                                               List&lt;GalleryStripe&gt; galleryStripes) {
+<b class="nc">&nbsp;        List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; mediaWithinRange = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        GalleryStripe firstStripe = galleryStripes.get(0);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (galleryStripes.size() == 1) {</b>
+<b class="nc">&nbsp;            for (int i = firstIndex; i &gt;= lastIndex; i--) {</b>
+<b class="nc">&nbsp;                mediaWithinRange.add(</b>
+<b class="nc">&nbsp;                        new ImmutablePair&lt;&gt;(firstStripe.getMedias().get(i).getView().getPhysicalDivision(), firstStripe.getStructure()));</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            for (int i = firstIndex; i &gt;= 0; i--) {</b>
+<b class="nc">&nbsp;                mediaWithinRange.add(</b>
+<b class="nc">&nbsp;                        new ImmutablePair&lt;&gt;(firstStripe.getMedias().get(i).getView().getPhysicalDivision(), firstStripe.getStructure()));</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            for (int i = 1; i &lt;= galleryStripes.size() - 2; i++) {</b>
+<b class="nc">&nbsp;                GalleryStripe galleryStripe = galleryStripes.get(i);</b>
+<b class="nc">&nbsp;                for (int j = galleryStripe.getMedias().size() - 1; j &gt;= 0; j--) {</b>
+<b class="nc">&nbsp;                    mediaWithinRange.add(new ImmutablePair&lt;&gt;(</b>
+<b class="nc">&nbsp;                            galleryStripe.getMedias().get(j).getView().getPhysicalDivision(), galleryStripe.getStructure()));</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            GalleryStripe lastStripe = galleryStripes.get(galleryStripes.size() - 1);</b>
+<b class="nc">&nbsp;            for (int i = lastStripe.getMedias().size() - 1; i &gt;= lastIndex; i--) {</b>
+<b class="nc">&nbsp;                mediaWithinRange.add(</b>
+<b class="nc">&nbsp;                        new ImmutablePair&lt;&gt;(lastStripe.getMedias().get(i).getView().getPhysicalDivision(), lastStripe.getStructure()));</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return mediaWithinRange;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Pair&lt;Integer, Integer&gt; getIndices(PhysicalDivision physicalDivision, LogicalDivision structuralElement) {
+<b class="nc">&nbsp;        for (GalleryStripe galleryStripe : stripes) {</b>
+<b class="nc">&nbsp;            if (Objects.equals(galleryStripe.getStructure(), structuralElement)) {</b>
+<b class="nc">&nbsp;                for (GalleryMediaContent media : galleryStripe.getMedias()) {</b>
+<b class="nc">&nbsp;                    if (Objects.equals(media.getView().getPhysicalDivision(), physicalDivision)) {</b>
+<b class="nc">&nbsp;                        return new ImmutablePair&lt;&gt;(stripes.indexOf(galleryStripe), galleryStripe.getMedias().indexOf(media));</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check whether the passed GalleryMediaContent is selected.
+&nbsp;     * @param galleryMediaContent the GalleryMediaContent to be checked
+&nbsp;     * @param galleryStripe the GalleryStripe where the GalleryMediaContent is located
+&nbsp;     * @return Boolean whether passed GalleryMediaContent is selected
+&nbsp;     */
+&nbsp;    public boolean isSelected(GalleryMediaContent galleryMediaContent, GalleryStripe galleryStripe) {
+<b class="nc">&nbsp;        if (Objects.nonNull(galleryMediaContent) &amp;&amp; Objects.nonNull(galleryMediaContent.getView())) {</b>
+<b class="nc">&nbsp;            PhysicalDivision physicalDivision = galleryMediaContent.getView().getPhysicalDivision();</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(physicalDivision)) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(galleryStripe)) {</b>
+<b class="nc">&nbsp;                    return dataEditor.isSelected(physicalDivision, galleryStripe.getStructure());</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    return dataEditor.isSelected(physicalDivision, getLogicalStructureOfMedia(galleryMediaContent).getStructure());</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void selectMedia(String physicalDivisionOrder, String stripeIndex, String selectionType) {
+<b class="nc">&nbsp;        PhysicalDivision selectedPhysicalDivision = null;</b>
+<b class="nc">&nbsp;        for (PhysicalDivision physicalDivision : this.dataEditor.getWorkpiece()</b>
+<b class="nc">&nbsp;                .getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted()) {</b>
+<b class="nc">&nbsp;            if (Objects.equals(physicalDivision.getOrder(), Integer.parseInt(physicalDivisionOrder))) {</b>
+<b class="nc">&nbsp;                selectedPhysicalDivision = physicalDivision;</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            this.dataEditor.getMetadataPanel().preserveLogical();</b>
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException | NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(selectedPhysicalDivision)) {</b>
+<b class="nc">&nbsp;            this.dataEditor.getMetadataPanel().showPageInLogical(selectedPhysicalDivision);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Selected PhysicalDivision is null!&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        GalleryStripe parentStripe;
+&nbsp;        try {
+<b class="nc">&nbsp;            parentStripe = stripes.get(Integer.parseInt(stripeIndex));</b>
+<b class="nc">&nbsp;        } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;            parentStripe = null;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        GalleryMediaContent currentSelection = getGalleryMediaContent(selectedPhysicalDivision);</b>
+<b class="nc">&nbsp;        select(currentSelection, parentStripe, selectionType);</b>
+&nbsp;
+<b class="nc">&nbsp;        String scrollScripts = &quot;scrollToSelectedTreeNode();scrollToSelectedPaginationRow();&quot;;</b>
+<b class="nc">&nbsp;        if (GalleryViewMode.PREVIEW.equals(galleryViewMode)) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;checkScrollPosition();initializeImage();&quot; + scrollScripts);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(scrollScripts);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void selectStructure(String stripeIndex) {
+<b class="nc">&nbsp;        LogicalDivision logicalDivision = stripes.get(Integer.parseInt(stripeIndex)).getStructure();</b>
+<b class="nc">&nbsp;        dataEditor.getSelectedMedia().clear();</b>
+<b class="nc">&nbsp;        dataEditor.getStructurePanel().updateLogicalNodeSelection(logicalDivision);</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;scrollToSelectedTreeNode();scrollToSelectedPaginationRow();&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update the media selection based on the page index, stripe index and pressed modifier keys passed as request parameter.
+&nbsp;     * This method should be called via remoteCommand.
+&nbsp;     */
+&nbsp;    public void select() {
+<b class="nc">&nbsp;        Map&lt;String, String&gt; params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();</b>
+<b class="nc">&nbsp;        String physicalDivisionOrder = params.get(&quot;page&quot;);</b>
+<b class="nc">&nbsp;        String stripeIndex = params.get(&quot;stripe&quot;);</b>
+<b class="nc">&nbsp;        String selectionType = params.get(&quot;selectionType&quot;);</b>
+<b class="nc">&nbsp;        boolean triggerContextMenu = Boolean.parseBoolean(params.get(&quot;triggerContextMenu&quot;));</b>
+<b class="nc">&nbsp;        String createEvent = &quot;&quot;;</b>
+<b class="nc">&nbsp;        if (triggerContextMenu) {</b>
+<b class="nc">&nbsp;            int pageX = Integer.parseInt(params.get(&quot;pageX&quot;));</b>
+<b class="nc">&nbsp;            int pageY = Integer.parseInt(params.get(&quot;pageY&quot;));</b>
+<b class="nc">&nbsp;            createEvent = &quot;(function(){let e=new Event(&#39;mousedown&#39;);e.pageX=&quot; + pageX + &quot;;e.pageY=&quot; + pageY + &quot;;return e})()&quot;;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (StringUtils.isNotBlank(physicalDivisionOrder)) {</b>
+<b class="nc">&nbsp;            selectMedia(physicalDivisionOrder, stripeIndex, selectionType);</b>
+<b class="nc">&nbsp;            if (triggerContextMenu) {</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;mediaContextMenu&#39;).show(&quot; + createEvent + &quot;)&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else if (StringUtils.isNotBlank(stripeIndex)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                selectStructure(stripeIndex);</b>
+<b class="nc">&nbsp;                if (triggerContextMenu) {</b>
+<b class="nc">&nbsp;                    PrimeFaces.current().executeScript(&quot;PF(&#39;stripeContextMenu&#39;).show(&quot; + createEvent + &quot;)&quot;);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;Could not select stripe: Stripe index \&quot;&quot; + stripeIndex + &quot;\&quot; could not be parsed.&quot;);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update selection based on the passed GalleryMediaContent and selectionType.
+&nbsp;     *
+&nbsp;     * @param currentSelection the GalleryMediaContent that was clicked
+&nbsp;     * @param parentStripe the GalleryStripe the clicked GalleryMediaContent is part of
+&nbsp;     * @param selectionType the type of selection based on the pressed modifier key
+&nbsp;     */
+&nbsp;    private void select(GalleryMediaContent currentSelection, GalleryStripe parentStripe, String selectionType) {
+<b class="nc">&nbsp;        if (Objects.isNull(parentStripe)) {</b>
+<b class="nc">&nbsp;            parentStripe = getLogicalStructureOfMedia(currentSelection);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (Objects.isNull(currentSelection)) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Passed GalleryMediaContent must not be null.&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        switch (selectionType) {</b>
+&nbsp;            case &quot;multi&quot;:
+<b class="nc">&nbsp;                multiSelect(currentSelection, parentStripe);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case &quot;range&quot;:
+<b class="nc">&nbsp;                rangeSelect(currentSelection, parentStripe);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                defaultSelect(currentSelection, parentStripe);</b>
+&nbsp;                break;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        updateStructure(currentSelection, parentStripe.getStructure());</b>
+<b class="nc">&nbsp;        dataEditor.getPaginationPanel().preparePaginationSelectionSelectedItems();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void defaultSelect(GalleryMediaContent currentSelection, GalleryStripe parentStripe) {
+<b class="nc">&nbsp;        if (Objects.isNull(currentSelection)) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        dataEditor.getSelectedMedia().clear();</b>
+<b class="nc">&nbsp;        dataEditor.getSelectedMedia().add(</b>
+<b class="nc">&nbsp;            new ImmutablePair&lt;&gt;(currentSelection.getView().getPhysicalDivision(), parentStripe.getStructure()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void rangeSelect(GalleryMediaContent currentSelection, GalleryStripe parentStripe) {
+<b class="nc">&nbsp;        if (Objects.isNull(currentSelection)) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (dataEditor.getSelectedMedia().isEmpty()) {</b>
+<b class="nc">&nbsp;            dataEditor.getSelectedMedia().add(</b>
+<b class="nc">&nbsp;                new ImmutablePair&lt;&gt;(currentSelection.getView().getPhysicalDivision(), parentStripe.getStructure()));</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Pair&lt;PhysicalDivision, LogicalDivision&gt; firstSelectedMediaPair = dataEditor.getSelectedMedia().get(0);</b>
+<b class="nc">&nbsp;        Pair&lt;PhysicalDivision, LogicalDivision&gt; lastSelectedMediaPair =</b>
+<b class="nc">&nbsp;                new ImmutablePair&lt;&gt;(currentSelection.getView().getPhysicalDivision(), parentStripe.getStructure());</b>
+&nbsp;
+<b class="nc">&nbsp;        dataEditor.getSelectedMedia().clear();</b>
+<b class="nc">&nbsp;        dataEditor.getSelectedMedia().addAll(getMediaWithinRange(firstSelectedMediaPair, lastSelectedMediaPair));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void multiSelect(GalleryMediaContent currentSelection, GalleryStripe parentStripe) {
+<b class="nc">&nbsp;        Pair&lt;PhysicalDivision, LogicalDivision&gt; selectedMediaPair = new ImmutablePair&lt;&gt;(</b>
+<b class="nc">&nbsp;                currentSelection.getView().getPhysicalDivision(), parentStripe.getStructure());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (dataEditor.getSelectedMedia().contains(selectedMediaPair)) {</b>
+<b class="nc">&nbsp;            if (dataEditor.getSelectedMedia().size() &gt; 1) {</b>
+<b class="nc">&nbsp;                dataEditor.getSelectedMedia().remove(selectedMediaPair);</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            dataEditor.getSelectedMedia().add(selectedMediaPair);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the index of this GalleryMediaContent&#39;s PhysicalDivision out of all
+&nbsp;     * PhysicalDivisions which are assigned to more than one LogicalDivision.
+&nbsp;     *
+&nbsp;     * @param galleryMediaContent
+&nbsp;     *            object to find the index for
+&nbsp;     * @return index of the GalleryMediaContent&#39;s PhysicalDivision if present in
+&nbsp;     *         the List of several assignments, or -1 if not present in the
+&nbsp;     *         list.
+&nbsp;     */
+&nbsp;    public int getSeveralAssignmentsIndex(GalleryMediaContent galleryMediaContent) {
+<b class="nc">&nbsp;        if (Objects.nonNull(galleryMediaContent.getView()) &amp;&amp; Objects.nonNull(galleryMediaContent.getView().getPhysicalDivision())) {</b>
+<b class="nc">&nbsp;            return dataEditor.getStructurePanel().getSeveralAssignments().indexOf(galleryMediaContent.getView().getPhysicalDivision());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return -1;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get cachingUUID.
+&nbsp;     *
+&nbsp;     * @return value of cachingUUID
+&nbsp;     */
+&nbsp;    public String getCachingUUID() {
+<b class="nc">&nbsp;        return cachingUUID;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,393 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > KitodoRestClient</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.elasticsearch</a>
+</div>
+
+<h1>Coverage Summary for Class: KitodoRestClient (org.kitodo.data.elasticsearch)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KitodoRestClient</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81%
+  </span>
+  <span class="absValue">
+    (17/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69,7%
+  </span>
+  <span class="absValue">
+    (53/76)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.elasticsearch;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import javax.ws.rs.HttpMethod;
+&nbsp;
+&nbsp;import org.apache.http.HttpEntity;
+&nbsp;import org.apache.http.HttpHost;
+&nbsp;import org.apache.http.StatusLine;
+&nbsp;import org.apache.http.auth.AuthScope;
+&nbsp;import org.apache.http.auth.UsernamePasswordCredentials;
+&nbsp;import org.apache.http.client.CredentialsProvider;
+&nbsp;import org.apache.http.entity.ContentType;
+&nbsp;import org.apache.http.impl.client.BasicCredentialsProvider;
+&nbsp;import org.apache.http.nio.entity.NStringEntity;
+&nbsp;import org.apache.http.util.EntityUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.elasticsearch.client.Request;
+&nbsp;import org.elasticsearch.client.RequestOptions;
+&nbsp;import org.elasticsearch.client.Requests;
+&nbsp;import org.elasticsearch.client.Response;
+&nbsp;import org.elasticsearch.client.ResponseException;
+&nbsp;import org.elasticsearch.client.RestClient;
+&nbsp;import org.elasticsearch.client.RestClientBuilder;
+&nbsp;import org.elasticsearch.client.RestHighLevelClient;
+&nbsp;import org.elasticsearch.client.core.MainResponse;
+&nbsp;import org.elasticsearch.rest.RestStatus;
+&nbsp;import org.kitodo.config.ConfigMain;
+&nbsp;import org.kitodo.data.elasticsearch.api.RestClientInterface;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation of ElasticSearch REST Client for Index Module.
+&nbsp; */
+<b class="fc">&nbsp;public abstract class KitodoRestClient implements RestClientInterface {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(KitodoRestClient.class);</b>
+&nbsp;
+&nbsp;    protected String indexBase;
+&nbsp;    protected RestClient client;
+&nbsp;    protected RestHighLevelClient highLevelClient;
+&nbsp;
+<b class="fc">&nbsp;    public static final List&lt;String&gt; MAPPING_TYPES = Arrays.asList(&quot;batch&quot;, &quot;docket&quot;, &quot;filter&quot;, &quot;process&quot;, &quot;project&quot;,</b>
+&nbsp;            &quot;property&quot;, &quot;ruleset&quot;, &quot;task&quot;, &quot;template&quot;, &quot;workflow&quot;);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create REST client.
+&nbsp;     *
+&nbsp;     */
+&nbsp;    protected void initiateClient() {
+<b class="fc">&nbsp;        String host = ConfigMain.getParameter(&quot;elasticsearch.host&quot;, &quot;localhost&quot;);</b>
+<b class="fc">&nbsp;        int port = ConfigMain.getIntParameter(&quot;elasticsearch.port&quot;, 9200);</b>
+<b class="fc">&nbsp;        String protocol = ConfigMain.getParameter(&quot;elasticsearch.protocol&quot;, &quot;http&quot;);</b>
+<b class="fc">&nbsp;        String path = ConfigMain.getParameter(&quot;elasticsearch.path&quot;, &quot;/&quot;);</b>
+<b class="fc">&nbsp;        initiateClient(host, port, protocol, path);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create REST client with other without basic authentication.
+&nbsp;     *
+&nbsp;     * @param host
+&nbsp;     *            default host is localhost
+&nbsp;     * @param port
+&nbsp;     *            default port ist 9200
+&nbsp;     * @param protocol
+&nbsp;     *            default protocol is http
+&nbsp;     * @param path
+&nbsp;     *            default path is /
+&nbsp;     */
+&nbsp;    private void initiateClient(String host, Integer port, String protocol, String path) {
+<b class="fc">&nbsp;        if (ConfigMain.getBooleanParameter(&quot;elasticsearch.useAuthentication&quot;)) {</b>
+<b class="nc">&nbsp;            initiateClientWithAuth(host, port, protocol, path);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            RestClientBuilder builder = RestClient.builder(new HttpHost(host, port, protocol));</b>
+&nbsp;
+<b class="fc">&nbsp;            if (!path.isEmpty() &amp;&amp; !path.equals(&quot;/&quot;)) {</b>
+<b class="nc">&nbsp;                builder.setPathPrefix(path);</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            client = builder.build();</b>
+<b class="fc">&nbsp;            highLevelClient = new RestHighLevelClient(builder);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create REST client with basic authentication.
+&nbsp;     *
+&nbsp;     * @param host
+&nbsp;     *            default host is localhost
+&nbsp;     * @param port
+&nbsp;     *            default port ist 9200
+&nbsp;     * @param protocol
+&nbsp;     *            default protocol is http
+&nbsp;     * @param path
+&nbsp;     *           default path is /
+&nbsp;     */
+&nbsp;    private void initiateClientWithAuth(String host, Integer port, String protocol, String path) {
+<b class="nc">&nbsp;        String user = ConfigMain.getParameter(&quot;elasticsearch.user&quot;, &quot;elastic&quot;);</b>
+<b class="nc">&nbsp;        String password = ConfigMain.getParameter(&quot;elasticsearch.password&quot;, &quot;changeme&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();</b>
+<b class="nc">&nbsp;        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));</b>
+&nbsp;
+<b class="nc">&nbsp;        RestClientBuilder builder = RestClient.builder(new HttpHost(host, port, protocol)).setHttpClientConfigCallback(</b>
+<b class="nc">&nbsp;            httpClientBuilder -&gt; httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!path.isEmpty() &amp;&amp; !path.equals(&quot;/&quot;)) {</b>
+<b class="nc">&nbsp;            builder.setPathPrefix(path);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        client = builder.build();</b>
+<b class="nc">&nbsp;        highLevelClient = new RestHighLevelClient(builder);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information about client server.
+&nbsp;     *
+&nbsp;     * @return information about the server
+&nbsp;     */
+&nbsp;    public String getServerInformation() throws IOException {
+<b class="fc">&nbsp;        Request request = new Request(HttpMethod.GET, &quot;/&quot;);</b>
+<b class="fc">&nbsp;        request.addParameter(&quot;pretty&quot;, &quot;true&quot;);</b>
+<b class="fc">&nbsp;        Response response = client.performRequest(request);</b>
+<b class="fc">&nbsp;        return EntityUtils.toString(response.getEntity());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get information about client server.
+&nbsp;     *
+&nbsp;     * @return information about the server
+&nbsp;     */
+&nbsp;    public String getServerInfo() throws IOException {
+<b class="fc">&nbsp;        MainResponse response = highLevelClient.info(RequestOptions.DEFAULT);</b>
+<b class="fc">&nbsp;        return response.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get mapping.
+&nbsp;     *
+&nbsp;     * @param mappingType
+&nbsp;     *           the name of table in database as String
+&nbsp;     * @return mapping
+&nbsp;     */
+&nbsp;    public String getMapping(String mappingType) throws IOException {
+<b class="fc">&nbsp;        Request request = new Request(HttpMethod.GET, &quot;/&quot; + indexBase + &quot;_&quot; + mappingType + &quot;/_mapping&quot;);</b>
+<b class="fc">&nbsp;        request.addParameter(&quot;pretty&quot;, &quot;true&quot;);</b>
+<b class="fc">&nbsp;        Response response = client.performRequest(request);</b>
+<b class="fc">&nbsp;        return EntityUtils.toString(response.getEntity());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new indexes without mappings.
+&nbsp;     */
+&nbsp;    public void createIndexes() throws IOException, CustomResponseException {
+<b class="nc">&nbsp;        for (String mappingType : MAPPING_TYPES) {</b>
+<b class="nc">&nbsp;            createIndex(null, mappingType);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new index with mapping.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            contains mapping
+&nbsp;     * @param mappingType
+&nbsp;     *            the name of table in database as String
+&nbsp;     * @return true or false - can be used for displaying information to user if
+&nbsp;     *         success
+&nbsp;     */
+&nbsp;    public boolean createIndex(String query, String mappingType) throws IOException, CustomResponseException {
+<b class="fc">&nbsp;        if (query == null) {</b>
+<b class="fc">&nbsp;            query = &quot;{\&quot;settings\&quot; : {\&quot;index\&quot; : {\&quot;number_of_shards\&quot; : 1,\&quot;number_of_replicas\&quot; : 0}}}&quot;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        HttpEntity entity = new NStringEntity(query, ContentType.APPLICATION_JSON);</b>
+<b class="fc">&nbsp;        Request request = new Request(HttpMethod.PUT, &quot;/&quot; + indexBase + &quot;_&quot; + mappingType);</b>
+<b class="fc">&nbsp;        request.setEntity(entity);</b>
+<b class="fc">&nbsp;        Response indexResponse = client.performRequest(request);</b>
+<b class="fc">&nbsp;        int statusCode = processStatusCode(indexResponse.getStatusLine());</b>
+<b class="fc">&nbsp;        return statusCode == 200 || statusCode == 201;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if all indexes already exist. Needed for frontend.
+&nbsp;     *
+&nbsp;     * @return false if any index doesn&#39;t exist, true else
+&nbsp;     */
+&nbsp;    public boolean typeIndexesExist() throws IOException, CustomResponseException {
+<b class="fc">&nbsp;        for (String mappingType : MAPPING_TYPES) {</b>
+<b class="fc">&nbsp;            Response indexResponse = client.performRequest(new Request(HttpMethod.GET, &quot;/&quot; + indexBase + &quot;_&quot; + mappingType));</b>
+<b class="fc">&nbsp;            int statusCode = processStatusCode(indexResponse.getStatusLine());</b>
+<b class="fc">&nbsp;            if (statusCode != 200 &amp;&amp; statusCode != 201) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete index of given mappingType. Currently, only used in test cases.
+&nbsp;     * @param mappingType mapping type
+&nbsp;     */
+&nbsp;    public void deleteIndex(String mappingType) throws IOException {
+<b class="fc">&nbsp;        client.performRequest(new Request(HttpMethod.DELETE, &quot;/&quot; + indexBase + &quot;_&quot; + mappingType));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete all indexes. Used for cleaning after tests!
+&nbsp;     */
+&nbsp;    public void deleteAllIndexes() throws IOException {
+<b class="fc">&nbsp;        for (String mappingType : MAPPING_TYPES) {</b>
+<b class="fc">&nbsp;            client.performRequest(new Request(HttpMethod.DELETE, &quot;/&quot; + indexBase + &quot;_&quot; + mappingType));</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Getter for indexBase.
+&nbsp;     * The indexBase is the prefix of all indexes - equal to the name of database, default kitodo.
+&nbsp;     *
+&nbsp;     * @return indexBase name
+&nbsp;     */
+&nbsp;    public String getIndexBase() {
+<b class="fc">&nbsp;        return indexBase;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update refresh interval of search indices to 1 ms.
+&nbsp;     *
+&nbsp;     * @throws IOException when index cannot be reached
+&nbsp;     */
+&nbsp;    public void setRefreshInterval() throws IOException {
+<b class="fc">&nbsp;        this.highLevelClient.indices().putSettings(Requests.updateSettingsRequest()</b>
+<b class="fc">&nbsp;                .settings(Collections.singletonMap(&quot;refresh_interval&quot;, &quot;1ms&quot;)), RequestOptions.DEFAULT);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Setter for indexBase. The indexBase is the prefix of all indexes
+&nbsp;     *
+&nbsp;     * @param indexBase
+&nbsp;     *            - equal to the name of database, default kitodo
+&nbsp;     */
+&nbsp;    public void setIndexBase(String indexBase) {
+<b class="fc">&nbsp;        this.indexBase = indexBase;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected void handleResponseException(ResponseException e) throws CustomResponseException {
+<b class="nc">&nbsp;        if (e.getResponse().getStatusLine().getStatusCode() == 404) {</b>
+<b class="nc">&nbsp;            if (logger.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;                logger.trace(e.getMessage(), e);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                logger.debug(e.getMessage().replaceAll(&quot;\\p{Space}+&quot;, &quot; &quot;));</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new CustomResponseException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    protected int processStatusCode(StatusLine statusLine) throws CustomResponseException {
+<b class="fc">&nbsp;        int statusCode = statusLine.getStatusCode();</b>
+<b class="fc">&nbsp;        processStatusCode(statusCode, statusLine);</b>
+<b class="fc">&nbsp;        return statusCode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected int processStatusCode(RestStatus restStatus) throws CustomResponseException {
+<b class="fc">&nbsp;        int statusCode = restStatus.getStatus();</b>
+<b class="fc">&nbsp;        processStatusCode(statusCode, restStatus);</b>
+<b class="fc">&nbsp;        return statusCode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processStatusCode(int statusCode, Object restStatus) throws CustomResponseException {
+<b class="fc">&nbsp;        if (statusCode &gt;= 400 &amp;&amp; statusCode &lt;= 499) {</b>
+<b class="nc">&nbsp;            throw new CustomResponseException(&quot;Client error: &quot; + restStatus.toString());</b>
+<b class="fc">&nbsp;        } else if (statusCode &gt;= 500 &amp;&amp; statusCode &lt;= 599) {</b>
+<b class="nc">&nbsp;            throw new CustomResponseException(&quot;Server error: &quot; + restStatus.toString());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

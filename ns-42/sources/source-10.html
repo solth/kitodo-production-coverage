@@ -1,0 +1,485 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > WikiFieldHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: WikiFieldHelper (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WikiFieldHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (14/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,1%
+  </span>
+  <span class="absValue">
+    (115/198)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.io.ByteArrayInputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.text.DateFormat;
+&nbsp;import java.text.ParseException;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Comment;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.enums.CommentType;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;import org.xml.sax.InputSource;
+&nbsp;import org.xml.sax.SAXException;
+&nbsp;
+&nbsp;public class WikiFieldHelper {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(WikiFieldHelper.class);</b>
+&nbsp;
+&nbsp;    private static final String CORRECTION_FOR_TASK_DE = &quot;Korrektur fuer Schritt&quot;;
+&nbsp;    private static final String CORRECTION_FOR_TASK_EN = &quot;Correction for step&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private WikiFieldHelper() {
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * transform wiki field to Comment objects.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            process as object.
+&nbsp;     */
+&nbsp;    public static Process transformWikiFieldToComment(Process process) throws DAOException, DataException, ParseException {
+<b class="fc">&nbsp;        String wikiField = process.getWikiField();</b>
+<b class="fc">&nbsp;        wikiField = wikiField.replaceAll(&quot;Ã¼&quot;, &quot;ue&quot;);</b>
+<b class="fc">&nbsp;        wikiField = wikiField.replaceAll(&quot;&amp;uuml;&quot;, &quot;ue&quot;);</b>
+<b class="fc">&nbsp;        if (!wikiField.isEmpty()) {</b>
+<b class="fc">&nbsp;            wikiField = wikiField.replace(&quot;&lt;/p&gt;&quot;, &quot;&quot;);</b>
+<b class="fc">&nbsp;            String[] comments = wikiField.split(&quot;&lt;p&gt;&quot;);</b>
+<b class="fc">&nbsp;            if (!comments[0].isEmpty()) {</b>
+<b class="fc">&nbsp;                String oldComments = comments[0];</b>
+<b class="fc">&nbsp;                oldComments = &quot;&lt;messages&gt;&quot; + oldComments + &quot;&lt;/messages&gt;&quot;;</b>
+<b class="fc">&nbsp;                Document document = convertStringToDocument(oldComments);</b>
+<b class="fc">&nbsp;                transformOldFormatWikifieldToComments(document, process);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            List&lt;String&gt; list = new ArrayList&lt;&gt;(Arrays.asList(comments));</b>
+<b class="fc">&nbsp;            list.remove(list.get(0));</b>
+<b class="fc">&nbsp;            comments = list.toArray(new String[0]);</b>
+<b class="fc">&nbsp;            transformNewFormatWikiFieldToComments(comments, process);</b>
+<b class="fc">&nbsp;            Process processWithoutProperties = deleteProcessCorrectionProperties(process);</b>
+<b class="fc">&nbsp;            processWithoutProperties.setWikiField(&quot;&quot;);</b>
+<b class="fc">&nbsp;            ServiceManager.getProcessService().save(processWithoutProperties);</b>
+<b class="fc">&nbsp;            return processWithoutProperties;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Property getCorrectionRequiredProperty(Process process, String message) {
+<b class="nc">&nbsp;        List&lt;Property&gt; properties = process.getProperties();</b>
+<b class="nc">&nbsp;        for (Property property : properties) {</b>
+<b class="nc">&nbsp;            String translation = Helper.getTranslation(&quot;correctionNecessary&quot;);</b>
+<b class="nc">&nbsp;            String msg = getWikiFieldMessage(message);</b>
+<b class="nc">&nbsp;            if (property.getTitle().equals(translation) &amp;&amp; property.getValue().contains(msg)) {</b>
+<b class="nc">&nbsp;                return property;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Property getCorrectionPerformedProperty(Process process, String message, String language) {
+<b class="nc">&nbsp;        List&lt;Property&gt; properties = process.getProperties();</b>
+<b class="nc">&nbsp;        for (Property property : properties) {</b>
+<b class="nc">&nbsp;            Task task = getWikiFieldCorrectionTask(message, process, language);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(task) &amp;&amp; property.getTitle().equals(Helper.getTranslation(&quot;correctionPerformed&quot;))</b>
+<b class="nc">&nbsp;                    &amp;&amp; property.getValue().endsWith(task.getTitle())) {</b>
+<b class="nc">&nbsp;                return property;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Task getCorrectionTask(Property property) throws DAOException {
+<b class="nc">&nbsp;        int correctionTaskId = Integer.parseInt(property.getValue()</b>
+<b class="nc">&nbsp;                .substring(property.getValue().indexOf(&quot; CorrectionTask: &quot;) + 17, property.getValue().indexOf(&#39;)&#39;)));</b>
+<b class="nc">&nbsp;        return ServiceManager.getTaskService().getById(correctionTaskId);</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Task getCurrentTask(Property property) throws DAOException {
+<b class="nc">&nbsp;        int currentTaskId = Integer.parseInt(property.getValue().substring(</b>
+<b class="nc">&nbsp;            property.getValue().indexOf(&quot;(CurrentTask: &quot;) + 14, property.getValue().indexOf(&quot; CorrectionTask: &quot;)));</b>
+<b class="nc">&nbsp;        return ServiceManager.getTaskService().getById(currentTaskId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Date getCreationDate(Property property) throws ParseException {
+<b class="nc">&nbsp;        return new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;).parse(property.getValue().substring(1, 20));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getWikiFieldMessage(String message) {
+<b class="fc">&nbsp;        return message.substring(message.indexOf(&#39;:&#39;) + 1).trim();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static User getWikiFieldAuthor(String message, String lang) {
+<b class="fc">&nbsp;        String[] parts = message.split(&quot;:&quot;);</b>
+<b class="fc">&nbsp;        if (parts.length &lt; 2) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String authorName = parts[0];</b>
+<b class="fc">&nbsp;        if (&quot;de&quot;.equals(lang)) {</b>
+<b class="nc">&nbsp;            authorName = authorName.split(CORRECTION_FOR_TASK_DE)[0];</b>
+<b class="fc">&nbsp;        } else if (&quot;en&quot;.equals(lang)) {</b>
+<b class="nc">&nbsp;            authorName = authorName.split(CORRECTION_FOR_TASK_EN)[0];</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (authorName.contains(&quot;Red K &quot;)) {</b>
+<b class="nc">&nbsp;            authorName = authorName.replace(&quot;Red K &quot;, &quot;&quot;);</b>
+<b class="fc">&nbsp;        } else if (authorName.contains(&quot;Orange K &quot;)) {</b>
+<b class="nc">&nbsp;            authorName = authorName.replace(&quot;Orange K &quot;, &quot;&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return getUserByFullName(authorName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Task getWikiFieldCorrectionTask(String message, Process process, String lang) {
+<b class="nc">&nbsp;        String[] parts = message.split(&quot;:&quot;);</b>
+<b class="nc">&nbsp;        if (parts.length &lt; 2) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        String correctionTaskName = parts[0];</b>
+<b class="nc">&nbsp;        if (&quot;en&quot;.equals(lang)) {</b>
+<b class="nc">&nbsp;            correctionTaskName = correctionTaskName.split(CORRECTION_FOR_TASK_EN)[1];</b>
+<b class="nc">&nbsp;        } else if (&quot;de&quot;.equals(lang)) {</b>
+<b class="nc">&nbsp;            correctionTaskName = correctionTaskName.split(CORRECTION_FOR_TASK_DE)[1];</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="nc">&nbsp;            if (task.getTitle().equals(correctionTaskName.trim())) {</b>
+<b class="nc">&nbsp;                return task;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void deleteProperty(Process process, Property property) throws DAOException, DataException {
+<b class="nc">&nbsp;        property.getProcesses().clear();</b>
+<b class="nc">&nbsp;        process.getProperties().remove(property);</b>
+<b class="nc">&nbsp;        ServiceManager.getProcessService().save(process);</b>
+<b class="nc">&nbsp;        ServiceManager.getPropertyService().removeFromDatabase(property);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Example of wiki Field&#39;s new format: &lt;p&gt;Admin, test: bla bla &lt;p&gt;Orange K
+&nbsp;     * Admin, test Korrektur f&amp;uuml;r Schritt Scanning: bla bla &lt;p&gt;Red K Admin,
+&nbsp;     * test Korrektur f&amp;uuml;r Schritt Scanning: bla bla
+&nbsp;     */
+&nbsp;    private static void transformNewFormatWikiFieldToComments(String[] messages, Process process)
+&nbsp;            throws DAOException, DataException, ParseException {
+<b class="fc">&nbsp;        List&lt;Comment&gt; newComments = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (String message : messages) {</b>
+<b class="fc">&nbsp;            String lang = getMessageLanguage(message);</b>
+<b class="fc">&nbsp;            Comment comment = new Comment();</b>
+<b class="fc">&nbsp;            comment.setProcess(process);</b>
+<b class="fc">&nbsp;            comment.setMessage(getWikiFieldMessage(message));</b>
+<b class="fc">&nbsp;            comment.setAuthor(getWikiFieldAuthor(message, lang));</b>
+<b class="fc">&nbsp;            if (message.contains(&quot;Red K&quot;)) {</b>
+<b class="nc">&nbsp;                comment.setType(CommentType.ERROR);</b>
+<b class="nc">&nbsp;                Property correctionRequiredProperty = getCorrectionRequiredProperty(process, message);</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(correctionRequiredProperty)) {</b>
+<b class="nc">&nbsp;                    comment.setCreationDate(getCreationDate(correctionRequiredProperty));</b>
+<b class="nc">&nbsp;                    comment.setCurrentTask(getCurrentTask(correctionRequiredProperty));</b>
+<b class="nc">&nbsp;                    comment.setCorrectionTask(getCorrectionTask(correctionRequiredProperty));</b>
+<b class="nc">&nbsp;                    deleteProperty(process, correctionRequiredProperty);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } else if (message.contains(&quot;Orange K&quot;)) {</b>
+<b class="nc">&nbsp;                comment.setType(CommentType.ERROR);</b>
+<b class="nc">&nbsp;                comment.setCorrected(Boolean.TRUE);</b>
+<b class="nc">&nbsp;                Property correctionPerformed = getCorrectionPerformedProperty(process, message, lang);</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(correctionPerformed)) {</b>
+<b class="nc">&nbsp;                    comment.setCreationDate(correctionPerformed.getCreationDate());</b>
+<b class="nc">&nbsp;                    comment.setCorrectionDate(getCreationDate(correctionPerformed));</b>
+<b class="nc">&nbsp;                    deleteProperty(process, correctionPerformed);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                comment.setCurrentTask(ServiceManager.getProcessService().getCurrentTask(process));</b>
+<b class="nc">&nbsp;                comment.setCorrectionTask(getWikiFieldCorrectionTask(message, process, lang));</b>
+<b class="nc">&nbsp;            } else {</b>
+<b class="fc">&nbsp;                comment.setType(CommentType.INFO);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            newComments.add(comment);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        saveComments(newComments);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getMessageLanguage(String message) {
+<b class="fc">&nbsp;        if (message.contains(CORRECTION_FOR_TASK_EN)) {</b>
+<b class="nc">&nbsp;            return &quot;en&quot;;</b>
+<b class="fc">&nbsp;        } else if (message.contains(CORRECTION_FOR_TASK_DE)) {</b>
+<b class="fc">&nbsp;            return &quot;de&quot;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /*
+&nbsp;        Example of wiki Field&#39;s very old format (#FF0000:Correction comment, #006600: is corrected, #0033CC: Info comment):
+&nbsp;        &lt;font color=&quot;#FF0000&quot;&gt;Jun 16, 2016 1:12:58 PM: Korrektur fÃ¼r Schritt Scannen: bla bla bla.. (Admin, test)&lt;/font&gt;&lt;br/&gt;
+&nbsp;        &lt;font color=&quot;#006600&quot;&gt;Jun 17, 2016 10:36:43 AM: bla bla (Admin, test)&lt;/font&gt;&lt;br/&gt;
+&nbsp;        &lt;font color=&quot;#0033CC&quot;&gt;Jun 17, 2016 10:40:43 AM: bla bla (Admin, test)&lt;/font&gt;
+&nbsp;
+&nbsp;       Another existing format, with German-style formatted date:
+&nbsp;       &lt;font color=&quot;#FF0000&quot;&gt;06.04.2017 09:38:58: bla bla (User, Example)&lt;/font&gt;&lt;br/&gt;
+&nbsp;    */
+&nbsp;    private static void transformOldFormatWikifieldToComments(Document document, Process process) {
+<b class="fc">&nbsp;        Element root = document.getDocumentElement();</b>
+<b class="fc">&nbsp;        NodeList nodeList = root.getElementsByTagName(&quot;font&quot;);</b>
+<b class="fc">&nbsp;        List&lt;Comment&gt; commentList = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; nodeList.getLength(); i++) {</b>
+<b class="fc">&nbsp;            Element element = (Element) nodeList.item(i);</b>
+<b class="fc">&nbsp;            String color = element.getAttribute(&quot;color&quot;);</b>
+<b class="fc">&nbsp;            if (Objects.equals(color, &quot;#FF0000&quot;) || Objects.equals(color, &quot;#0033CC&quot;)) {</b>
+<b class="fc">&nbsp;                Comment comment = new Comment();</b>
+<b class="fc">&nbsp;                comment.setProcess(process);</b>
+<b class="fc">&nbsp;                String message = element.getTextContent();</b>
+<b class="fc">&nbsp;                String lang = getMessageLanguage(message);</b>
+<b class="fc">&nbsp;                comment.setCreationDate(getCreationDateOld(message));</b>
+<b class="fc">&nbsp;                comment.setMessage(getOldComment(message, lang));</b>
+<b class="fc">&nbsp;                String authorName = message.substring(message.lastIndexOf(&#39;(&#39;) + 1, message.lastIndexOf(&#39;)&#39;));</b>
+<b class="fc">&nbsp;                comment.setAuthor(getUserByFullName(authorName));</b>
+<b class="fc">&nbsp;                if (Objects.equals(color, &quot;#FF0000&quot;)) {</b>
+<b class="fc">&nbsp;                    comment.setType(CommentType.ERROR);</b>
+<b class="fc">&nbsp;                    comment.setCorrected(true);</b>
+<b class="fc">&nbsp;                    comment.setCorrectionTask(getOldCorrectionTask(message, process, lang));</b>
+<b class="nc">&nbsp;                } else if (Objects.equals(color, &quot;#0033CC&quot;)) {</b>
+<b class="nc">&nbsp;                    comment.setType(CommentType.INFO);</b>
+&nbsp;                }
+<b class="fc">&nbsp;                commentList.add(comment);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;        }
+<b class="fc">&nbsp;        if (!commentList.isEmpty()) {</b>
+<b class="fc">&nbsp;            saveComments(commentList);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void saveComments(List&lt;Comment&gt; commentList) {
+&nbsp;        try {
+<b class="fc">&nbsp;            ServiceManager.getCommentService().saveList(commentList);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /*
+&nbsp;     * fullName = surname, name
+&nbsp;     */
+&nbsp;    private static User getUserByFullName(String fullName) {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; parameters = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        parameters.put(&quot;surname&quot;, fullName.split(&quot;,&quot;)[0].trim());</b>
+<b class="fc">&nbsp;        parameters.put(&quot;name&quot;, fullName.split(&quot;,&quot;)[1].trim());</b>
+<b class="fc">&nbsp;        List&lt;User&gt; userList = ServiceManager.getUserService()</b>
+<b class="fc">&nbsp;                .getByQuery(&quot;FROM User WHERE name = :name AND surname = :surname&quot;, parameters);</b>
+<b class="fc">&nbsp;        if (userList.isEmpty()) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return userList.get(0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Document convertStringToDocument(String xmlString) {
+<b class="fc">&nbsp;        Document document = null;</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();</b>
+<b class="fc">&nbsp;            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();</b>
+<b class="fc">&nbsp;            document = documentBuilder</b>
+<b class="fc">&nbsp;                    .parse(new InputSource(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8))));</b>
+<b class="nc">&nbsp;        } catch (ParserConfigurationException | IOException | SAXException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;{} Could not parse XML string &#39;{}&#39;!&quot;, e.getMessage(), xmlString, e);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return document;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Date getCreationDateOld(String message) {
+&nbsp;        try {
+<b class="fc">&nbsp;            Pattern pattern = Pattern.compile(&quot;^\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2}:\\d{2}(?=: )&quot;);</b>
+<b class="fc">&nbsp;            Matcher matcher = pattern.matcher(message);</b>
+<b class="fc">&nbsp;            if (matcher.find()) {</b>
+<b class="fc">&nbsp;                return new SimpleDateFormat(&quot;dd.MM.yyy hh:mm:ss&quot;).parse(matcher.group());</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            int index = message.contains(&quot;PM&quot;) ? message.indexOf(&quot;PM&quot;) : message.indexOf(&quot;AM&quot;);</b>
+<b class="fc">&nbsp;            String date = message.substring(0, index + 2);</b>
+<b class="fc">&nbsp;            DateFormat dateFormat = new SimpleDateFormat(&quot;MMM dd, yyyy h:mm:ss a&quot;, Locale.ENGLISH);</b>
+<b class="fc">&nbsp;            return dateFormat.parse(date);</b>
+<b class="nc">&nbsp;        } catch (ParseException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getOldComment(String message, String language) {
+&nbsp;        String comment;
+<b class="fc">&nbsp;        if (&quot;de&quot;.equals(language)) {</b>
+<b class="fc">&nbsp;            comment = message.substring(message.indexOf(&#39;:&#39;, message.indexOf(CORRECTION_FOR_TASK_DE)) + 1,</b>
+<b class="fc">&nbsp;                message.lastIndexOf(&#39;(&#39;));</b>
+<b class="nc">&nbsp;        } else if (&quot;en&quot;.equals(language)) {</b>
+<b class="nc">&nbsp;            comment = message.substring(message.indexOf(&#39;:&#39;, message.indexOf(CORRECTION_FOR_TASK_EN)) + 1,</b>
+<b class="nc">&nbsp;                message.lastIndexOf(&#39;(&#39;));</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            int index = message.contains(&quot;PM:&quot;) ? message.indexOf(&quot;PM:&quot;) : message.indexOf(&quot;AM:&quot;);</b>
+<b class="nc">&nbsp;            comment = message.substring(index + 3, message.lastIndexOf(&#39;(&#39;));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return comment;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Task getOldCorrectionTask(String message, Process process, String language) {
+&nbsp;        String correctionTaskName;
+<b class="fc">&nbsp;        if (&quot;de&quot;.equals(language)) {</b>
+<b class="fc">&nbsp;            int index = message.indexOf(CORRECTION_FOR_TASK_DE);</b>
+<b class="fc">&nbsp;            correctionTaskName = message.substring(index + 23, message.indexOf(&#39;:&#39;, index));</b>
+<b class="fc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            int index = message.indexOf(CORRECTION_FOR_TASK_EN);</b>
+<b class="nc">&nbsp;            correctionTaskName = message.substring(index + 20, message.indexOf(&#39;:&#39;, index));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="fc">&nbsp;            if (task.getTitle().equals(correctionTaskName.trim())) {</b>
+<b class="nc">&nbsp;                return task;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Process deleteProcessCorrectionProperties(Process process) throws DAOException, DataException {
+<b class="fc">&nbsp;        List&lt;Property&gt; properties = new ArrayList&lt;&gt;(process.getProperties());</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Property property : properties) {</b>
+<b class="fc">&nbsp;            String title = property.getTitle();</b>
+<b class="fc">&nbsp;            if (&quot;Korrektur notwendig&quot;.equals(title) || &quot;Correction required&quot;.equals(title)</b>
+<b class="fc">&nbsp;                    || &quot;Korrektur durchgef\\u00FChrt&quot;.equals(title) || &quot;Correction performed&quot;.equals(title)) {</b>
+<b class="fc">&nbsp;                process.getProperties().remove(property);</b>
+<b class="fc">&nbsp;                ServiceManager.getProcessService().save(process);</b>
+<b class="fc">&nbsp;                ServiceManager.getPropertyService().removeFromDatabase(property);</b>
+<b class="fc">&nbsp;                property.getProcesses().remove(process);</b>
+<b class="fc">&nbsp;                ServiceManager.getPropertyService().removeFromDatabase(property);</b>
+<b class="fc">&nbsp;                return ServiceManager.getProcessService().getById(process.getId());</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return process;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

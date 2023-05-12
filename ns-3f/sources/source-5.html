@@ -1,0 +1,1231 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DataEditorForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: DataEditorForm (org.kitodo.production.forms.dataeditor)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DataEditorForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    6,8%
+  </span>
+  <span class="absValue">
+    (5/73)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    6,7%
+  </span>
+  <span class="absValue">
+    (23/343)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DataEditorForm$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    6,8%
+  </span>
+  <span class="absValue">
+    (5/74)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    6,7%
+  </span>
+  <span class="absValue">
+    (23/344)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.dataeditor;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.annotation.PreDestroy;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;import javax.inject.Inject;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.lang3.tuple.ImmutablePair;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.validation.State;
+&nbsp;import org.kitodo.api.validation.ValidationResult;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.data.database.beans.DataEditorSetting;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.exceptions.InvalidImagesException;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.MediaNotFoundException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessDetail;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.interfaces.MetadataTreeTableInterface;
+&nbsp;import org.kitodo.production.interfaces.RulesetSetupInterface;
+&nbsp;import org.kitodo.production.metadata.MetadataLock;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.dataeditor.DataEditorService;
+&nbsp;import org.omnifaces.cdi.ViewScoped;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;import org.primefaces.model.TreeNode;
+&nbsp;
+&nbsp;@Named(&quot;DataEditorForm&quot;)
+&nbsp;@ViewScoped
+&nbsp;public class DataEditorForm implements MetadataTreeTableInterface, RulesetSetupInterface, Serializable {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(DataEditorForm.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A filter on the rule set depending on the workflow step. So far this is
+&nbsp;     * not configurable anywhere and is therefore on “edit”.
+&nbsp;     */
+&nbsp;    private final String acquisitionStage;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backing bean for the add doc struc type dialog.
+&nbsp;     */
+&nbsp;    private final AddDocStrucTypeDialog addDocStrucTypeDialog;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Dialog for adding metadata.
+&nbsp;     */
+&nbsp;    private final AddMetadataDialog addMetadataDialog;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backing bean for the add PhysicalDivision dialog.
+&nbsp;     */
+&nbsp;    private final AddPhysicalDivisionDialog addPhysicalDivisionDialog;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backing bean for the change doc struc type dialog.
+&nbsp;     */
+&nbsp;    private final ChangeDocStrucTypeDialog changeDocStrucTypeDialog;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backing bean for the edit pages dialog.
+&nbsp;     */
+&nbsp;    private final EditPagesDialog editPagesDialog;
+&nbsp;
+&nbsp;    private final UploadFileDialog uploadFileDialog ;
+&nbsp;    /**
+&nbsp;     * Backing bean for the gallery panel.
+&nbsp;     */
+&nbsp;    private final GalleryPanel galleryPanel;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The current process children.
+&nbsp;     */
+<b class="fc">&nbsp;    private final Set&lt;Process&gt; currentChildren = new HashSet&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The path to the main file, to save it later.
+&nbsp;     */
+&nbsp;    private URI mainFileUri;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backing bean for the metadata panel.
+&nbsp;     */
+&nbsp;    private final MetadataPanel metadataPanel;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backing bean for the pagination panel.
+&nbsp;     */
+&nbsp;    private final PaginationPanel paginationPanel;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The language preference list of the editing user for displaying the
+&nbsp;     * metadata labels. We cache this because it’s used thousands of times and
+&nbsp;     * otherwise the access would always go through the search engine, which
+&nbsp;     * would delay page creation.
+&nbsp;     */
+&nbsp;    private List&lt;LanguageRange&gt; priorityList;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Process whose workpiece is under edit.
+&nbsp;     */
+&nbsp;    private Process process;
+&nbsp;
+<b class="fc">&nbsp;    private String referringView = &quot;desktop&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The ruleset that the file is based on.
+&nbsp;     */
+&nbsp;    private RulesetManagementInterface ruleset;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backing bean for the structure panel.
+&nbsp;     */
+&nbsp;    private final StructurePanel structurePanel;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * User sitting in front of the editor.
+&nbsp;     */
+&nbsp;    private User user;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The file content.
+&nbsp;     */
+&nbsp;    private Workpiece workpiece;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Original state of workpiece. Used to check whether any unsaved changes exist when leaving the editor.
+&nbsp;     */
+&nbsp;    private Workpiece workpieceOriginalState;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This List of Pairs stores all selected physical elements and the logical elements in which the physical element was selected.
+&nbsp;     * It is necessary to store the logical elements as well, because a physical element can be assigned to multiple logical elements.
+&nbsp;     */
+&nbsp;    private List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; selectedMedia;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The id of the template&#39;s task corresponding to the current task that is under edit.
+&nbsp;     * This is used for saving and loading the metadata editor settings.
+&nbsp;     * The current task, the corresponding template task id and the settings are only available
+&nbsp;     * if the user opened the editor from a task.
+&nbsp;     */
+&nbsp;    private int templateTaskId;
+&nbsp;
+&nbsp;    private DataEditorSetting dataEditorSetting;
+&nbsp;
+&nbsp;    private static final String DESKTOP_LINK = &quot;/pages/desktop.jsf&quot;;
+&nbsp;
+<b class="fc">&nbsp;    private List&lt;PhysicalDivision&gt; unsavedDeletedMedia = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    private List&lt;PhysicalDivision&gt; unsavedUploadedMedia = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    private boolean folderConfigurationComplete = false;</b>
+&nbsp;
+<b class="fc">&nbsp;    private int numberOfScans = 0;</b>
+&nbsp;    private String errorMessage;
+&nbsp;
+&nbsp;    @Inject
+&nbsp;    private MediaProvider mediaProvider;
+<b class="fc">&nbsp;    private boolean mediaUpdated = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Public constructor.
+&nbsp;     */
+<b class="fc">&nbsp;    public DataEditorForm() {</b>
+<b class="fc">&nbsp;        this.structurePanel = new StructurePanel(this);</b>
+<b class="fc">&nbsp;        this.metadataPanel = new MetadataPanel(this);</b>
+<b class="fc">&nbsp;        this.galleryPanel = new GalleryPanel(this);</b>
+<b class="fc">&nbsp;        this.paginationPanel = new PaginationPanel(this);</b>
+<b class="fc">&nbsp;        this.addDocStrucTypeDialog = new AddDocStrucTypeDialog(this);</b>
+<b class="fc">&nbsp;        this.addMetadataDialog = new AddMetadataDialog(this);</b>
+<b class="fc">&nbsp;        this.addPhysicalDivisionDialog = new AddPhysicalDivisionDialog(this);</b>
+<b class="fc">&nbsp;        this.changeDocStrucTypeDialog = new ChangeDocStrucTypeDialog(this);</b>
+<b class="fc">&nbsp;        this.editPagesDialog = new EditPagesDialog(this);</b>
+<b class="fc">&nbsp;        this.uploadFileDialog = new UploadFileDialog(this);</b>
+<b class="fc">&nbsp;        acquisitionStage = &quot;edit&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if the process is correctly set. Otherwise, redirect to desktop,
+&nbsp;     * because metadata editor doesn&#39;t work without a process.
+&nbsp;     */
+&nbsp;    public void initMetadataEditor() {
+<b class="nc">&nbsp;        if (Objects.isNull(process)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;noProcessSelected&quot;);</b>
+<b class="nc">&nbsp;                FacesContext context = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;                String path = context.getExternalContext().getRequestContextPath() + DESKTOP_LINK;</b>
+<b class="nc">&nbsp;                context.getExternalContext().redirect(path);</b>
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;noProcessSelected&quot;);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            if (mediaUpdated) {</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;fileReferencesUpdatedDialog&#39;).show();&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Open the metadata file of the process with the given ID in the metadata editor.
+&nbsp;     *
+&nbsp;     * @param processID
+&nbsp;     *            ID of the process that is opened
+&nbsp;     * @param referringView
+&nbsp;     *            JSF page the user came from
+&nbsp;     */
+&nbsp;    public void open(String processID, String referringView, String taskId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.referringView = referringView;</b>
+<b class="nc">&nbsp;            this.process = ServiceManager.getProcessService().getById(Integer.parseInt(processID));</b>
+<b class="nc">&nbsp;            this.currentChildren.addAll(process.getChildren());</b>
+<b class="nc">&nbsp;            this.user = ServiceManager.getUserService().getCurrentUser();</b>
+<b class="nc">&nbsp;            this.checkProjectFolderConfiguration();</b>
+<b class="nc">&nbsp;            if (StringUtils.isNotBlank(taskId) &amp;&amp; StringUtils.isNumeric(taskId)) {</b>
+<b class="nc">&nbsp;                this.templateTaskId = Integer.parseInt(taskId);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            this.loadDataEditorSettings();</b>
+<b class="nc">&nbsp;            errorMessage = &quot;&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;            User blockedUser = MetadataLock.getLockUser(process.getId());</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(blockedUser) &amp;&amp; !blockedUser.equals(this.user)) {</b>
+<b class="nc">&nbsp;                errorMessage = Helper.getTranslation(&quot;blocked&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            String metadataLanguage = user.getMetadataLanguage();</b>
+<b class="nc">&nbsp;            priorityList = LanguageRange.parse(metadataLanguage.isEmpty() ? &quot;en&quot; : metadataLanguage);</b>
+<b class="nc">&nbsp;            ruleset = ServiceManager.getRulesetService().openRuleset(process.getRuleset());</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                mediaUpdated = openMetsFile();</b>
+<b class="nc">&nbsp;            } catch (MediaNotFoundException e) {</b>
+<b class="nc">&nbsp;                mediaUpdated = false;</b>
+<b class="nc">&nbsp;                Helper.setWarnMessage(e.getMessage());</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            if (!workpiece.getId().equals(process.getId().toString())) {</b>
+<b class="nc">&nbsp;                errorMessage = Helper.getTranslation(&quot;metadataConfusion&quot;, String.valueOf(process.getId()),</b>
+<b class="nc">&nbsp;                        workpiece.getId());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            selectedMedia = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;            unsavedUploadedMedia = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            init();</b>
+<b class="nc">&nbsp;            if (Objects.isNull(errorMessage) || errorMessage.isEmpty()) {</b>
+<b class="nc">&nbsp;                MetadataLock.setLocked(process.getId(), user);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;metadataLockedDialog&#39;).show();&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException | DAOException | InvalidImagesException | NoSuchElementException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void checkProjectFolderConfiguration() {
+<b class="nc">&nbsp;        if (Objects.nonNull(this.process)) {</b>
+<b class="nc">&nbsp;            Project project = this.process.getProject();</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(project)) {</b>
+<b class="nc">&nbsp;                this.folderConfigurationComplete = Objects.nonNull(project.getGeneratorSource())</b>
+<b class="nc">&nbsp;                        &amp;&amp; Objects.nonNull(project.getMediaView()) &amp;&amp; Objects.nonNull(project.getPreview());</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                this.folderConfigurationComplete = false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            this.folderConfigurationComplete = false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void loadDataEditorSettings() {
+<b class="nc">&nbsp;        if (templateTaskId &gt; 0) {</b>
+<b class="nc">&nbsp;            dataEditorSetting = ServiceManager.getDataEditorSettingService().loadDataEditorSetting(user.getId(),</b>
+&nbsp;                    templateTaskId);
+<b class="nc">&nbsp;            if (Objects.isNull(dataEditorSetting)) {</b>
+<b class="nc">&nbsp;                dataEditorSetting = new DataEditorSetting();</b>
+<b class="nc">&nbsp;                dataEditorSetting.setUserId(user.getId());</b>
+<b class="nc">&nbsp;                dataEditorSetting.setTaskId(templateTaskId);</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            dataEditorSetting = null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Opens the METS file.
+&nbsp;     *
+&nbsp;     * @throws IOException
+&nbsp;     *             if filesystem I/O fails
+&nbsp;     */
+&nbsp;    private boolean openMetsFile() throws IOException, InvalidImagesException, MediaNotFoundException {
+<b class="nc">&nbsp;        mainFileUri = ServiceManager.getProcessService().getMetadataFileUri(process);</b>
+<b class="nc">&nbsp;        workpiece = ServiceManager.getMetsService().loadWorkpiece(mainFileUri);</b>
+<b class="nc">&nbsp;        workpieceOriginalState = ServiceManager.getMetsService().loadWorkpiece(mainFileUri);</b>
+<b class="nc">&nbsp;        if (Objects.isNull(workpiece.getId())) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;Workpiece has no ID. Cannot verify workpiece ID. Setting workpiece ID.&quot;);</b>
+<b class="nc">&nbsp;            workpiece.setId(process.getId().toString());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        setNumberOfScans(workpiece.getNumberOfAllPhysicalDivisionChildrenFilteredByTypes(PhysicalDivision.TYPES));</b>
+<b class="nc">&nbsp;        return ServiceManager.getFileService().searchForMedia(process, workpiece);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void init() {
+<b class="nc">&nbsp;        final long begin = System.nanoTime();</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; severalAssignments = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        initSeveralAssignments(workpiece.getPhysicalStructure(), severalAssignments);</b>
+<b class="nc">&nbsp;        structurePanel.getSeveralAssignments().addAll(severalAssignments);</b>
+&nbsp;
+<b class="nc">&nbsp;        structurePanel.show();</b>
+<b class="nc">&nbsp;        structurePanel.getSelectedLogicalNode().setSelected(true);</b>
+<b class="nc">&nbsp;        structurePanel.getSelectedPhysicalNode().setSelected(true);</b>
+<b class="nc">&nbsp;        metadataPanel.showLogical(getSelectedStructure());</b>
+<b class="nc">&nbsp;        metadataPanel.showPhysical(getSelectedPhysicalDivision());</b>
+<b class="nc">&nbsp;        galleryPanel.setGalleryViewMode(GalleryViewMode.getByName(user.getDefaultGalleryViewMode()).name());</b>
+<b class="nc">&nbsp;        galleryPanel.show();</b>
+<b class="nc">&nbsp;        paginationPanel.show();</b>
+&nbsp;
+<b class="nc">&nbsp;        editPagesDialog.prepare();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (logger.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;            logger.trace(&quot;Initializing editor beans took {} ms&quot;,</b>
+<b class="nc">&nbsp;                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Clears all remaining content from the data editor form.
+&nbsp;     *
+&nbsp;     * @return the referring view, to return there
+&nbsp;     */
+&nbsp;    public String closeAndReturn() {
+<b class="nc">&nbsp;        if (referringView.contains(&quot;?&quot;)) {</b>
+<b class="nc">&nbsp;            return referringView + &quot;&amp;faces-redirect=true&quot;;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return referringView + &quot;?faces-redirect=true&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Close method called before destroying ViewScoped DataEditorForm bean instance. Cleans up various properties
+&nbsp;     * and releases metadata lock of current process if current user equals user of metadata lock.
+&nbsp;     */
+&nbsp;    @PreDestroy
+&nbsp;    public void close() {
+<b class="nc">&nbsp;        deleteNotSavedUploadedMedia();</b>
+<b class="nc">&nbsp;        unsavedDeletedMedia.clear();</b>
+<b class="nc">&nbsp;        metadataPanel.clear();</b>
+<b class="nc">&nbsp;        structurePanel.clear();</b>
+<b class="nc">&nbsp;        workpiece = null;</b>
+<b class="nc">&nbsp;        workpieceOriginalState = null;</b>
+<b class="nc">&nbsp;        mainFileUri = null;</b>
+<b class="nc">&nbsp;        ruleset = null;</b>
+<b class="nc">&nbsp;        currentChildren.clear();</b>
+<b class="nc">&nbsp;        selectedMedia.clear();</b>
+<b class="nc">&nbsp;        if (!FacesContext.getCurrentInstance().isPostback()) {</b>
+<b class="nc">&nbsp;            mediaProvider.resetMediaResolverForProcess(process.getId());</b>
+&nbsp;        }
+&nbsp;        // do not unlock process if this locked process was opened by a different user opening editor
+&nbsp;        // directly via URL bookmark and &#39;preDestroy&#39; method was being triggered redirecting him to desktop page
+<b class="nc">&nbsp;        if (this.user.equals(MetadataLock.getLockUser(process.getId()))) {</b>
+<b class="nc">&nbsp;            MetadataLock.setFree(process.getId());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        process = null;</b>
+<b class="nc">&nbsp;        user = null;</b>
+<b class="nc">&nbsp;        mediaUpdated = false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void deleteUnsavedDeletedMedia() {
+<b class="nc">&nbsp;        URI uri = Paths.get(ConfigCore.getKitodoDataDirectory(),</b>
+<b class="nc">&nbsp;                ServiceManager.getProcessService().getProcessDataDirectory(this.process).getPath()).toUri();</b>
+<b class="nc">&nbsp;        for (PhysicalDivision physicalDivision : this.unsavedDeletedMedia) {</b>
+<b class="nc">&nbsp;            for (URI fileURI : physicalDivision.getMediaFiles().values()) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    ServiceManager.getFileService().delete(uri.resolve(fileURI));</b>
+<b class="nc">&nbsp;                } catch (IOException e) {</b>
+<b class="nc">&nbsp;                    logger.error(e.getMessage());</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get unsavedDeletedMedia.
+&nbsp;     *
+&nbsp;     * @return value of unsavedDeletedMedia
+&nbsp;     */
+&nbsp;    public List&lt;PhysicalDivision&gt; getUnsavedDeletedMedia() {
+<b class="nc">&nbsp;        return unsavedDeletedMedia;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void deleteNotSavedUploadedMedia() {
+<b class="nc">&nbsp;        URI uri = Paths.get(ConfigCore.getKitodoDataDirectory(),</b>
+<b class="nc">&nbsp;                ServiceManager.getProcessService().getProcessDataDirectory(this.process).getPath()).toUri();</b>
+<b class="nc">&nbsp;        for (PhysicalDivision mediaUnit : this.unsavedUploadedMedia) {</b>
+<b class="nc">&nbsp;            for (URI fileURI : mediaUnit.getMediaFiles().values()) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    ServiceManager.getFileService().delete(uri.resolve(fileURI));</b>
+<b class="nc">&nbsp;                } catch (IOException e) {</b>
+<b class="nc">&nbsp;                    logger.error(e.getMessage());</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        this.unsavedUploadedMedia.clear();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Validate the structure and metadata.
+&nbsp;     *
+&nbsp;     * @return whether the validation was successful or not
+&nbsp;     */
+&nbsp;    public boolean validate() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ValidationResult validationResult = ServiceManager.getMetadataValidationService().validate(workpiece,</b>
+&nbsp;                ruleset);
+<b class="nc">&nbsp;            State state = validationResult.getState();</b>
+<b class="nc">&nbsp;            switch (state) {</b>
+&nbsp;                case ERROR:
+<b class="nc">&nbsp;                    Helper.setErrorMessage(Helper.getTranslation(&quot;dataEditor.validation.state.error&quot;));</b>
+<b class="nc">&nbsp;                    for (String message : validationResult.getResultMessages()) {</b>
+<b class="nc">&nbsp;                        Helper.setErrorMessage(message);</b>
+<b class="nc">&nbsp;                    }</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                case WARNING:
+<b class="nc">&nbsp;                    Helper.setWarnMessage(Helper.getTranslation(&quot;dataEditor.validation.state.warning&quot;));</b>
+<b class="nc">&nbsp;                    for (String message : validationResult.getResultMessages()) {</b>
+<b class="nc">&nbsp;                        Helper.setWarnMessage(message);</b>
+<b class="nc">&nbsp;                    }</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;                default:
+<b class="nc">&nbsp;                    Helper.setMessage(Helper.getTranslation(&quot;dataEditor.validation.state.success&quot;));</b>
+<b class="nc">&nbsp;                    for (String message : validationResult.getResultMessages()) {</b>
+<b class="nc">&nbsp;                        Helper.setMessage(message);</b>
+<b class="nc">&nbsp;                    }</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save the structure and metadata.
+&nbsp;     */
+&nbsp;    public void save() {
+<b class="nc">&nbsp;        save(false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String save(boolean close) {
+&nbsp;        try {
+<b class="nc">&nbsp;            metadataPanel.preserve();</b>
+<b class="nc">&nbsp;            structurePanel.preserve();</b>
+<b class="nc">&nbsp;            ServiceManager.getProcessService().updateChildrenFromLogicalStructure(process, workpiece.getLogicalStructure());</b>
+<b class="nc">&nbsp;            ServiceManager.getFileService().createBackupFile(process);</b>
+<b class="nc">&nbsp;            try (OutputStream out = ServiceManager.getFileService().write(mainFileUri)) {</b>
+<b class="nc">&nbsp;                ServiceManager.getMetsService().save(workpiece, out);</b>
+<b class="nc">&nbsp;                ServiceManager.getProcessService().saveToIndex(process,false);</b>
+<b class="nc">&nbsp;                unsavedUploadedMedia.clear();</b>
+<b class="nc">&nbsp;                deleteUnsavedDeletedMedia();</b>
+<b class="nc">&nbsp;                if (close) {</b>
+<b class="nc">&nbsp;                    return closeAndReturn();</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    PrimeFaces.current().executeScript(&quot;PF(&#39;notifications&#39;).renderMessage({&#39;summary&#39;:&#39;&quot;</b>
+<b class="nc">&nbsp;                            + Helper.getTranslation(&quot;metadataSaved&quot;) + &quot;&#39;,&#39;severity&#39;:&#39;info&#39;})&quot;);</b>
+<b class="nc">&nbsp;                    workpieceOriginalState = ServiceManager.getMetsService().loadWorkpiece(mainFileUri);</b>
+<b class="nc">&nbsp;                    PrimeFaces.current().executeScript(&quot;setUnsavedChanges(false);&quot;);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;PF(&#39;sticky-notifications&#39;).removeAll();&quot;);</b>
+<b class="nc">&nbsp;        PrimeFaces.current().ajax().update(&quot;notifications&quot;);</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save the structure and metadata.
+&nbsp;     *
+&nbsp;     * @return navigation target
+&nbsp;     */
+&nbsp;    public String saveAndExit() {
+<b class="nc">&nbsp;        return save(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void initSeveralAssignments(PhysicalDivision physicalDivision, List&lt;PhysicalDivision&gt; severalAssignments) {
+<b class="nc">&nbsp;        if (physicalDivision.getLogicalDivisions().size() &gt; 1) {</b>
+<b class="nc">&nbsp;            severalAssignments.add(physicalDivision);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (PhysicalDivision child : physicalDivision.getChildren()) {</b>
+<b class="nc">&nbsp;            initSeveralAssignments(child, severalAssignments);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes the selected outline point from the logical outline. This method
+&nbsp;     * is called by PrimeFaces to inform the application that the user has
+&nbsp;     * clicked on the shortcut menu entry to clear the outline point.
+&nbsp;     */
+&nbsp;    public void deleteStructure() {
+<b class="nc">&nbsp;        structurePanel.deleteSelectedStructure();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes the selected physical division from the media list. The associated files
+&nbsp;     * on the drive are not deleted. The next time the editor is started, files
+&nbsp;     * that are not yet in the media list will be inserted there again. This
+&nbsp;     * method is called by PrimeFaces to inform the application that the user
+&nbsp;     * clicked on the context menu entry to delete the physical division.
+&nbsp;     */
+&nbsp;    public void deletePhysicalDivision() {
+<b class="nc">&nbsp;        structurePanel.deleteSelectedPhysicalDivision();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getAcquisitionStage() {
+<b class="nc">&nbsp;        return acquisitionStage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get unsavedUploadedMedia.
+&nbsp;     *
+&nbsp;     * @return value of unsavedUploadedMedia
+&nbsp;     */
+&nbsp;    public List&lt;PhysicalDivision&gt; getUnsavedUploadedMedia() {
+<b class="nc">&nbsp;        return unsavedUploadedMedia;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the backing bean for the add doc struc type dialog. This function
+&nbsp;     * is used by PrimeFaces to access the elements of the add doc struc type
+&nbsp;     * dialog.
+&nbsp;     *
+&nbsp;     * @return the backing bean for the add doc struc type dialog
+&nbsp;     */
+&nbsp;    public AddDocStrucTypeDialog getAddDocStrucTypeDialog() {
+<b class="nc">&nbsp;        return addDocStrucTypeDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get addMetadataDialog.
+&nbsp;     *
+&nbsp;     * @return value of addMetadataDialog
+&nbsp;     */
+&nbsp;    public AddMetadataDialog getAddMetadataDialog() {
+<b class="nc">&nbsp;        return addMetadataDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the backing bean for the add media dialog. This function is used
+&nbsp;     * by PrimeFaces to access the elements of the add media dialog.
+&nbsp;     *
+&nbsp;     * @return the backing bean for the add media dialog
+&nbsp;     */
+&nbsp;    public AddPhysicalDivisionDialog getAddPhysicalDivisionDialog() {
+<b class="nc">&nbsp;        return addPhysicalDivisionDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the backing bean for the change doc struc type dialog. This
+&nbsp;     * function is used by PrimeFaces to access the elements of the change doc
+&nbsp;     * struc type dialog.
+&nbsp;     *
+&nbsp;     * @return the backing bean for the change doc struc type dialog
+&nbsp;     */
+&nbsp;    public ChangeDocStrucTypeDialog getChangeDocStrucTypeDialog() {
+<b class="nc">&nbsp;        return changeDocStrucTypeDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the backing bean for the edit pages dialog. This function is used
+&nbsp;     * by PrimeFaces to access the elements of the edit pages dialog.
+&nbsp;     *
+&nbsp;     * @return the backing bean for the edit pages dialog
+&nbsp;     */
+&nbsp;    public EditPagesDialog getEditPagesDialog() {
+<b class="nc">&nbsp;        return editPagesDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the backing bean for the gallery panel. This function is used by
+&nbsp;     * PrimeFaces to access the elements of the gallery panel.
+&nbsp;     *
+&nbsp;     * @return the backing bean for the gallery panel
+&nbsp;     */
+&nbsp;    public GalleryPanel getGalleryPanel() {
+<b class="nc">&nbsp;        return galleryPanel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    Set&lt;Process&gt; getCurrentChildren() {
+<b class="fc">&nbsp;        return currentChildren;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the backing bean for the metadata panel. This function is used
+&nbsp;     * by PrimeFaces to access the elements of the metadata panel.
+&nbsp;     *
+&nbsp;     * @return the backing bean for the metadata panel
+&nbsp;     */
+&nbsp;    public MetadataPanel getMetadataPanel() {
+<b class="nc">&nbsp;        return metadataPanel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the backing bean for the pagination panel. This function is used
+&nbsp;     * by PrimeFaces to access the elements of the pagination panel.
+&nbsp;     *
+&nbsp;     * @return the backing bean for the pagination panel
+&nbsp;     */
+&nbsp;    public PaginationPanel getPaginationPanel() {
+<b class="nc">&nbsp;        return paginationPanel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;LanguageRange&gt; getPriorityList() {
+<b class="nc">&nbsp;        return priorityList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process.
+&nbsp;     *
+&nbsp;     * @return value of process
+&nbsp;     */
+&nbsp;    public Process getProcess() {
+<b class="fc">&nbsp;        return process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process title.
+&nbsp;     *
+&nbsp;     * @return value of process title
+&nbsp;     */
+&nbsp;    public String getProcessTitle() {
+<b class="nc">&nbsp;        return process.getTitle();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public RulesetManagementInterface getRulesetManagement() {
+<b class="nc">&nbsp;        return ruleset;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Optional&lt;LogicalDivision&gt; getSelectedStructure() {
+<b class="nc">&nbsp;        return structurePanel.getSelectedStructure();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    Optional&lt;PhysicalDivision&gt; getSelectedPhysicalDivision() {
+<b class="nc">&nbsp;        return structurePanel.getSelectedPhysicalDivision();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the passed LogicalDivision is part of the selection.
+&nbsp;     * @param structure LogicalDivision to be checked
+&nbsp;     * @return boolean representing selection status
+&nbsp;     */
+&nbsp;    public boolean isStripeSelected(LogicalDivision structure) {
+<b class="nc">&nbsp;        Optional&lt;LogicalDivision&gt; selectedStructure = structurePanel.getSelectedStructure();</b>
+<b class="nc">&nbsp;        return selectedStructure.filter(logicalDivision -&gt; Objects.equals(structure, logicalDivision)).isPresent();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return structurePanel.
+&nbsp;     *
+&nbsp;     * @return structurePanel
+&nbsp;     */
+&nbsp;    public StructurePanel getStructurePanel() {
+<b class="nc">&nbsp;        return structurePanel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    Workpiece getWorkpiece() {
+<b class="nc">&nbsp;        return workpiece;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void refreshStructurePanel() {
+<b class="nc">&nbsp;        structurePanel.show(true);</b>
+<b class="nc">&nbsp;        galleryPanel.updateStripes();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void setProcess(Process process) {
+<b class="fc">&nbsp;        this.process = process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selectedMedia.
+&nbsp;     *
+&nbsp;     * @return value of selectedMedia
+&nbsp;     */
+&nbsp;    public List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; getSelectedMedia() {
+<b class="nc">&nbsp;        return selectedMedia;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks and returns if consecutive physical divisions in one structure element are selected or not.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Note: This method is called potentially thousands of times when rendering large galleries.&lt;/p&gt;
+&nbsp;     */
+&nbsp;    public boolean consecutivePagesSelected() {
+<b class="nc">&nbsp;        if (selectedMedia.isEmpty()) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int maxOrder = selectedMedia.stream().mapToInt(m -&gt; m.getLeft().getOrder()).max().orElseThrow(NoSuchElementException::new);</b>
+<b class="nc">&nbsp;        int minOrder = selectedMedia.stream().mapToInt(m -&gt; m.getLeft().getOrder()).min().orElseThrow(NoSuchElementException::new);</b>
+&nbsp;
+&nbsp;        // Check whether the set of selected media all belong to the same logical division, otherwise the selection
+&nbsp;        // is not consecutive. However, do not use stream().distinct(), which will do pairwise comparisons, which is
+&nbsp;        // slow for large amounts of selected images. Instead, just check whether the first logical division matches
+&nbsp;        // all others in a simple loop.
+<b class="nc">&nbsp;        boolean theSameLogicalDivisions = true;</b>
+<b class="nc">&nbsp;        LogicalDivision firstSelectedMediaLogicalDivision = null;</b>
+<b class="nc">&nbsp;        for (Pair&lt;PhysicalDivision, LogicalDivision&gt; pair : selectedMedia) {</b>
+<b class="nc">&nbsp;            if (Objects.isNull(firstSelectedMediaLogicalDivision)) {</b>
+<b class="nc">&nbsp;                firstSelectedMediaLogicalDivision = pair.getRight();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                if (!Objects.equals(firstSelectedMediaLogicalDivision, pair.getRight())) {</b>
+<b class="nc">&nbsp;                    theSameLogicalDivisions = false;</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return selectedMedia.size() - 1 == maxOrder - minOrder &amp;&amp; theSameLogicalDivisions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void setSelectedMedia(List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; media) {
+<b class="nc">&nbsp;        this.selectedMedia = media;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the passed PhysicalDivision is selected.
+&nbsp;     * @param physicalDivision PhysicalDivision object to check for selection
+&nbsp;     * @param logicalDivision object to check whether the PhysicalDivision is selected as a child of this LogicalDivision.
+&nbsp;     *                                  A PhysicalDivision can be assigned to multiple logical divisionss but can be selected
+&nbsp;     *                                  in one of these LogicalDivisions.
+&nbsp;     * @return boolean whether the PhysicalDivision is selected at the specified position
+&nbsp;     */
+&nbsp;    public boolean isSelected(PhysicalDivision physicalDivision, LogicalDivision logicalDivision) {
+<b class="nc">&nbsp;        if (Objects.nonNull(physicalDivision) &amp;&amp; Objects.nonNull(logicalDivision)) {</b>
+<b class="nc">&nbsp;            return selectedMedia.contains(new ImmutablePair&lt;&gt;(physicalDivision, logicalDivision));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void switchStructure(Object treeNodeData, boolean updateGalleryAndPhysicalTree) throws NoSuchMetadataFieldException {
+&nbsp;        try {
+<b class="nc">&nbsp;            metadataPanel.preserveLogical();</b>
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException e) {</b>
+<b class="nc">&nbsp;            logger.info(e.getLocalizedMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        Optional&lt;LogicalDivision&gt; selectedStructure = structurePanel.getSelectedStructure();</b>
+&nbsp;
+<b class="nc">&nbsp;        metadataPanel.showLogical(selectedStructure);</b>
+<b class="nc">&nbsp;        if (treeNodeData instanceof StructureTreeNode) {</b>
+<b class="nc">&nbsp;            StructureTreeNode structureTreeNode = (StructureTreeNode) treeNodeData;</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(structureTreeNode.getDataObject())) {</b>
+<b class="nc">&nbsp;                if (structureTreeNode.getDataObject() instanceof LogicalDivision</b>
+<b class="nc">&nbsp;                        &amp;&amp; selectedStructure.isPresent()) {</b>
+&nbsp;                    // Logical structure element selected
+<b class="nc">&nbsp;                    if (structurePanel.isSeparateMedia()) {</b>
+<b class="nc">&nbsp;                        LogicalDivision structuralElement = selectedStructure.get();</b>
+<b class="nc">&nbsp;                        if (!structuralElement.getViews().isEmpty()) {</b>
+<b class="nc">&nbsp;                            ArrayList&lt;View&gt; views = new ArrayList&lt;&gt;(structuralElement.getViews());</b>
+<b class="nc">&nbsp;                            if (Objects.nonNull(views.get(0)) &amp;&amp; updateGalleryAndPhysicalTree) {</b>
+<b class="nc">&nbsp;                                updatePhysicalStructureTree(views.get(0));</b>
+<b class="nc">&nbsp;                                updateGallery(views.get(0));</b>
+&nbsp;                            }
+<b class="nc">&nbsp;                        } else {</b>
+<b class="nc">&nbsp;                            updatePhysicalStructureTree(null);</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                    } else {</b>
+<b class="nc">&nbsp;                        getSelectedMedia().clear();</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                } else if (structureTreeNode.getDataObject() instanceof View) {</b>
+&nbsp;                    // Page selected in logical tree
+<b class="nc">&nbsp;                    View view = (View) structureTreeNode.getDataObject();</b>
+<b class="nc">&nbsp;                    metadataPanel.showPageInLogical(view.getPhysicalDivision());</b>
+<b class="nc">&nbsp;                    if (updateGalleryAndPhysicalTree) {</b>
+<b class="nc">&nbsp;                        updateGallery(view);</b>
+&nbsp;                    }
+&nbsp;                    // no need to update physical tree because pages can only be clicked in logical tree if physical tree is hidden!
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        paginationPanel.preparePaginationSelectionSelectedItems();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void switchPhysicalDivision() throws NoSuchMetadataFieldException {
+&nbsp;        try {
+<b class="nc">&nbsp;            metadataPanel.preservePhysical();</b>
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException e) {</b>
+<b class="nc">&nbsp;            logger.info(e.getLocalizedMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        Optional&lt;PhysicalDivision&gt; selectedPhysicalDivision = structurePanel.getSelectedPhysicalDivision();</b>
+&nbsp;
+<b class="nc">&nbsp;        metadataPanel.showPhysical(selectedPhysicalDivision);</b>
+<b class="nc">&nbsp;        if (selectedPhysicalDivision.isPresent()) {</b>
+&nbsp;            // update gallery
+<b class="nc">&nbsp;            galleryPanel.updateSelection(selectedPhysicalDivision.get(), null);</b>
+&nbsp;            // update logical tree
+<b class="nc">&nbsp;            for (GalleryMediaContent galleryMediaContent : galleryPanel.getMedias()) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(galleryMediaContent.getView())</b>
+<b class="nc">&nbsp;                        &amp;&amp; Objects.equals(selectedPhysicalDivision.get(), galleryMediaContent.getView().getPhysicalDivision())) {</b>
+<b class="nc">&nbsp;                    structurePanel.updateLogicalNodeSelection(galleryMediaContent, null);</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updatePhysicalStructureTree(View view) {
+<b class="nc">&nbsp;        GalleryMediaContent galleryMediaContent = this.galleryPanel.getGalleryMediaContent(view);</b>
+<b class="nc">&nbsp;        structurePanel.updatePhysicalNodeSelection(galleryMediaContent);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updateGallery(View view) {
+<b class="nc">&nbsp;        PhysicalDivision physicalDivision = view.getPhysicalDivision();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(physicalDivision)) {</b>
+<b class="nc">&nbsp;            galleryPanel.updateSelection(physicalDivision, structurePanel.getPageStructure(view, workpiece.getLogicalStructure()));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    void assignView(LogicalDivision logicalDivision, View view, Integer index) {
+<b class="nc">&nbsp;        if (Objects.nonNull(index) &amp;&amp; index &gt;= 0 &amp;&amp; index &lt; logicalDivision.getViews().size()) {</b>
+<b class="nc">&nbsp;            logicalDivision.getViews().add(index, view);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            logicalDivision.getViews().add(view);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        view.getPhysicalDivision().getLogicalDivisions().add(logicalDivision);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void unassignView(LogicalDivision logicalDivision, View view, boolean removeLast) {
+&nbsp;        // if View was moved within one element, we need to distinguish two possible directions it could have been moved
+<b class="nc">&nbsp;        if (removeLast) {</b>
+<b class="nc">&nbsp;            logicalDivision.getViews().removeLastOccurrence(view);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            logicalDivision.getViews().removeFirstOccurrence(view);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        view.getPhysicalDivision().getLogicalDivisions().remove(logicalDivision);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return &#39;title&#39; value of given Object &#39;dataObject&#39; if Object is instance of
+&nbsp;     * &#39;LogicalDivision&#39; and if it does have a title. Uses a configurable list of metadata keys to determine
+&nbsp;     * which metadata keys should be considered.
+&nbsp;     * Return empty string otherwise.
+&nbsp;     *
+&nbsp;     * @param dataObject
+&nbsp;     *          StructureTreeNode containing the LogicalDivision whose title is returned
+&nbsp;     * @return &#39;title&#39; value of the LogicalDivision contained in the given StructureTreeNode &#39;treeNode&#39;
+&nbsp;     */
+&nbsp;    public String getStructureElementTitle(Object dataObject) {
+<b class="nc">&nbsp;        if (dataObject instanceof LogicalDivision) {</b>
+<b class="nc">&nbsp;            return DataEditorService.getTitleValue((LogicalDivision) dataObject, structurePanel.getTitleMetadata());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get referringView.
+&nbsp;     *
+&nbsp;     * @return value of referringView
+&nbsp;     */
+&nbsp;    public String getReferringView() {
+<b class="nc">&nbsp;        return referringView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the given ProcessDetail &#39;processDetail&#39; is contained in the current list of addable
+&nbsp;     * metadata types in the addDocStrucTypeDialog.
+&nbsp;     *
+&nbsp;     * @param treeNode treeNode to be added
+&nbsp;     * @return whether the given ProcessDetail can be added or not
+&nbsp;     */
+&nbsp;    public boolean canBeAdded(TreeNode treeNode) {
+<b class="nc">&nbsp;        if (Objects.isNull(treeNode.getParent().getParent())) {</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(metadataPanel.getSelectedMetadataTreeNode()) || Objects.isNull(addMetadataDialog.getAddableMetadata())) {</b>
+<b class="nc">&nbsp;                this.addMetadataDialog.prepareAddableMetadataForStructure(treeNode.getParent().getChildren());</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else if (!Objects.equals(metadataPanel.getSelectedMetadataTreeNode(), treeNode.getParent())</b>
+<b class="nc">&nbsp;                || Objects.isNull(addMetadataDialog.getAddableMetadata())) {</b>
+<b class="nc">&nbsp;            prepareAddableMetadataForGroup(treeNode.getParent());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(addMetadataDialog.getAddableMetadata())) {</b>
+<b class="nc">&nbsp;            return addMetadataDialog.getAddableMetadata().stream()</b>
+<b class="nc">&nbsp;                    .map(SelectItem::getValue).collect(Collectors.toList()).contains(((ProcessDetail) treeNode.getData()).getMetadataID());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean canBeDeleted(ProcessDetail processDetail) {
+<b class="nc">&nbsp;        return processDetail.getOccurrences() &gt; 1 &amp;&amp; processDetail.getOccurrences() &gt; processDetail.getMinOccurs()</b>
+<b class="nc">&nbsp;                || (!processDetail.isRequired() &amp;&amp; !this.ruleset.isAlwaysShowingForKey(processDetail.getMetadataID()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check for changes in workpiece.
+&nbsp;     */
+&nbsp;    public void checkForChanges() {
+<b class="nc">&nbsp;        if (Objects.nonNull(PrimeFaces.current())) {</b>
+<b class="nc">&nbsp;            boolean unsavedChanges = !this.workpiece.equals(workpieceOriginalState);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;setUnsavedChanges(&quot; + unsavedChanges + &quot;);&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the shortcuts for the current user.
+&nbsp;     *
+&nbsp;     * @return shortcuts as java.lang.String
+&nbsp;     */
+&nbsp;    public String getShortcuts() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getUserService().getShortcuts(user.getId());</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            return &quot;{}&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get templateTaskId.
+&nbsp;     *
+&nbsp;     * @return value of templateTaskId
+&nbsp;     */
+&nbsp;    public int getTemplateTaskId() {
+<b class="nc">&nbsp;        return templateTaskId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get dataEditorSetting.
+&nbsp;     *
+&nbsp;     * @return value of dataEditorSetting
+&nbsp;     */
+&nbsp;    public DataEditorSetting getDataEditorSetting() {
+<b class="nc">&nbsp;        return dataEditorSetting;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set dataEditorSetting.
+&nbsp;     *
+&nbsp;     * @param dataEditorSetting as org.kitodo.data.database.beans.DataEditorSetting
+&nbsp;     */
+&nbsp;    public void setDataEditorSetting(DataEditorSetting dataEditorSetting) {
+<b class="nc">&nbsp;        this.dataEditorSetting = dataEditorSetting;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets numberOfScans.
+&nbsp;     *
+&nbsp;     * @return value of numberOfScans
+&nbsp;     */
+&nbsp;    public int getNumberOfScans() {
+<b class="nc">&nbsp;        return numberOfScans;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets numberOfScans.
+&nbsp;     *
+&nbsp;     * @param numberOfScans value of numberOfScans
+&nbsp;     */
+&nbsp;    public void setNumberOfScans(int numberOfScans) {
+<b class="nc">&nbsp;        this.numberOfScans = numberOfScans;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save current metadata editor layout.
+&nbsp;     */
+&nbsp;    public void saveDataEditorSetting() {
+<b class="nc">&nbsp;        if (Objects.nonNull(dataEditorSetting) &amp;&amp; dataEditorSetting.getTaskId() &gt; 0) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getDataEditorSettingService().saveToDatabase(dataEditorSetting);</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;dataEditorSavingResultDialog&#39;).show();&quot;);</b>
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;errorSaving&quot;, new Object[] {ObjectType.USER.getTranslationSingular() }, logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            logger.error(&quot;Could not save DataEditorSettings with userId {} and templateTaskId {}&quot;, user.getId(),</b>
+<b class="nc">&nbsp;                templateTaskId);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get uploadFileDialog.
+&nbsp;     *
+&nbsp;     * @return value of uploadFileDialog
+&nbsp;     */
+&nbsp;    public UploadFileDialog getUploadFileDialog() {
+<b class="nc">&nbsp;        return uploadFileDialog;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get folderConfigurationComplete.
+&nbsp;     *
+&nbsp;     * @return value of folderConfigurationComplete
+&nbsp;     */
+&nbsp;    public boolean isFolderConfigurationComplete() {
+<b class="nc">&nbsp;        return folderConfigurationComplete;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Preserve changes in the metadata panel.
+&nbsp;     */
+&nbsp;    public void preserveMetadataPanel() {
+&nbsp;        try {
+<b class="nc">&nbsp;            metadataPanel.preserve();</b>
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException | NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;            logger.info(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether given TreeNode contains ProcessFieldedMetadata and if any further metadata can
+&nbsp;     * be added to it or not.
+&nbsp;     *
+&nbsp;     * @return whether given TreeNode contains ProcessFieldedMetadata and if any further metadata can be added to it
+&nbsp;     */
+&nbsp;    public boolean metadataAddableToGroup(TreeNode metadataNode) {
+<b class="nc">&nbsp;        return metadataPanel.metadataAddableToGroup(metadataNode);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prepare addable metadata for metadata group.
+&nbsp;     */
+&nbsp;    public void prepareAddableMetadataForGroup(TreeNode treeNode) {
+<b class="nc">&nbsp;        addMetadataDialog.prepareAddableMetadataForGroup(treeNode);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get errorMessage.
+&nbsp;     *
+&nbsp;     * @return value of errorMessage
+&nbsp;     */
+&nbsp;    public String getErrorMessage() {
+<b class="nc">&nbsp;        return errorMessage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get mediaProvider.
+&nbsp;     *
+&nbsp;     * @return value of mediaProvider
+&nbsp;     */
+&nbsp;    public MediaProvider getMediaProvider() {
+<b class="nc">&nbsp;        return mediaProvider;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get mediaUpdated.
+&nbsp;     *
+&nbsp;     * @return value of mediaUpdated
+&nbsp;     */
+&nbsp;    public boolean isMediaUpdated() {
+<b class="nc">&nbsp;        return mediaUpdated;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set mediaUpdated.
+&nbsp;     *
+&nbsp;     * @param mediaUpdated as boolean
+&nbsp;     */
+&nbsp;    public void setMediaUpdated(boolean mediaUpdated) {
+<b class="nc">&nbsp;        this.mediaUpdated = mediaUpdated;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

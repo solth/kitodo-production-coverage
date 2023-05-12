@@ -1,0 +1,339 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessGenerator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.process</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessGenerator (org.kitodo.production.process)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessGenerator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,3%
+  </span>
+  <span class="absValue">
+    (12/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,4%
+  </span>
+  <span class="absValue">
+    (62/65)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.process;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+<b class="fc">&nbsp;public class ProcessGenerator {</b>
+&nbsp;
+&nbsp;    private Process generatedProcess;
+&nbsp;    private Project project;
+&nbsp;    private Template template;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get generatedProcess.
+&nbsp;     *
+&nbsp;     * @return value of generatedProcess
+&nbsp;     */
+&nbsp;    public Process getGeneratedProcess() {
+<b class="fc">&nbsp;        return generatedProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get project.
+&nbsp;     *
+&nbsp;     * @return value of project
+&nbsp;     */
+&nbsp;    public Project getProject() {
+<b class="nc">&nbsp;        return project;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get template.
+&nbsp;     *
+&nbsp;     * @return value of template
+&nbsp;     */
+&nbsp;    public Template getTemplate() {
+<b class="fc">&nbsp;        return template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate new process for given project and template.
+&nbsp;     *
+&nbsp;     * @param templateId
+&nbsp;     *            id of template to query from database
+&nbsp;     * @param projectId
+&nbsp;     *            id of project to query from database
+&nbsp;     *
+&nbsp;     * @return true if process was generated, otherwise false
+&nbsp;     */
+&nbsp;    public boolean generateProcess(int templateId, int projectId) throws ProcessGenerationException {
+&nbsp;        try {
+<b class="fc">&nbsp;            this.template = ServiceManager.getTemplateService().getById(templateId);</b>
+<b class="fc">&nbsp;            this.project = ServiceManager.getProjectService().getById(projectId);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            throw new ProcessGenerationException(</b>
+&nbsp;                    &quot;Template with id &quot; + templateId + &quot; or project with id &quot; + projectId + &quot; not found.&quot;, e);
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        ServiceManager.getTemplateService().checkForUnreachableTasks(this.template.getTasks());</b>
+&nbsp;
+<b class="fc">&nbsp;        this.generatedProcess = new Process();</b>
+<b class="fc">&nbsp;        this.generatedProcess.setTitle(&quot;&quot;);</b>
+<b class="fc">&nbsp;        this.generatedProcess.setTemplate(this.template);</b>
+<b class="fc">&nbsp;        this.generatedProcess.setProject(this.project);</b>
+<b class="fc">&nbsp;        this.generatedProcess.setRuleset(this.template.getRuleset());</b>
+<b class="fc">&nbsp;        this.generatedProcess.setDocket(this.template.getDocket());</b>
+&nbsp;
+<b class="fc">&nbsp;        ProcessGenerator.copyTasks(this.template, this.generatedProcess);</b>
+&nbsp;
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add property for process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @param title
+&nbsp;     *            String
+&nbsp;     * @param value
+&nbsp;     *            String
+&nbsp;     */
+&nbsp;    public static void addPropertyForProcess(Process process, String title, String value) {
+<b class="fc">&nbsp;        Property property = new Property();</b>
+<b class="fc">&nbsp;        property.setTitle(title);</b>
+<b class="fc">&nbsp;        property.setValue(value);</b>
+<b class="fc">&nbsp;        property.getProcesses().add(process);</b>
+<b class="fc">&nbsp;        List&lt;Property&gt; properties = process.getProperties();</b>
+<b class="fc">&nbsp;        properties.add(property);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add property for template.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @param title
+&nbsp;     *            String
+&nbsp;     * @param value
+&nbsp;     *            String
+&nbsp;     */
+&nbsp;    public static void addPropertyForTemplate(Process process, String title, String value) {
+<b class="fc">&nbsp;        Property property = new Property();</b>
+<b class="fc">&nbsp;        property.setTitle(title);</b>
+<b class="fc">&nbsp;        property.setValue(value);</b>
+<b class="fc">&nbsp;        property.getTemplates().add(process);</b>
+<b class="fc">&nbsp;        List&lt;Property&gt; properties = process.getTemplates();</b>
+<b class="fc">&nbsp;        properties.add(property);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add property for workpiece.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @param title
+&nbsp;     *            String
+&nbsp;     * @param value
+&nbsp;     *            String
+&nbsp;     */
+&nbsp;    public static void addPropertyForWorkpiece(Process process, String title, String value) {
+<b class="fc">&nbsp;        Property property = new Property();</b>
+<b class="fc">&nbsp;        property.setTitle(title);</b>
+<b class="fc">&nbsp;        property.setValue(value);</b>
+<b class="fc">&nbsp;        property.getWorkpieces().add(process);</b>
+<b class="fc">&nbsp;        List&lt;Property&gt; properties = process.getWorkpieces();</b>
+<b class="fc">&nbsp;        properties.add(property);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copy property for process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     * @param property
+&nbsp;     *            origin property
+&nbsp;     */
+&nbsp;    public static void copyPropertyForProcess(Process process, Property property) {
+<b class="fc">&nbsp;        if (ProcessValidator.existsProperty(process.getProperties(), property)) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Property processProperty = insertDataToProperty(property);</b>
+<b class="fc">&nbsp;        processProperty.getProcesses().add(process);</b>
+<b class="fc">&nbsp;        List&lt;Property&gt; properties = process.getProperties();</b>
+<b class="fc">&nbsp;        properties.add(processProperty);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copy property for template.
+&nbsp;     *
+&nbsp;     * @param template
+&nbsp;     *            object
+&nbsp;     * @param property
+&nbsp;     *            origin property
+&nbsp;     */
+&nbsp;    public static void copyPropertyForTemplate(Process template, Property property) {
+<b class="fc">&nbsp;        if (ProcessValidator.existsProperty(template.getTemplates(), property)) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Property templateProperty = insertDataToProperty(property);</b>
+<b class="fc">&nbsp;        templateProperty.getTemplates().add(template);</b>
+<b class="fc">&nbsp;        List&lt;Property&gt; properties = template.getTemplates();</b>
+<b class="fc">&nbsp;        properties.add(templateProperty);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add property for workpiece.
+&nbsp;     *
+&nbsp;     * @param workpiece
+&nbsp;     *            object
+&nbsp;     * @param property
+&nbsp;     *            origin property
+&nbsp;     */
+&nbsp;    public static void copyPropertyForWorkpiece(Process workpiece, Property property) {
+<b class="fc">&nbsp;        if (ProcessValidator.existsProperty(workpiece.getWorkpieces(), property)) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Property workpieceProperty = insertDataToProperty(property);</b>
+<b class="fc">&nbsp;        workpieceProperty.getWorkpieces().add(workpiece);</b>
+<b class="fc">&nbsp;        List&lt;Property&gt; properties = workpiece.getWorkpieces();</b>
+<b class="fc">&nbsp;        properties.add(workpieceProperty);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copy tasks from process&#39; template to process.
+&nbsp;     *
+&nbsp;     * @param processTemplate
+&nbsp;     *            template object
+&nbsp;     * @param processCopy
+&nbsp;     *            new object
+&nbsp;     */
+&nbsp;    public static void copyTasks(Template processTemplate, Process processCopy) {
+<b class="fc">&nbsp;        List&lt;Task&gt; tasks = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Task templateTask : processTemplate.getTasks()) {</b>
+<b class="fc">&nbsp;            Task task = new Task(templateTask);</b>
+<b class="fc">&nbsp;            task.setProcess(processCopy);</b>
+<b class="fc">&nbsp;            tasks.add(task);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        tasks.sort(Comparator.comparing(Task::getOrdering).thenComparing(Task::getTitle));</b>
+<b class="fc">&nbsp;        processCopy.setTasks(tasks);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Property insertDataToProperty(Property property) {
+<b class="fc">&nbsp;        Property newProperty = new Property();</b>
+<b class="fc">&nbsp;        newProperty.setTitle(property.getTitle());</b>
+<b class="fc">&nbsp;        newProperty.setValue(property.getValue());</b>
+<b class="fc">&nbsp;        newProperty.setChoice(property.getChoice());</b>
+<b class="fc">&nbsp;        newProperty.setDataType(property.getDataType());</b>
+<b class="fc">&nbsp;        return newProperty;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

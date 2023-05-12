@@ -1,0 +1,277 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Division</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset.xml</a>
+</div>
+
+<h1>Coverage Summary for Class: Division (org.kitodo.dataeditor.ruleset.xml)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Division</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,3%
+  </span>
+  <span class="absValue">
+    (14/15)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset.xml;
+&nbsp;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;
+&nbsp;/**
+&nbsp; * A division is a possible type of element of the tree-shaped structure of the
+&nbsp; * digital representation of the cultural work.
+&nbsp; */
+<b class="fc">&nbsp;public class Division {</b>
+&nbsp;    /**
+&nbsp;     * The internal identifier of the division.
+&nbsp;     */
+&nbsp;    @XmlAttribute(required = true)
+&nbsp;    private String id;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The sequence description to form a process title.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private String processTitle;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The key used to store the part of the date relevant to this division, to
+&nbsp;     * which the described subtree dates.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private String dates;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The use of the division.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private String use;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the division should use a workflow.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private Boolean withWorkflow;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The schema in which the part of the date relevant to this division is
+&nbsp;     * stored. Apart from the dates built into Java and interpreted by the
+&nbsp;     * runtime, there is still the special string “{@code yyyy/yyyy}”, which
+&nbsp;     * stands for a double year, eg. an operation year that starts on a day
+&nbsp;     * other than January 1. This works in conjunction with
+&nbsp;     * {@link SubdivisionByDateElement#yearBegin}.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private String scheme;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Human-readable identifiers for the type. There can be several, depending
+&nbsp;     * on the language.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlElement(name = &quot;label&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;, required = true)</b>
+&nbsp;    private List&lt;Label&gt; labels = new LinkedList&lt;&gt;();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * In this element, if there is, it is stored that the division of this
+&nbsp;     * division is done by divisions, which map a calendar date.
+&nbsp;     */
+&nbsp;    @XmlElement(namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)
+&nbsp;    private SubdivisionByDateElement subdivisionByDate;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the key used to store the part of the date relevant to this
+&nbsp;     * division, to which the described subtree dates.
+&nbsp;     *
+&nbsp;     * @return the key used to store the date
+&nbsp;     */
+&nbsp;    public Optional&lt;String&gt; getDates() {
+<b class="fc">&nbsp;        return Optional.ofNullable(dates);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns of divisions in it.
+&nbsp;     *
+&nbsp;     * @return divisions
+&nbsp;     */
+&nbsp;    public List&lt;Division&gt; getDivisions() {
+<b class="fc">&nbsp;        if (subdivisionByDate == null) {</b>
+<b class="fc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return subdivisionByDate.getDivisions();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the internal identifier of the division.
+&nbsp;     *
+&nbsp;     * @return the internal identifier of the division
+&nbsp;     */
+&nbsp;    public String getId() {
+<b class="fc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the human-readable identifiers for the type.
+&nbsp;     *
+&nbsp;     * @return the human-readable identifiers for the type
+&nbsp;     */
+&nbsp;    public List&lt;Label&gt; getLabels() {
+<b class="fc">&nbsp;        return labels;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the sequence description to form a process title.
+&nbsp;     *
+&nbsp;     * @return the key used to store the date
+&nbsp;     */
+&nbsp;    public Optional&lt;String&gt; getProcessTitle() {
+<b class="fc">&nbsp;        return Optional.ofNullable(processTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the scheme of the date.
+&nbsp;     *
+&nbsp;     * @return the scheme
+&nbsp;     */
+&nbsp;    public String getScheme() {
+<b class="fc">&nbsp;        return scheme;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the begin of the operating year.
+&nbsp;     *
+&nbsp;     * @return the begin of the operating year
+&nbsp;     */
+&nbsp;    public String getYearBegin() {
+<b class="fc">&nbsp;        if (subdivisionByDate == null) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return subdivisionByDate.getYearBegin();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the use.
+&nbsp;     *
+&nbsp;     * @return the use
+&nbsp;     */
+&nbsp;    public String getUse() {
+<b class="fc">&nbsp;        return use;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns if a workflow is used.
+&nbsp;     *
+&nbsp;     * @return if a workflow is used.
+&nbsp;     */
+&nbsp;    public boolean isWithWorkflow() {
+<b class="fc">&nbsp;        return Objects.isNull(withWorkflow) ? true : withWorkflow;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

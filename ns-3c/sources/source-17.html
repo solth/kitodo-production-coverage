@@ -1,0 +1,314 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LdapServerForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: LdapServerForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LdapServerForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/47)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.security.InvalidAlgorithmParameterException;
+&nbsp;import java.security.InvalidKeyException;
+&nbsp;import java.security.NoSuchAlgorithmException;
+&nbsp;import java.security.spec.InvalidKeySpecException;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.crypto.BadPaddingException;
+&nbsp;import javax.crypto.IllegalBlockSizeException;
+&nbsp;import javax.crypto.NoSuchPaddingException;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.LdapServer;
+&nbsp;import org.kitodo.data.database.enums.PasswordEncryption;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.security.AESUtil;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;@Named(&quot;LdapServerForm&quot;)
+&nbsp;@SessionScoped
+<b class="nc">&nbsp;public class LdapServerForm extends BaseForm {</b>
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(LdapServerForm.class);</b>
+<b class="nc">&nbsp;    private static final String LDAP_SERVER = Helper.getTranslation(&quot;ldapServer&quot;);</b>
+<b class="nc">&nbsp;    private final String ldapServerEditPath = MessageFormat.format(REDIRECT_PATH, &quot;ldapserverEdit&quot;);</b>
+&nbsp;
+&nbsp;    private LdapServer ldapServer;
+&nbsp;    private PasswordEncryption passwordEncryption;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new LDAP server.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String newLdapServer() {
+<b class="nc">&nbsp;        this.ldapServer = new LdapServer();</b>
+<b class="nc">&nbsp;        return ldapServerEditPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets all ldap servers.
+&nbsp;     *
+&nbsp;     * @return list of LdapServer objects.
+&nbsp;     */
+&nbsp;    public List&lt;LdapServer&gt; getLdapServers() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getLdapServerService().getAll();</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {Helper.getTranslation(&quot;ldapServers&quot;) }, logger, e);</b>
+<b class="nc">&nbsp;            return new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save LDAP Server.
+&nbsp;     *
+&nbsp;     * @return page or null
+&nbsp;     */
+&nbsp;    public String save() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getLdapServerService().saveToDatabase(ldapServer);</b>
+<b class="nc">&nbsp;            return usersPage;</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {LDAP_SERVER }, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove LDAP Server.
+&nbsp;     *
+&nbsp;     */
+&nbsp;    public void delete() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getLdapServerService().removeFromDatabase(this.ldapServer);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DELETING, new Object[] {LDAP_SERVER }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for ldap server edit form.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            ID of the ldap server to load
+&nbsp;     */
+&nbsp;    public void load(int id) {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!Objects.equals(id, 0)) {</b>
+<b class="nc">&nbsp;                this.ldapServer = ServiceManager.getLdapServerService().getById(id);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {LDAP_SERVER, id }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        setSaveDisabled(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set LDAP group by ID.
+&nbsp;     *
+&nbsp;     * @param ldapServerID
+&nbsp;     *          ID of LDAP server to set.
+&nbsp;     */
+&nbsp;    public void setLdapServerById(int ldapServerID) {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.ldapServer = ServiceManager.getLdapServerService().getById(ldapServerID);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {LDAP_SERVER, ldapServerID }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets manager password.
+&nbsp;     *
+&nbsp;     * @return The manager password
+&nbsp;     */
+&nbsp;    public String getManagerPassword() {
+<b class="nc">&nbsp;        if (AESUtil.isEncrypted(ldapServer.getManagerPassword())) {</b>
+<b class="nc">&nbsp;            String securitySecret = ConfigCore.getParameterOrDefaultValue(ParameterCore.SECURITY_SECRET_LDAPMANAGERPASSWORD);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (StringUtils.isNotBlank(securitySecret)) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    return AESUtil.decrypt(ldapServer.getManagerPassword(), securitySecret);</b>
+<b class="nc">&nbsp;                } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException</b>
+&nbsp;                        | InvalidKeyException | BadPaddingException | IllegalBlockSizeException
+&nbsp;                        | InvalidKeySpecException e) {
+<b class="nc">&nbsp;                    Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {LDAP_SERVER }, logger, e);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+&nbsp;        }
+<b class="nc">&nbsp;        return ldapServer.getManagerPassword();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets manager password.
+&nbsp;     *
+&nbsp;     * @param managerPassword The manager password
+&nbsp;     */
+&nbsp;    public void setManagerPassword(String managerPassword) {
+&nbsp;        try {
+<b class="nc">&nbsp;            String securitySecret = ConfigCore.getParameterOrDefaultValue(ParameterCore.SECURITY_SECRET_LDAPMANAGERPASSWORD);</b>
+<b class="nc">&nbsp;            if (StringUtils.isNotBlank(securitySecret)) {</b>
+<b class="nc">&nbsp;                managerPassword = AESUtil.encrypt(managerPassword, securitySecret);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            ldapServer.setManagerPassword(managerPassword);</b>
+<b class="nc">&nbsp;        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException</b>
+&nbsp;                | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidKeySpecException e) {
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {LDAP_SERVER }, logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets ldapServer.
+&nbsp;     *
+&nbsp;     * @return The ldapServer.
+&nbsp;     */
+&nbsp;    public LdapServer getLdapServer() {
+<b class="nc">&nbsp;        return ldapServer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets ldapServer.
+&nbsp;     *
+&nbsp;     * @param ldapServer The ldapServer.
+&nbsp;     */
+&nbsp;    public void setLdapServer(LdapServer ldapServer) {
+<b class="nc">&nbsp;        this.ldapServer = ldapServer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets passwordEncryption.
+&nbsp;     *
+&nbsp;     * @return The passwordEncryption.
+&nbsp;     */
+&nbsp;    public PasswordEncryption[] getPasswordEncryption() {
+<b class="nc">&nbsp;        return PasswordEncryption.values();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets passwordEncryption.
+&nbsp;     *
+&nbsp;     * @param passwordEncryption The passwordEncryption.
+&nbsp;     */
+&nbsp;    public void setPasswordEncryption(PasswordEncryption passwordEncryption) {
+<b class="nc">&nbsp;        this.passwordEncryption = passwordEncryption;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,347 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LegacyDocStructHelperInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.metadata.legacytypeimplementations</a>
+</div>
+
+<h1>Coverage Summary for Class: LegacyDocStructHelperInterface (org.kitodo.production.helper.metadata.legacytypeimplementations)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LegacyDocStructHelperInterface</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    8,3%
+  </span>
+  <span class="absValue">
+    (1/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    3,6%
+  </span>
+  <span class="absValue">
+    (1/28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.metadata.legacytypeimplementations;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;
+&nbsp;/**
+&nbsp; * One node of a tree depicting the structure of the document.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * A DocStruct object represents a structure entity in work. Every document
+&nbsp; * consists of a structure, which can be separated into several structure
+&nbsp; * entities, which build hierarchical structure. Usually a
+&nbsp; * {@code DigitalDocument} contains two structures; a logical and a physical
+&nbsp; * one. Each structure consists of a top DocStruct element that is embedded in
+&nbsp; * some kind of structure. This structure is represented by parent and children
+&nbsp; * of {@code DocStruct} objects.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * This class contains methods to:
+&nbsp; * &lt;ul&gt;
+&nbsp; * &lt;li&gt;Retrieve information about the structure (add, move and remove children),
+&nbsp; * &lt;li&gt;set the parent (the top element has no parent),
+&nbsp; * &lt;li&gt;set and retrieve metadata, which describe a structure entity,
+&nbsp; * &lt;li&gt;handle content files, which are linked to a structure entity.
+&nbsp; * &lt;/ul&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * Every structure entity is of a special kind. The kind of entity is stored in
+&nbsp; * a {@code DocStructType} element. Depending on the type of structure entities
+&nbsp; * certain metadata and children a permitted or forbidden.
+&nbsp; */
+&nbsp;public interface LegacyDocStructHelperInterface {
+<b class="fc">&nbsp;    Logger logger = LogManager.getLogger(LegacyDocStructHelperInterface.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a metadata object to this instance. The method checks, if it is
+&nbsp;     * allowed to add it, based on the configuration. If so, the object is added
+&nbsp;     * and the method returns {@code true}, otherwise it returns {@code false}.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The {@code Metadata} object must already include all necessary
+&nbsp;     * information, such as {@code MetadataType} and value.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For internal reasons, this method replaces the {@code MetadataType}
+&nbsp;     * object by a local copy, which is retrieved from the {@code DocStructType}
+&nbsp;     * of this instance. The internal name of both {@code MetadataType} objects
+&nbsp;     * will still be identical afterwards. If a local copy cannot be found,
+&nbsp;     * which means that the metadata type is invalid on this instance, false is
+&nbsp;     * returned.
+&nbsp;     *
+&nbsp;     * @param metadata
+&nbsp;     *            metadata object to add
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default void addMetadata(LegacyMetadataHelper metadata) {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds an outgoing reference to another {@code DocStruct} instance.
+&nbsp;     * {@code Reference}s are always linked both ways. Both {@code DocStruct}
+&nbsp;     * instances are storing a reference to the other {@code DocStruct}
+&nbsp;     * instance. This methods stores the outgoing reference. The
+&nbsp;     * {@code DocStruct} instance given as a parameter is the target of the
+&nbsp;     * Reference (to which is linked). The corresponding back-reference (from
+&nbsp;     * the target to the source—this instance) is set automatically. Each
+&nbsp;     * reference can contain a type.
+&nbsp;     *
+&nbsp;     * @param docStruct
+&nbsp;     *            target to link to
+&nbsp;     * @param type
+&nbsp;     *            the type of reference
+&nbsp;     * @return a newly created References object containing information about
+&nbsp;     *         linking both DocStructs. The return value is never used.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default LegacyReferenceHelper addReferenceTo(LegacyDocStructHelperInterface docStruct, String type) {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all metadata types that can be added to this instance and shall
+&nbsp;     * be visible to the user. This method considers already added
+&nbsp;     * {@code Metadata}, so metadata types which can only be available once
+&nbsp;     * cannot be added a second time. Therefore these {@code MetadataType}s will
+&nbsp;     * not be included in this list.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Internal metadata groups, whose {@code MetadataGroupType} starts with
+&nbsp;     * the {@code HIDDEN_METADATA_CHAR}, will also not be included.
+&nbsp;     *
+&nbsp;     * @return all metadata types that users can add to this instance
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default List&lt;LegacyMetadataTypeHelper&gt; getAddableMetadataTypes() {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a list containing all children of this DocStruct. If this
+&nbsp;     * instance has no children, {@code null} is returned.
+&nbsp;     *
+&nbsp;     * @return all children of this DocStruct
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default List&lt;LegacyDocStructHelperInterface&gt; getAllChildren() {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all children of this instance which are of a given type and have
+&nbsp;     * a given type of metadata attached. For example, you can get all articles
+&nbsp;     * which have an author. It is possible to use &quot;{@code *}&quot; as wildcard
+&nbsp;     * character value for {@code theDocTypeName} and {@code theMDTypeName}.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * If this instance has no children, null is returned.
+&nbsp;     *
+&nbsp;     * @param docStructType
+&nbsp;     *            name of the structural type
+&nbsp;     * @param metaDataType
+&nbsp;     *            name of the metadata type
+&nbsp;     * @return all children of the given type and with the given metadata
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default List&lt;LegacyDocStructHelperInterface&gt; getAllChildrenByTypeAndMetadataType(String docStructType,
+&nbsp;            String metaDataType) {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all metadata from this instance. If no {@code Metadata} is
+&nbsp;     * available, {@code null} is returned.
+&nbsp;     *
+&nbsp;     * @return all metadata from this instance. A return type
+&nbsp;     *         {@code Collection&lt;&gt;} would be sufficient.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default List&lt;LegacyMetadataHelper&gt; getAllMetadata() {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all metadata of a given type, including persons. Can be used to
+&nbsp;     * get all titles, authors, etc.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * If no {@code MetadataGroup}s are available, an empty list is returned.
+&nbsp;     *
+&nbsp;     * @param metadataType
+&nbsp;     *            metadata type to look for
+&nbsp;     * @return all metadata of the given type
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default List&lt;LegacyMetadataHelper&gt; getAllMetadataByType(LegacyMetadataTypeHelper metadataType) {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all references that are directed from this instance to another
+&nbsp;     * and have a given type. For example, the type &quot;{@code logical_physical}&quot;
+&nbsp;     * refers to references from logical structures to physical structures.
+&nbsp;     *
+&nbsp;     * @param type
+&nbsp;     *            type of the references to return, always &quot;logical_physical&quot;?
+&nbsp;     * @return all outgoing {@code Reference}s of the given type. The return
+&nbsp;     *         type would be sufficient to be an Iterable, but there is a check
+&nbsp;     *         for size()=0.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default Collection&lt;LegacyReferenceHelper&gt; getAllToReferences(String type) {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the type of this DocStruct.
+&nbsp;     *
+&nbsp;     * @return the type of this DocStruct
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default LegacyLogicalDocStructTypeHelper getDocStructType() {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes a meta-datum from this instance. If (according to configuration)
+&nbsp;     * at least one {@code Metadata} of this type is required on this instance,
+&nbsp;     * the meta-datum will &lt;i&gt;not be removed&lt;/i&gt;.
+&nbsp;     *
+&nbsp;     * @param metaDatum
+&nbsp;     *            meta-datum which should be removed
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    default void removeMetadata(LegacyMetadataHelper metaDatum) {
+<b class="nc">&nbsp;        throw andLog(new UnsupportedOperationException(&quot;Not yet implemented&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method generates a comprehensible log message in case something was
+&nbsp;     * overlooked and one of the unimplemented methods should ever be called in
+&nbsp;     * operation. The name was chosen deliberately short in order to keep the
+&nbsp;     * calling code clear.
+&nbsp;     * 
+&nbsp;     * @param exception
+&nbsp;     *            created {@code UnsupportedOperationException}
+&nbsp;     * @return the exception
+&nbsp;     */
+&nbsp;    static UnsupportedOperationException andLog(UnsupportedOperationException exception) {
+<b class="nc">&nbsp;        StackTraceElement[] stackTrace = exception.getStackTrace();</b>
+<b class="nc">&nbsp;        StringBuilder buffer = new StringBuilder(255);</b>
+<b class="nc">&nbsp;        buffer.append(stackTrace[1].getClassName());</b>
+<b class="nc">&nbsp;        buffer.append(&#39;.&#39;);</b>
+<b class="nc">&nbsp;        buffer.append(stackTrace[1].getMethodName());</b>
+<b class="nc">&nbsp;        buffer.append(&quot;()&quot;);</b>
+<b class="nc">&nbsp;        if (stackTrace[1].getLineNumber() &gt; -1) {</b>
+<b class="nc">&nbsp;            buffer.append(&quot; line &quot;);</b>
+<b class="nc">&nbsp;            buffer.append(stackTrace[1].getLineNumber());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        buffer.append(&quot; unexpectedly called unimplemented &quot;);</b>
+<b class="nc">&nbsp;        buffer.append(stackTrace[0].getMethodName());</b>
+<b class="nc">&nbsp;        buffer.append(&quot;()&quot;);</b>
+<b class="nc">&nbsp;        if (exception.getMessage() != null) {</b>
+<b class="nc">&nbsp;            buffer.append(&quot;: &quot;);</b>
+<b class="nc">&nbsp;            buffer.append(exception.getMessage());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        logger.error(buffer.toString());</b>
+<b class="nc">&nbsp;        return exception;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

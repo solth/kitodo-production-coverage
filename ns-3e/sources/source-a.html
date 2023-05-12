@@ -1,0 +1,301 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessDetail</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessDetail (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessDetail</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    44,4%
+  </span>
+  <span class="absValue">
+    (4/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,2%
+  </span>
+  <span class="absValue">
+    (13/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.EnumMap;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.function.BiConsumer;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.Domain;
+&nbsp;import org.kitodo.api.dataformat.Division;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;
+&nbsp;public abstract class ProcessDetail implements Serializable {
+&nbsp;    /**
+&nbsp;     * Describes the relationship between the domain in the rule set and the
+&nbsp;     * mdSec in the METS.
+&nbsp;     */
+<b class="fc">&nbsp;    protected static final EnumMap&lt;Domain, MdSec&gt; DOMAIN_TO_MDSEC = new EnumMap&lt;&gt;(Domain.class);</b>
+&nbsp;
+&nbsp;    static {
+<b class="fc">&nbsp;        DOMAIN_TO_MDSEC.put(Domain.DESCRIPTION, MdSec.DMD_SEC);</b>
+<b class="fc">&nbsp;        DOMAIN_TO_MDSEC.put(Domain.DIGITAL_PROVENANCE, MdSec.DIGIPROV_MD);</b>
+<b class="fc">&nbsp;        DOMAIN_TO_MDSEC.put(Domain.RIGHTS, MdSec.RIGHTS_MD);</b>
+<b class="fc">&nbsp;        DOMAIN_TO_MDSEC.put(Domain.SOURCE, MdSec.SOURCE_MD);</b>
+<b class="fc">&nbsp;        DOMAIN_TO_MDSEC.put(Domain.TECHNICAL, MdSec.TECH_MD);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parental metadata group.
+&nbsp;     */
+&nbsp;    protected ProcessFieldedMetadata container;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The label of this row.
+&nbsp;     */
+&nbsp;    protected final String label;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether this metadata entry is leading for options of other metadata
+&nbsp;     * entries.
+&nbsp;     */
+<b class="fc">&nbsp;    protected boolean leading = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new metadata panel row.
+&nbsp;     *
+&nbsp;     * @param label
+&nbsp;     *            the label of this row
+&nbsp;     */
+<b class="fc">&nbsp;    ProcessDetail(ProcessFieldedMetadata container, String label) {</b>
+<b class="fc">&nbsp;        this.container = container;</b>
+<b class="fc">&nbsp;        this.label = label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is triggered when the user clicks the copy metadata button.
+&nbsp;     */
+&nbsp;    public void copy() throws IOException, InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="fc">&nbsp;        container.copy(this);</b>
+<b class="fc">&nbsp;        container.preserve();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is triggered when the user clicks the delete metadata button.
+&nbsp;     */
+&nbsp;    public void delete() throws IOException, InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="nc">&nbsp;        container.remove(this);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public abstract String getMetadataID();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the type of input to be rendered in this row. One of the
+&nbsp;     * following values:
+&nbsp;     *
+&nbsp;
+&nbsp;     *
+&nbsp;     * @return the type of input to be rendered
+&nbsp;     */
+&nbsp;    public abstract String getInput();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the label of this row.
+&nbsp;     *
+&nbsp;     * @return the label
+&nbsp;     */
+&nbsp;    public String getLabel() {
+<b class="fc">&nbsp;        return label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the metadata from this row, as far as it has to be stored in the
+&nbsp;     * collection obtainable from {@link LogicalDivision#getMetadata()}.
+&nbsp;     *
+&nbsp;     * @return the metadata from this row
+&nbsp;     * @throws InvalidMetadataValueException
+&nbsp;     *             if the metadata form contains syntactically wrong input
+&nbsp;     */
+&nbsp;    public abstract Collection&lt;Metadata&gt; getMetadataWithFilledValues() throws InvalidMetadataValueException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the metadata from this row.
+&nbsp;     * @param skipEmpty boolean to filter metadata with empty value or not.
+&nbsp;     * @return the metadata from this row
+&nbsp;     * @throws InvalidMetadataValueException
+&nbsp;     *             if the metadata form contains syntactically wrong input
+&nbsp;     */
+&nbsp;    public abstract Collection&lt;Metadata&gt; getMetadata(boolean skipEmpty) throws InvalidMetadataValueException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the metadata entry addresses a property of the structure, returns a
+&nbsp;     * pair of the setter and the value to set; else {@code null}. This method
+&nbsp;     * it to be called when saving the data.
+&nbsp;     *
+&nbsp;     * @return if data is to be written a pair of the setter of the
+&nbsp;     *         {@link LogicalDivision} and the value to set, else null
+&nbsp;     * @throws InvalidMetadataValueException
+&nbsp;     *             if the metadata form contains syntactically wrong input
+&nbsp;     * @throws NoSuchMetadataFieldException
+&nbsp;     *             if the field configured in the rule set does not exist
+&nbsp;     */
+&nbsp;    abstract Pair&lt;BiConsumer&lt;Division&lt;?&gt;, String&gt;, String&gt; getStructureFieldValue()
+&nbsp;            throws InvalidMetadataValueException, NoSuchMetadataFieldException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether this metadata entry is leading for options of other
+&nbsp;     * metadata entries. If true, the application must refresh the metadata
+&nbsp;     * panel after this entry was changed to reflect the option changes in other
+&nbsp;     * metadata entries.
+&nbsp;     *
+&nbsp;     * @return whether this metadata entry is leading
+&nbsp;     */
+&nbsp;    public boolean isLeading() {
+<b class="nc">&nbsp;        return leading;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns if the field is not defined by the rule set. The front-end should
+&nbsp;     * show some kind of warning sign then.
+&nbsp;     *
+&nbsp;     * @return if the field is not defined by the rule set
+&nbsp;     */
+&nbsp;    public abstract boolean isUndefined();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns if the field is required in the rule set.
+&nbsp;     *
+&nbsp;     * @return if the field is required in the rule set
+&nbsp;     */
+&nbsp;    public abstract boolean isRequired();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns if the field is valid.
+&nbsp;     * @return if the field is valid
+&nbsp;     */
+&nbsp;    public abstract boolean isValid();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get occurrences of this metadata in container.
+&nbsp;     * @return occurrences
+&nbsp;     */
+&nbsp;    public int getOccurrences() {
+<b class="nc">&nbsp;        return container.getOccurrences(this.getMetadataID());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void preserve() throws InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="nc">&nbsp;        container.preserve();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public abstract int getMinOccurs();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets whether this metadata entry is leading for options of other metadata
+&nbsp;     * entries. Set to true to tell the application to refresh the metadata
+&nbsp;     * panel after this entry was changed, to reflect the option changes in
+&nbsp;     * other metadata entries.
+&nbsp;     */
+&nbsp;    public void setLeading() {
+<b class="nc">&nbsp;        this.leading = true;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

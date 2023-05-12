@@ -1,0 +1,254 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TernaryValue</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.longtermpreservationvalidation</a>
+</div>
+
+<h1>Coverage Summary for Class: TernaryValue (org.kitodo.longtermpreservationvalidation)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TernaryValue</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">TernaryValue$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TernaryValue$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TernaryValue$3</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/15)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.longtermpreservationvalidation;
+&nbsp;
+&nbsp;import edu.harvard.hul.ois.jhove.RepInfo;
+&nbsp;
+&nbsp;/**
+&nbsp; * Enumeration of possible values in ternary logic.
+&nbsp; */
+<b class="nc">&nbsp;enum TernaryValue {</b>
+&nbsp;    /**
+&nbsp;     * A constant with the truth value true. Corresponds to the boolean value
+&nbsp;     * true.
+&nbsp;     */
+<b class="nc">&nbsp;    TRUE {</b>
+&nbsp;        @Override
+&nbsp;        String toModalAdverb() {
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A constant with the truth value maybe. The use of this constant has the
+&nbsp;     * meaning of knowing that we know nothing, what is different from not
+&nbsp;     * knowing if we do not know something. This value has no equivalent in
+&nbsp;     * Boolean logic.
+&nbsp;     */
+<b class="nc">&nbsp;    MAYBE {</b>
+&nbsp;        @Override
+&nbsp;        String toModalAdverb() {
+<b class="nc">&nbsp;            return &quot; unclear if&quot;;</b>
+&nbsp;        }
+&nbsp;    },
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A constant with the truth value false. Corresponds to the boolean value
+&nbsp;     * false.
+&nbsp;     */
+<b class="nc">&nbsp;    FALSE {</b>
+&nbsp;        @Override
+&nbsp;        String toModalAdverb() {
+<b class="nc">&nbsp;            return &quot; not&quot;;</b>
+&nbsp;        }
+&nbsp;    };
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A modal adverb is a word that modifies the quality, manner, quantity, or
+&nbsp;     * intensity of an expression, such as &quot;not&quot; or &quot;maybe.&quot; For the sake of
+&nbsp;     * simpler string building, returning a word returns a space before the
+&nbsp;     * word.
+&nbsp;     * 
+&nbsp;     * @return a modal adverb, can also be empty if the linguistic utterance
+&nbsp;     *         attains its correctness through non-alteration
+&nbsp;     */
+&nbsp;    abstract String toModalAdverb();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JHove returns the state of the result as int. This is converted into a
+&nbsp;     * Java value as optional of truth value.
+&nbsp;     * 
+&nbsp;     * @param repInfo
+&nbsp;     *            State of result as RepInfo (int) value
+&nbsp;     * @return an optional one of truth value
+&nbsp;     */
+&nbsp;    static TernaryValue valueOf(int repInfo) {
+<b class="nc">&nbsp;        switch (repInfo) {</b>
+&nbsp;            case RepInfo.UNDETERMINED:
+<b class="nc">&nbsp;                return TernaryValue.MAYBE;</b>
+&nbsp;            case RepInfo.FALSE:
+<b class="nc">&nbsp;                return TernaryValue.FALSE;</b>
+&nbsp;            case RepInfo.TRUE:
+<b class="nc">&nbsp;                return TernaryValue.TRUE;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalArgumentException(&quot;The argument must be in the range &quot; + RepInfo.UNDETERMINED + &quot; to &quot;</b>
+&nbsp;                        + RepInfo.TRUE + &quot;, but was &quot; + repInfo + &#39;.&#39;);
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

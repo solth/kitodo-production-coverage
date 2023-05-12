@@ -1,0 +1,186 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RequestScopeCacheHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.cache</a>
+</div>
+
+<h1>Coverage Summary for Class: RequestScopeCacheHelper (org.kitodo.production.helper.cache)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RequestScopeCacheHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.cache;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.concurrent.ConcurrentHashMap;
+&nbsp;import java.util.function.Supplier;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;
+&nbsp;/**
+&nbsp; * Caches arbitrary objects while processing a request.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Stores objects in a simple hash map inside FacesContext.getAttributes(). After each request, 
+&nbsp; * a new FacesContext will be created, which means cached objects are not available any more.&lt;/p&gt;
+&nbsp; * 
+&nbsp; * &lt;p&gt;Usually, such caching is not necessary when implementing Beans annotated with @RequestScope
+&nbsp; * and getters that store processed values in local variables. However, a lot of beans do not 
+&nbsp; * follow this pattern, which means that some common methods, e.g., getting the current locale of 
+&nbsp; * a user (which requires a database lookup), are re-evaluated many times during processing of 
+&nbsp; * a request.&lt;/p&gt;
+&nbsp; * 
+&nbsp; * &lt;p&gt;Therefore, this class provides the possibility to inject a request scoped cache.&lt;/p&gt;
+&nbsp; * 
+&nbsp; * &lt;p&gt;If this cache is used outside of a JSF request context, it will simply re-evaluate the supplier 
+&nbsp; * function upon every request.&lt;/p&gt;
+&nbsp; * 
+&nbsp; */
+<b class="nc">&nbsp;public class RequestScopeCacheHelper {</b>
+&nbsp;
+&nbsp;    private static final String ATTRIBUTE_NAME = &quot;RequestScopeCacheHelper&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Load or create a simple hash map in the FacesContext.getAttributes() map.
+&nbsp;     * @return the cache
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    private static Map&lt;String, Object&gt; getCache() {
+<b class="nc">&nbsp;        FacesContext ctx = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(ctx)) {</b>
+<b class="nc">&nbsp;            if (!ctx.getAttributes().containsKey(ATTRIBUTE_NAME)) {</b>
+<b class="nc">&nbsp;                ctx.getAttributes().put(ATTRIBUTE_NAME, new ConcurrentHashMap&lt;String, Object&gt;());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return (ConcurrentHashMap&lt;String, Object&gt;)ctx.getAttributes().get(ATTRIBUTE_NAME);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a cached object if it has been previously requested within the scope of a request,
+&nbsp;     * otherwise it will evaluate the supplier function.
+&nbsp;     * 
+&nbsp;     * @param &lt;T&gt; the type of the object that is cached
+&nbsp;     * @param key the key that is used to cache an object (needs to be unique application wide)
+&nbsp;     * @param supplier a supplier function that is evaluated if the object is not found in cache 
+&nbsp;     *                 and whose result is then stored in the cache
+&nbsp;     * @param clazz the class of the object type
+&nbsp;     * @return the cached object or the object provided by supplier if it was not cached before
+&nbsp;     */
+&nbsp;    public static &lt;T&gt; T getFromCache(String key, Supplier&lt;T&gt; supplier, Class&lt;T&gt; clazz) {
+<b class="nc">&nbsp;        Map&lt;String, Object&gt; cache = getCache();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(cache)) {</b>
+&nbsp;            // save value if it does not yet exist
+<b class="nc">&nbsp;            if (!cache.containsKey(key)) {</b>
+<b class="nc">&nbsp;                T value = supplier.get();</b>
+<b class="nc">&nbsp;                cache.put(key, value);</b>
+&nbsp;            };
+<b class="nc">&nbsp;            return clazz.cast(cache.get(key));</b>
+&nbsp;        }
+&nbsp;        // cache not available, e.g., when called outside of request scope (in a background process)
+<b class="nc">&nbsp;        return supplier.get();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

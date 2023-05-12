@@ -1,0 +1,320 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessDataTab</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessDataTab (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessDataTab</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,1%
+  </span>
+  <span class="absValue">
+    (8/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,7%
+  </span>
+  <span class="absValue">
+    (39/74)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.exceptions.DoctypeMissingException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.ProcessHelper;
+&nbsp;import org.kitodo.production.helper.TempProcess;
+&nbsp;import org.kitodo.production.process.TitleGenerator;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.omnifaces.util.Ajax;
+&nbsp;import org.omnifaces.util.Faces;
+&nbsp;
+&nbsp;public class ProcessDataTab {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ProcessDataTab.class);</b>
+&nbsp;
+&nbsp;    private List&lt;SelectItem&gt; allDocTypes;
+&nbsp;    protected final CreateProcessForm createProcessForm;
+&nbsp;    private String docType;
+&nbsp;
+<b class="fc">&nbsp;    ProcessDataTab(CreateProcessForm createProcessForm) {</b>
+<b class="fc">&nbsp;        this.createProcessForm = createProcessForm;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set docType.
+&nbsp;     *
+&nbsp;     * @param docType as java.lang.String
+&nbsp;     */
+&nbsp;    public void setDocType(String docType) {
+<b class="fc">&nbsp;        if (Objects.isNull(this.docType) || this.docType.isEmpty() || !this.docType.equals(docType)) {</b>
+<b class="fc">&nbsp;            if (Objects.isNull(allDocTypes) || allDocTypes.isEmpty()) {</b>
+<b class="fc">&nbsp;                this.docType = &quot;&quot;;</b>
+<b class="fc">&nbsp;                Helper.setErrorMessage(&quot;errorLoadingDocTypes&quot;);</b>
+<b class="fc">&nbsp;            } else if (docTypeExistsInRuleset(docType)) {</b>
+<b class="fc">&nbsp;                this.docType = docType;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                this.docType = (String) allDocTypes.get(0).getValue();</b>
+<b class="fc">&nbsp;                Helper.setErrorMessage(&quot;docTypeNotFound&quot;, new Object[] {docType });</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update process metadata of currently selected process.
+&nbsp;     */
+&nbsp;    public void updateProcessMetadata() {
+<b class="fc">&nbsp;        if (Objects.nonNull(docType) &amp;&amp; Objects.nonNull(createProcessForm.getCurrentProcess()) &amp;&amp; Objects.nonNull(</b>
+<b class="fc">&nbsp;                createProcessForm.getCurrentProcess().getWorkpiece())) {</b>
+<b class="nc">&nbsp;            createProcessForm.getCurrentProcess().getWorkpiece().getLogicalStructure().setType(this.docType);</b>
+<b class="nc">&nbsp;            if (this.docType.isEmpty()) {</b>
+<b class="nc">&nbsp;                createProcessForm.getProcessMetadata().setProcessDetails(ProcessFieldedMetadata.EMPTY);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                createProcessForm.getProcessMetadata().initializeProcessDetails(</b>
+<b class="nc">&nbsp;                        createProcessForm.getCurrentProcess().getWorkpiece().getLogicalStructure(), createProcessForm);</b>
+<b class="nc">&nbsp;                overwriteProcessMetadata();</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void overwriteProcessMetadata() {
+<b class="nc">&nbsp;        TempProcess currentProcess = createProcessForm.getCurrentProcess();</b>
+<b class="nc">&nbsp;        if (StringUtils.isNotBlank(currentProcess.getAtstsl())) {</b>
+<b class="nc">&nbsp;            for (ProcessDetail processDetail : currentProcess.getProcessMetadata().getProcessDetailsElements()) {</b>
+<b class="nc">&nbsp;                if (TitleGenerator.TSL_ATS.equals(processDetail.getMetadataID())</b>
+&nbsp;                        &amp;&amp; processDetail instanceof ProcessTextMetadata) {
+<b class="nc">&nbsp;                    ProcessTextMetadata processTextMetadata = (ProcessTextMetadata) processDetail;</b>
+<b class="nc">&nbsp;                    if (StringUtils.isBlank(processTextMetadata.getValue())) {</b>
+<b class="nc">&nbsp;                        processTextMetadata.setValue(currentProcess.getAtstsl());</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean docTypeExistsInRuleset(String docType) {
+<b class="fc">&nbsp;        for (SelectItem division : allDocTypes) {</b>
+<b class="fc">&nbsp;            if (docType.equals(division.getValue())) {</b>
+<b class="fc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get docType.
+&nbsp;     *
+&nbsp;     * @return value of docType
+&nbsp;     */
+&nbsp;    public String getDocType() {
+<b class="fc">&nbsp;        return docType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get useTemplate.
+&nbsp;     *
+&nbsp;     * @return value of useTemplate
+&nbsp;     */
+&nbsp;    public boolean isUsingTemplates() {
+<b class="nc">&nbsp;        return ServiceManager.getImportService().isUsingTemplates();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set useTemplate.
+&nbsp;     *
+&nbsp;     * @param usingTemplates as boolean
+&nbsp;     */
+&nbsp;    public void setUsingTemplates(boolean usingTemplates) {
+<b class="nc">&nbsp;        ServiceManager.getImportService().setUsingTemplates(usingTemplates);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all document types.
+&nbsp;     *
+&nbsp;     * @return list of all ruleset divisions
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getAllDoctypes() {
+<b class="nc">&nbsp;        return allDocTypes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set allDocTypes.
+&nbsp;     *
+&nbsp;     * @param allDocTypes as java.util.List
+&nbsp;     */
+&nbsp;    void setAllDocTypes(List&lt;SelectItem&gt; allDocTypes) {
+<b class="fc">&nbsp;        this.allDocTypes = allDocTypes;</b>
+<b class="fc">&nbsp;        if (allDocTypes.isEmpty()) {</b>
+<b class="nc">&nbsp;            setDocType(&quot;&quot;);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            setDocType((String) allDocTypes.get(0).getValue());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate process titles and other details.
+&nbsp;     */
+&nbsp;    public void generateAtstslFields() {
+<b class="fc">&nbsp;        List&lt;ProcessDetail&gt; processDetails = this.createProcessForm.getProcessMetadata().getProcessDetailsElements();</b>
+<b class="fc">&nbsp;        TempProcess currentProcess = createProcessForm.getCurrentProcess();</b>
+<b class="fc">&nbsp;        Process process = currentProcess.getProcess();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            String processTitleOfDocTypeView = ProcessHelper.getTitleDefinition(</b>
+<b class="fc">&nbsp;                    createProcessForm.getRulesetManagement(), docType, createProcessForm.getAcquisitionStage(),</b>
+<b class="fc">&nbsp;                    createProcessForm.getPriorityList());</b>
+<b class="fc">&nbsp;            if (processTitleOfDocTypeView.isEmpty()) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;newProcess.titleGeneration.creationRuleNotFound&quot;,</b>
+<b class="nc">&nbsp;                        new Object[] {getDocTypeLabel(docType), process.getRuleset().getTitle()});</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            LinkedList&lt;TempProcess&gt; parents = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;            int processesSize = createProcessForm.getProcesses().size();</b>
+<b class="fc">&nbsp;            if (processesSize &gt; 1) {</b>
+<b class="nc">&nbsp;                int indexCurrent = createProcessForm.getProcesses().indexOf(currentProcess);</b>
+<b class="nc">&nbsp;                parents.addAll(createProcessForm.getProcesses().subList(indexCurrent + 1, processesSize));</b>
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            ProcessHelper.generateAtstslFields(currentProcess, processDetails, parents, docType,</b>
+<b class="fc">&nbsp;                    createProcessForm.getRulesetManagement(), createProcessForm.getAcquisitionStage(),</b>
+<b class="fc">&nbsp;                    createProcessForm.getPriorityList(),</b>
+<b class="fc">&nbsp;                    createProcessForm.getTitleRecordLinkTab().getTitleRecordProcess(), true);</b>
+&nbsp;
+<b class="fc">&nbsp;            updateProcessMetadata();</b>
+<b class="nc">&nbsp;        } catch (ProcessGenerationException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(Faces.getContext())) {</b>
+<b class="nc">&nbsp;            Ajax.update(&quot;editForm:processFromTemplateTabView:processDataEditGrid&quot;,</b>
+&nbsp;                &quot;editForm:processFromTemplateTabView:processMetadata&quot;,
+&nbsp;                &quot;editForm:processFromTemplateTabView:processAncestors&quot;);
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String getDocTypeLabel(String docType) {
+<b class="nc">&nbsp;        for (int i = 0; i &lt; this.allDocTypes.size(); i++) {</b>
+<b class="nc">&nbsp;            SelectItem docTypeItem = this.allDocTypes.get(0);</b>
+<b class="nc">&nbsp;            if (docTypeItem.getValue().equals(docType)) {</b>
+<b class="nc">&nbsp;                return docTypeItem.getLabel();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return docType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Read project configs for display in GUI.
+&nbsp;     */
+&nbsp;    public void prepare() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getImportService().prepare(createProcessForm.getProject().getTitle());</b>
+<b class="nc">&nbsp;            updateProcessMetadata();</b>
+<b class="nc">&nbsp;        } catch (IOException | DoctypeMissingException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

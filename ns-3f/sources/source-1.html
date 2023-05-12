@@ -1,0 +1,882 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > AddDocStrucTypeDialog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: AddDocStrucTypeDialog (org.kitodo.production.forms.dataeditor)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AddDocStrucTypeDialog</td>
+<td class="coverageStat">
+  <span class="percent">
+    3,9%
+  </span>
+  <span class="absValue">
+    (2/51)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4%
+  </span>
+  <span class="absValue">
+    (10/251)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AddDocStrucTypeDialog$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    3,8%
+  </span>
+  <span class="absValue">
+    (2/52)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4%
+  </span>
+  <span class="absValue">
+    (10/252)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.dataeditor;
+&nbsp;
+&nbsp;import static org.kitodo.production.metadata.InsertionPosition.AFTER_CURRENT_ELEMENT;
+&nbsp;import static org.kitodo.production.metadata.InsertionPosition.BEFORE_CURRENT_ELEMENT;
+&nbsp;import static org.kitodo.production.metadata.InsertionPosition.CURRENT_POSITION;
+&nbsp;import static org.kitodo.production.metadata.InsertionPosition.FIRST_CHILD_OF_CURRENT_ELEMENT;
+&nbsp;import static org.kitodo.production.metadata.InsertionPosition.LAST_CHILD_OF_CURRENT_ELEMENT;
+&nbsp;import static org.kitodo.production.metadata.InsertionPosition.PARENT_OF_CURRENT_ELEMENT;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.lang3.tuple.ImmutablePair;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.Level;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.exceptions.UnknownTreeNodeDataException;
+&nbsp;import org.kitodo.production.dto.ProcessDTO;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.metadata.InsertionPosition;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.dataeditor.DataEditorService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;import org.primefaces.model.TreeNode;
+&nbsp;
+&nbsp;/**
+&nbsp; * Backing bean for the add doc struc type dialog of the metadata editor.
+&nbsp; */
+&nbsp;public class AddDocStrucTypeDialog {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(AddDocStrucTypeDialog.class);</b>
+&nbsp;
+&nbsp;    private final DataEditorForm dataEditor;
+&nbsp;    private List&lt;SelectItem&gt; docStructAddTypeSelectionItemsForChildren;
+&nbsp;    private List&lt;SelectItem&gt; docStructAddTypeSelectionItemsForParent;
+&nbsp;    private List&lt;SelectItem&gt; docStructAddTypeSelectionItemsForSiblings;
+&nbsp;    private String docStructAddTypeSelectionSelectedItem;
+&nbsp;    private List&lt;SelectItem&gt; docStructPositionSelectionItems;
+<b class="fc">&nbsp;    private InsertionPosition selectedDocStructPosition = LAST_CHILD_OF_CURRENT_ELEMENT;</b>
+&nbsp;    private int elementsToAddSpinnerValue;
+<b class="fc">&nbsp;    private String inputMetaDataValue = &quot;&quot;;</b>
+&nbsp;    private LinkedList&lt;LogicalDivision&gt; parents;
+&nbsp;    private List&lt;SelectItem&gt; addableMetadata;
+<b class="fc">&nbsp;    private String selectedMetadata = &quot;&quot;;</b>
+&nbsp;    private String selectFirstPageOnAddNode;
+&nbsp;    private String selectLastPageOnAddNode;
+&nbsp;    private List&lt;SelectItem&gt; selectPageOnAddNodeItems;
+&nbsp;    private List&lt;View&gt; preselectedViews;
+<b class="fc">&nbsp;    private String processNumber = &quot;&quot;;</b>
+<b class="fc">&nbsp;    private Process selectedProcess = null;</b>
+<b class="fc">&nbsp;    private List&lt;Process&gt; processes = Collections.emptyList();</b>
+<b class="fc">&nbsp;    private boolean linkSubDialogVisible = false;</b>
+&nbsp;    private static final String PREVIEW_MODE = &quot;preview&quot;;
+&nbsp;    private static final String LIST_MODE = &quot;list&quot;;
+&nbsp;    private TreeNode previouslySelectedLogicalNode;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Backing bean for the add doc struc type dialog of the metadata editor.
+&nbsp;     *
+&nbsp;     * @see &quot;WEB-INF/templates/includes/metadataEditor/dialogs/addDocStrucType.xhtml&quot;
+&nbsp;     */
+<b class="fc">&nbsp;    AddDocStrucTypeDialog(DataEditorForm dataEditor) {</b>
+<b class="fc">&nbsp;        this.dataEditor = dataEditor;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return if sub dialog is visible.
+&nbsp;     *
+&nbsp;     * @return sub dialog visibility
+&nbsp;     */
+&nbsp;    public boolean isLinkSubDialogVisible() {
+<b class="nc">&nbsp;        return this.linkSubDialogVisible;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set sub dialog visibility.
+&nbsp;     *
+&nbsp;     * @param visible whether sub dialog is visible or not
+&nbsp;     */
+&nbsp;    public void setLinkSubDialogVisible(boolean visible) {
+<b class="nc">&nbsp;        this.linkSubDialogVisible = visible;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add structure element.
+&nbsp;     */
+&nbsp;    public void addDocStruc(boolean preview) {
+&nbsp;        try {
+<b class="nc">&nbsp;            dataEditor.getMetadataPanel().preserve();</b>
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException | NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;            logger.info(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        if (this.elementsToAddSpinnerValue &gt; 1) {</b>
+<b class="nc">&nbsp;            this.addMultiDocStruc();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            this.addSingleDocStruc(preview);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (preview &amp;&amp; (!(StringUtils.isEmpty(selectFirstPageOnAddNode)</b>
+<b class="nc">&nbsp;                || StringUtils.isEmpty(this.selectLastPageOnAddNode))</b>
+<b class="nc">&nbsp;                || Objects.nonNull(this.preselectedViews) &amp;&amp; this.preselectedViews.size() &gt; 0)) {</b>
+<b class="nc">&nbsp;            dataEditor.getGalleryPanel().setGalleryViewMode(PREVIEW_MODE);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            dataEditor.getGalleryPanel().setGalleryViewMode(LIST_MODE);</b>
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            dataEditor.getStructurePanel().preserve();</b>
+<b class="nc">&nbsp;            dataEditor.refreshStructurePanel();</b>
+<b class="nc">&nbsp;            dataEditor.getPaginationPanel().show();</b>
+<b class="nc">&nbsp;        } catch (UnknownTreeNodeDataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked if the user clicks on the add multi doc struc
+&nbsp;     * submit btn command button.
+&nbsp;     */
+&nbsp;    private void addMultiDocStruc() {
+<b class="nc">&nbsp;        Optional&lt;LogicalDivision&gt; selectedStructure = dataEditor.getSelectedStructure();</b>
+<b class="nc">&nbsp;        if (selectedStructure.isPresent()) {</b>
+<b class="nc">&nbsp;            if (selectedMetadata != &quot;&quot;) {</b>
+<b class="nc">&nbsp;                MetadataViewInterface metadataViewInterface = getMetadataViewFromKey(</b>
+&nbsp;                    docStructAddTypeSelectionSelectedItem, selectedMetadata);
+<b class="nc">&nbsp;                MetadataEditor.addMultipleStructuresWithMetadata(elementsToAddSpinnerValue,</b>
+<b class="nc">&nbsp;                    docStructAddTypeSelectionSelectedItem, dataEditor.getWorkpiece(), selectedStructure.get(),</b>
+&nbsp;                    selectedDocStructPosition, metadataViewInterface, inputMetaDataValue);
+<b class="nc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                MetadataEditor.addMultipleStructures(elementsToAddSpinnerValue, docStructAddTypeSelectionSelectedItem,</b>
+<b class="nc">&nbsp;                    dataEditor.getWorkpiece(), selectedStructure.get(), selectedDocStructPosition);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            dataEditor.refreshStructurePanel();</b>
+<b class="nc">&nbsp;            dataEditor.getPaginationPanel().show();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked if the user clicks on the add single doc struc
+&nbsp;     * submit btn command button.
+&nbsp;     */
+&nbsp;    private void addSingleDocStruc(boolean selectViews) {
+<b class="nc">&nbsp;        Optional&lt;LogicalDivision&gt; selectedStructure = dataEditor.getSelectedStructure();</b>
+<b class="nc">&nbsp;        if (selectedStructure.isPresent()) {</b>
+<b class="nc">&nbsp;            LogicalDivision newStructure = MetadataEditor.addLogicalDivision(docStructAddTypeSelectionSelectedItem,</b>
+<b class="nc">&nbsp;                    dataEditor.getWorkpiece(), selectedStructure.get(),</b>
+<b class="nc">&nbsp;                    selectedDocStructPosition, getViewsToAdd());</b>
+<b class="nc">&nbsp;            dataEditor.getSelectedMedia().clear();</b>
+<b class="nc">&nbsp;            if (selectViews) {</b>
+<b class="nc">&nbsp;                for (View view : getViewsToAdd()) {</b>
+<b class="nc">&nbsp;                    dataEditor.getSelectedMedia().add(new ImmutablePair&lt;&gt;(view.getPhysicalDivision(), newStructure));</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;            dataEditor.refreshStructurePanel();</b>
+<b class="nc">&nbsp;            TreeNode selectedLogicalTreeNode = dataEditor.getStructurePanel().updateLogicalNodeSelectionRecursive(newStructure,</b>
+<b class="nc">&nbsp;                    this.dataEditor.getStructurePanel().getLogicalTree());</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(selectedLogicalTreeNode)) {</b>
+<b class="nc">&nbsp;                this.dataEditor.getStructurePanel().setSelectedLogicalNode(selectedLogicalTreeNode);</b>
+<b class="nc">&nbsp;                this.dataEditor.getMetadataPanel().showLogical(this.dataEditor.getSelectedStructure());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; selectedMedia = this.dataEditor.getSelectedMedia().stream()</b>
+<b class="nc">&nbsp;                    .sorted(Comparator.comparingInt(p -&gt; p.getLeft().getOrder()))</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;            Collections.reverse(selectedMedia);</b>
+<b class="nc">&nbsp;            this.dataEditor.setSelectedMedia(selectedMedia);</b>
+<b class="nc">&nbsp;            dataEditor.getPaginationPanel().show();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the docStructAddTypeSelection drop-down
+&nbsp;     * menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the docStructAddTypeSelection
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getDocStructAddTypeSelectionItems() {
+<b class="nc">&nbsp;        if (Objects.isNull(selectedDocStructPosition)) {</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        switch (selectedDocStructPosition) {</b>
+&nbsp;            case AFTER_CURRENT_ELEMENT:
+&nbsp;            case BEFORE_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                return docStructAddTypeSelectionItemsForSiblings;</b>
+&nbsp;            case CURRENT_POSITION:
+&nbsp;            case FIRST_CHILD_OF_CURRENT_ELEMENT:
+&nbsp;            case LAST_CHILD_OF_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                return docStructAddTypeSelectionItemsForChildren;</b>
+&nbsp;            case PARENT_OF_CURRENT_ELEMENT:
+<b class="nc">&nbsp;                return docStructAddTypeSelectionItemsForParent;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return selected doc struct type.
+&nbsp;     *
+&nbsp;     * @return selected doc struct type
+&nbsp;     */
+&nbsp;    public String getDocStructAddTypeSelectionSelectedItem() {
+<b class="nc">&nbsp;        return StringUtils.isBlank(docStructAddTypeSelectionSelectedItem) ? null : docStructAddTypeSelectionSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the docStructAddTypeSelection drop-down menu.
+&nbsp;     *
+&nbsp;     * @param docStructAddTypeSelectionSelectedItem
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setDocStructAddTypeSelectionSelectedItem(String docStructAddTypeSelectionSelectedItem) {
+<b class="nc">&nbsp;        this.docStructAddTypeSelectionSelectedItem = docStructAddTypeSelectionSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items of the docStructPositionSelection drop-down menu.
+&nbsp;     *
+&nbsp;     * @return the items of the docStructPositionSelection
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getDocStructPositionSelectionItems() {
+<b class="nc">&nbsp;        return docStructPositionSelectionItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the docStructPositionSelection drop-down
+&nbsp;     * menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the docStructPositionSelection
+&nbsp;     */
+&nbsp;    public InsertionPosition getSelectedDocStructPosition() {
+<b class="nc">&nbsp;        if (!docStructPositionSelectionItems.stream()</b>
+<b class="nc">&nbsp;                .map(SelectItem::getValue)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList())</b>
+<b class="nc">&nbsp;                .contains(selectedDocStructPosition)) {</b>
+<b class="nc">&nbsp;            setSelectedDocStructPosition(LAST_CHILD_OF_CURRENT_ELEMENT);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return selectedDocStructPosition;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the docStructPositionSelection drop-down menu.
+&nbsp;     *
+&nbsp;     * @param selectedDocStructPosition
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setSelectedDocStructPosition(InsertionPosition selectedDocStructPosition) {
+<b class="nc">&nbsp;        this.selectedDocStructPosition = selectedDocStructPosition;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value of the elementsToAddSpinner number input box.
+&nbsp;     *
+&nbsp;     * @return the value of the elementsToAddSpinner
+&nbsp;     */
+&nbsp;    public int getElementsToAddSpinnerValue() {
+<b class="nc">&nbsp;        return elementsToAddSpinnerValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the value of the elementsToAddSpinner number input box.
+&nbsp;     *
+&nbsp;     * @param elementsToAddSpinnerValue
+&nbsp;     *            value to set
+&nbsp;     */
+&nbsp;    public void setElementsToAddSpinnerValue(int elementsToAddSpinnerValue) {
+<b class="nc">&nbsp;        this.elementsToAddSpinnerValue = elementsToAddSpinnerValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value of the inputMetaData text box.
+&nbsp;     *
+&nbsp;     * @return the value of the inputMetaData
+&nbsp;     */
+&nbsp;    public String getInputMetaDataValue() {
+<b class="nc">&nbsp;        return inputMetaDataValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the value of the inputMetaData text box.
+&nbsp;     *
+&nbsp;     * @param inputMetaDataValue
+&nbsp;     *            value to set
+&nbsp;     */
+&nbsp;    public void setInputMetaDataValue(String inputMetaDataValue) {
+<b class="nc">&nbsp;        this.inputMetaDataValue = inputMetaDataValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items of the selectAddableMetadataTypes drop-down menu.
+&nbsp;     *
+&nbsp;     * @return the items of the selectAddableMetadataTypes
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getAddableMetadata() {
+<b class="nc">&nbsp;        return addableMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the selectAddableMetadataTypes drop-down
+&nbsp;     * menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the selectAddableMetadataTypes
+&nbsp;     */
+&nbsp;    public String getSelectedMetadata() {
+<b class="nc">&nbsp;        return selectedMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the selectAddableMetadataTypes drop-down menu.
+&nbsp;     *
+&nbsp;     * @param selectedMetadata
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setSelectedMetadata(String selectedMetadata) {
+<b class="nc">&nbsp;        this.selectedMetadata = selectedMetadata;</b>
+<b class="nc">&nbsp;        dataEditor.getMetadataPanel().setAddMetadataKeySelectedItem(selectedMetadata);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the selectFirstPageOnAddNode drop-down menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the selectFirstPageOnAddNode
+&nbsp;     */
+&nbsp;    public String getSelectFirstPageOnAddNode() {
+<b class="nc">&nbsp;        return selectFirstPageOnAddNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the selectFirstPageOnAddNode drop-down menu.
+&nbsp;     *
+&nbsp;     * @param selectFirstPageOnAddNode
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setSelectFirstPageOnAddNode(String selectFirstPageOnAddNode) {
+<b class="nc">&nbsp;        this.selectFirstPageOnAddNode = selectFirstPageOnAddNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the selectLastPageOnAddNode drop-down menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the selectLastPageOnAddNode
+&nbsp;     */
+&nbsp;    public String getSelectLastPageOnAddNode() {
+<b class="nc">&nbsp;        return selectLastPageOnAddNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the selectLastPageOnAddNode drop-down menu.
+&nbsp;     *
+&nbsp;     * @param selectLastPageOnAddNode
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setSelectLastPageOnAddNode(String selectLastPageOnAddNode) {
+<b class="nc">&nbsp;        this.selectLastPageOnAddNode = selectLastPageOnAddNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items of the selectFirstPageOnAddNode and
+&nbsp;     * selectLastPageOnAddNode drop-down menus.
+&nbsp;     *
+&nbsp;     * @return the items of the selectFirstPageOnAddNode and
+&nbsp;     *         selectLastPageOnAddNode
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getSelectPageOnAddNodeItems() {
+<b class="nc">&nbsp;        return selectPageOnAddNodeItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;View&gt; getViewsToAdd() {
+<b class="nc">&nbsp;        if (Objects.nonNull(preselectedViews) &amp;&amp; preselectedViews.size() &gt; 0) {</b>
+<b class="nc">&nbsp;            return preselectedViews;</b>
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            int firstPage = Integer.parseInt(selectFirstPageOnAddNode);</b>
+<b class="nc">&nbsp;            int lastPage = Integer.parseInt(selectLastPageOnAddNode);</b>
+<b class="nc">&nbsp;            return dataEditor.getEditPagesDialog().getViewsToAdd(firstPage, lastPage);</b>
+<b class="nc">&nbsp;        } catch (NumberFormatException e) {</b>
+&nbsp;            // user didn’t select both start and end page
+<b class="nc">&nbsp;            logger.catching(Level.TRACE, e);</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prepare popup dialog by retrieving available insertion positions and doc struct types for selected element.
+&nbsp;     */
+&nbsp;    public void prepare() {
+<b class="nc">&nbsp;        docStructAddTypeSelectionSelectedItem = &quot;&quot;;</b>
+<b class="nc">&nbsp;        elementsToAddSpinnerValue = 1;</b>
+<b class="nc">&nbsp;        checkSelectedLogicalNode();</b>
+<b class="nc">&nbsp;        Optional&lt;LogicalDivision&gt; selectedStructure = dataEditor.getSelectedStructure();</b>
+<b class="nc">&nbsp;        if (selectedStructure.isPresent()) {</b>
+<b class="nc">&nbsp;            this.parents = MetadataEditor.getAncestorsOfLogicalDivision(selectedStructure.get(),</b>
+<b class="nc">&nbsp;                dataEditor.getWorkpiece().getLogicalStructure());</b>
+<b class="nc">&nbsp;            prepareDocStructPositionSelectionItems(parents.isEmpty());</b>
+<b class="nc">&nbsp;            prepareAddableMetadataForStructure(true);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            docStructPositionSelectionItems = Collections.emptyList();</b>
+<b class="nc">&nbsp;            addableMetadata = Collections.emptyList();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        this.prepareDocStructTypes();</b>
+<b class="nc">&nbsp;        prepareSelectPageOnAddNodeItems();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void checkSelectedLogicalNode() {
+&nbsp;        //If a view is selected in logical tree then the &#39;selectedLogicalNode&#39; will be set to the parent of this view
+<b class="nc">&nbsp;        TreeNode selectedLogicalNode = dataEditor.getStructurePanel().getSelectedLogicalNode();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(selectedLogicalNode) &amp;&amp; selectedLogicalNode.getData() instanceof StructureTreeNode) {</b>
+<b class="nc">&nbsp;            StructureTreeNode structureTreeNode = (StructureTreeNode) selectedLogicalNode.getData();</b>
+<b class="nc">&nbsp;            if (structureTreeNode.getDataObject() instanceof View) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(selectedLogicalNode.getParent())) {</b>
+<b class="nc">&nbsp;                    previouslySelectedLogicalNode = selectedLogicalNode;</b>
+<b class="nc">&nbsp;                    dataEditor.getStructurePanel().setSelectedLogicalNode(selectedLogicalNode.getParent());</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update lists of available doc struct types that can be added to the currently selected structure element in the
+&nbsp;     * currently selected position.
+&nbsp;     */
+&nbsp;    public void prepareDocStructTypes() {
+<b class="nc">&nbsp;        Optional&lt;LogicalDivision&gt; selectedStructure = dataEditor.getSelectedStructure();</b>
+<b class="nc">&nbsp;        if (selectedStructure.isPresent()) {</b>
+<b class="nc">&nbsp;            this.parents = MetadataEditor.getAncestorsOfLogicalDivision(selectedStructure.get(),</b>
+<b class="nc">&nbsp;                    dataEditor.getWorkpiece().getLogicalStructure());</b>
+<b class="nc">&nbsp;            if (parents.isEmpty()) {</b>
+<b class="nc">&nbsp;                docStructAddTypeSelectionItemsForParent = Collections.emptyList();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                prepareDocStructAddTypeSelectionItemsForParent();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            prepareDocStructAddTypeSelectionItemsForChildren();</b>
+<b class="nc">&nbsp;            prepareDocStructAddTypeSelectionItemsForSiblings();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            docStructAddTypeSelectionItemsForChildren = Collections.emptyList();</b>
+<b class="nc">&nbsp;            docStructAddTypeSelectionItemsForParent = Collections.emptyList();</b>
+<b class="nc">&nbsp;            docStructAddTypeSelectionItemsForSiblings = Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareDocStructAddTypeSelectionItemsForChildren() {
+<b class="nc">&nbsp;        docStructAddTypeSelectionItemsForChildren = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        StructuralElementViewInterface divisionView = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;            dataEditor.getSelectedStructure().orElseThrow(IllegalStateException::new).getType(),</b>
+<b class="nc">&nbsp;            dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;        for (Entry&lt;String, String&gt; entry : divisionView.getAllowedSubstructuralElements().entrySet()) {</b>
+<b class="nc">&nbsp;            docStructAddTypeSelectionItemsForChildren.add(new SelectItem(entry.getKey(), entry.getValue()));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        DataEditorService.sortMetadataList(docStructAddTypeSelectionItemsForChildren, dataEditor.getProcess().getRuleset());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareDocStructAddTypeSelectionItemsForParent() {
+<b class="nc">&nbsp;        docStructAddTypeSelectionItemsForParent = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (!parents.isEmpty()) {</b>
+<b class="nc">&nbsp;            StructuralElementViewInterface parentDivisionView = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                parents.getLast().getType(), dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;            for (Entry&lt;String, String&gt; entry : parentDivisionView.getAllowedSubstructuralElements().entrySet()) {</b>
+<b class="nc">&nbsp;                String newParent = entry.getKey();</b>
+<b class="nc">&nbsp;                StructuralElementViewInterface newParentDivisionView = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                    newParent, dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;                if (newParentDivisionView.getAllowedSubstructuralElements().containsKey(</b>
+<b class="nc">&nbsp;                    dataEditor.getSelectedStructure().orElseThrow(IllegalStateException::new).getType())) {</b>
+<b class="nc">&nbsp;                    docStructAddTypeSelectionItemsForParent.add(new SelectItem(newParent, entry.getValue()));</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            DataEditorService.sortMetadataList(docStructAddTypeSelectionItemsForParent, dataEditor.getProcess().getRuleset());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareDocStructAddTypeSelectionItemsForSiblings() {
+<b class="nc">&nbsp;        docStructAddTypeSelectionItemsForSiblings = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (!parents.isEmpty()) {</b>
+<b class="nc">&nbsp;            StructuralElementViewInterface parentDivisionView = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                parents.getLast().getType(), dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;            for (Entry&lt;String, String&gt; entry : parentDivisionView.getAllowedSubstructuralElements().entrySet()) {</b>
+<b class="nc">&nbsp;                docStructAddTypeSelectionItemsForSiblings.add(new SelectItem(entry.getKey(), entry.getValue()));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            DataEditorService.sortMetadataList(docStructAddTypeSelectionItemsForSiblings, dataEditor.getProcess().getRuleset());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareDocStructPositionSelectionItems(boolean rootNode) {
+<b class="nc">&nbsp;        docStructPositionSelectionItems = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (!dataEditor.getSelectedMedia().isEmpty() &amp;&amp; dataEditor.consecutivePagesSelected()) {</b>
+<b class="nc">&nbsp;            selectedDocStructPosition = CURRENT_POSITION;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            if (!rootNode) {</b>
+<b class="nc">&nbsp;                docStructPositionSelectionItems.add(new SelectItem(BEFORE_CURRENT_ELEMENT,</b>
+<b class="nc">&nbsp;                        Helper.getTranslation(&quot;dataEditor.position.beforeCurrentElement&quot;)));</b>
+<b class="nc">&nbsp;                docStructPositionSelectionItems.add(new SelectItem(AFTER_CURRENT_ELEMENT,</b>
+<b class="nc">&nbsp;                        Helper.getTranslation(&quot;dataEditor.position.afterCurrentElement&quot;)));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            docStructPositionSelectionItems.add(new SelectItem(FIRST_CHILD_OF_CURRENT_ELEMENT,</b>
+<b class="nc">&nbsp;                    Helper.getTranslation(&quot;dataEditor.position.asFirstChildOfCurrentElement&quot;)));</b>
+<b class="nc">&nbsp;            docStructPositionSelectionItems.add(new SelectItem(LAST_CHILD_OF_CURRENT_ELEMENT,</b>
+<b class="nc">&nbsp;                    Helper.getTranslation(&quot;dataEditor.position.asLastChildOfCurrentElement&quot;)));</b>
+<b class="nc">&nbsp;            docStructPositionSelectionItems.add(new SelectItem(PARENT_OF_CURRENT_ELEMENT,</b>
+<b class="nc">&nbsp;                    Helper.getTranslation(&quot;dataEditor.position.asParentOfCurrentElement&quot;)));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Prepare the list of available Metadata that can be added to the currently selected structure element.
+&nbsp;     *
+&nbsp;     * @param currentElement flag controlling whether to return a list of metadata for the currently selected logical
+&nbsp;     *                       structure element (currentElement = true) or for a new element to be added to the structure
+&nbsp;     *                       (currentElement = false)
+&nbsp;     * @param metadataNodes list of TreeNodes containing the metadata that is already assigned to the structure element
+&nbsp;     */
+&nbsp;    public void prepareAddableMetadataForStructure(boolean currentElement, List&lt;TreeNode&gt; metadataNodes) {
+<b class="nc">&nbsp;        addableMetadata = DataEditorService.getAddableMetadataForStructureElement(this.dataEditor, currentElement,</b>
+&nbsp;                metadataNodes, docStructAddTypeSelectionSelectedItem, true);
+<b class="nc">&nbsp;        setSelectedMetadata(&quot;&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convenience function to call metadata preparation with a single parameter.
+&nbsp;     *
+&nbsp;     * @param currentElement flag controlling whether to return a list of metadata for the currently selected logical
+&nbsp;     *                       structure element (currentElement = true) or for a new element to be added to the structure
+&nbsp;     *                       (currentElement = false)
+&nbsp;     */
+&nbsp;    public void prepareAddableMetadataForStructure(boolean currentElement) {
+<b class="nc">&nbsp;        dataEditor.getMetadataPanel().setSelectedMetadataTreeNode(null);</b>
+<b class="nc">&nbsp;        prepareAddableMetadataForStructure(currentElement, Collections.emptyList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareSelectPageOnAddNodeItems() {
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; physicalDivisions = dataEditor.getWorkpiece().getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted();</b>
+<b class="nc">&nbsp;        selectPageOnAddNodeItems = new ArrayList&lt;&gt;(physicalDivisions.size());</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; physicalDivisions.size(); i++) {</b>
+<b class="nc">&nbsp;            View view = View.of(physicalDivisions.get(i));</b>
+<b class="nc">&nbsp;            String label = dataEditor.getStructurePanel().buildViewLabel(view);</b>
+<b class="nc">&nbsp;            selectPageOnAddNodeItems.add(new SelectItem(Integer.toString(i), label));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Fill preselectedViews with the views matching the List of selectedMedia.
+&nbsp;     */
+&nbsp;    public void preparePreselectedViews() {
+<b class="nc">&nbsp;        preselectedViews = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;Pair&lt;PhysicalDivision, LogicalDivision&gt;&gt; selectedMedia = dataEditor.getSelectedMedia();</b>
+<b class="nc">&nbsp;        for (Pair&lt;PhysicalDivision, LogicalDivision&gt; pair : selectedMedia) {</b>
+<b class="nc">&nbsp;            for (View view : pair.getValue().getViews()) {</b>
+<b class="nc">&nbsp;                if (Objects.equals(view.getPhysicalDivision(), pair.getKey())) {</b>
+<b class="nc">&nbsp;                    preselectedViews.add(view);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        preselectedViews.sort(Comparator.comparingInt(view -&gt; view.getPhysicalDivision().getOrder()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reset values.
+&nbsp;     */
+&nbsp;    public void resetValues() {
+<b class="nc">&nbsp;        preselectedViews = Collections.emptyList();</b>
+<b class="nc">&nbsp;        processNumber = &quot;&quot;;</b>
+<b class="nc">&nbsp;        processes = Collections.emptyList();</b>
+<b class="nc">&nbsp;        linkSubDialogVisible = false;</b>
+<b class="nc">&nbsp;        inputMetaDataValue = &quot;&quot;;</b>
+<b class="nc">&nbsp;        elementsToAddSpinnerValue = 1;</b>
+<b class="nc">&nbsp;        selectFirstPageOnAddNode = null;</b>
+<b class="nc">&nbsp;        selectLastPageOnAddNode = null;</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(previouslySelectedLogicalNode)) {</b>
+<b class="nc">&nbsp;            dataEditor.getStructurePanel().setSelectedLogicalNode(previouslySelectedLogicalNode);</b>
+<b class="nc">&nbsp;            previouslySelectedLogicalNode = null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the process number. The process number is an input field where
+&nbsp;     * the user can enter the process number or the process title, and then it
+&nbsp;     * is searched for. But search is only when the button is clicked (too much
+&nbsp;     * load otherwise).
+&nbsp;     *
+&nbsp;     * @return the process number
+&nbsp;     */
+&nbsp;    public String getProcessNumber() {
+<b class="nc">&nbsp;        return processNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the process number when the user entered it.
+&nbsp;     *
+&nbsp;     * @param processNumber
+&nbsp;     *            process number to set
+&nbsp;     */
+&nbsp;    public void setProcessNumber(String processNumber) {
+<b class="nc">&nbsp;        this.processNumber = processNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Function for the button for the search. Looks for suitable processes. If
+&nbsp;     * the process number is a number and the process exists, it is already
+&nbsp;     * found. Otherwise it must be searched for, excluding the wrong ruleset or
+&nbsp;     * the wrong client.
+&nbsp;     */
+&nbsp;    public void search() {
+<b class="nc">&nbsp;        if (processNumber.trim().isEmpty()) {</b>
+<b class="nc">&nbsp;            alert(Helper.getTranslation(&quot;dialogAddDocStrucType.searchButtonClick.empty&quot;));</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            Set&lt;String&gt; allowedSubstructuralElements = DataEditorService.getStructuralElementView(this.dataEditor)</b>
+<b class="nc">&nbsp;                    .getAllowedSubstructuralElements().keySet();</b>
+<b class="nc">&nbsp;            List&lt;Integer&gt; ids = ServiceManager.getProcessService().findLinkableChildProcesses(processNumber,</b>
+<b class="nc">&nbsp;                dataEditor.getProcess().getRuleset().getId(), allowedSubstructuralElements)</b>
+<b class="nc">&nbsp;                    .stream().map(ProcessDTO::getId).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;            if (ids.isEmpty()) {</b>
+<b class="nc">&nbsp;                alert(Helper.getTranslation(&quot;dialogAddDocStrucType.searchButtonClick.noHits&quot;));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            processes = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (int processId : ids) {</b>
+<b class="nc">&nbsp;                processes.add(ServiceManager.getProcessService().getById(processId));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (DataException | DAOException e) {</b>
+<b class="nc">&nbsp;            logger.catching(e);</b>
+<b class="nc">&nbsp;            alert(Helper.getTranslation(&quot;dialogAddDocStrucType.searchButtonClick.error&quot;, e.getMessage()));</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Displays a dialog box with a message to the user.
+&nbsp;     *
+&nbsp;     * @param message
+&nbsp;     *            message to show
+&nbsp;     */
+&nbsp;    private void alert(String message) {
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;alert(&#39;&quot; + message + &quot;&#39;);&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the process selected by the user in the drop-down list.
+&nbsp;     *
+&nbsp;     * @return the selected process
+&nbsp;     */
+&nbsp;    public Process getSelectedProcess() {
+<b class="nc">&nbsp;        return selectedProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the number of the process selected by the user.
+&nbsp;     *
+&nbsp;     * @param selectedProcess
+&nbsp;     *            selected process
+&nbsp;     */
+&nbsp;    public void setSelectedProcess(Process selectedProcess) {
+<b class="nc">&nbsp;        this.selectedProcess = selectedProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of items to populate the drop-down list to select a
+&nbsp;     * process.
+&nbsp;     *
+&nbsp;     * @return the list of processes
+&nbsp;     */
+&nbsp;    public List&lt;Process&gt; getProcesses() {
+<b class="nc">&nbsp;        return processes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get preselectedViews.
+&nbsp;     *
+&nbsp;     * @return value of preselectedViews
+&nbsp;     */
+&nbsp;    public List&lt;View&gt; getPreselectedViews() {
+<b class="nc">&nbsp;        return preselectedViews;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds the link when the user clicks OK.
+&nbsp;     */
+&nbsp;    public void addProcessLink() {
+<b class="nc">&nbsp;        dataEditor.getCurrentChildren().add(selectedProcess);</b>
+<b class="nc">&nbsp;        MetadataEditor.addLink(dataEditor.getSelectedStructure().orElseThrow(IllegalStateException::new),</b>
+<b class="nc">&nbsp;            selectedProcess.getId());</b>
+<b class="nc">&nbsp;        dataEditor.getStructurePanel().show(true);</b>
+<b class="nc">&nbsp;        dataEditor.getPaginationPanel().show();</b>
+<b class="nc">&nbsp;        selectedProcess = null;</b>
+<b class="nc">&nbsp;        processes = Collections.emptyList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the label of the currently selected structure.
+&nbsp;     *
+&nbsp;     * @return label of the currently selected structure
+&nbsp;     */
+&nbsp;    public String getCurrentStructureLabel() {
+<b class="nc">&nbsp;        if (dataEditor.getSelectedStructure().isPresent()) {</b>
+<b class="nc">&nbsp;            StructuralElementViewInterface divisionView = dataEditor.getRulesetManagement().getStructuralElementView(</b>
+<b class="nc">&nbsp;                    dataEditor.getSelectedStructure().get().getType(), dataEditor.getAcquisitionStage(),</b>
+<b class="nc">&nbsp;                    dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;            return divisionView.getLabel();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return &quot; - &quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    
+&nbsp;    private StructuralElementViewInterface getDivisionViewOfStructure(String structure) {
+<b class="nc">&nbsp;        StructuralElementViewInterface divisionView = dataEditor.getRulesetManagement()</b>
+<b class="nc">&nbsp;                .getStructuralElementView(structure, dataEditor.getAcquisitionStage(), dataEditor.getPriorityList());</b>
+<b class="nc">&nbsp;        return divisionView;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * This method checks if the selected metadatakey refers to complex metadata.
+&nbsp;     * 
+&nbsp;     * @return True if metadata is of complex type.
+&nbsp;     */
+&nbsp;    public boolean isSelectedMetadataComplex() {
+<b class="nc">&nbsp;        MetadataViewInterface mvi = getMetadataViewFromKey(docStructAddTypeSelectionSelectedItem,selectedMetadata);</b>
+<b class="nc">&nbsp;        return mvi.isComplex();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private MetadataViewInterface getMetadataViewFromKey(String structure, String metadataKey) {
+<b class="nc">&nbsp;        StructuralElementViewInterface divisionView = getDivisionViewOfStructure(structure);</b>
+&nbsp;
+<b class="nc">&nbsp;        return divisionView.getAllowedMetadata().stream().filter(metaDatum -&gt; metaDatum.getId().equals(metadataKey))</b>
+<b class="nc">&nbsp;                .findFirst().orElseThrow(IllegalStateException::new);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,192 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetsKitodoWriter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: MetsKitodoWriter (org.kitodo.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetsKitodoWriter</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.StringWriter;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.xml.bind.JAXBContext;
+&nbsp;import javax.xml.bind.JAXBException;
+&nbsp;import javax.xml.bind.Marshaller;
+&nbsp;import javax.xml.datatype.DatatypeConfigurationException;
+&nbsp;
+&nbsp;import org.kitodo.dataformat.metskitodo.Mets;
+&nbsp;import org.kitodo.utils.JAXBContextCache;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class provides methods for writing Mets objects to xml files.
+&nbsp; */
+&nbsp;public class MetsKitodoWriter {
+&nbsp;
+<b class="nc">&nbsp;    private MetsKitodoObjectFactory objectFactory = new MetsKitodoObjectFactory();</b>
+&nbsp;    private JAXBContext jaxbMetsContext;
+&nbsp;    private Marshaller jaxbMetsMarshaller;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The Constructor which instantiates the JAXB context of MetsKitodo format.
+&nbsp;     */
+<b class="nc">&nbsp;    public MetsKitodoWriter() throws JAXBException {</b>
+<b class="nc">&nbsp;        jaxbMetsContext = JAXBContextCache.getJAXBContext(Mets.class);</b>
+<b class="nc">&nbsp;        jaxbMetsMarshaller = jaxbMetsContext.createMarshaller();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updating Mets header by inserting a new header if no one exists, updating
+&nbsp;     * last modification date and writing the serialized Mets object to specified file path in
+&nbsp;     * xml format.
+&nbsp;     *
+&nbsp;     * @param mets
+&nbsp;     *            The Mets object.
+&nbsp;     * @param filePath
+&nbsp;     *            The file path to write the xml file.
+&nbsp;     */
+&nbsp;    public void writeSerializedToFile(Mets mets, URI filePath) throws JAXBException, DatatypeConfigurationException, IOException {
+<b class="nc">&nbsp;        insertMetsHeaderIfNotExist(mets);</b>
+<b class="nc">&nbsp;        updateLastModDate(mets);</b>
+<b class="nc">&nbsp;        writeMetsData(mets, filePath);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Serializes a given Mets object to xml format and returns as formatted String.
+&nbsp;     *
+&nbsp;     * @param mets
+&nbsp;     *            The mets object.
+&nbsp;     */
+&nbsp;    public String writeSerializedToString(Mets mets) throws JAXBException {
+<b class="nc">&nbsp;        jaxbMetsMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);</b>
+<b class="nc">&nbsp;        jaxbMetsMarshaller.setProperty(&quot;com.sun.xml.bind.namespacePrefixMapper&quot;, new MetsKitodoNamespacePrefixMapper());</b>
+<b class="nc">&nbsp;        StringWriter stringWriter = new StringWriter();</b>
+<b class="nc">&nbsp;        jaxbMetsMarshaller.marshal(mets, stringWriter);</b>
+<b class="nc">&nbsp;        return stringWriter.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void writeMetsData(Mets mets, URI file) throws JAXBException {
+<b class="nc">&nbsp;        jaxbMetsMarshaller.setProperty(&quot;com.sun.xml.bind.namespacePrefixMapper&quot;, new MetsKitodoNamespacePrefixMapper());</b>
+<b class="nc">&nbsp;        jaxbMetsMarshaller.marshal(mets, new File(file));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void insertMetsHeaderIfNotExist(Mets mets) throws DatatypeConfigurationException, IOException {
+<b class="nc">&nbsp;        if (Objects.isNull(mets.getMetsHdr())) {</b>
+<b class="nc">&nbsp;            mets.setMetsHdr(objectFactory.createKitodoMetsHeader());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updateLastModDate(Mets mets) throws DatatypeConfigurationException {
+<b class="nc">&nbsp;        mets.getMetsHdr().setLASTMODDATE(JaxbXmlUtils.getXmlTime());</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

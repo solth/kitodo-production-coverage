@@ -1,0 +1,368 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TempProcess</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: TempProcess (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TempProcess</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (12/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45,3%
+  </span>
+  <span class="absValue">
+    (24/53)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessMetadata;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;import org.w3c.dom.Node;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class is used during import.
+&nbsp; */
+&nbsp;public class TempProcess {
+&nbsp;
+&nbsp;    private Workpiece workpiece;
+&nbsp;
+&nbsp;    private Process process;
+&nbsp;
+&nbsp;    private NodeList metadataNodes;
+&nbsp;
+&nbsp;    private String atstsl;
+&nbsp;
+&nbsp;    private String tiffHeaderDocumentName;
+&nbsp;
+&nbsp;    private String tiffHeaderImageDescription;
+&nbsp;
+&nbsp;    private int guessedImages;
+&nbsp;
+&nbsp;    private final ProcessMetadata processMetadata;
+<b class="fc">&nbsp;    private String catalogId = &quot;&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor that creates an instance of TempProcess with the given Process
+&nbsp;     * and Workpiece instances.
+&nbsp;     *
+&nbsp;     * @param process Process of this TempProcess
+&nbsp;     * @param workpiece Workpiece of this TempProcess
+&nbsp;     */
+<b class="fc">&nbsp;    public TempProcess(Process process, Workpiece workpiece) {</b>
+<b class="fc">&nbsp;        this.process = process;</b>
+<b class="fc">&nbsp;        this.workpiece = workpiece;</b>
+<b class="fc">&nbsp;        this.processMetadata = new ProcessMetadata();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor that creates an instance of TempProcess with given Process
+&nbsp;     * and metadata NodeList.
+&nbsp;     *
+&nbsp;     * @param process Process of this TempProcess
+&nbsp;     * @param nodeList Metadata NodeList of this TempProcess
+&nbsp;     * @param docType Document type of process
+&nbsp;     */
+<b class="fc">&nbsp;    public TempProcess(Process process, NodeList nodeList, String docType) {</b>
+<b class="fc">&nbsp;        this.process = process;</b>
+<b class="fc">&nbsp;        this.metadataNodes = nodeList;</b>
+<b class="fc">&nbsp;        this.workpiece = new Workpiece();</b>
+<b class="fc">&nbsp;        this.workpiece.getLogicalStructure().setType(docType);</b>
+<b class="fc">&nbsp;        if (nodeList.getLength() != 0) {</b>
+<b class="fc">&nbsp;            this.workpiece.getLogicalStructure().getMetadata().addAll(</b>
+<b class="fc">&nbsp;                    ProcessHelper.convertMetadata(this.metadataNodes, MdSec.DMD_SEC));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        this.processMetadata = new ProcessMetadata();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get workpiece.
+&nbsp;     *
+&nbsp;     * @return workpiece
+&nbsp;     */
+&nbsp;    public Workpiece getWorkpiece() {
+<b class="fc">&nbsp;        return workpiece;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set workpiece.
+&nbsp;     *
+&nbsp;     * @param workpiece new Workpiece
+&nbsp;     */
+&nbsp;    public void setWorkpiece(Workpiece workpiece) {
+<b class="nc">&nbsp;        this.workpiece = workpiece;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get process.
+&nbsp;     *
+&nbsp;     * @return process
+&nbsp;     */
+&nbsp;    public Process getProcess() {
+<b class="fc">&nbsp;        return process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set process.
+&nbsp;     *
+&nbsp;     * @param process new Process
+&nbsp;     */
+&nbsp;    public void setProcess(Process process) {
+<b class="nc">&nbsp;        this.process = process;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get metadataNodes.
+&nbsp;     *
+&nbsp;     * @return value of metadataNodes
+&nbsp;     */
+&nbsp;    public NodeList getMetadataNodes() {
+<b class="fc">&nbsp;        return metadataNodes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get tiffHeaderDocumentName.
+&nbsp;     *
+&nbsp;     * @return value of tiffHeaderDocumentName
+&nbsp;     */
+&nbsp;    public String getTiffHeaderDocumentName() {
+<b class="fc">&nbsp;        return tiffHeaderDocumentName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set tiffHeaderDocumentName.
+&nbsp;     *
+&nbsp;     * @param tiffHeaderDocumentName as java.lang.String
+&nbsp;     */
+&nbsp;    public void setTiffHeaderDocumentName(String tiffHeaderDocumentName) {
+<b class="fc">&nbsp;        this.tiffHeaderDocumentName = tiffHeaderDocumentName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get tiffHeaderImageDescription.
+&nbsp;     *
+&nbsp;     * @return value of tiffHeaderImageDescription
+&nbsp;     */
+&nbsp;    public String getTiffHeaderImageDescription() {
+<b class="nc">&nbsp;        return tiffHeaderImageDescription;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set tiffHeaderImageDescription.
+&nbsp;     *
+&nbsp;     * @param tiffHeaderImageDescription as java.lang.String
+&nbsp;     */
+&nbsp;    public void setTiffHeaderImageDescription(String tiffHeaderImageDescription) {
+<b class="fc">&nbsp;        this.tiffHeaderImageDescription = tiffHeaderImageDescription;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get guessedImages.
+&nbsp;     *
+&nbsp;     * @return value of guessedImages
+&nbsp;     */
+&nbsp;    public int getGuessedImages() {
+<b class="fc">&nbsp;        return guessedImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set guessedImages.
+&nbsp;     *
+&nbsp;     * @param guessedImages as int
+&nbsp;     */
+&nbsp;    public void setGuessedImages(int guessedImages) {
+<b class="nc">&nbsp;        this.guessedImages = guessedImages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processMetadata.
+&nbsp;     *
+&nbsp;     * @return value of processMetadata
+&nbsp;     */
+&nbsp;    public ProcessMetadata getProcessMetadata() {
+<b class="fc">&nbsp;        return processMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Verify the doc type of the process. This Method checks whether the process has a metadata
+&nbsp;     * of type &quot;docType&quot; and if its value equals the type of the logical root element. If not, the
+&nbsp;     * logical root is set to the value of the &quot;docType&quot; metadata.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This function is currently only used for the import of prestructured processes.
+&nbsp;     */
+&nbsp;    public void verifyDocType() throws IOException, ProcessGenerationException {
+<b class="nc">&nbsp;        if (Objects.nonNull(process.getRuleset())) {</b>
+<b class="nc">&nbsp;            Collection&lt;String&gt; doctypeMetadata = ImportService.getDocTypeMetadata(process.getRuleset());</b>
+<b class="nc">&nbsp;            if (doctypeMetadata.isEmpty()) {</b>
+<b class="nc">&nbsp;                throw new ProcessGenerationException(Helper.getTranslation(&quot;newProcess.docTypeMetadataMissing&quot;,</b>
+<b class="nc">&nbsp;                        process.getRuleset().getTitle()));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.nonNull(this.getWorkpiece().getLogicalStructure().getMetadata())) {</b>
+<b class="nc">&nbsp;                Optional&lt;Metadata&gt; docTypeMetadata = this.getWorkpiece().getLogicalStructure().getMetadata()</b>
+<b class="nc">&nbsp;                        .stream().filter(metadata -&gt; doctypeMetadata.contains(metadata.getKey())).findFirst();</b>
+<b class="nc">&nbsp;                if (docTypeMetadata.isPresent() &amp;&amp; docTypeMetadata.get() instanceof MetadataEntry) {</b>
+<b class="nc">&nbsp;                    String docType = ((MetadataEntry)docTypeMetadata.get()).getValue();</b>
+<b class="nc">&nbsp;                    if (StringUtils.isNotBlank(docType)</b>
+<b class="nc">&nbsp;                            &amp;&amp; !this.getWorkpiece().getLogicalStructure().getType().equals(docType)) {</b>
+<b class="nc">&nbsp;                        this.getWorkpiece().getLogicalStructure().setType(docType);</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get atstsl.
+&nbsp;     *
+&nbsp;     * @return value of atstsl
+&nbsp;     */
+&nbsp;    public String getAtstsl() {
+<b class="fc">&nbsp;        return atstsl;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set atstsl.
+&nbsp;     *
+&nbsp;     * @param atstsl as string
+&nbsp;     */
+&nbsp;    public void setAtstsl(String atstsl) {
+<b class="fc">&nbsp;        this.atstsl = atstsl;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get catalog ID of this temp process.
+&nbsp;     *
+&nbsp;     * @param identifierMetadataKeys Collection of metadata keys of identifier metadata
+&nbsp;     * @return catalog ID
+&nbsp;     */
+&nbsp;    public String getCatalogId(Collection&lt;String&gt; identifierMetadataKeys) {
+<b class="nc">&nbsp;        for (String identifierMetadata : identifierMetadataKeys) {</b>
+<b class="nc">&nbsp;            if (catalogId.isEmpty() &amp;&amp; Objects.nonNull(metadataNodes) &amp;&amp; metadataNodes.getLength() &gt; 0) {</b>
+<b class="nc">&nbsp;                for (int i = 0; i &lt; metadataNodes.getLength(); i++) {</b>
+<b class="nc">&nbsp;                    Node item = metadataNodes.item(i);</b>
+<b class="nc">&nbsp;                    Node name = item.getAttributes().getNamedItem(&quot;name&quot;);</b>
+<b class="nc">&nbsp;                    if (Objects.nonNull(name) &amp;&amp; name.getTextContent().equals(identifierMetadata)) {</b>
+<b class="nc">&nbsp;                        catalogId = item.getTextContent();</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        if (catalogId.isEmpty()) {</b>
+<b class="nc">&nbsp;            catalogId = &quot; - &quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return catalogId;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

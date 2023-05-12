@@ -1,0 +1,362 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Division</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataformat</a>
+</div>
+
+<h1>Coverage Summary for Class: Division (org.kitodo.api.dataformat)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Division</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93%
+  </span>
+  <span class="absValue">
+    (40/43)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataformat;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;
+&nbsp;/**
+&nbsp; * A tree-shaped description of the content of the digital representation of a
+&nbsp; * digital medium. This can be subdivided into finer granular children. It can
+&nbsp; * be described with metadata.
+&nbsp; *
+&nbsp; * @param &lt;T&gt;
+&nbsp; *            There are two versions of it, an {@link LogicalDivision}
+&nbsp; *            and a {@link PhysicalDivision}.
+&nbsp; */
+&nbsp;public abstract class Division&lt;T extends Division&lt;T&gt;&gt; {
+&nbsp;    /**
+&nbsp;     * The children of this division, which form the structure tree.
+&nbsp;     */
+<b class="fc">&nbsp;    private List&lt;T&gt; children = new LinkedList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    private List&lt;URI&gt; contentIds = new ArrayList&lt;&gt;(0);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The label for this divison.
+&nbsp;     */
+&nbsp;    private String label;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The metadata for this division.
+&nbsp;     */
+<b class="fc">&nbsp;    private HashSet&lt;Metadata&gt; metadata = new HashSet&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sequence number. The sequence number must be unique across all divisions.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * &lt;i&gt;For logical structures&lt;/i&gt; meaningless, only used internally.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * &lt;i&gt;For physical divisions&lt;/i&gt;, the display or playback order of several media
+&nbsp;     * units referenced from one logical division is determined by
+&nbsp;     * this attribute, not by the order of the references.
+&nbsp;     */
+&nbsp;    private int order;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The order label of this division.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * &lt;i&gt;For logical structures&lt;/i&gt;, used to store &lt;b&gt;the machine-readable
+&nbsp;     * value&lt;/b&gt; if the &lt;i&gt;label&lt;/i&gt; contains a human-readable value that can be
+&nbsp;     * mapped to a machine-readable value.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * &lt;i&gt;For physical divisions&lt;/i&gt;, &lt;b&gt;a human readable label&lt;/b&gt; for the
+&nbsp;     * &lt;i&gt;order&lt;/i&gt; of this physical division. This need not be directly related to the
+&nbsp;     * order number. Examples of order labels could be “I, II, III, IV, V, - ,
+&nbsp;     * 1, 2, 3”, meanwhile the order would be “1, 2, 3, 4, 5, 6, 7, 8, 9”.
+&nbsp;     */
+&nbsp;    private String orderlabel;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The type of the division. Although the data type of this variable is a
+&nbsp;     * string, it is recommended to use a controlled vocabulary. If the
+&nbsp;     * generated METS files are to be used with the DFG Viewer, the list of
+&nbsp;     * supported logical structure types is defined.
+&nbsp;     *
+&nbsp;     * @see &quot;https://dfg-viewer.de/en/structural-data-set/&quot;
+&nbsp;     */
+&nbsp;    private String type;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new division.
+&nbsp;     */
+<b class="fc">&nbsp;    protected Division() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new division from an existing division. This is used by a
+&nbsp;     * subclass to make a division an instance of the subclass, so the shallow
+&nbsp;     * copies of {@code children} and {@code metadata} are intentional.
+&nbsp;     *
+&nbsp;     * @param source
+&nbsp;     *            division that serves as data source
+&nbsp;     */
+<b class="fc">&nbsp;    protected Division(Division&lt;T&gt; source) {</b>
+<b class="fc">&nbsp;        children = source.children;</b>
+<b class="fc">&nbsp;        label = source.label;</b>
+<b class="fc">&nbsp;        metadata = source.metadata;</b>
+<b class="fc">&nbsp;        order = source.order;</b>
+<b class="fc">&nbsp;        orderlabel = source.orderlabel;</b>
+<b class="fc">&nbsp;        type = source.type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all children of this division as a flat list. The list isn’t
+&nbsp;     * backed by the division, which means that insertions and deletions in the
+&nbsp;     * list would not change the division. Therefore a list that cannot be
+&nbsp;     * modified is returned.
+&nbsp;     *
+&nbsp;     * @return the children
+&nbsp;     */
+&nbsp;    public List&lt;T&gt; getAllChildren() {
+<b class="fc">&nbsp;        return children.stream().flatMap(Workpiece::treeStream).collect(Collectors.toUnmodifiableList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the children of this division.
+&nbsp;     *
+&nbsp;     * @return the children
+&nbsp;     */
+&nbsp;    public List&lt;T&gt; getChildren() {
+<b class="fc">&nbsp;        return children;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the content IDs list of this division.
+&nbsp;     *
+&nbsp;     * @return the children
+&nbsp;     */
+&nbsp;    public List&lt;URI&gt; getContentIds() {
+<b class="fc">&nbsp;        return contentIds;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the label of this logical division.
+&nbsp;     *
+&nbsp;     * @return the label
+&nbsp;     */
+&nbsp;    public String getLabel() {
+<b class="fc">&nbsp;        return label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the label of this logical division.
+&nbsp;     *
+&nbsp;     * @param label
+&nbsp;     *            label to set
+&nbsp;     */
+&nbsp;    public void setLabel(String label) {
+<b class="fc">&nbsp;        this.label = label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the metadata on this structure.
+&nbsp;     *
+&nbsp;     * @return the metadata
+&nbsp;     */
+&nbsp;    public HashSet&lt;Metadata&gt; getMetadata() {
+<b class="fc">&nbsp;        return metadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get order.
+&nbsp;     *
+&nbsp;     * @return value of order
+&nbsp;     */
+&nbsp;    public int getOrder() {
+<b class="fc">&nbsp;        return order;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set order.
+&nbsp;     *
+&nbsp;     * @param order
+&nbsp;     *            as int
+&nbsp;     */
+&nbsp;    public void setOrder(int order) {
+<b class="fc">&nbsp;        this.order = order;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the order label for this physical division.
+&nbsp;     *
+&nbsp;     * @return the order label
+&nbsp;     */
+&nbsp;    public String getOrderlabel() {
+<b class="fc">&nbsp;        return orderlabel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the order label for this physical division.
+&nbsp;     *
+&nbsp;     * @param orderlabel
+&nbsp;     *            order label to set
+&nbsp;     */
+&nbsp;    public void setOrderlabel(String orderlabel) {
+<b class="fc">&nbsp;        this.orderlabel = orderlabel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the type of this division.
+&nbsp;     *
+&nbsp;     * @return the type
+&nbsp;     */
+&nbsp;    public String getType() {
+<b class="fc">&nbsp;        return type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the type of this division.
+&nbsp;     *
+&nbsp;     * @param type
+&nbsp;     *            type to set
+&nbsp;     */
+&nbsp;    public void setType(String type) {
+<b class="fc">&nbsp;        this.type = type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object compared) {
+<b class="fc">&nbsp;        if (this == compared) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (compared == null) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!(compared instanceof Division)) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Division&lt;?&gt; other = (Division&lt;?&gt;) compared;</b>
+<b class="fc">&nbsp;        return Objects.equals(children, other.children) &amp;&amp; Objects.equals(label, other.label)</b>
+<b class="fc">&nbsp;                &amp;&amp; Objects.equals(metadata, other.metadata)</b>
+<b class="fc">&nbsp;                &amp;&amp; order == other.order &amp;&amp; Objects.equals(orderlabel, other.orderlabel)</b>
+<b class="fc">&nbsp;                &amp;&amp; Objects.equals(type, other.type);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        final int prime = 31;</b>
+<b class="fc">&nbsp;        int result = 1;</b>
+<b class="fc">&nbsp;        result = prime * result + ((children == null) ? 0 : children.hashCode());</b>
+<b class="fc">&nbsp;        result = prime * result + ((label == null) ? 0 : label.hashCode());</b>
+<b class="fc">&nbsp;        result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());</b>
+<b class="fc">&nbsp;        result = prime * result + order;</b>
+<b class="fc">&nbsp;        result = prime * result + ((orderlabel == null) ? 0 : orderlabel.hashCode());</b>
+<b class="fc">&nbsp;        result = prime * result + ((type == null) ? 0 : type.hashCode());</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

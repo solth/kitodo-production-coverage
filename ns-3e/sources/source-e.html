@@ -1,0 +1,206 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessSimpleMetadata</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessSimpleMetadata (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessSimpleMetadata</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37,5%
+  </span>
+  <span class="absValue">
+    (3/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (6/15)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.function.BiConsumer;
+&nbsp;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.ComplexMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.SimpleMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.Division;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;
+&nbsp;abstract class ProcessSimpleMetadata extends ProcessDetail implements Serializable {
+&nbsp;
+<b class="fc">&nbsp;    static final List&lt;Class&lt;? extends Division&lt;?&gt;&gt;&gt; PARENT_CLASSES = Arrays.asList(LogicalDivision.class,</b>
+&nbsp;        PhysicalDivision.class);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Container to store the ruleset settings.
+&nbsp;     */
+&nbsp;    protected SimpleMetadataViewInterface settings;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor, must be called from the subclass.
+&nbsp;     *
+&nbsp;     * @param settings
+&nbsp;     *            the ruleset settings for this field.
+&nbsp;     */
+&nbsp;    protected ProcessSimpleMetadata(ProcessFieldedMetadata container, SimpleMetadataViewInterface settings,
+&nbsp;            String label) {
+<b class="fc">&nbsp;        super(container, label);</b>
+<b class="fc">&nbsp;        this.settings = settings;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an independently mutable copy of this.
+&nbsp;     *
+&nbsp;     * @return an independently mutable copy
+&nbsp;     */
+&nbsp;    abstract ProcessSimpleMetadata getClone();
+&nbsp;
+&nbsp;    protected BiConsumer&lt;Division&lt;?&gt;, String&gt; getStructureFieldSetters(MetadataViewInterface field)
+&nbsp;            throws NoSuchMetadataFieldException {
+<b class="nc">&nbsp;        String key = field.getId();</b>
+&nbsp;
+<b class="nc">&nbsp;        switch (key.toUpperCase()) {</b>
+&nbsp;            case &quot;LABEL&quot;:
+&nbsp;                return Division::setLabel;
+&nbsp;            case &quot;ORDERLABEL&quot;:
+&nbsp;                return Division::setOrderlabel;
+&nbsp;            case &quot;CONTENTIDS&quot;:
+<b class="nc">&nbsp;                return (division, value) -&gt; division.getContentIds().add(URI.create(value));</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new NoSuchMetadataFieldException(key, field.getLabel());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns if the field may be edited. Some fields may be disallowed to be
+&nbsp;     * edit from the rule set.
+&nbsp;     *
+&nbsp;     * @return whether the field is editable
+&nbsp;     */
+&nbsp;    public boolean isEditable() {
+<b class="nc">&nbsp;        return Objects.isNull(settings) || settings.isEditable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isUndefined() {
+<b class="nc">&nbsp;        return Objects.isNull(settings) || settings.isUndefined();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isRequired() {
+<b class="fc">&nbsp;        ComplexMetadataViewInterface containerSettings = container.getMetadataView();</b>
+<b class="fc">&nbsp;        if (!(containerSettings instanceof StructuralElementViewInterface) &amp;&amp; container.getChildMetadata().isEmpty()</b>
+<b class="nc">&nbsp;                &amp;&amp; containerSettings.getMinOccurs() == 0) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return settings.getMinOccurs() &gt; 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int getMinOccurs() {
+<b class="nc">&nbsp;        return settings.getMinOccurs();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

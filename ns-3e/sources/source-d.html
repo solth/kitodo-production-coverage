@@ -1,0 +1,361 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessSelectMetadata</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessSelectMetadata (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessSelectMetadata</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (10/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    47,1%
+  </span>
+  <span class="absValue">
+    (33/70)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ProcessSelectMetadata$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    58,8%
+  </span>
+  <span class="absValue">
+    (10/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,5%
+  </span>
+  <span class="absValue">
+    (33/71)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.function.BiConsumer;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.Domain;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.SimpleMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataformat.Division;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;
+&nbsp;public class ProcessSelectMetadata extends ProcessSimpleMetadata implements Serializable {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ProcessSelectMetadata.class);</b>
+&nbsp;
+&nbsp;    private final boolean dependent;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts the select items map to the select items type required by JSF to
+&nbsp;     * display the select lists.
+&nbsp;     *
+&nbsp;     * @param selectItems
+&nbsp;     *            items as map key to label
+&nbsp;     * @return list of select item objects
+&nbsp;     */
+&nbsp;    private static List&lt;SelectItem&gt; toItems(Map&lt;String, String&gt; selectItems) {
+<b class="fc">&nbsp;        ArrayList&lt;SelectItem&gt; items = new ArrayList&lt;&gt;(selectItems.entrySet().size());</b>
+<b class="fc">&nbsp;        for (Entry&lt;String, String&gt; entry : selectItems.entrySet()) {</b>
+<b class="fc">&nbsp;            items.add(new SelectItem(entry.getKey(), entry.getValue()));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return items;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Elements the user can choose from.
+&nbsp;     */
+&nbsp;    private final List&lt;SelectItem&gt; items;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Elements selected by the user.
+&nbsp;     */
+<b class="fc">&nbsp;    private List&lt;String&gt; selectedItems = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    ProcessSelectMetadata(ProcessFieldedMetadata container, SimpleMetadataViewInterface settings,
+&nbsp;            Collection&lt;MetadataEntry&gt; selected, boolean dependent) {
+<b class="fc">&nbsp;        super(container, settings, settings.getLabel());</b>
+<b class="fc">&nbsp;        List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; leadingMetadataFields = container.getListForLeadingMetadataFields();</b>
+<b class="fc">&nbsp;        this.items = toItems(settings.getSelectItems(leadingMetadataFields));</b>
+<b class="fc">&nbsp;        container.markLeadingMetadataFields(leadingMetadataFields);</b>
+<b class="fc">&nbsp;        if (selected.isEmpty()) {</b>
+<b class="fc">&nbsp;            selectedItems.addAll(settings.getDefaultItems());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            for (MetadataEntry entry : selected) {</b>
+<b class="nc">&nbsp;                selectedItems.add(entry.getValue());</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        this.dependent = dependent;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ProcessSelectMetadata(ProcessSelectMetadata template) {
+<b class="nc">&nbsp;        super(template.container, template.settings, template.label);</b>
+<b class="nc">&nbsp;        this.items = template.items;</b>
+<b class="nc">&nbsp;        this.selectedItems = new ArrayList&lt;&gt;(template.selectedItems);</b>
+<b class="nc">&nbsp;        this.dependent = template.dependent;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    ProcessSelectMetadata getClone() {
+<b class="nc">&nbsp;        return new ProcessSelectMetadata(this);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the list is multi-select or not can be told from this.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String getInput() {
+<b class="nc">&nbsp;        switch (settings.getInputType()) {</b>
+&nbsp;            case MULTIPLE_SELECTION:
+<b class="nc">&nbsp;                return &quot;manyMenu&quot;;</b>
+&nbsp;            case MULTI_LINE_SINGLE_SELECTION:
+<b class="nc">&nbsp;                return &quot;oneRadio&quot;;</b>
+&nbsp;            case ONE_LINE_SINGLE_SELECTION:
+<b class="nc">&nbsp;                return &quot;oneMenu&quot;;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the select item objects required to display the list.
+&nbsp;     *
+&nbsp;     * @return the select item objects
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getItems() {
+<b class="nc">&nbsp;        return items;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Collection&lt;Metadata&gt; getMetadataWithFilledValues() throws InvalidMetadataValueException {
+<b class="fc">&nbsp;        return getMetadata(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Collection&lt;Metadata&gt; getMetadata(boolean skipEmpty) throws InvalidMetadataValueException {
+<b class="fc">&nbsp;        int items = selectedItems.size();</b>
+<b class="fc">&nbsp;        Collection&lt;Metadata&gt; metadata = new HashSet&lt;&gt;((int) Math.ceil(items / .75));</b>
+<b class="fc">&nbsp;        String key = settings.getId();</b>
+<b class="fc">&nbsp;        MdSec domain = DOMAIN_TO_MDSEC.get(settings.getDomain().orElse(Domain.DESCRIPTION));</b>
+<b class="fc">&nbsp;        selectedItems.removeAll(Collections.singletonList(&quot;&quot;));</b>
+<b class="fc">&nbsp;        selectedItems.removeAll(Collections.singletonList(null));</b>
+<b class="fc">&nbsp;        for (String selectedItem : selectedItems) {</b>
+<b class="nc">&nbsp;            if (!settings.isValid(selectedItem, container.getListForLeadingMetadataFields())) {</b>
+&nbsp;                /*
+&nbsp;                 * If this selection field is dependent on another metadata
+&nbsp;                 * field and is not valid, then this is because the user has
+&nbsp;                 * changed a field it depends on. In that case we can safely
+&nbsp;                 * skip saving the value.
+&nbsp;                 */
+<b class="nc">&nbsp;                if (dependent) {</b>
+<b class="nc">&nbsp;                    logger.debug(&quot;{} \&quot;{}\&quot; moved out of scope, forgetting.&quot;, key, selectedItem);</b>
+<b class="nc">&nbsp;                    continue;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                throw new InvalidMetadataValueException(label, selectedItem);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            MetadataEntry entry = new MetadataEntry();</b>
+<b class="nc">&nbsp;            entry.setKey(key);</b>
+<b class="nc">&nbsp;            entry.setDomain(domain);</b>
+<b class="nc">&nbsp;            entry.setValue(selectedItem);</b>
+<b class="nc">&nbsp;            metadata.add(entry);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (!skipEmpty &amp;&amp; metadata.isEmpty()) {</b>
+<b class="nc">&nbsp;            MetadataEntry entry = new MetadataEntry();</b>
+<b class="nc">&nbsp;            entry.setKey(key);</b>
+<b class="nc">&nbsp;            entry.setDomain(domain);</b>
+<b class="nc">&nbsp;            metadata.add(entry);</b>
+<b class="nc">&nbsp;            metadata.add(entry);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return metadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the keys which io selected in single-select scenario.
+&nbsp;     *
+&nbsp;     * @return identifier of selected element
+&nbsp;     */
+&nbsp;    public String getSelectedItem() {
+<b class="nc">&nbsp;        return selectedItems.isEmpty() ? &quot;&quot; : selectedItems.get(0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of keys which are selected in multi-select scenario.
+&nbsp;     *
+&nbsp;     * @return identifiers of selected elements
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getSelectedItems() {
+<b class="fc">&nbsp;        return selectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    Pair&lt;BiConsumer&lt;Division&lt;?&gt;, String&gt;, String&gt; getStructureFieldValue()
+&nbsp;            throws InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="fc">&nbsp;        if (settings.getDomain().orElse(Domain.DESCRIPTION).equals(Domain.METS_DIV)) {</b>
+<b class="nc">&nbsp;            String value = String.join(&quot; &quot;, selectedItems);</b>
+<b class="nc">&nbsp;            if (!settings.isValid(value, container.getListForLeadingMetadataFields())) {</b>
+<b class="nc">&nbsp;                throw new InvalidMetadataValueException(label, value);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return Pair.of(super.getStructureFieldSetters(settings), value);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isValid() {
+<b class="fc">&nbsp;        for (String selectedItem : selectedItems) {</b>
+<b class="fc">&nbsp;            if (!settings.isValid(selectedItem, container.getListForLeadingMetadataFields())) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Setter to set the selected elements in multi-select scenario.
+&nbsp;     *
+&nbsp;     * @param selectedItems
+&nbsp;     *            selected items to set
+&nbsp;     */
+&nbsp;    public void setSelectedItems(List&lt;String&gt; selectedItems) {
+<b class="nc">&nbsp;        this.selectedItems = selectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Setter to set the one selected element in single-select scenario.
+&nbsp;     *
+&nbsp;     * @param selectedItem
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setSelectedItem(String selectedItem) {
+<b class="fc">&nbsp;        this.selectedItems = selectedItem.isEmpty() ? Collections.emptyList() : Collections.singletonList(selectedItem);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getMetadataID() {
+<b class="fc">&nbsp;        return settings.getId();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

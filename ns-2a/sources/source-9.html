@@ -1,0 +1,568 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetsXmlElementAccess</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.access</a>
+</div>
+
+<h1>Coverage Summary for Class: MetsXmlElementAccess (org.kitodo.dataformat.access)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetsXmlElementAccess</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,1%
+  </span>
+  <span class="absValue">
+    (154/169)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataformat.access;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.GregorianCalendar;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.stream.Stream;
+&nbsp;
+&nbsp;import javax.xml.bind.JAXBContext;
+&nbsp;import javax.xml.bind.JAXBException;
+&nbsp;import javax.xml.bind.Marshaller;
+&nbsp;import javax.xml.bind.Unmarshaller;
+&nbsp;import javax.xml.datatype.DatatypeConfigurationException;
+&nbsp;import javax.xml.datatype.DatatypeFactory;
+&nbsp;import javax.xml.datatype.XMLGregorianCalendar;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataformat.MediaVariant;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.ProcessingNote;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.dataformat.mets.MetsXmlElementAccessInterface;
+&nbsp;import org.kitodo.dataformat.metskitodo.DivType;
+&nbsp;import org.kitodo.dataformat.metskitodo.FileType;
+&nbsp;import org.kitodo.dataformat.metskitodo.Mets;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType.FileSec;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType.FileSec.FileGrp;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType.MetsHdr;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType.MetsHdr.Agent;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType.MetsHdr.MetsDocumentID;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType.StructLink;
+&nbsp;import org.kitodo.dataformat.metskitodo.StructLinkType.SmLink;
+&nbsp;import org.kitodo.dataformat.metskitodo.StructMapType;
+&nbsp;import org.kitodo.utils.JAXBContextCache;
+&nbsp;
+&nbsp;/**
+&nbsp; * The administrative structure of the product of an element that passes through
+&nbsp; * a Production workflow. The file format for this management structure is METS
+&nbsp; * XML after the ZVDD DFG Viewer Application Profile.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * A {@code Workpiece} has two essential characteristics: {@link FileXmlElementAccess}s and
+&nbsp; * an outline {@link DivXmlElementAccess}. {@code PhysicalDivision}s are the types of every
+&nbsp; * single digital medium on a conceptual level, such as the individual pages of
+&nbsp; * a book. Each {@code PhysicalDivision} can be in different {@link UseXmlAttributeAccess}s (for
+&nbsp; * example, in different resolutions or file formats). Each {@code MediaVariant}
+&nbsp; * of a {@code PhysicalDivision} resides in a {@link FLocatXmlElementAccess} in the data store.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * The {@code LogicalDivision} is a tree structure that can be finely
+&nbsp; * subdivided, e.g. a book, in which the chapters, in it individual elements
+&nbsp; * such as tables or figures. Each outline level points to the
+&nbsp; * {@code PhysicalDivision}s that belong to it via {@link AreaXmlElementAccess}s.
+&nbsp; * Currently, a {@code View} always contains exactly one {@code PhysicalDivision} unit,
+&nbsp; * here a simple expandability is provided, so that in a future version excerpts
+&nbsp; * from {@code PhysicalDivision}s can be described. Each outline level can be described
+&nbsp; * with any {@link MetadataXmlElementsAccess}.
+&nbsp; *
+&nbsp; * @see &quot;https://www.zvdd.de/fileadmin/AGSDD-Redaktion/METS_Anwendungsprofil_2.0.pdf&quot;
+&nbsp; */
+&nbsp;public class MetsXmlElementAccess implements MetsXmlElementAccessInterface {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(MetsXmlElementAccess.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The data object of this mets XML element access.
+&nbsp;     */
+&nbsp;    private final Workpiece workpiece;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates an empty workpiece. This is the default state when the editor
+&nbsp;     * starts. You can either load a file or create a new one.
+&nbsp;     */
+<b class="fc">&nbsp;    public MetsXmlElementAccess() {</b>
+<b class="fc">&nbsp;        workpiece = new Workpiece();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a workpiece from a METS XML structure. Due to limitations of the
+&nbsp;     * API, this can only be done by calling {@link #read(InputStream)} and then
+&nbsp;     * replacing the content of the current editor, but at least the
+&nbsp;     * implementation is clean.
+&nbsp;     *
+&nbsp;     * @param mets
+&nbsp;     *            METS XML structure to read
+&nbsp;     */
+&nbsp;    private MetsXmlElementAccess(Mets mets) {
+<b class="fc">&nbsp;        this();</b>
+<b class="fc">&nbsp;        initialize(mets);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void initialize(Mets mets) {
+<b class="fc">&nbsp;        setWorkpieceFromMetsHeader(mets);</b>
+<b class="fc">&nbsp;        Map&lt;String, FileXmlElementAccess&gt; divIDsToPhysicalDivisions = getReferenceDivIdsToPhysicalDivisions(mets);</b>
+<b class="fc">&nbsp;        if (mets.getStructLink() == null) {</b>
+<b class="fc">&nbsp;            mets.setStructLink(new StructLink());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Map&lt;String, List&lt;FileXmlElementAccess&gt;&gt; physicalDivisionsMap = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Object smLinkOrSmLinkGrp : mets.getStructLink().getSmLinkOrSmLinkGrp()) {</b>
+<b class="fc">&nbsp;            if (smLinkOrSmLinkGrp instanceof SmLink) {</b>
+<b class="fc">&nbsp;                SmLink smLink = (SmLink) smLinkOrSmLinkGrp;</b>
+<b class="fc">&nbsp;                physicalDivisionsMap.computeIfAbsent(smLink.getFrom(), any -&gt; new LinkedList&lt;&gt;());</b>
+<b class="fc">&nbsp;                physicalDivisionsMap.get(smLink.getFrom()).add(divIDsToPhysicalDivisions.get(smLink.getTo()));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        workpiece.setLogicalStructure(getStructMapsStreamByType(mets, &quot;LOGICAL&quot;)</b>
+<b class="fc">&nbsp;                .map(structMap -&gt; new DivXmlElementAccess(structMap.getDiv(), mets, physicalDivisionsMap, 1))</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList())</b>
+<b class="fc">&nbsp;                .iterator().next());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Map&lt;String, FileXmlElementAccess&gt; getReferenceDivIdsToPhysicalDivisions(Mets mets) {
+<b class="fc">&nbsp;        FileSec fileSec = mets.getFileSec();</b>
+<b class="fc">&nbsp;        Map&lt;String, MediaVariant&gt; useXmlAttributeAccess = fileSec != null</b>
+<b class="fc">&nbsp;                ? fileSec.getFileGrp().parallelStream().filter(fileGrp -&gt; !fileGrp.getFile().isEmpty())</b>
+<b class="fc">&nbsp;                        .map(UseXmlAttributeAccess::new)</b>
+<b class="fc">&nbsp;                        .collect(Collectors.toMap(</b>
+<b class="fc">&nbsp;                            newUseXmlAttributeAccess -&gt; newUseXmlAttributeAccess.getMediaVariant().getUse(),</b>
+&nbsp;                            UseXmlAttributeAccess::getMediaVariant))
+<b class="fc">&nbsp;                : new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        Optional&lt;StructMapType&gt; optionalPhysicalStructMap = getStructMapsStreamByType(mets, &quot;PHYSICAL&quot;).findFirst();</b>
+<b class="fc">&nbsp;        Map&lt;String, FileXmlElementAccess&gt; divIDsToPhysicalDivisions = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (optionalPhysicalStructMap.isPresent()) {</b>
+<b class="fc">&nbsp;            DivType div = optionalPhysicalStructMap.get().getDiv();</b>
+<b class="fc">&nbsp;            Map&lt;FileType, String&gt; fileUseByFileCache = createFileUseByFileCache(mets);</b>
+<b class="fc">&nbsp;            FileXmlElementAccess fileXmlElementAccess = new FileXmlElementAccess(</b>
+&nbsp;                div, mets, useXmlAttributeAccess, fileUseByFileCache
+&nbsp;            );
+<b class="fc">&nbsp;            PhysicalDivision physicalDivision = fileXmlElementAccess.getPhysicalDivision();</b>
+<b class="fc">&nbsp;            workpiece.setPhysicalStructure(physicalDivision);</b>
+<b class="fc">&nbsp;            divIDsToPhysicalDivisions.put(div.getID(), fileXmlElementAccess);</b>
+<b class="fc">&nbsp;            readMediaUnitsTreeRecursive(</b>
+&nbsp;                div, mets, useXmlAttributeAccess, physicalDivision, divIDsToPhysicalDivisions, fileUseByFileCache
+&nbsp;            );
+&nbsp;        }
+<b class="fc">&nbsp;        return divIDsToPhysicalDivisions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setWorkpieceFromMetsHeader(Mets mets) {
+<b class="fc">&nbsp;        MetsHdr metsHdr = mets.getMetsHdr();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(metsHdr)) {</b>
+&nbsp;            GregorianCalendar gregorianCalendar;
+<b class="fc">&nbsp;            if (Objects.nonNull(metsHdr.getCREATEDATE())) {</b>
+<b class="fc">&nbsp;                gregorianCalendar = metsHdr.getCREATEDATE().toGregorianCalendar();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                gregorianCalendar = new GregorianCalendar();</b>
+&nbsp;            }
+<b class="fc">&nbsp;            workpiece.setCreationDate(gregorianCalendar);</b>
+<b class="fc">&nbsp;            for (Agent agent : metsHdr.getAgent()) {</b>
+<b class="fc">&nbsp;                workpiece.getEditHistory().add(new AgentXmlElementAccess(agent).getProcessingNote());</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            MetsDocumentID metsDocumentID = metsHdr.getMetsDocumentID();</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(metsDocumentID)) {</b>
+<b class="fc">&nbsp;                workpiece.setId(metsDocumentID.getValue());</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void readMediaUnitsTreeRecursive(DivType div, Mets mets, Map&lt;String, MediaVariant&gt; useXmlAttributeAccess,
+&nbsp;            PhysicalDivision physicalDivision, Map&lt;String, FileXmlElementAccess&gt; divIDsToPhysicalDivisions, 
+&nbsp;            Map&lt;FileType, String&gt; fileUseByFileCache) {
+<b class="fc">&nbsp;        for (DivType child : div.getDiv()) {</b>
+<b class="fc">&nbsp;            FileXmlElementAccess fileXmlElementAccess = new FileXmlElementAccess(</b>
+&nbsp;                child, mets, useXmlAttributeAccess, fileUseByFileCache
+&nbsp;            );
+<b class="fc">&nbsp;            PhysicalDivision childPhysicalDivision = fileXmlElementAccess.getPhysicalDivision();</b>
+<b class="fc">&nbsp;            physicalDivision.getChildren().add(childPhysicalDivision);</b>
+<b class="fc">&nbsp;            divIDsToPhysicalDivisions.put(child.getID(), fileXmlElementAccess);</b>
+<b class="fc">&nbsp;            readMediaUnitsTreeRecursive(</b>
+&nbsp;                child, mets, useXmlAttributeAccess, childPhysicalDivision, divIDsToPhysicalDivisions, fileUseByFileCache
+&nbsp;            );
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    private MetsXmlElementAccess(Workpiece workpiece) {</b>
+<b class="fc">&nbsp;        this.workpiece = workpiece;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The method helps to read {@code &lt;structMap&gt;}s from METS.
+&nbsp;     *
+&nbsp;     * @param mets
+&nbsp;     *            METS that can be read from
+&nbsp;     * @param type
+&nbsp;     *            type of the {@code &lt;structMap&gt;} to read
+&nbsp;     * @return a stream of {@code &lt;structMap&gt;}s
+&nbsp;     */
+&nbsp;    private static final Stream&lt;StructMapType&gt; getStructMapsStreamByType(Mets mets, String type) {
+<b class="fc">&nbsp;        return mets.getStructMap().parallelStream().filter(structMap -&gt; structMap.getTYPE().equals(type));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads METS from an InputStream. JAXB is used to parse the XML.
+&nbsp;     *
+&nbsp;     * @param in
+&nbsp;     *            InputStream to read from
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Workpiece read(InputStream in) throws IOException {
+&nbsp;        try {
+<b class="fc">&nbsp;            JAXBContext jc = JAXBContextCache.getJAXBContext(Mets.class);</b>
+<b class="fc">&nbsp;            Unmarshaller unmarshaller = jc.createUnmarshaller();</b>
+<b class="fc">&nbsp;            Mets mets = (Mets) unmarshaller.unmarshal(in);</b>
+<b class="fc">&nbsp;            return new MetsXmlElementAccess(mets).workpiece;</b>
+<b class="nc">&nbsp;        } catch (JAXBException e) {</b>
+<b class="nc">&nbsp;            if (e.getCause() instanceof IOException) {</b>
+<b class="nc">&nbsp;                throw (IOException) e.getCause();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                throw new IOException(e.getMessage(), e);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Writes the contents of this workpiece as a METS file into an output
+&nbsp;     * stream.
+&nbsp;     *
+&nbsp;     * @param out
+&nbsp;     *            writable output stream
+&nbsp;     * @throws IOException
+&nbsp;     *             if the output device has an error
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void save(Workpiece workpiece, OutputStream out) throws IOException {
+&nbsp;        try {
+<b class="fc">&nbsp;            JAXBContext context = JAXBContextCache.getJAXBContext(Mets.class);</b>
+<b class="fc">&nbsp;            Marshaller marshal = context.createMarshaller();</b>
+<b class="fc">&nbsp;            marshal.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);</b>
+<b class="fc">&nbsp;            marshal.marshal(new MetsXmlElementAccess(workpiece).toMets(), out);</b>
+<b class="nc">&nbsp;        } catch (JAXBException e) {</b>
+<b class="nc">&nbsp;            if (e.getCause() instanceof IOException) {</b>
+<b class="nc">&nbsp;                throw (IOException) e.getCause();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                throw new IOException(e.getMessage(), e);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates a METS XML structure from this workpiece in the form of Java
+&nbsp;     * objects in the main memory.
+&nbsp;     *
+&nbsp;     * @return a METS XML structure from this workpiece
+&nbsp;     */
+&nbsp;    private Mets toMets() {
+<b class="fc">&nbsp;        Mets mets = new Mets();</b>
+<b class="fc">&nbsp;        mets.setMetsHdr(generateMetsHdr());</b>
+&nbsp;
+<b class="fc">&nbsp;        Map&lt;URI, FileType&gt; mediaFilesToIDFiles = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        mets.setFileSec(generateFileSec(mediaFilesToIDFiles));</b>
+&nbsp;
+<b class="fc">&nbsp;        Map&lt;PhysicalDivision, String&gt; physicalDivisionIDs = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        mets.getStructMap().add(generatePhysicalStructMap(mediaFilesToIDFiles, physicalDivisionIDs, mets));</b>
+&nbsp;
+<b class="fc">&nbsp;        LinkedList&lt;Pair&lt;String, String&gt;&gt; smLinkData = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        StructMapType logical = new StructMapType();</b>
+<b class="fc">&nbsp;        logical.setTYPE(&quot;LOGICAL&quot;);</b>
+<b class="fc">&nbsp;        logical.setDiv(new DivXmlElementAccess(workpiece.getLogicalStructure()).toDiv(physicalDivisionIDs, smLinkData, mets));</b>
+<b class="fc">&nbsp;        mets.getStructMap().add(logical);</b>
+&nbsp;
+<b class="fc">&nbsp;        mets.setStructLink(createStructLink(smLinkData));</b>
+<b class="fc">&nbsp;        return mets;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the header of the METS file. The header area stores the time
+&nbsp;     * stamp, the ID and the processing notes.
+&nbsp;     *
+&nbsp;     * @return the header of the METS file
+&nbsp;     */
+&nbsp;    private MetsHdr generateMetsHdr() {
+<b class="fc">&nbsp;        MetsHdr metsHdr = new MetsHdr();</b>
+<b class="fc">&nbsp;        metsHdr.setCREATEDATE(convertDate(workpiece.getCreationDate()));</b>
+<b class="fc">&nbsp;        metsHdr.setLASTMODDATE(convertDate(new GregorianCalendar()));</b>
+<b class="fc">&nbsp;        if (workpiece.getId() != null) {</b>
+<b class="fc">&nbsp;            MetsDocumentID id = new MetsDocumentID();</b>
+<b class="fc">&nbsp;            id.setValue(workpiece.getId());</b>
+<b class="fc">&nbsp;            metsHdr.setMetsDocumentID(id);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (ProcessingNote processingNote : workpiece.getEditHistory()) {</b>
+<b class="fc">&nbsp;            metsHdr.getAgent().add(new AgentXmlElementAccess(processingNote).toAgent());</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return metsHdr;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates an object of class XMLGregorianCalendar. Creating this
+&nbsp;     * JAXB-specific class is quite complicated and has therefore been
+&nbsp;     * outsourced to a separate method.
+&nbsp;     *
+&nbsp;     * @param gregorianCalendar
+&nbsp;     *            value of the calendar
+&nbsp;     * @return an object of class XMLGregorianCalendar
+&nbsp;     */
+&nbsp;    private static XMLGregorianCalendar convertDate(GregorianCalendar gregorianCalendar) {
+&nbsp;        DatatypeFactory datatypeFactory;
+&nbsp;        try {
+<b class="fc">&nbsp;            datatypeFactory = DatatypeFactory.newInstance();</b>
+<b class="nc">&nbsp;        } catch (DatatypeConfigurationException e) {</b>
+<b class="nc">&nbsp;            String message = e.getMessage();</b>
+<b class="nc">&nbsp;            throw new NoClassDefFoundError(message != null ? message</b>
+<b class="nc">&nbsp;                    : &quot;Implementation of DatatypeFactory not available or cannot be instantiated.&quot;);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return datatypeFactory.newXMLGregorianCalendar(gregorianCalendar);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the file section. In the file section of a METS file after the
+&nbsp;     * ZVDD DFG Viewer Application Profile, the files are declared in exactly
+&nbsp;     * the opposite way as they are managed in Production. That is, there are
+&nbsp;     * file groups, each file group accommodating the files of a media variant.
+&nbsp;     * Therefore, the physical divisions are first resolved according to their media
+&nbsp;     * variants, then the corresponding XML elements are generated.
+&nbsp;     *
+&nbsp;     * @param mediaFilesToIDFiles
+&nbsp;     *            In this map, for each physical division, the corresponding XML file
+&nbsp;     *            element is added, so that it can be used for linking later.
+&nbsp;     * @return an object of type FileSec
+&nbsp;     */
+&nbsp;    private FileSec generateFileSec(Map&lt;URI, FileType&gt; mediaFilesToIDFiles) {
+<b class="fc">&nbsp;        FileSec fileSec = new FileSec();</b>
+&nbsp;
+<b class="fc">&nbsp;        Map&lt;UseXmlAttributeAccess, Set&lt;URI&gt;&gt; useToPhysicalDivisions = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        Map&lt;Pair&lt;UseXmlAttributeAccess, URI&gt;, String&gt; fileIds = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        generateFileSecRecursive(workpiece.getPhysicalStructure(), useToPhysicalDivisions, fileIds);</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Entry&lt;UseXmlAttributeAccess, Set&lt;URI&gt;&gt; fileGrpData : useToPhysicalDivisions.entrySet()) {</b>
+<b class="fc">&nbsp;            FileGrp fileGrp = new FileGrp();</b>
+<b class="fc">&nbsp;            UseXmlAttributeAccess useXmlAttributeAccess = fileGrpData.getKey();</b>
+<b class="fc">&nbsp;            fileGrp.setUSE(useXmlAttributeAccess.getMediaVariant().getUse());</b>
+<b class="fc">&nbsp;            String mimeType = useXmlAttributeAccess.getMediaVariant().getMimeType();</b>
+<b class="fc">&nbsp;            Map&lt;URI, FileType&gt; files = fileGrpData.getValue().parallelStream()</b>
+<b class="fc">&nbsp;                    .map(uri -&gt; Pair.of(uri,</b>
+<b class="fc">&nbsp;                        new FLocatXmlElementAccess(uri).toFile(mimeType,</b>
+<b class="fc">&nbsp;                            fileIds.get(Pair.of(useXmlAttributeAccess, uri)))))</b>
+<b class="fc">&nbsp;                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue));</b>
+<b class="fc">&nbsp;            mediaFilesToIDFiles.putAll(files);</b>
+<b class="fc">&nbsp;            fileGrp.getFile().addAll(files.values());</b>
+<b class="fc">&nbsp;            fileSec.getFileGrp().add(fileGrp);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return fileSec;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void generateFileSecRecursive(PhysicalDivision physicalDivision, Map&lt;UseXmlAttributeAccess, Set&lt;URI&gt;&gt; useToPhysicalDivisions,
+&nbsp;            Map&lt;Pair&lt;UseXmlAttributeAccess, URI&gt;, String&gt; fileIds) {
+&nbsp;
+<b class="fc">&nbsp;        for (Entry&lt;MediaVariant, URI&gt; variantEntry : physicalDivision.getMediaFiles().entrySet()) {</b>
+<b class="fc">&nbsp;            UseXmlAttributeAccess use = new UseXmlAttributeAccess(variantEntry.getKey());</b>
+<b class="fc">&nbsp;            useToPhysicalDivisions.computeIfAbsent(use, any -&gt; new HashSet&lt;&gt;());</b>
+<b class="fc">&nbsp;            URI uri = variantEntry.getValue();</b>
+<b class="fc">&nbsp;            useToPhysicalDivisions.get(use).add(uri);</b>
+<b class="fc">&nbsp;            if (physicalDivision instanceof PhysicalDivisionMetsReferrerStorage) {</b>
+<b class="fc">&nbsp;                fileIds.put(Pair.of(use, uri), ((PhysicalDivisionMetsReferrerStorage) physicalDivision).getFileId(uri));</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        for (PhysicalDivision child : physicalDivision.getChildren()) {</b>
+<b class="fc">&nbsp;            generateFileSecRecursive(child, useToPhysicalDivisions, fileIds);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the physical struct map. In the physical struct map, the
+&nbsp;     * individual files with their variants are enumerated and labeled.
+&nbsp;     *
+&nbsp;     * @param mediaFilesToIDFiles
+&nbsp;     *            A map of the media files to the XML file elements used to
+&nbsp;     *            declare them in the file section. To output a link to the ID,
+&nbsp;     *            the XML element must be passed to JAXB.
+&nbsp;     * @param physicalDivisionIDs
+&nbsp;     *            In this map, the function returns the assigned identifier for
+&nbsp;     *            each physical division so that the link pairs of the struct link
+&nbsp;     *            section can be formed later.
+&nbsp;     * @param mets
+&nbsp;     *            the METS structure in which the metadata is added
+&nbsp;     * @return the physical struct map
+&nbsp;     */
+&nbsp;    private StructMapType generatePhysicalStructMap(
+&nbsp;            Map&lt;URI, FileType&gt; mediaFilesToIDFiles, Map&lt;PhysicalDivision, String&gt; physicalDivisionIDs, MetsType mets) {
+<b class="fc">&nbsp;        StructMapType physical = new StructMapType();</b>
+<b class="fc">&nbsp;        physical.setTYPE(&quot;PHYSICAL&quot;);</b>
+<b class="fc">&nbsp;        physical.setDiv(</b>
+<b class="fc">&nbsp;            generatePhysicalStructMapRecursive(workpiece.getPhysicalStructure(), mediaFilesToIDFiles, physicalDivisionIDs, mets));</b>
+<b class="fc">&nbsp;        return physical;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private DivType generatePhysicalStructMapRecursive(PhysicalDivision physicalDivision, Map&lt;URI, FileType&gt; mediaFilesToIDFiles,
+&nbsp;            Map&lt;PhysicalDivision, String&gt; physicalDivisionIDs, MetsType mets) {
+<b class="fc">&nbsp;        DivType div = new FileXmlElementAccess(physicalDivision).toDiv(mediaFilesToIDFiles, physicalDivisionIDs, mets);</b>
+<b class="fc">&nbsp;        for (PhysicalDivision child : physicalDivision.getChildren()) {</b>
+<b class="fc">&nbsp;            div.getDiv().add(generatePhysicalStructMapRecursive(child, mediaFilesToIDFiles, physicalDivisionIDs, mets));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return div;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates the struct link section. The struct link section stores which
+&nbsp;     * files are attached to which nodes and leaves of the description
+&nbsp;     * structure.
+&nbsp;     *
+&nbsp;     * @param smLinkData
+&nbsp;     *            The list of related IDs
+&nbsp;     * @return the struct link section
+&nbsp;     */
+&nbsp;    private StructLink createStructLink(LinkedList&lt;Pair&lt;String, String&gt;&gt; smLinkData) {
+<b class="fc">&nbsp;        StructLink structLink = new StructLink();</b>
+<b class="fc">&nbsp;        structLink.getSmLinkOrSmLinkGrp().addAll(smLinkData.parallelStream().map(entry -&gt; {</b>
+<b class="fc">&nbsp;            SmLink smLink = new SmLink();</b>
+<b class="fc">&nbsp;            smLink.setFrom(entry.getLeft());</b>
+<b class="fc">&nbsp;            smLink.setTo(entry.getRight());</b>
+<b class="fc">&nbsp;            return smLink;</b>
+<b class="fc">&nbsp;        }).collect(Collectors.toList()));</b>
+<b class="fc">&nbsp;        return structLink;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create a map that stores a file&#39;s use parameter for each existing file (e.g. MAX, THUMB, LOCAL). 
+&nbsp;     * 
+&nbsp;     * @param mets the mets file
+&nbsp;     * @return the map from file to file group use
+&nbsp;     */
+&nbsp;    private Map&lt;FileType, String&gt; createFileUseByFileCache(Mets mets) {
+<b class="fc">&nbsp;        HashMap&lt;FileType, String&gt; fileUseMap = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        FileSec fileSec = mets.getFileSec();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(fileSec)) {</b>
+<b class="fc">&nbsp;            for (FileGrp fileGrp : fileSec.getFileGrp()) {</b>
+<b class="fc">&nbsp;                String use = fileGrp.getUSE();</b>
+<b class="fc">&nbsp;                for (FileType file : fileGrp.getFile()) {</b>
+<b class="fc">&nbsp;                    if (fileUseMap.containsKey(file)) {</b>
+<b class="nc">&nbsp;                        throw new IllegalArgumentException(</b>
+<b class="nc">&nbsp;                            &quot;Corrupt file: file with id &quot; + file.getID() + &quot; is part of multiple groups&quot;</b>
+&nbsp;                        );
+&nbsp;                    } else {
+<b class="fc">&nbsp;                        fileUseMap.put(file, use);</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                }</b>
+&nbsp;                
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return fileUseMap;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

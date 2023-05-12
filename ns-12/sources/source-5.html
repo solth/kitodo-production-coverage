@@ -1,0 +1,386 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > KitodoConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.config</a>
+</div>
+
+<h1>Coverage Summary for Class: KitodoConfig (org.kitodo.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KitodoConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,4%
+  </span>
+  <span class="absValue">
+    (17/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,9%
+  </span>
+  <span class="absValue">
+    (22/35)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.config;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.ConversionException;
+&nbsp;import org.apache.commons.configuration.PropertiesConfiguration;
+&nbsp;import org.apache.commons.io.FilenameUtils;
+&nbsp;import org.apache.logging.log4j.Level;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.enums.ParameterAPI;
+&nbsp;import org.kitodo.config.enums.ParameterInterface;
+&nbsp;
+<b class="nc">&nbsp;public class KitodoConfig extends Config {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(KitodoConfig.class);</b>
+&nbsp;
+&nbsp;    private static final String CONFIG_FILE = &quot;kitodo_config.properties&quot;;
+&nbsp;    public static final int INT_PARAMETER_NOT_DEFINED_OR_ERRONEOUS = 0;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the directory that contains the modules.
+&nbsp;     *
+&nbsp;     * @return the directory for the process directories
+&nbsp;     */
+&nbsp;    public static String getKitodoModulesDirectory() {
+<b class="fc">&nbsp;        return getParameter(ParameterAPI.DIR_MODULES);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the directory that contains the process directories.
+&nbsp;     *
+&nbsp;     * @return the directory for the process directories
+&nbsp;     */
+&nbsp;    public static String getKitodoDataDirectory() {
+<b class="fc">&nbsp;        return getParameter(ParameterAPI.DIR_PROCESSES);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the directory that contains XML configuration files.
+&nbsp;     *
+&nbsp;     * @return the directory for XML configuration files
+&nbsp;     */
+&nbsp;    public static String getKitodoConfigDirectory() {
+<b class="fc">&nbsp;        return getParameter(ParameterAPI.DIR_XML_CONFIG);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected parameter from the configuration file. Throws a
+&nbsp;     * {@code NoSuchElementException} if no such parameter exists.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as ParameterInterface enum implementation whose value is to be
+&nbsp;     *            returned
+&nbsp;     * @return value for the requested key
+&nbsp;     * @throws NoSuchElementException
+&nbsp;     *             if parameter taken from config file is null or exception occurred
+&nbsp;     */
+&nbsp;    public static String getParameter(ParameterInterface key) {
+<b class="fc">&nbsp;        return getParameter(key.getName());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected parameter from the configuration file. Throws a
+&nbsp;     * {@code NoSuchElementException} if no such parameter exists.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            whose value is to be returned
+&nbsp;     * @return value for the requested key
+&nbsp;     * @throws NoSuchElementException
+&nbsp;     *             if parameter taken from config file is null or exception occurred
+&nbsp;     */
+&nbsp;    public static String getParameter(String key) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return resolveOsSpecific(getConfig().getString(key));</b>
+<b class="fc">&nbsp;        } catch (NoSuchElementException e) {</b>
+<b class="fc">&nbsp;            throw new NoSuchElementException(&quot;No configuration found in &quot; + CONFIG_FILE + &quot; for key &quot; + key + &quot;!&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected parameter from the configuration file. If no such
+&nbsp;     * parameter exists, returns the given default value.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as ParameterInterface enum implementation whose value is to be
+&nbsp;     *            returned
+&nbsp;     * @param defaultValue
+&nbsp;     *            default value in case parameter taken from config file does not
+&nbsp;     *            exist or exception occurred
+&nbsp;     * @return value for the requested key, or {@code defaultIfNull} if not found
+&nbsp;     */
+&nbsp;    public static String getParameter(ParameterInterface key, String defaultValue) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return getConfig().getString(key.getName(), defaultValue);</b>
+<b class="nc">&nbsp;        } catch (ConversionException e) {</b>
+<b class="nc">&nbsp;            logConversionException(key.getName(), CONFIG_FILE, String.class, e, defaultValue);</b>
+<b class="nc">&nbsp;            return defaultValue;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected parameter from the configuration file. If no such
+&nbsp;     * parameter exists, returns the given default value.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            whose value is to be returned
+&nbsp;     * @param defaultValue
+&nbsp;     *            default value in case parameter taken from config file does not
+&nbsp;     *            exist or exception occurred
+&nbsp;     * @return value for the requested key, or {@code defaultIfNull} if not found
+&nbsp;     */
+&nbsp;    // TODO: there is still one place when it is needed
+&nbsp;    public static String getParameter(String key, String defaultValue) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return getConfig().getString(key, defaultValue);</b>
+<b class="nc">&nbsp;        } catch (ConversionException e) {</b>
+<b class="nc">&nbsp;            logConversionException(key, CONFIG_FILE, String.class, e, defaultValue);</b>
+<b class="nc">&nbsp;            return defaultValue;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected boolean parameter from the configuration file. If no
+&nbsp;     * such parameter exists, or the value cannot be parsed to {@code boolean},
+&nbsp;     * returns {@code false}.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as ParameterInterface enum implementation whose value is to be
+&nbsp;     *            returned
+&nbsp;     * @return boolean value for the requested key, or {@code false} if not found or
+&nbsp;     *         not parsing
+&nbsp;     */
+&nbsp;    public static boolean getBooleanParameter(ParameterInterface key) {
+<b class="fc">&nbsp;        return getBooleanParameter(key, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected boolean parameter from the configuration file. If no
+&nbsp;     * such parameter exists, or the value cannot be parsed to {@code boolean},
+&nbsp;     * returns the provided default value.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as ParameterInterface enum implementation whose value is to be
+&nbsp;     *            returned
+&nbsp;     * @param defaultValue
+&nbsp;     *            default value in case parameter taken from config file does not
+&nbsp;     *            exist or exception occurred
+&nbsp;     * @return boolean value for the requested key, or {@code defaultIfNull} if not
+&nbsp;     *         found or not parsing
+&nbsp;     */
+&nbsp;    public static boolean getBooleanParameter(ParameterInterface key, boolean defaultValue) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return getConfig().getBoolean(key.getName(), defaultValue);</b>
+<b class="nc">&nbsp;        } catch (ConversionException e) {</b>
+<b class="nc">&nbsp;            logConversionException(key.getName(), CONFIG_FILE, boolean.class, e, defaultValue);</b>
+<b class="nc">&nbsp;            return defaultValue;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected int parameter from the configuration file. If no such
+&nbsp;     * parameter exists, or the value cannot be parsed to {@code int}, returns
+&nbsp;     * {@code 0}.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as ParameterInterface enum implementation whose value is to be
+&nbsp;     *            returned
+&nbsp;     * @return int value for the requested key, or {@code 0} if not found or not
+&nbsp;     *         parsing
+&nbsp;     */
+&nbsp;    public static int getIntParameter(ParameterInterface key) {
+<b class="fc">&nbsp;        return getIntParameter(key, INT_PARAMETER_NOT_DEFINED_OR_ERRONEOUS);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected int parameter from the configuration file. If no such
+&nbsp;     * parameter exists, or the value cannot be parsed to {@code int}, returns the
+&nbsp;     * provided default value.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as ParameterInterface enum implementation whose value is to be
+&nbsp;     *            returned
+&nbsp;     * @param defaultValue
+&nbsp;     *            default value in case parameter taken from config file does not
+&nbsp;     *            exist or exception occurred
+&nbsp;     * @return int value for the requested key, or {@code defaultIfNull} if not
+&nbsp;     *         found or not parsing
+&nbsp;     */
+&nbsp;    public static int getIntParameter(ParameterInterface key, int defaultValue) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return getConfig().getInt(key.getName(), defaultValue);</b>
+<b class="nc">&nbsp;        } catch (ConversionException e) {</b>
+<b class="nc">&nbsp;            logConversionException(key.getName(), CONFIG_FILE, int.class, e, defaultValue);</b>
+<b class="nc">&nbsp;            return defaultValue;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the configuration.
+&nbsp;     *
+&nbsp;     * @return the configuration
+&nbsp;     */
+&nbsp;    public static PropertiesConfiguration getConfig() {
+<b class="fc">&nbsp;        return Config.getConfig(CONFIG_FILE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected parameter from the configuration file, if any.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as ParameterInterface enum implementation whose value is to be
+&nbsp;     *            returned
+&nbsp;     * @return Optional holding the value for the requested key, else empty.
+&nbsp;     */
+&nbsp;    public static Optional&lt;String&gt; getOptionalString(ParameterInterface key) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return Optional.of(resolveOsSpecific(getConfig().getString(key.getName())));</b>
+<b class="fc">&nbsp;        } catch (NoSuchElementException e) {</b>
+<b class="fc">&nbsp;            logger.catching(Level.TRACE, e);</b>
+<b class="fc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected URI from the configuration file. Throws a
+&nbsp;     * {@code NoSuchElementException} if no such parameter exists.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as ParameterInterface enum implementation whose value is to be
+&nbsp;     *            returned
+&nbsp;     * @return URI value for the requested key
+&nbsp;     * @throws NoSuchElementException
+&nbsp;     *             if parameter taken from config file is null or exception occurred
+&nbsp;     */
+&nbsp;    public static URI getUriParameter(ParameterInterface key) {
+<b class="fc">&nbsp;        return Paths.get(getParameter(key)).toUri();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected URI from the configuration file. Throws a
+&nbsp;     * {@code NoSuchElementException} if no such parameter exists.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as ParameterInterface enum implementation whose value is to be
+&nbsp;     *            returned
+&nbsp;     * @param fullFilenameToAdd
+&nbsp;     *            the filename (or path) to attach to the base
+&nbsp;     * @return URI value for the requested key
+&nbsp;     * @throws NoSuchElementException
+&nbsp;     *             if parameter taken from config file is null or exception occurred
+&nbsp;     */
+&nbsp;    public static URI getUriParameter(ParameterInterface key, String fullFilenameToAdd) {
+<b class="fc">&nbsp;        return Paths.get(FilenameUtils.concat(getParameter(key), fullFilenameToAdd)).toUri();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parameter value like &quot;foo(.bar|.baz)&quot; will resolve to &quot;foo.bar&quot; on Unix
+&nbsp;     * and to &quot;foo.baz&quot; on Windows.
+&nbsp;     *
+&nbsp;     * @param string
+&nbsp;     *            string to process
+&nbsp;     * @return OS-specific string
+&nbsp;     */
+&nbsp;    private static String resolveOsSpecific(String string) {
+<b class="fc">&nbsp;        return string.replaceFirst(&quot;\\((\\p{Graph}*)\\|(\\p{Graph}*)\\)$&quot;, File.separatorChar == &#39;/&#39; ? &quot;$1&quot; : &quot;$2&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

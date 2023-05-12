@@ -1,0 +1,280 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ConfigCore</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.config</a>
+</div>
+
+<h1>Coverage Summary for Class: ConfigCore (org.kitodo.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConfigCore</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,3%
+  </span>
+  <span class="absValue">
+    (21/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.config;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.time.Duration;
+&nbsp;import java.time.temporal.TemporalUnit;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.Level;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.beans.Parameter;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.exceptions.ConfigParameterException;
+&nbsp;
+&nbsp;public class ConfigCore extends KitodoConfig {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ConfigCore.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private ConfigCore() {
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request string parameter from configuration, if parameter is not there - use
+&nbsp;     * default value.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as Parameter whose value is to be returned
+&nbsp;     * @return parameter as String or default value for this parameter
+&nbsp;     */
+&nbsp;    public static String getParameterOrDefaultValue(ParameterCore key) {
+<b class="fc">&nbsp;        Parameter&lt;?&gt; parameter = key.getParameter();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (parameter.getDefaultValue() instanceof String) {</b>
+<b class="fc">&nbsp;            return getParameter(key.getName(), (String) parameter.getDefaultValue());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new ConfigParameterException(parameter.getKey(), &quot;String&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request boolean parameter from configuration, if parameter is not there - use
+&nbsp;     * default value.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as Parameter whose value is to be returned
+&nbsp;     * @return parameter as boolean or default value for this parameter
+&nbsp;     */
+&nbsp;    public static boolean getBooleanParameterOrDefaultValue(ParameterCore key) {
+<b class="fc">&nbsp;        Parameter&lt;?&gt; parameter = key.getParameter();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (parameter.getDefaultValue() instanceof Boolean) {</b>
+<b class="fc">&nbsp;            return getBooleanParameter(key, (Boolean) parameter.getDefaultValue());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new ConfigParameterException(parameter.getKey(), &quot;boolean&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request int parameter from configuration, if parameter is not there - use
+&nbsp;     * default value.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as Parameter whose value is to be returned
+&nbsp;     * @return parameter as int or default value for this parameter
+&nbsp;     */
+&nbsp;    public static int getIntParameterOrDefaultValue(ParameterCore key) {
+<b class="fc">&nbsp;        Parameter&lt;?&gt; parameter = key.getParameter();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (parameter.getDefaultValue() instanceof Integer) {</b>
+<b class="fc">&nbsp;            return getIntParameter(key, (Integer) parameter.getDefaultValue());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new ConfigParameterException(parameter.getKey(), &quot;int&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request long parameter from configuration, if parameter is not there - use
+&nbsp;     * default value.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as Parameter whose value is to be returned
+&nbsp;     * @return Parameter as long or default value
+&nbsp;     */
+&nbsp;    public static long getLongParameterOrDefaultValue(ParameterCore key) {
+<b class="fc">&nbsp;        Parameter&lt;?&gt; parameter = key.getParameter();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (parameter.getDefaultValue() instanceof Long) {</b>
+<b class="fc">&nbsp;            return getLongParameter(key, (Long) parameter.getDefaultValue());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new ConfigParameterException(parameter.getKey(), &quot;long&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request long parameter or default value from configuration.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as Parameter whose value is to be returned
+&nbsp;     * @param defaultValue
+&nbsp;     *            as long
+&nbsp;     * @return Parameter as long or default value
+&nbsp;     */
+&nbsp;    public static long getLongParameter(ParameterCore key, long defaultValue) {
+<b class="fc">&nbsp;        return getConfig().getLong(key.getName(), defaultValue);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request Duration parameter from configuration.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as Parameter whose value is to be returned
+&nbsp;     * @param temporalUnit
+&nbsp;     *            as TemporalUnit
+&nbsp;     * @return Parameter as Duration
+&nbsp;     */
+&nbsp;    public static Duration getDurationParameter(ParameterCore key, TemporalUnit temporalUnit) {
+<b class="fc">&nbsp;        long duration = getLongParameterOrDefaultValue(key);</b>
+<b class="fc">&nbsp;        return Duration.of(duration, temporalUnit);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request String[]-parameter from Configuration.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as Parameter whose value is to be returned
+&nbsp;     * @return Parameter as String[]
+&nbsp;     */
+&nbsp;    public static String[] getStringArrayParameter(ParameterCore key) {
+<b class="nc">&nbsp;        return getConfig().getStringArray(key.getName());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get Kitodo debug directory.
+&nbsp;     *
+&nbsp;     * @return String
+&nbsp;     */
+&nbsp;    public static File getKitodoDebugDirectory() {
+&nbsp;        try {
+<b class="fc">&nbsp;            File debugDirectory = new File(ConfigCore.getParameter(ParameterCore.DIR_DEBUG));</b>
+<b class="nc">&nbsp;            if (!debugDirectory.exists()) {</b>
+<b class="nc">&nbsp;                logger.debug(&quot;Cannot save debug output to {}: Directory does not exist&quot;, debugDirectory);</b>
+<b class="nc">&nbsp;                return null;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (!debugDirectory.isDirectory()) {</b>
+<b class="nc">&nbsp;                logger.debug(&quot;Cannot save debug output to {}: Not a directory&quot;, debugDirectory);</b>
+<b class="nc">&nbsp;                return null;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (!debugDirectory.canWrite()) {</b>
+<b class="nc">&nbsp;                logger.debug(&quot;Cannot save debug output to {}: Directory is not writable&quot;, debugDirectory);</b>
+<b class="nc">&nbsp;                return null;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return debugDirectory;</b>
+<b class="fc">&nbsp;        } catch (NoSuchElementException debugDirectoryNotConfigured) {</b>
+<b class="fc">&nbsp;            logger.catching(Level.TRACE, debugDirectoryNotConfigured);</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get Kitodo diagram directory.
+&nbsp;     *
+&nbsp;     * @return String
+&nbsp;     */
+&nbsp;    public static String getKitodoDiagramDirectory() {
+<b class="fc">&nbsp;        return getParameter(ParameterCore.DIR_DIAGRAMS);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,555 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > IndividualIssue</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model.bibliography.course</a>
+</div>
+
+<h1>Coverage Summary for Class: IndividualIssue (org.kitodo.production.model.bibliography.course)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IndividualIssue</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,9%
+  </span>
+  <span class="absValue">
+    (9/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45,5%
+  </span>
+  <span class="absValue">
+    (46/101)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IndividualIssue$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    55,6%
+  </span>
+  <span class="absValue">
+    (10/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,1%
+  </span>
+  <span class="absValue">
+    (47/102)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model.bibliography.course;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.MonthDay;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.time.temporal.WeekFields;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.UnreachableCodeException;
+&nbsp;import org.kitodo.production.model.bibliography.course.metadata.CountableMetadata;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents a stamping of an Issue, that is one distinguishable physically
+&nbsp; * appeared issue. In opposition, the class {@link Issue} represents the
+&nbsp; * &lt;em&gt;type&lt;/em&gt; of issue.
+&nbsp; */
+&nbsp;public class IndividualIssue {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(IndividualIssue.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The constant DAY holds a DateTimeFormatter used to get the a two-digit
+&nbsp;     * day (01—31) from the newspaper’s date.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern(&quot;dd&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The constant MONTH holds a DateTimeFormatter used to get the a two-digit
+&nbsp;     * month (01—12) from the newspaper’s date.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final DateTimeFormatter MONTH = DateTimeFormatter.ofPattern(&quot;MM&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The constant YEAR2 holds a DateTimeFormatter used to get the a four-digit
+&nbsp;     * year of era (00—99, always positive) from the newspaper’s date.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final DateTimeFormatter YEAR2 = DateTimeFormatter.ofPattern(&quot;YY&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The constant YEAR4 holds a DateTimeFormatter used to get the a four-digit
+&nbsp;     * year of era (0001—9999, always positive) from the newspaper’s date.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final DateTimeFormatter YEAR4 = DateTimeFormatter.ofPattern(&quot;YYYY&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata key to store the sorting number.
+&nbsp;     */
+&nbsp;    public static final String RULESET_ORDER_NAME = &quot;CurrentNoSorting&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Date of this issue.
+&nbsp;     */
+&nbsp;    protected final LocalDate date;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The issue this is an issue from.
+&nbsp;     */
+&nbsp;    protected final Issue issue;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The sorting number of the issue.
+&nbsp;     */
+&nbsp;    private Integer sortingNumber;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Block that the issue this is an issue from is in.
+&nbsp;     */
+&nbsp;    protected final Block block;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor to create an IndividualIssue.
+&nbsp;     *
+&nbsp;     * @param block
+&nbsp;     *            Block block this issue is in
+&nbsp;     * @param issue
+&nbsp;     *            Issue type that this issue is of
+&nbsp;     * @param date
+&nbsp;     *            Date of appearance
+&nbsp;     * @param sortingNumber
+&nbsp;     *            sorting number
+&nbsp;     */
+<b class="fc">&nbsp;    IndividualIssue(Block block, Issue issue, LocalDate date, Integer sortingNumber) {</b>
+<b class="fc">&nbsp;        this.block = block;</b>
+<b class="fc">&nbsp;        this.issue = issue;</b>
+<b class="fc">&nbsp;        this.date = date;</b>
+<b class="fc">&nbsp;        this.sortingNumber = sortingNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an integer which, for a given Granularity, shall indicate for two
+&nbsp;     * neighboring individual issues whether they form the same process (break
+&nbsp;     * mark is equal) or two different processes (break mark differs).
+&nbsp;     *
+&nbsp;     * @param mode
+&nbsp;     *            how the course shall be broken into processes
+&nbsp;     * @param yearStart
+&nbsp;     *            the first day of the business year
+&nbsp;     * @return an int which differs if two neighboring individual issues belong
+&nbsp;     *         to different processes
+&nbsp;     */
+&nbsp;    public int getBreakMark(Granularity mode, MonthDay yearStart) {
+<b class="fc">&nbsp;        final int prime = 31;</b>
+<b class="fc">&nbsp;        switch (mode) {</b>
+&nbsp;            case ISSUES:
+<b class="nc">&nbsp;                return this.hashCode();</b>
+&nbsp;            case DAYS:
+<b class="fc">&nbsp;                return date.hashCode();</b>
+&nbsp;            case WEEKS:
+<b class="nc">&nbsp;                return prime * getFirstYear(yearStart) + date.get(WeekFields.ISO.weekOfWeekBasedYear()); // TODO Weekfields.ISO correct?</b>
+&nbsp;            case MONTHS:
+<b class="nc">&nbsp;                return prime * getFirstYear(yearStart) + date.getMonthValue();</b>
+&nbsp;            case QUARTERS:
+<b class="nc">&nbsp;                return prime * getFirstYear(yearStart) + (date.getMonthValue() - 1) / 3;</b>
+&nbsp;            case YEARS:
+<b class="nc">&nbsp;                return getFirstYear(yearStart);</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new UnreachableCodeException(&quot;default case in complete switch statement&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the first calendar year of the year range this issue is on.
+&nbsp;     *
+&nbsp;     * @param yearStart
+&nbsp;     *            the day the new year starts
+&nbsp;     * @return the first calendar year of the year range this issue is on
+&nbsp;     */
+&nbsp;    private int getFirstYear(MonthDay yearStart) {
+<b class="nc">&nbsp;        int year = date.getYear();</b>
+<b class="nc">&nbsp;        return date.compareTo(yearStart.atYear(year)) &lt; 0 ? year - 1 : year;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the date of this issue.
+&nbsp;     *
+&nbsp;     * @return the date of this issue
+&nbsp;     */
+&nbsp;    public LocalDate getDate() {
+<b class="fc">&nbsp;        return date;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a map with generic fields that can be configured for process
+&nbsp;     * title creation in kitodo_projects.xml. It provides the issue information
+&nbsp;     * in the following fields:
+&nbsp;     *
+&nbsp;     * &lt;dl&gt;
+&nbsp;     * &lt;dt&gt;{@code #DAY}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;two-digit day of month&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #Issue}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;issue name&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #MONTH}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;two-digit month of year&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #YEAR}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;four-digit year&lt;/dd&gt;
+&nbsp;     * &lt;/dl&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * In addition, the following abbreviated fields are provided:
+&nbsp;     *
+&nbsp;     * &lt;dl&gt;
+&nbsp;     * &lt;dt&gt;{@code #i}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;first letter of issue name in lower case&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #I}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;first letter of issue name in upper case&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #is}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;first two letters of issue name in lower case&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #IS}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;first two letters of issue name in upper case&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #iss}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;first three letters of issue name in lower case&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #ISS}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;first three letters of issue name in upper case&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #issu}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;first four letters of issue name in lower case&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #ISSU}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;first four letters of issue name in upper case&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code #YR}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;two-digit year of century&lt;/dd&gt;
+&nbsp;     * &lt;/dl&gt;
+&nbsp;     *
+&nbsp;     * @return the generic fields for process title creation
+&nbsp;     */
+&nbsp;    public Map&lt;String, String&gt; getGenericFields() {
+<b class="fc">&nbsp;        Map&lt;String, String&gt; genericFields = new HashMap&lt;&gt;(18);</b>
+<b class="fc">&nbsp;        String heading = issue.getHeading();</b>
+<b class="fc">&nbsp;        int length = heading.length();</b>
+<b class="fc">&nbsp;        String upperCase = heading.toUpperCase();</b>
+<b class="fc">&nbsp;        String lowerCase = heading.toLowerCase();</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#DAY&quot;, DAY.format(date));</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#I&quot;, length &gt; 1 ? upperCase.substring(0, 1) : upperCase);</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#i&quot;, length &gt; 1 ? lowerCase.substring(0, 1) : lowerCase);</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#IS&quot;, length &gt; 2 ? upperCase.substring(0, 2) : upperCase);</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#is&quot;, length &gt; 2 ? lowerCase.substring(0, 2) : lowerCase);</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#ISS&quot;, length &gt; 3 ? upperCase.substring(0, 3) : upperCase);</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#iss&quot;, length &gt; 3 ? lowerCase.substring(0, 3) : lowerCase);</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#ISSU&quot;, length &gt; 4 ? upperCase.substring(0, 4) : upperCase);</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#issu&quot;, length &gt; 4 ? lowerCase.substring(0, 4) : lowerCase);</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#Issue&quot;, heading);</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#MONTH&quot;, MONTH.format(date));</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#YEAR&quot;, YEAR4.format(date));</b>
+<b class="fc">&nbsp;        genericFields.put(&quot;#YR&quot;, YEAR2.format(date));</b>
+<b class="fc">&nbsp;        return genericFields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the metadata for this individual issue.
+&nbsp;     *
+&nbsp;     * @param monthOfYear
+&nbsp;     *            the month of the year start—relevant to correctly calculate
+&nbsp;     *            the counter value
+&nbsp;     * @param dayOfMonth
+&nbsp;     *            the day of the year start—relevant to correctly calculate the
+&nbsp;     *            counter value
+&nbsp;     * @return a list of pairs, each consisting of the metadata type name and
+&nbsp;     *         the value
+&nbsp;     */
+&nbsp;    public Iterable&lt;Metadata&gt; getMetadata(int monthOfYear, int dayOfMonth) {
+<b class="fc">&nbsp;        return getMetadata(MonthDay.of(monthOfYear, dayOfMonth));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the metadata for this individual issue.
+&nbsp;     *
+&nbsp;     * @param yearStart
+&nbsp;     *            the day of the year start—relevant to correctly calculate the
+&nbsp;     *            counter value
+&nbsp;     * @return a list of pairs, each consisting of the metadata type name and
+&nbsp;     *         the value
+&nbsp;     */
+&nbsp;    public Iterable&lt;Metadata&gt; getMetadata(MonthDay yearStart) {
+<b class="fc">&nbsp;        List&lt;Metadata&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        Pair&lt;LocalDate, Issue&gt; selectedIssue = Pair.of(date, issue);</b>
+<b class="fc">&nbsp;        for (CountableMetadata counter : block.getMetadata(selectedIssue, null)) {</b>
+<b class="nc">&nbsp;            Collection&lt;Metadata&gt; metadata = Collections.emptyList();</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                metadata = counter.getMetadataDetail().getMetadataWithFilledValues();</b>
+<b class="nc">&nbsp;            } catch (InvalidMetadataValueException e) {</b>
+<b class="nc">&nbsp;                logger.error(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            if (counter.getMetadataDetail().getInput().equals(&quot;inputText&quot;)</b>
+<b class="nc">&nbsp;                    || counter.getMetadataDetail().getInput().equals(&quot;inputTextarea&quot;)) {</b>
+<b class="nc">&nbsp;                String value = counter.getValue(selectedIssue, yearStart);</b>
+<b class="nc">&nbsp;                if (metadata.stream().findFirst().isPresent()</b>
+<b class="nc">&nbsp;                        &amp;&amp; metadata.stream().findFirst().get() instanceof MetadataEntry) {</b>
+<b class="nc">&nbsp;                    ((MetadataEntry) metadata.stream().findFirst().get()).setValue(value);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            result.addAll(metadata);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the name of the issue this is an issue from.
+&nbsp;     *
+&nbsp;     * @return the issue’s name
+&nbsp;     */
+&nbsp;    public String getHeading() {
+<b class="nc">&nbsp;        return issue.getHeading();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The function getIssue() returns the issue this is an issue from.
+&nbsp;     *
+&nbsp;     * @return the issue
+&nbsp;     */
+&nbsp;    public Issue getIssue() {
+<b class="nc">&nbsp;        return issue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of issues before this issue.
+&nbsp;     *
+&nbsp;     * @return the list of issues before this
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getIssuesBefore() {
+<b class="nc">&nbsp;        List&lt;String&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (Issue issue : block.getIssues()) {</b>
+<b class="nc">&nbsp;            String heading = issue.getHeading();</b>
+<b class="nc">&nbsp;            if (heading.equals(this.issue.getHeading())) {</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            result.add(heading);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the sorting number of the issue.
+&nbsp;     *
+&nbsp;     * @return the sorting number
+&nbsp;     */
+&nbsp;    public Integer getSortingNumber() {
+<b class="nc">&nbsp;        return sortingNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the index of the first occurrence of the block of this issue in
+&nbsp;     * the given course, or -1 if the course does not contain the element.
+&nbsp;     *
+&nbsp;     * @param course
+&nbsp;     *            course to find the block in
+&nbsp;     * @return the index of the first occurrence of the block of this issue in
+&nbsp;     *         the course, or -1 if the course does not contain the element
+&nbsp;     */
+&nbsp;    int indexIn(Course course) {
+<b class="nc">&nbsp;        return course.indexOf(block);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the sorting number of the issue.
+&nbsp;     *
+&nbsp;     * @param sortingNumber
+&nbsp;     *            the sorting number to set
+&nbsp;     */
+&nbsp;    public void setSortingNumber(Integer sortingNumber) {
+<b class="nc">&nbsp;        this.sortingNumber = sortingNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Provides returns a string that contains a concise but informative
+&nbsp;     * representation of this issue that is easy for a person to read.
+&nbsp;     *
+&nbsp;     * @return a string representation of the issue
+&nbsp;     * @see java.lang.Object#toString()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+&nbsp;        try {
+<b class="fc">&nbsp;            if (issue.getHeading().length() == 0) {</b>
+<b class="fc">&nbsp;                return date.toString();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return date.toString() + &quot;, &quot; + issue.getHeading();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;            return super.toString();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a hash code for the object which depends on the content of its
+&nbsp;     * variables. Whenever IndividualIssue objects are held in HashSet objects,
+&nbsp;     * a hashCode() is essentially necessary.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The method was generated by Eclipse using right-click → Source → Generate
+&nbsp;     * hashCode() and equals()…. If you will ever change the classes’ fields,
+&nbsp;     * just re-generate it.
+&nbsp;     *
+&nbsp;     * @see java.lang.Object#hashCode()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        final int prime = 31;</b>
+<b class="fc">&nbsp;        int hashCode = 1;</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((date == null) ? 0 : date.hashCode());</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((issue == null) ? 0 : issue.hashCode());</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((block == null) ? 0 : block.hashCode());</b>
+<b class="fc">&nbsp;        return hashCode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether two individual issues are equal; the decision depends on
+&nbsp;     * the content of its variables.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The method was generated by Eclipse using right-click → Source → Generate
+&nbsp;     * hashCode() and equals()…. If you will ever change the classes’ fields,
+&nbsp;     * just re-generate it.
+&nbsp;     *
+&nbsp;     * @see java.lang.Object#equals(java.lang.Object)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object obj) {
+<b class="nc">&nbsp;        if (this == obj) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (obj instanceof IndividualIssue) {</b>
+<b class="nc">&nbsp;            IndividualIssue other = (IndividualIssue) obj;</b>
+<b class="nc">&nbsp;            if (Objects.isNull(date)) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(other.date)) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } else if (!date.equals(other.date)) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.isNull(issue)) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(other.issue)) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } else if (!issue.equals(other.issue)) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.isNull(block)) {</b>
+<b class="nc">&nbsp;                return Objects.isNull(other.block);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return block.equals(other.block);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

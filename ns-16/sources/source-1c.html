@@ -1,0 +1,219 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > WorkflowCondition</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: WorkflowCondition (org.kitodo.data.database.beans)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WorkflowCondition</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (4/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (10/15)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">WorkflowCondition$HibernateProxy$y39MZkt7</td>
+  </tr>
+  <tr>
+    <td class="name">WorkflowCondition$HibernateProxy$yh12TYeI</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (4/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (10/15)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.beans;
+&nbsp;
+&nbsp;import java.security.InvalidParameterException;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.EnumType;
+&nbsp;import javax.persistence.Enumerated;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;import org.kitodo.data.database.enums.WorkflowConditionType;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;workflowcondition&quot;)
+&nbsp;public class WorkflowCondition extends BaseBean {
+&nbsp;
+&nbsp;    @Column(name = &quot;type&quot;)
+&nbsp;    @Enumerated(EnumType.STRING)
+&nbsp;    private WorkflowConditionType type;
+&nbsp;
+&nbsp;    @Column(name = &quot;value&quot;)
+&nbsp;    private String value;
+&nbsp;
+<b class="fc">&nbsp;    protected WorkflowCondition() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Public constructor.
+&nbsp;     *
+&nbsp;     * @param type
+&nbsp;     *            of workflow condition
+&nbsp;     * @param value
+&nbsp;     *            of workflow condition
+&nbsp;     */
+<b class="fc">&nbsp;    public WorkflowCondition(String type, String value) {</b>
+<b class="fc">&nbsp;        switch (type.toLowerCase()) {</b>
+&nbsp;            case &quot;none&quot;: {
+<b class="nc">&nbsp;                this.type = WorkflowConditionType.NONE;</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+&nbsp;            case &quot;script&quot;: {
+<b class="fc">&nbsp;                this.type = WorkflowConditionType.SCRIPT;</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            }
+&nbsp;            case &quot;xpath&quot;: {
+<b class="fc">&nbsp;                this.type = WorkflowConditionType.XPATH;</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            }
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new InvalidParameterException(&quot;Type should be none, script or XPath, but was &quot; + type);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        this.value = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get type.
+&nbsp;     *
+&nbsp;     * @return value of type
+&nbsp;     */
+&nbsp;    public WorkflowConditionType getType() {
+<b class="fc">&nbsp;        return type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set type.
+&nbsp;     *
+&nbsp;     * @param type
+&nbsp;     *            as java.lang.String
+&nbsp;     */
+&nbsp;    public void setType(WorkflowConditionType type) {
+<b class="nc">&nbsp;        this.type = type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get value.
+&nbsp;     *
+&nbsp;     * @return value of value
+&nbsp;     */
+&nbsp;    public String getValue() {
+<b class="fc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set value.
+&nbsp;     *
+&nbsp;     * @param value
+&nbsp;     *            as java.lang.String
+&nbsp;     */
+&nbsp;    public void setValue(String value) {
+<b class="nc">&nbsp;        this.value = value;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

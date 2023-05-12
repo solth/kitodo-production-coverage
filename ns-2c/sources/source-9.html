@@ -1,0 +1,1896 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MdSecType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.metskitodo</a>
+</div>
+
+<h1>Coverage Summary for Class: MdSecType (org.kitodo.dataformat.metskitodo)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MdSecType</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,6%
+  </span>
+  <span class="absValue">
+    (12/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,6%
+  </span>
+  <span class="absValue">
+    (30/54)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">MdSecType$MdRef</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/43)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/131)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">MdSecType$MdWrap</td>
+<td class="coverageStat">
+  <span class="percent">
+    63%
+  </span>
+  <span class="absValue">
+    (17/27)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,4%
+  </span>
+  <span class="absValue">
+    (57/81)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">MdSecType$MdWrap$XmlData</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (12/16)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    35,2%
+  </span>
+  <span class="absValue">
+    (32/91)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    35,1%
+  </span>
+  <span class="absValue">
+    (99/282)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;//
+&nbsp;// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.0 generiert 
+&nbsp;// Siehe &lt;a href=&quot;https://javaee.github.io/jaxb-v2/&quot;&gt;https://javaee.github.io/jaxb-v2/&lt;/a&gt; 
+&nbsp;// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+&nbsp;// Generiert: 2023.05.12 um 01:28:08 PM CEST 
+&nbsp;//
+&nbsp;
+&nbsp;
+&nbsp;package org.kitodo.dataformat.metskitodo;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAnyAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlAnyElement;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlID;
+&nbsp;import javax.xml.bind.annotation.XmlIDREF;
+&nbsp;import javax.xml.bind.annotation.XmlSchemaType;
+&nbsp;import javax.xml.bind.annotation.XmlType;
+&nbsp;import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+&nbsp;import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+&nbsp;import javax.xml.datatype.XMLGregorianCalendar;
+&nbsp;import javax.xml.namespace.QName;
+&nbsp;import org.jvnet.jaxb2_commons.lang.Equals2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.EqualsStrategy2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+&nbsp;import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+&nbsp;import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * mdSecType: Complex Type for Metadata Sections
+&nbsp; * 			A generic framework for pointing to/including metadata within a METS document, a la Warwick Framework.
+&nbsp; * 			
+&nbsp; * 
+&nbsp; * &lt;p&gt;Java-Klasse für mdSecType complex type.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * &amp;lt;complexType name=&quot;mdSecType&quot;&amp;gt;
+&nbsp; *   &amp;lt;complexContent&amp;gt;
+&nbsp; *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *       &amp;lt;all&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;mdRef&quot; minOccurs=&quot;0&quot;&amp;gt;
+&nbsp; *           &amp;lt;complexType&amp;gt;
+&nbsp; *             &amp;lt;complexContent&amp;gt;
+&nbsp; *               &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *                 &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}METADATA&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}simpleLink&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}LOCATION&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}FILECORE&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;LABEL&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;XPTR&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *               &amp;lt;/restriction&amp;gt;
+&nbsp; *             &amp;lt;/complexContent&amp;gt;
+&nbsp; *           &amp;lt;/complexType&amp;gt;
+&nbsp; *         &amp;lt;/element&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;mdWrap&quot; minOccurs=&quot;0&quot;&amp;gt;
+&nbsp; *           &amp;lt;complexType&amp;gt;
+&nbsp; *             &amp;lt;complexContent&amp;gt;
+&nbsp; *               &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *                 &amp;lt;choice&amp;gt;
+&nbsp; *                   &amp;lt;element name=&quot;binData&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}base64Binary&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp; *                   &amp;lt;element name=&quot;xmlData&quot; minOccurs=&quot;0&quot;&amp;gt;
+&nbsp; *                     &amp;lt;complexType&amp;gt;
+&nbsp; *                       &amp;lt;complexContent&amp;gt;
+&nbsp; *                         &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *                           &amp;lt;sequence&amp;gt;
+&nbsp; *                             &amp;lt;any processContents=&#39;lax&#39; maxOccurs=&quot;unbounded&quot;/&amp;gt;
+&nbsp; *                           &amp;lt;/sequence&amp;gt;
+&nbsp; *                         &amp;lt;/restriction&amp;gt;
+&nbsp; *                       &amp;lt;/complexContent&amp;gt;
+&nbsp; *                     &amp;lt;/complexType&amp;gt;
+&nbsp; *                   &amp;lt;/element&amp;gt;
+&nbsp; *                 &amp;lt;/choice&amp;gt;
+&nbsp; *                 &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}METADATA&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}FILECORE&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;LABEL&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *               &amp;lt;/restriction&amp;gt;
+&nbsp; *             &amp;lt;/complexContent&amp;gt;
+&nbsp; *           &amp;lt;/complexType&amp;gt;
+&nbsp; *         &amp;lt;/element&amp;gt;
+&nbsp; *       &amp;lt;/all&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;ID&quot; use=&quot;required&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;GROUPID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;ADMID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREFS&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;CREATED&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}dateTime&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;STATUS&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *       &amp;lt;anyAttribute processContents=&#39;lax&#39; namespace=&#39;##other&#39;/&amp;gt;
+&nbsp; *     &amp;lt;/restriction&amp;gt;
+&nbsp; *   &amp;lt;/complexContent&amp;gt;
+&nbsp; * &amp;lt;/complexType&amp;gt;
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * 
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;@XmlType(name = &quot;mdSecType&quot;, propOrder = {
+&nbsp;
+&nbsp;})
+<b class="fc">&nbsp;public class MdSecType implements Equals2</b>
+&nbsp;{
+&nbsp;
+&nbsp;    protected MdSecType.MdRef mdRef;
+&nbsp;    protected MdSecType.MdWrap mdWrap;
+&nbsp;    @XmlAttribute(name = &quot;ID&quot;, required = true)
+&nbsp;    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;    @XmlID
+&nbsp;    @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;    protected String id;
+&nbsp;    @XmlAttribute(name = &quot;GROUPID&quot;)
+&nbsp;    protected String groupid;
+&nbsp;    @XmlAttribute(name = &quot;ADMID&quot;)
+&nbsp;    @XmlIDREF
+&nbsp;    @XmlSchemaType(name = &quot;IDREFS&quot;)
+&nbsp;    protected List&lt;Object&gt; admid;
+&nbsp;    @XmlAttribute(name = &quot;CREATED&quot;)
+&nbsp;    @XmlSchemaType(name = &quot;dateTime&quot;)
+&nbsp;    protected XMLGregorianCalendar created;
+&nbsp;    @XmlAttribute(name = &quot;STATUS&quot;)
+&nbsp;    protected String status;
+<b class="fc">&nbsp;    @XmlAnyAttribute</b>
+&nbsp;    private Map&lt;QName, String&gt; otherAttributes = new HashMap&lt;QName, String&gt;();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der mdRef-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link MdSecType.MdRef }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public MdSecType.MdRef getMdRef() {
+<b class="fc">&nbsp;        return mdRef;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der mdRef-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link MdSecType.MdRef }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setMdRef(MdSecType.MdRef value) {
+<b class="nc">&nbsp;        this.mdRef = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der mdWrap-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link MdSecType.MdWrap }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public MdSecType.MdWrap getMdWrap() {
+<b class="fc">&nbsp;        return mdWrap;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der mdWrap-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link MdSecType.MdWrap }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setMdWrap(MdSecType.MdWrap value) {
+<b class="fc">&nbsp;        this.mdWrap = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getID() {
+<b class="fc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der id-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setID(String value) {
+<b class="fc">&nbsp;        this.id = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der groupid-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getGROUPID() {
+<b class="fc">&nbsp;        return groupid;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der groupid-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setGROUPID(String value) {
+<b class="nc">&nbsp;        this.groupid = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the admid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the admid property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getADMID().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link Object }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;Object&gt; getADMID() {
+<b class="fc">&nbsp;        if (admid == null) {</b>
+<b class="fc">&nbsp;            admid = new ArrayList&lt;Object&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.admid;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der created-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link XMLGregorianCalendar }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public XMLGregorianCalendar getCREATED() {
+<b class="fc">&nbsp;        return created;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der created-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link XMLGregorianCalendar }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setCREATED(XMLGregorianCalendar value) {
+<b class="nc">&nbsp;        this.created = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der status-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getSTATUS() {
+<b class="fc">&nbsp;        return status;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der status-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setSTATUS(String value) {
+<b class="nc">&nbsp;        this.status = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets a map that contains attributes that aren&#39;t bound to any typed property on this class.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * the map is keyed by the name of the attribute and 
+&nbsp;     * the value is the string value of the attribute.
+&nbsp;     * 
+&nbsp;     * the map returned by this method is live, and you can add new attribute
+&nbsp;     * by updating the map directly. Because of this design, there&#39;s no setter.
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     always non-null
+&nbsp;     */
+&nbsp;    public Map&lt;QName, String&gt; getOtherAttributes() {
+<b class="nc">&nbsp;        return otherAttributes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="fc">&nbsp;        if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (this == object) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        final MdSecType that = ((MdSecType) object);</b>
+&nbsp;        {
+&nbsp;            MdSecType.MdRef lhsMdRef;
+<b class="fc">&nbsp;            lhsMdRef = this.getMdRef();</b>
+&nbsp;            MdSecType.MdRef rhsMdRef;
+<b class="fc">&nbsp;            rhsMdRef = that.getMdRef();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mdRef&quot;, lhsMdRef), LocatorUtils.property(thatLocator, &quot;mdRef&quot;, rhsMdRef), lhsMdRef, rhsMdRef, (this.mdRef!= null), (that.mdRef!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            MdSecType.MdWrap lhsMdWrap;
+<b class="fc">&nbsp;            lhsMdWrap = this.getMdWrap();</b>
+&nbsp;            MdSecType.MdWrap rhsMdWrap;
+<b class="fc">&nbsp;            rhsMdWrap = that.getMdWrap();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mdWrap&quot;, lhsMdWrap), LocatorUtils.property(thatLocator, &quot;mdWrap&quot;, rhsMdWrap), lhsMdWrap, rhsMdWrap, (this.mdWrap!= null), (that.mdWrap!= null))) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsID;
+<b class="fc">&nbsp;            lhsID = this.getID();</b>
+&nbsp;            String rhsID;
+<b class="fc">&nbsp;            rhsID = that.getID();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsGROUPID;
+<b class="nc">&nbsp;            lhsGROUPID = this.getGROUPID();</b>
+&nbsp;            String rhsGROUPID;
+<b class="nc">&nbsp;            rhsGROUPID = that.getGROUPID();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;groupid&quot;, lhsGROUPID), LocatorUtils.property(thatLocator, &quot;groupid&quot;, rhsGROUPID), lhsGROUPID, rhsGROUPID, (this.groupid!= null), (that.groupid!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            List&lt;Object&gt; lhsADMID;
+<b class="nc">&nbsp;            lhsADMID = (((this.admid!= null)&amp;&amp;(!this.admid.isEmpty()))?this.getADMID():null);</b>
+&nbsp;            List&lt;Object&gt; rhsADMID;
+<b class="nc">&nbsp;            rhsADMID = (((that.admid!= null)&amp;&amp;(!that.admid.isEmpty()))?that.getADMID():null);</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;admid&quot;, lhsADMID), LocatorUtils.property(thatLocator, &quot;admid&quot;, rhsADMID), lhsADMID, rhsADMID, ((this.admid!= null)&amp;&amp;(!this.admid.isEmpty())), ((that.admid!= null)&amp;&amp;(!that.admid.isEmpty())))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            XMLGregorianCalendar lhsCREATED;
+<b class="nc">&nbsp;            lhsCREATED = this.getCREATED();</b>
+&nbsp;            XMLGregorianCalendar rhsCREATED;
+<b class="nc">&nbsp;            rhsCREATED = that.getCREATED();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;created&quot;, lhsCREATED), LocatorUtils.property(thatLocator, &quot;created&quot;, rhsCREATED), lhsCREATED, rhsCREATED, (this.created!= null), (that.created!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsSTATUS;
+<b class="nc">&nbsp;            lhsSTATUS = this.getSTATUS();</b>
+&nbsp;            String rhsSTATUS;
+<b class="nc">&nbsp;            rhsSTATUS = that.getSTATUS();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;status&quot;, lhsSTATUS), LocatorUtils.property(thatLocator, &quot;status&quot;, rhsSTATUS), lhsSTATUS, rhsSTATUS, (this.status!= null), (that.status!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(Object object) {
+<b class="fc">&nbsp;        final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="fc">&nbsp;        return equals(null, null, object, strategy);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;Java-Klasse für anonymous complex type.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp;     * 
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * &amp;lt;complexType&amp;gt;
+&nbsp;     *   &amp;lt;complexContent&amp;gt;
+&nbsp;     *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;     *       &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}METADATA&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}simpleLink&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}LOCATION&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}FILECORE&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;LABEL&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;XPTR&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp;     *     &amp;lt;/restriction&amp;gt;
+&nbsp;     *   &amp;lt;/complexContent&amp;gt;
+&nbsp;     * &amp;lt;/complexType&amp;gt;
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    @XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;    @XmlType(name = &quot;&quot;)
+<b class="nc">&nbsp;    public static class MdRef implements Equals2</b>
+&nbsp;    {
+&nbsp;
+&nbsp;        @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;        @XmlID
+&nbsp;        @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;        protected String id;
+&nbsp;        @XmlAttribute(name = &quot;LABEL&quot;)
+&nbsp;        protected String label;
+&nbsp;        @XmlAttribute(name = &quot;XPTR&quot;)
+&nbsp;        protected String xptr;
+&nbsp;        @XmlAttribute(name = &quot;MDTYPE&quot;, required = true)
+&nbsp;        protected String mdtype;
+&nbsp;        @XmlAttribute(name = &quot;OTHERMDTYPE&quot;)
+&nbsp;        protected String othermdtype;
+&nbsp;        @XmlAttribute(name = &quot;MDTYPEVERSION&quot;)
+&nbsp;        protected String mdtypeversion;
+&nbsp;        @XmlAttribute(name = &quot;type&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String type;
+&nbsp;        @XmlAttribute(name = &quot;href&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        @XmlSchemaType(name = &quot;anyURI&quot;)
+&nbsp;        protected String href;
+&nbsp;        @XmlAttribute(name = &quot;role&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String role;
+&nbsp;        @XmlAttribute(name = &quot;arcrole&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String arcrole;
+&nbsp;        @XmlAttribute(name = &quot;title&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String title;
+&nbsp;        @XmlAttribute(name = &quot;show&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String show;
+&nbsp;        @XmlAttribute(name = &quot;actuate&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String actuate;
+&nbsp;        @XmlAttribute(name = &quot;LOCTYPE&quot;, required = true)
+&nbsp;        protected String loctype;
+&nbsp;        @XmlAttribute(name = &quot;OTHERLOCTYPE&quot;)
+&nbsp;        protected String otherloctype;
+&nbsp;        @XmlAttribute(name = &quot;MIMETYPE&quot;)
+&nbsp;        protected String mimetype;
+&nbsp;        @XmlAttribute(name = &quot;SIZE&quot;)
+&nbsp;        protected Long size;
+&nbsp;        @XmlAttribute(name = &quot;CREATED&quot;)
+&nbsp;        @XmlSchemaType(name = &quot;dateTime&quot;)
+&nbsp;        protected XMLGregorianCalendar created;
+&nbsp;        @XmlAttribute(name = &quot;CHECKSUM&quot;)
+&nbsp;        protected String checksum;
+&nbsp;        @XmlAttribute(name = &quot;CHECKSUMTYPE&quot;)
+&nbsp;        protected String checksumtype;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getID() {
+<b class="nc">&nbsp;            return id;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der id-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setID(String value) {
+<b class="nc">&nbsp;            this.id = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der label-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getLABEL() {
+<b class="nc">&nbsp;            return label;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der label-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setLABEL(String value) {
+<b class="nc">&nbsp;            this.label = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der xptr-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getXPTR() {
+<b class="nc">&nbsp;            return xptr;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der xptr-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setXPTR(String value) {
+<b class="nc">&nbsp;            this.xptr = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der mdtype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getMDTYPE() {
+<b class="nc">&nbsp;            return mdtype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der mdtype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setMDTYPE(String value) {
+<b class="nc">&nbsp;            this.mdtype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der othermdtype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getOTHERMDTYPE() {
+<b class="nc">&nbsp;            return othermdtype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der othermdtype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setOTHERMDTYPE(String value) {
+<b class="nc">&nbsp;            this.othermdtype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der mdtypeversion-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getMDTYPEVERSION() {
+<b class="nc">&nbsp;            return mdtypeversion;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der mdtypeversion-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setMDTYPEVERSION(String value) {
+<b class="nc">&nbsp;            this.mdtypeversion = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der type-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getType() {
+<b class="nc">&nbsp;            if (type == null) {</b>
+<b class="nc">&nbsp;                return &quot;simple&quot;;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return type;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der type-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setType(String value) {
+<b class="nc">&nbsp;            this.type = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der href-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getHref() {
+<b class="nc">&nbsp;            return href;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der href-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setHref(String value) {
+<b class="nc">&nbsp;            this.href = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der role-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getRole() {
+<b class="nc">&nbsp;            return role;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der role-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setRole(String value) {
+<b class="nc">&nbsp;            this.role = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der arcrole-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getArcrole() {
+<b class="nc">&nbsp;            return arcrole;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der arcrole-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setArcrole(String value) {
+<b class="nc">&nbsp;            this.arcrole = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der title-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getTitle() {
+<b class="nc">&nbsp;            return title;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der title-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setTitle(String value) {
+<b class="nc">&nbsp;            this.title = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der show-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getShow() {
+<b class="nc">&nbsp;            return show;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der show-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setShow(String value) {
+<b class="nc">&nbsp;            this.show = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der actuate-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getActuate() {
+<b class="nc">&nbsp;            return actuate;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der actuate-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setActuate(String value) {
+<b class="nc">&nbsp;            this.actuate = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der loctype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getLOCTYPE() {
+<b class="nc">&nbsp;            return loctype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der loctype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setLOCTYPE(String value) {
+<b class="nc">&nbsp;            this.loctype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der otherloctype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getOTHERLOCTYPE() {
+<b class="nc">&nbsp;            return otherloctype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der otherloctype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setOTHERLOCTYPE(String value) {
+<b class="nc">&nbsp;            this.otherloctype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der mimetype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getMIMETYPE() {
+<b class="nc">&nbsp;            return mimetype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der mimetype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setMIMETYPE(String value) {
+<b class="nc">&nbsp;            this.mimetype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der size-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link Long }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public Long getSIZE() {
+<b class="nc">&nbsp;            return size;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der size-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link Long }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setSIZE(Long value) {
+<b class="nc">&nbsp;            this.size = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der created-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link XMLGregorianCalendar }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public XMLGregorianCalendar getCREATED() {
+<b class="nc">&nbsp;            return created;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der created-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link XMLGregorianCalendar }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setCREATED(XMLGregorianCalendar value) {
+<b class="nc">&nbsp;            this.created = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der checksum-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getCHECKSUM() {
+<b class="nc">&nbsp;            return checksum;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der checksum-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setCHECKSUM(String value) {
+<b class="nc">&nbsp;            this.checksum = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der checksumtype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getCHECKSUMTYPE() {
+<b class="nc">&nbsp;            return checksumtype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der checksumtype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setCHECKSUMTYPE(String value) {
+<b class="nc">&nbsp;            this.checksumtype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="nc">&nbsp;            if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (this == object) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            final MdSecType.MdRef that = ((MdSecType.MdRef) object);</b>
+&nbsp;            {
+&nbsp;                String lhsID;
+<b class="nc">&nbsp;                lhsID = this.getID();</b>
+&nbsp;                String rhsID;
+<b class="nc">&nbsp;                rhsID = that.getID();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsLABEL;
+<b class="nc">&nbsp;                lhsLABEL = this.getLABEL();</b>
+&nbsp;                String rhsLABEL;
+<b class="nc">&nbsp;                rhsLABEL = that.getLABEL();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;label&quot;, lhsLABEL), LocatorUtils.property(thatLocator, &quot;label&quot;, rhsLABEL), lhsLABEL, rhsLABEL, (this.label!= null), (that.label!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsXPTR;
+<b class="nc">&nbsp;                lhsXPTR = this.getXPTR();</b>
+&nbsp;                String rhsXPTR;
+<b class="nc">&nbsp;                rhsXPTR = that.getXPTR();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;xptr&quot;, lhsXPTR), LocatorUtils.property(thatLocator, &quot;xptr&quot;, rhsXPTR), lhsXPTR, rhsXPTR, (this.xptr!= null), (that.xptr!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsMDTYPE;
+<b class="nc">&nbsp;                lhsMDTYPE = this.getMDTYPE();</b>
+&nbsp;                String rhsMDTYPE;
+<b class="nc">&nbsp;                rhsMDTYPE = that.getMDTYPE();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mdtype&quot;, lhsMDTYPE), LocatorUtils.property(thatLocator, &quot;mdtype&quot;, rhsMDTYPE), lhsMDTYPE, rhsMDTYPE, (this.mdtype!= null), (that.mdtype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsOTHERMDTYPE;
+<b class="nc">&nbsp;                lhsOTHERMDTYPE = this.getOTHERMDTYPE();</b>
+&nbsp;                String rhsOTHERMDTYPE;
+<b class="nc">&nbsp;                rhsOTHERMDTYPE = that.getOTHERMDTYPE();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;othermdtype&quot;, lhsOTHERMDTYPE), LocatorUtils.property(thatLocator, &quot;othermdtype&quot;, rhsOTHERMDTYPE), lhsOTHERMDTYPE, rhsOTHERMDTYPE, (this.othermdtype!= null), (that.othermdtype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsMDTYPEVERSION;
+<b class="nc">&nbsp;                lhsMDTYPEVERSION = this.getMDTYPEVERSION();</b>
+&nbsp;                String rhsMDTYPEVERSION;
+<b class="nc">&nbsp;                rhsMDTYPEVERSION = that.getMDTYPEVERSION();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mdtypeversion&quot;, lhsMDTYPEVERSION), LocatorUtils.property(thatLocator, &quot;mdtypeversion&quot;, rhsMDTYPEVERSION), lhsMDTYPEVERSION, rhsMDTYPEVERSION, (this.mdtypeversion!= null), (that.mdtypeversion!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsType;
+<b class="nc">&nbsp;                lhsType = this.getType();</b>
+&nbsp;                String rhsType;
+<b class="nc">&nbsp;                rhsType = that.getType();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;type&quot;, lhsType), LocatorUtils.property(thatLocator, &quot;type&quot;, rhsType), lhsType, rhsType, (this.type!= null), (that.type!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsHref;
+<b class="nc">&nbsp;                lhsHref = this.getHref();</b>
+&nbsp;                String rhsHref;
+<b class="nc">&nbsp;                rhsHref = that.getHref();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;href&quot;, lhsHref), LocatorUtils.property(thatLocator, &quot;href&quot;, rhsHref), lhsHref, rhsHref, (this.href!= null), (that.href!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsRole;
+<b class="nc">&nbsp;                lhsRole = this.getRole();</b>
+&nbsp;                String rhsRole;
+<b class="nc">&nbsp;                rhsRole = that.getRole();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;role&quot;, lhsRole), LocatorUtils.property(thatLocator, &quot;role&quot;, rhsRole), lhsRole, rhsRole, (this.role!= null), (that.role!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsArcrole;
+<b class="nc">&nbsp;                lhsArcrole = this.getArcrole();</b>
+&nbsp;                String rhsArcrole;
+<b class="nc">&nbsp;                rhsArcrole = that.getArcrole();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;arcrole&quot;, lhsArcrole), LocatorUtils.property(thatLocator, &quot;arcrole&quot;, rhsArcrole), lhsArcrole, rhsArcrole, (this.arcrole!= null), (that.arcrole!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsTitle;
+<b class="nc">&nbsp;                lhsTitle = this.getTitle();</b>
+&nbsp;                String rhsTitle;
+<b class="nc">&nbsp;                rhsTitle = that.getTitle();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;title&quot;, lhsTitle), LocatorUtils.property(thatLocator, &quot;title&quot;, rhsTitle), lhsTitle, rhsTitle, (this.title!= null), (that.title!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsShow;
+<b class="nc">&nbsp;                lhsShow = this.getShow();</b>
+&nbsp;                String rhsShow;
+<b class="nc">&nbsp;                rhsShow = that.getShow();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;show&quot;, lhsShow), LocatorUtils.property(thatLocator, &quot;show&quot;, rhsShow), lhsShow, rhsShow, (this.show!= null), (that.show!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsActuate;
+<b class="nc">&nbsp;                lhsActuate = this.getActuate();</b>
+&nbsp;                String rhsActuate;
+<b class="nc">&nbsp;                rhsActuate = that.getActuate();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;actuate&quot;, lhsActuate), LocatorUtils.property(thatLocator, &quot;actuate&quot;, rhsActuate), lhsActuate, rhsActuate, (this.actuate!= null), (that.actuate!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsLOCTYPE;
+<b class="nc">&nbsp;                lhsLOCTYPE = this.getLOCTYPE();</b>
+&nbsp;                String rhsLOCTYPE;
+<b class="nc">&nbsp;                rhsLOCTYPE = that.getLOCTYPE();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;loctype&quot;, lhsLOCTYPE), LocatorUtils.property(thatLocator, &quot;loctype&quot;, rhsLOCTYPE), lhsLOCTYPE, rhsLOCTYPE, (this.loctype!= null), (that.loctype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsOTHERLOCTYPE;
+<b class="nc">&nbsp;                lhsOTHERLOCTYPE = this.getOTHERLOCTYPE();</b>
+&nbsp;                String rhsOTHERLOCTYPE;
+<b class="nc">&nbsp;                rhsOTHERLOCTYPE = that.getOTHERLOCTYPE();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;otherloctype&quot;, lhsOTHERLOCTYPE), LocatorUtils.property(thatLocator, &quot;otherloctype&quot;, rhsOTHERLOCTYPE), lhsOTHERLOCTYPE, rhsOTHERLOCTYPE, (this.otherloctype!= null), (that.otherloctype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsMIMETYPE;
+<b class="nc">&nbsp;                lhsMIMETYPE = this.getMIMETYPE();</b>
+&nbsp;                String rhsMIMETYPE;
+<b class="nc">&nbsp;                rhsMIMETYPE = that.getMIMETYPE();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mimetype&quot;, lhsMIMETYPE), LocatorUtils.property(thatLocator, &quot;mimetype&quot;, rhsMIMETYPE), lhsMIMETYPE, rhsMIMETYPE, (this.mimetype!= null), (that.mimetype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                Long lhsSIZE;
+<b class="nc">&nbsp;                lhsSIZE = this.getSIZE();</b>
+&nbsp;                Long rhsSIZE;
+<b class="nc">&nbsp;                rhsSIZE = that.getSIZE();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;size&quot;, lhsSIZE), LocatorUtils.property(thatLocator, &quot;size&quot;, rhsSIZE), lhsSIZE, rhsSIZE, (this.size!= null), (that.size!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                XMLGregorianCalendar lhsCREATED;
+<b class="nc">&nbsp;                lhsCREATED = this.getCREATED();</b>
+&nbsp;                XMLGregorianCalendar rhsCREATED;
+<b class="nc">&nbsp;                rhsCREATED = that.getCREATED();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;created&quot;, lhsCREATED), LocatorUtils.property(thatLocator, &quot;created&quot;, rhsCREATED), lhsCREATED, rhsCREATED, (this.created!= null), (that.created!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsCHECKSUM;
+<b class="nc">&nbsp;                lhsCHECKSUM = this.getCHECKSUM();</b>
+&nbsp;                String rhsCHECKSUM;
+<b class="nc">&nbsp;                rhsCHECKSUM = that.getCHECKSUM();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;checksum&quot;, lhsCHECKSUM), LocatorUtils.property(thatLocator, &quot;checksum&quot;, rhsCHECKSUM), lhsCHECKSUM, rhsCHECKSUM, (this.checksum!= null), (that.checksum!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsCHECKSUMTYPE;
+<b class="nc">&nbsp;                lhsCHECKSUMTYPE = this.getCHECKSUMTYPE();</b>
+&nbsp;                String rhsCHECKSUMTYPE;
+<b class="nc">&nbsp;                rhsCHECKSUMTYPE = that.getCHECKSUMTYPE();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;checksumtype&quot;, lhsCHECKSUMTYPE), LocatorUtils.property(thatLocator, &quot;checksumtype&quot;, rhsCHECKSUMTYPE), lhsCHECKSUMTYPE, rhsCHECKSUMTYPE, (this.checksumtype!= null), (that.checksumtype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(Object object) {
+<b class="nc">&nbsp;            final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;            return equals(null, null, object, strategy);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;Java-Klasse für anonymous complex type.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp;     * 
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * &amp;lt;complexType&amp;gt;
+&nbsp;     *   &amp;lt;complexContent&amp;gt;
+&nbsp;     *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;     *       &amp;lt;choice&amp;gt;
+&nbsp;     *         &amp;lt;element name=&quot;binData&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}base64Binary&quot; minOccurs=&quot;0&quot;/&amp;gt;
+&nbsp;     *         &amp;lt;element name=&quot;xmlData&quot; minOccurs=&quot;0&quot;&amp;gt;
+&nbsp;     *           &amp;lt;complexType&amp;gt;
+&nbsp;     *             &amp;lt;complexContent&amp;gt;
+&nbsp;     *               &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;     *                 &amp;lt;sequence&amp;gt;
+&nbsp;     *                   &amp;lt;any processContents=&#39;lax&#39; maxOccurs=&quot;unbounded&quot;/&amp;gt;
+&nbsp;     *                 &amp;lt;/sequence&amp;gt;
+&nbsp;     *               &amp;lt;/restriction&amp;gt;
+&nbsp;     *             &amp;lt;/complexContent&amp;gt;
+&nbsp;     *           &amp;lt;/complexType&amp;gt;
+&nbsp;     *         &amp;lt;/element&amp;gt;
+&nbsp;     *       &amp;lt;/choice&amp;gt;
+&nbsp;     *       &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}METADATA&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attGroup ref=&quot;{http://www.loc.gov/METS/}FILECORE&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;LABEL&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp;     *     &amp;lt;/restriction&amp;gt;
+&nbsp;     *   &amp;lt;/complexContent&amp;gt;
+&nbsp;     * &amp;lt;/complexType&amp;gt;
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    @XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;    @XmlType(name = &quot;&quot;, propOrder = {
+&nbsp;        &quot;binData&quot;,
+&nbsp;        &quot;xmlData&quot;
+&nbsp;    })
+<b class="fc">&nbsp;    public static class MdWrap implements Equals2</b>
+&nbsp;    {
+&nbsp;
+&nbsp;        protected byte[] binData;
+&nbsp;        protected MdSecType.MdWrap.XmlData xmlData;
+&nbsp;        @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;        @XmlID
+&nbsp;        @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;        protected String id;
+&nbsp;        @XmlAttribute(name = &quot;LABEL&quot;)
+&nbsp;        protected String label;
+&nbsp;        @XmlAttribute(name = &quot;MDTYPE&quot;, required = true)
+&nbsp;        protected String mdtype;
+&nbsp;        @XmlAttribute(name = &quot;OTHERMDTYPE&quot;)
+&nbsp;        protected String othermdtype;
+&nbsp;        @XmlAttribute(name = &quot;MDTYPEVERSION&quot;)
+&nbsp;        protected String mdtypeversion;
+&nbsp;        @XmlAttribute(name = &quot;MIMETYPE&quot;)
+&nbsp;        protected String mimetype;
+&nbsp;        @XmlAttribute(name = &quot;SIZE&quot;)
+&nbsp;        protected Long size;
+&nbsp;        @XmlAttribute(name = &quot;CREATED&quot;)
+&nbsp;        @XmlSchemaType(name = &quot;dateTime&quot;)
+&nbsp;        protected XMLGregorianCalendar created;
+&nbsp;        @XmlAttribute(name = &quot;CHECKSUM&quot;)
+&nbsp;        protected String checksum;
+&nbsp;        @XmlAttribute(name = &quot;CHECKSUMTYPE&quot;)
+&nbsp;        protected String checksumtype;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der binData-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     byte[]
+&nbsp;         */
+&nbsp;        public byte[] getBinData() {
+<b class="fc">&nbsp;            return binData;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der binData-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     byte[]
+&nbsp;         */
+&nbsp;        public void setBinData(byte[] value) {
+<b class="nc">&nbsp;            this.binData = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der xmlData-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link MdSecType.MdWrap.XmlData }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public MdSecType.MdWrap.XmlData getXmlData() {
+<b class="fc">&nbsp;            return xmlData;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der xmlData-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link MdSecType.MdWrap.XmlData }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setXmlData(MdSecType.MdWrap.XmlData value) {
+<b class="fc">&nbsp;            this.xmlData = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getID() {
+<b class="fc">&nbsp;            return id;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der id-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setID(String value) {
+<b class="nc">&nbsp;            this.id = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der label-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getLABEL() {
+<b class="fc">&nbsp;            return label;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der label-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setLABEL(String value) {
+<b class="nc">&nbsp;            this.label = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der mdtype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getMDTYPE() {
+<b class="fc">&nbsp;            return mdtype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der mdtype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setMDTYPE(String value) {
+<b class="fc">&nbsp;            this.mdtype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der othermdtype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getOTHERMDTYPE() {
+<b class="fc">&nbsp;            return othermdtype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der othermdtype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setOTHERMDTYPE(String value) {
+<b class="fc">&nbsp;            this.othermdtype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der mdtypeversion-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getMDTYPEVERSION() {
+<b class="fc">&nbsp;            return mdtypeversion;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der mdtypeversion-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setMDTYPEVERSION(String value) {
+<b class="nc">&nbsp;            this.mdtypeversion = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der mimetype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getMIMETYPE() {
+<b class="fc">&nbsp;            return mimetype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der mimetype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setMIMETYPE(String value) {
+<b class="nc">&nbsp;            this.mimetype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der size-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link Long }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public Long getSIZE() {
+<b class="fc">&nbsp;            return size;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der size-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link Long }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setSIZE(Long value) {
+<b class="nc">&nbsp;            this.size = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der created-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link XMLGregorianCalendar }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public XMLGregorianCalendar getCREATED() {
+<b class="fc">&nbsp;            return created;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der created-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link XMLGregorianCalendar }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setCREATED(XMLGregorianCalendar value) {
+<b class="nc">&nbsp;            this.created = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der checksum-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getCHECKSUM() {
+<b class="fc">&nbsp;            return checksum;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der checksum-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setCHECKSUM(String value) {
+<b class="nc">&nbsp;            this.checksum = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der checksumtype-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getCHECKSUMTYPE() {
+<b class="fc">&nbsp;            return checksumtype;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der checksumtype-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setCHECKSUMTYPE(String value) {
+<b class="nc">&nbsp;            this.checksumtype = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="fc">&nbsp;            if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (this == object) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            final MdSecType.MdWrap that = ((MdSecType.MdWrap) object);</b>
+&nbsp;            {
+&nbsp;                byte[] lhsBinData;
+<b class="fc">&nbsp;                lhsBinData = this.getBinData();</b>
+&nbsp;                byte[] rhsBinData;
+<b class="fc">&nbsp;                rhsBinData = that.getBinData();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;binData&quot;, lhsBinData), LocatorUtils.property(thatLocator, &quot;binData&quot;, rhsBinData), lhsBinData, rhsBinData, (this.binData!= null), (that.binData!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                MdSecType.MdWrap.XmlData lhsXmlData;
+<b class="fc">&nbsp;                lhsXmlData = this.getXmlData();</b>
+&nbsp;                MdSecType.MdWrap.XmlData rhsXmlData;
+<b class="fc">&nbsp;                rhsXmlData = that.getXmlData();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;xmlData&quot;, lhsXmlData), LocatorUtils.property(thatLocator, &quot;xmlData&quot;, rhsXmlData), lhsXmlData, rhsXmlData, (this.xmlData!= null), (that.xmlData!= null))) {</b>
+<b class="fc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsID;
+<b class="fc">&nbsp;                lhsID = this.getID();</b>
+&nbsp;                String rhsID;
+<b class="fc">&nbsp;                rhsID = that.getID();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsLABEL;
+<b class="fc">&nbsp;                lhsLABEL = this.getLABEL();</b>
+&nbsp;                String rhsLABEL;
+<b class="fc">&nbsp;                rhsLABEL = that.getLABEL();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;label&quot;, lhsLABEL), LocatorUtils.property(thatLocator, &quot;label&quot;, rhsLABEL), lhsLABEL, rhsLABEL, (this.label!= null), (that.label!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsMDTYPE;
+<b class="fc">&nbsp;                lhsMDTYPE = this.getMDTYPE();</b>
+&nbsp;                String rhsMDTYPE;
+<b class="fc">&nbsp;                rhsMDTYPE = that.getMDTYPE();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mdtype&quot;, lhsMDTYPE), LocatorUtils.property(thatLocator, &quot;mdtype&quot;, rhsMDTYPE), lhsMDTYPE, rhsMDTYPE, (this.mdtype!= null), (that.mdtype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsOTHERMDTYPE;
+<b class="fc">&nbsp;                lhsOTHERMDTYPE = this.getOTHERMDTYPE();</b>
+&nbsp;                String rhsOTHERMDTYPE;
+<b class="fc">&nbsp;                rhsOTHERMDTYPE = that.getOTHERMDTYPE();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;othermdtype&quot;, lhsOTHERMDTYPE), LocatorUtils.property(thatLocator, &quot;othermdtype&quot;, rhsOTHERMDTYPE), lhsOTHERMDTYPE, rhsOTHERMDTYPE, (this.othermdtype!= null), (that.othermdtype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsMDTYPEVERSION;
+<b class="fc">&nbsp;                lhsMDTYPEVERSION = this.getMDTYPEVERSION();</b>
+&nbsp;                String rhsMDTYPEVERSION;
+<b class="fc">&nbsp;                rhsMDTYPEVERSION = that.getMDTYPEVERSION();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mdtypeversion&quot;, lhsMDTYPEVERSION), LocatorUtils.property(thatLocator, &quot;mdtypeversion&quot;, rhsMDTYPEVERSION), lhsMDTYPEVERSION, rhsMDTYPEVERSION, (this.mdtypeversion!= null), (that.mdtypeversion!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsMIMETYPE;
+<b class="fc">&nbsp;                lhsMIMETYPE = this.getMIMETYPE();</b>
+&nbsp;                String rhsMIMETYPE;
+<b class="fc">&nbsp;                rhsMIMETYPE = that.getMIMETYPE();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;mimetype&quot;, lhsMIMETYPE), LocatorUtils.property(thatLocator, &quot;mimetype&quot;, rhsMIMETYPE), lhsMIMETYPE, rhsMIMETYPE, (this.mimetype!= null), (that.mimetype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                Long lhsSIZE;
+<b class="fc">&nbsp;                lhsSIZE = this.getSIZE();</b>
+&nbsp;                Long rhsSIZE;
+<b class="fc">&nbsp;                rhsSIZE = that.getSIZE();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;size&quot;, lhsSIZE), LocatorUtils.property(thatLocator, &quot;size&quot;, rhsSIZE), lhsSIZE, rhsSIZE, (this.size!= null), (that.size!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                XMLGregorianCalendar lhsCREATED;
+<b class="fc">&nbsp;                lhsCREATED = this.getCREATED();</b>
+&nbsp;                XMLGregorianCalendar rhsCREATED;
+<b class="fc">&nbsp;                rhsCREATED = that.getCREATED();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;created&quot;, lhsCREATED), LocatorUtils.property(thatLocator, &quot;created&quot;, rhsCREATED), lhsCREATED, rhsCREATED, (this.created!= null), (that.created!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsCHECKSUM;
+<b class="fc">&nbsp;                lhsCHECKSUM = this.getCHECKSUM();</b>
+&nbsp;                String rhsCHECKSUM;
+<b class="fc">&nbsp;                rhsCHECKSUM = that.getCHECKSUM();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;checksum&quot;, lhsCHECKSUM), LocatorUtils.property(thatLocator, &quot;checksum&quot;, rhsCHECKSUM), lhsCHECKSUM, rhsCHECKSUM, (this.checksum!= null), (that.checksum!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsCHECKSUMTYPE;
+<b class="fc">&nbsp;                lhsCHECKSUMTYPE = this.getCHECKSUMTYPE();</b>
+&nbsp;                String rhsCHECKSUMTYPE;
+<b class="fc">&nbsp;                rhsCHECKSUMTYPE = that.getCHECKSUMTYPE();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;checksumtype&quot;, lhsCHECKSUMTYPE), LocatorUtils.property(thatLocator, &quot;checksumtype&quot;, rhsCHECKSUMTYPE), lhsCHECKSUMTYPE, rhsCHECKSUMTYPE, (this.checksumtype!= null), (that.checksumtype!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(Object object) {
+<b class="nc">&nbsp;            final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;            return equals(null, null, object, strategy);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * &lt;p&gt;Java-Klasse für anonymous complex type.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp;         * 
+&nbsp;         * &lt;pre&gt;
+&nbsp;         * &amp;lt;complexType&amp;gt;
+&nbsp;         *   &amp;lt;complexContent&amp;gt;
+&nbsp;         *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;         *       &amp;lt;sequence&amp;gt;
+&nbsp;         *         &amp;lt;any processContents=&#39;lax&#39; maxOccurs=&quot;unbounded&quot;/&amp;gt;
+&nbsp;         *       &amp;lt;/sequence&amp;gt;
+&nbsp;         *     &amp;lt;/restriction&amp;gt;
+&nbsp;         *   &amp;lt;/complexContent&amp;gt;
+&nbsp;         * &amp;lt;/complexType&amp;gt;
+&nbsp;         * &lt;/pre&gt;
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         */
+&nbsp;        @XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;        @XmlType(name = &quot;&quot;, propOrder = {
+&nbsp;            &quot;any&quot;
+&nbsp;        })
+<b class="fc">&nbsp;        public static class XmlData implements Equals2</b>
+&nbsp;        {
+&nbsp;
+&nbsp;            @XmlAnyElement(lax = true)
+&nbsp;            protected List&lt;Object&gt; any;
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Gets the value of the any property.
+&nbsp;             * 
+&nbsp;             * &lt;p&gt;
+&nbsp;             * This accessor method returns a reference to the live list,
+&nbsp;             * not a snapshot. Therefore any modification you make to the
+&nbsp;             * returned list will be present inside the JAXB object.
+&nbsp;             * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the any property.
+&nbsp;             * 
+&nbsp;             * &lt;p&gt;
+&nbsp;             * For example, to add a new item, do as follows:
+&nbsp;             * &lt;pre&gt;
+&nbsp;             *    getAny().add(newItem);
+&nbsp;             * &lt;/pre&gt;
+&nbsp;             * 
+&nbsp;             * 
+&nbsp;             * &lt;p&gt;
+&nbsp;             * Objects of the following type(s) are allowed in the list
+&nbsp;             * {@link Element }
+&nbsp;             * {@link Object }
+&nbsp;             * 
+&nbsp;             * 
+&nbsp;             */
+&nbsp;            public List&lt;Object&gt; getAny() {
+<b class="fc">&nbsp;                if (any == null) {</b>
+<b class="fc">&nbsp;                    any = new ArrayList&lt;Object&gt;();</b>
+&nbsp;                }
+<b class="fc">&nbsp;                return this.any;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="fc">&nbsp;                if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                if (this == object) {</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                final MdSecType.MdWrap.XmlData that = ((MdSecType.MdWrap.XmlData) object);</b>
+&nbsp;                {
+&nbsp;                    List&lt;Object&gt; lhsAny;
+<b class="fc">&nbsp;                    lhsAny = (((this.any!= null)&amp;&amp;(!this.any.isEmpty()))?this.getAny():null);</b>
+&nbsp;                    List&lt;Object&gt; rhsAny;
+<b class="fc">&nbsp;                    rhsAny = (((that.any!= null)&amp;&amp;(!that.any.isEmpty()))?that.getAny():null);</b>
+<b class="fc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;any&quot;, lhsAny), LocatorUtils.property(thatLocator, &quot;any&quot;, rhsAny), lhsAny, rhsAny, ((this.any!= null)&amp;&amp;(!this.any.isEmpty())), ((that.any!= null)&amp;&amp;(!that.any.isEmpty())))) {</b>
+<b class="fc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="fc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            public boolean equals(Object object) {
+<b class="nc">&nbsp;                final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;                return equals(null, null, object, strategy);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

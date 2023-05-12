@@ -1,0 +1,546 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TitleRecordLinkTab</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: TitleRecordLinkTab (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TitleRecordLinkTab</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (7/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    22,3%
+  </span>
+  <span class="absValue">
+    (27/121)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.FunctionalMetadata;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.dto.ProcessDTO;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.dataformat.MetsService;
+&nbsp;import org.omnifaces.util.Ajax;
+&nbsp;import org.primefaces.model.DefaultTreeNode;
+&nbsp;import org.primefaces.model.TreeNode;
+&nbsp;
+&nbsp;/**
+&nbsp; * Backing bean for the title record link tab.
+&nbsp; */
+&nbsp;public class TitleRecordLinkTab {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(TitleRecordLinkTab.class);</b>
+&nbsp;
+&nbsp;    static final String INSERTION_TREE = &quot;editForm:processFromTemplateTabView:insertionTree&quot;;
+<b class="fc">&nbsp;    private static final MetsService metsService = ServiceManager.getMetsService();</b>
+<b class="fc">&nbsp;    private static final ProcessService processService = ServiceManager.getProcessService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Maximum number of search hits to show.
+&nbsp;     */
+&nbsp;    private static final int MAXIMUM_NUMBER_OF_HITS = 10;
+&nbsp;
+&nbsp;    private final CreateProcessForm createProcessForm;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The user-selected parent process.
+&nbsp;     */
+<b class="fc">&nbsp;    private String chosenParentProcess = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifies whether an indication of further hits is visible.
+&nbsp;     */
+<b class="fc">&nbsp;    private boolean indicationOfMoreHitsVisible = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Elements from which a parent process can be selected.
+&nbsp;     */
+<b class="fc">&nbsp;    private List&lt;SelectItem&gt; possibleParentProcesses = Collections.emptyList();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Tree with the logical structure of the workpiece and elements indicating the
+&nbsp;     * possible insertion positions.
+&nbsp;     */
+<b class="fc">&nbsp;    private TreeNode logicalStructure = new DefaultTreeNode();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The user’s search for parent processes.
+&nbsp;     */
+<b class="fc">&nbsp;    private String searchQuery = &quot;&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The list of possible insertion positions.
+&nbsp;     */
+<b class="fc">&nbsp;    private List&lt;SelectItem&gt; selectableInsertionPositions = Collections.emptyList();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The user-selected insertion position.
+&nbsp;     */
+<b class="fc">&nbsp;    private String selectedInsertionPosition = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Process selected as parent.
+&nbsp;     */
+<b class="fc">&nbsp;    private Process titleRecordProcess = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new data object underlying the title record link tab.
+&nbsp;     *
+&nbsp;     * @param createProcessForm
+&nbsp;     *            CreateProcessForm containing the object
+&nbsp;     */
+<b class="fc">&nbsp;    public TitleRecordLinkTab(CreateProcessForm createProcessForm) {</b>
+<b class="fc">&nbsp;        this.createProcessForm = createProcessForm;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Selects a parent process and builds the tree with the logical structure of the
+&nbsp;     * selected process and the possible insertion positions.
+&nbsp;     */
+&nbsp;    public void chooseParentProcess() {
+<b class="fc">&nbsp;        if (StringUtils.isBlank(chosenParentProcess)) {</b>
+<b class="nc">&nbsp;            logicalStructure = new DefaultTreeNode();</b>
+<b class="nc">&nbsp;            titleRecordProcess = null;</b>
+&nbsp;        } else {
+&nbsp;            try {
+<b class="fc">&nbsp;                titleRecordProcess = ServiceManager.getProcessService().getById(Integer.valueOf(chosenParentProcess));</b>
+<b class="fc">&nbsp;                createInsertionPositionSelectionTree();</b>
+<b class="fc">&nbsp;            } catch (DAOException | DataException | IOException e) {</b>
+<b class="fc">&nbsp;                Helper.setErrorMessage(&quot;errorLoadingOne&quot;,</b>
+<b class="fc">&nbsp;                        new Object[] {possibleParentProcesses.parallelStream()</b>
+<b class="fc">&nbsp;                                .filter(selectItem -&gt; selectItem.getValue().equals(chosenParentProcess)).findAny()</b>
+<b class="fc">&nbsp;                                .orElse(new SelectItem(null, null)).getLabel(), chosenParentProcess },</b>
+&nbsp;                        logger, e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets up the variables for the tree for the insertion position selection.
+&nbsp;     *
+&nbsp;     * @throws IOException
+&nbsp;     *             if the METS file cannot be read
+&nbsp;     */
+&nbsp;    public void createInsertionPositionSelectionTree() throws DAOException, DataException, IOException {
+<b class="fc">&nbsp;        if (Objects.isNull(titleRecordProcess)) {</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="fc">&nbsp;        URI uri = ServiceManager.getProcessService().getMetadataFileUri(titleRecordProcess);</b>
+<b class="fc">&nbsp;        Workpiece workpiece = metsService.loadWorkpiece(uri);</b>
+&nbsp;
+<b class="nc">&nbsp;        RulesetManagementInterface ruleset = ServiceManager.getRulesetService()</b>
+<b class="nc">&nbsp;                .openRuleset(titleRecordProcess.getRuleset());</b>
+<b class="nc">&nbsp;        String metadataLanguage = ServiceManager.getUserService().getCurrentUser().getMetadataLanguage();</b>
+<b class="nc">&nbsp;        List&lt;LanguageRange&gt; priorityList = LanguageRange.parse(metadataLanguage.isEmpty() ? &quot;en&quot; : metadataLanguage);</b>
+&nbsp;
+<b class="nc">&nbsp;        selectableInsertionPositions = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        logicalStructure = new DefaultTreeNode();</b>
+<b class="nc">&nbsp;        createInsertionPositionSelectionTreeRecursive(&quot;&quot;, workpiece.getLogicalStructure(), logicalStructure, ruleset,</b>
+&nbsp;            priorityList);
+<b class="nc">&nbsp;        logicalStructure.setExpanded(true);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (selectableInsertionPositions.size() &gt; 0) {</b>
+<b class="nc">&nbsp;            selectedInsertionPosition = (String) ((LinkedList&lt;SelectItem&gt;) selectableInsertionPositions).getLast()</b>
+<b class="nc">&nbsp;                    .getValue();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            selectedInsertionPosition = null;</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;createProcessForm.titleRecordLinkTab.noInsertionPosition&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Recursively builds the tree for the insertion position selection.
+&nbsp;     *
+&nbsp;     * @param positionPrefix
+&nbsp;     *            A string with comma-delimited specification of the levels that
+&nbsp;     *            have already been traversed. Initially empty.
+&nbsp;     * @param currentLogicalDivision
+&nbsp;     *            Logical division for whom the tree is being created. Initially
+&nbsp;     *            the logical structure of the workpiece.
+&nbsp;     * @param parentNode
+&nbsp;     *            Parent node of the tree structure to add to. This is
+&nbsp;     *            initialized with a {@link DefaultTreeNode} which is not
+&nbsp;     *            displayed
+&nbsp;     * @param ruleset
+&nbsp;     *            the current ruleset
+&nbsp;     * @param priorityList
+&nbsp;     *            the user’s metadata language priority list
+&nbsp;     */
+&nbsp;    private void createInsertionPositionSelectionTreeRecursive(String positionPrefix,
+&nbsp;            LogicalDivision currentLogicalDivision, TreeNode parentNode,
+&nbsp;            RulesetManagementInterface ruleset, List&lt;LanguageRange&gt; priorityList) throws IOException, DAOException, DataException {
+&nbsp;
+&nbsp;        String type;
+<b class="nc">&nbsp;        List&lt;String&gt; tooltip = Collections.emptyList();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(currentLogicalDivision.getLink())) {</b>
+<b class="nc">&nbsp;            type = currentLogicalDivision.getType();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            ProcessService processService = ServiceManager.getProcessService();</b>
+<b class="nc">&nbsp;            int processIdFromUri = processService.processIdFromUri(currentLogicalDivision.getLink().getUri());</b>
+<b class="nc">&nbsp;            Process linkedProcess = processService.getById(processIdFromUri);</b>
+<b class="nc">&nbsp;            type = processService.getBaseType(processIdFromUri);</b>
+<b class="nc">&nbsp;            tooltip = getToolTip(ruleset, linkedProcess);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        StructuralElementViewInterface currentStructuralElementView = ruleset.getStructuralElementView(type,</b>
+<b class="nc">&nbsp;            createProcessForm.getAcquisitionStage(), priorityList);</b>
+&nbsp;
+<b class="nc">&nbsp;        TreeNode logicalDivisionNode = new InsertionPositionSelectionTreeNode(parentNode,</b>
+<b class="nc">&nbsp;                currentStructuralElementView.getLabel(), tooltip);</b>
+&nbsp;
+<b class="nc">&nbsp;        boolean linkingAllowedHere = Objects.isNull(currentLogicalDivision.getLink())</b>
+<b class="nc">&nbsp;                &amp;&amp; currentStructuralElementView.getAllowedSubstructuralElements()</b>
+<b class="nc">&nbsp;                        .containsKey(createProcessForm.getProcessDataTab().getDocType());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (linkingAllowedHere) {</b>
+<b class="nc">&nbsp;            new InsertionPositionSelectionTreeNode(logicalDivisionNode, selectableInsertionPositions.size());</b>
+<b class="nc">&nbsp;            selectableInsertionPositions.add(new SelectItem(positionPrefix.concat(&quot;0&quot;), null));</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;LogicalDivision&gt; children = currentLogicalDivision.getChildren();</b>
+<b class="nc">&nbsp;        for (int index = 0; index &lt; children.size(); index++) {</b>
+&nbsp;
+<b class="nc">&nbsp;            createInsertionPositionSelectionTreeRecursive(</b>
+<b class="nc">&nbsp;                positionPrefix + index + 1 + MetadataEditor.INSERTION_POSITION_SEPARATOR, children.get(index),</b>
+&nbsp;                logicalDivisionNode, ruleset, priorityList);
+&nbsp;
+<b class="nc">&nbsp;            if (linkingAllowedHere) {</b>
+<b class="nc">&nbsp;                new InsertionPositionSelectionTreeNode(logicalDivisionNode,</b>
+<b class="nc">&nbsp;                        selectableInsertionPositions.size());</b>
+<b class="nc">&nbsp;                selectableInsertionPositions.add(new SelectItem(positionPrefix + (index + 1), null));</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines the overlay text for a node of the tree.
+&nbsp;     *
+&nbsp;     * @param ruleset
+&nbsp;     *            Ruleset of the process
+&nbsp;     * @param linkedProcess
+&nbsp;     *            Linked child process
+&nbsp;     * @return text to be displayed
+&nbsp;     * @throws IOException
+&nbsp;     *             if the METS file cannot be read
+&nbsp;     */
+&nbsp;    private List&lt;String&gt; getToolTip(RulesetManagementInterface ruleset, Process linkedProcess) throws IOException {
+&nbsp;
+<b class="nc">&nbsp;        Collection&lt;String&gt; summaryKeys = ruleset.getFunctionalKeys(FunctionalMetadata.DISPLAY_SUMMARY);</b>
+<b class="nc">&nbsp;        List&lt;String&gt; toolTip = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (!summaryKeys.isEmpty()) {</b>
+&nbsp;
+<b class="nc">&nbsp;            Workpiece workpiece = metsService.loadWorkpiece(processService.getMetadataFileUri(linkedProcess));</b>
+<b class="nc">&nbsp;            LogicalDivision logicalStructure = workpiece.getLogicalStructure();</b>
+&nbsp;
+<b class="nc">&nbsp;            final String metadataLanguage = ServiceManager.getUserService().getCurrentUser().getMetadataLanguage();</b>
+<b class="nc">&nbsp;            List&lt;LanguageRange&gt; priorityList = Locale.LanguageRange.parse(metadataLanguage);</b>
+&nbsp;
+<b class="nc">&nbsp;            for (String key : summaryKeys) {</b>
+<b class="nc">&nbsp;                String value = MetadataEditor.getMetadataValue(logicalStructure, key);</b>
+&nbsp;
+<b class="nc">&nbsp;                if (Objects.nonNull(value)) {</b>
+<b class="nc">&nbsp;                    Optional&lt;String&gt; label = ruleset.getTranslationForKey(key, priorityList);</b>
+<b class="nc">&nbsp;                    toolTip.add(label.orElse(key) + &quot;: &quot; + value);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (toolTip.isEmpty()) {</b>
+<b class="nc">&nbsp;            toolTip.add(linkedProcess.toString());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return toolTip;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the HTML identifier of the selected parent process.
+&nbsp;     *
+&nbsp;     * @return the identifier of the selected parent process
+&nbsp;     */
+&nbsp;    public String getChosenParentProcess() {
+<b class="nc">&nbsp;        return chosenParentProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the HTML identifier of the selected parent process.
+&nbsp;     *
+&nbsp;     * @param chosenParentProcess
+&nbsp;     *            identifier to set
+&nbsp;     */
+&nbsp;    public void setChosenParentProcess(String chosenParentProcess) {
+<b class="fc">&nbsp;        this.chosenParentProcess = chosenParentProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Search for possible parent processes and fill with the result the hit
+&nbsp;     * selection. If there are more than the maximum number of hits defined as a
+&nbsp;     * constant above, the corresponding message is displayed.
+&nbsp;     */
+&nbsp;    public void searchForParentProcesses() {
+<b class="nc">&nbsp;        logicalStructure = new DefaultTreeNode();</b>
+<b class="nc">&nbsp;        selectableInsertionPositions = Collections.emptyList();</b>
+<b class="nc">&nbsp;        selectedInsertionPosition = null;</b>
+<b class="nc">&nbsp;        if (searchQuery.trim().isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setMessage(&quot;createProcessForm.titleRecordLinkTab.searchButtonClick.empty&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            List&lt;ProcessDTO&gt; processes = ServiceManager.getProcessService().findLinkableParentProcesses(searchQuery,</b>
+<b class="nc">&nbsp;                createProcessForm.getProject().getId(), createProcessForm.getTemplate().getRuleset().getId());</b>
+<b class="nc">&nbsp;            if (processes.isEmpty()) {</b>
+<b class="nc">&nbsp;                Helper.setMessage(&quot;createProcessForm.titleRecordLinkTab.searchButtonClick.noHits&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            indicationOfMoreHitsVisible = processes.size() &gt; MAXIMUM_NUMBER_OF_HITS;</b>
+<b class="nc">&nbsp;            possibleParentProcesses = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (ProcessDTO process : processes.subList(0, Math.min(processes.size(), MAXIMUM_NUMBER_OF_HITS))) {</b>
+<b class="nc">&nbsp;                possibleParentProcesses.add(new SelectItem(process.getId().toString(), process.getTitle()));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;createProcessForm.titleRecordLinkTab.searchButtonClick.error&quot;, e.getMessage(),</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;            indicationOfMoreHitsVisible = false;</b>
+<b class="nc">&nbsp;            possibleParentProcesses = Collections.emptyList();</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the search query typed by the user.
+&nbsp;     *
+&nbsp;     * @return the search query
+&nbsp;     */
+&nbsp;    public String getSearchQuery() {
+<b class="nc">&nbsp;        return searchQuery;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the search query typed by the user.
+&nbsp;     *
+&nbsp;     * @param searchQuery
+&nbsp;     *            search query to set
+&nbsp;     */
+&nbsp;    public void setSearchQuery(String searchQuery) {
+<b class="nc">&nbsp;        this.searchQuery = searchQuery;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the HTML identifier of the selected insertion position.
+&nbsp;     *
+&nbsp;     * @return the selected insertion position
+&nbsp;     */
+&nbsp;    public String getSelectedInsertionPosition() {
+<b class="nc">&nbsp;        return selectedInsertionPosition;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the HTML identifier of the selected insertion position.
+&nbsp;     *
+&nbsp;     * @param selectedInsertionPosition
+&nbsp;     *            identifier to set
+&nbsp;     */
+&nbsp;    public void setSelectedInsertionPosition(String selectedInsertionPosition) {
+<b class="nc">&nbsp;        this.selectedInsertionPosition = selectedInsertionPosition;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the hint that there were more hits is visible.
+&nbsp;     *
+&nbsp;     * @return whether the hint is visible
+&nbsp;     */
+&nbsp;    public boolean isIndicationOfMoreHitsVisible() {
+<b class="nc">&nbsp;        return indicationOfMoreHitsVisible;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of selectors for selecting a parent process.
+&nbsp;     *
+&nbsp;     * @return the list of selectors
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getPossibleParentProcesses() {
+<b class="nc">&nbsp;        return possibleParentProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set possibleParentProcesses.
+&nbsp;     *
+&nbsp;     * @param possibleParentProcesses as list
+&nbsp;     */
+&nbsp;    public void setPossibleParentProcesses(List&lt;SelectItem&gt; possibleParentProcesses) {
+<b class="nc">&nbsp;        this.possibleParentProcesses = possibleParentProcesses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the tree containing the logical structure of the selected parent
+&nbsp;     * process and the possible insert positions.
+&nbsp;     *
+&nbsp;     * @return the tree structure for selecting the insertion position
+&nbsp;     */
+&nbsp;    public TreeNode getLogicalStructure() {
+<b class="nc">&nbsp;        return logicalStructure;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of selection items for selecting an insertion position.
+&nbsp;     *
+&nbsp;     * @return selection elements for selecting an insertion position
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getSelectableInsertionPositions() {
+<b class="nc">&nbsp;        return selectableInsertionPositions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the process of the selected title record.
+&nbsp;     *
+&nbsp;     * @return the process of the selected title record
+&nbsp;     */
+&nbsp;    public Process getTitleRecordProcess() {
+<b class="fc">&nbsp;        return titleRecordProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the process of the selected title record.
+&nbsp;     *
+&nbsp;     * @param titleRecordProcess the process of the selected title record
+&nbsp;     */
+&nbsp;    public void setTitleRecordProcess(Process titleRecordProcess) {
+<b class="fc">&nbsp;        this.titleRecordProcess = titleRecordProcess;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set given process &quot;parentProcess&quot; as parent title record of new process.
+&nbsp;     * @param parentProcess process to set as parent title record
+&nbsp;     */
+&nbsp;    public void setParentAsTitleRecord(Process parentProcess) {
+<b class="nc">&nbsp;        createProcessForm.setEditActiveTabIndex(CreateProcessForm.TITLE_RECORD_LINK_TAB_INDEX);</b>
+<b class="nc">&nbsp;        ArrayList&lt;SelectItem&gt; parentCandidates = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        parentCandidates.add(new SelectItem(parentProcess.getId().toString(), parentProcess.getTitle()));</b>
+<b class="nc">&nbsp;        createProcessForm.getTitleRecordLinkTab().setPossibleParentProcesses(parentCandidates);</b>
+<b class="nc">&nbsp;        createProcessForm.getTitleRecordLinkTab().setChosenParentProcess((String)parentCandidates.get(0).getValue());</b>
+<b class="nc">&nbsp;        createProcessForm.getTitleRecordLinkTab().chooseParentProcess();</b>
+<b class="nc">&nbsp;        Ajax.update(INSERTION_TREE);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

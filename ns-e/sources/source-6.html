@@ -1,0 +1,118 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SchemaConverterInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.schemaconverter</a>
+</div>
+
+<h1>Coverage Summary for Class: SchemaConverterInterface (org.kitodo.api.schemaconverter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SchemaConverterInterface</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.schemaconverter;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/** Enables the conversion of a DataRecord from one format to another. */
+&nbsp;public interface SchemaConverterInterface {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts a given DataRecord to the given MetadataFormat &#39;targetMetadataFormat&#39; and FileFormat &#39;targetFileFormat&#39;.
+&nbsp;     *
+&nbsp;     * @param record DataRecord to be converted
+&nbsp;     * @param targetMetadataFormat MetadataFormat to which the given DataRecord is converted
+&nbsp;     * @param targetFileFormat FileFormat to which the given DataRecord is converted
+&nbsp;     * @param mappingFiles list of mapping files; if empty, the schema converter module uses a default mapping
+&nbsp;     * @return The result of the conversion as a DataRecord.
+&nbsp;     */
+&nbsp;    DataRecord convert(DataRecord record, MetadataFormat targetMetadataFormat, FileFormat targetFileFormat,
+&nbsp;                       List&lt;File&gt; mappingFiles) throws IOException, URISyntaxException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the current SchemaConverter supports the given FileFormat as a target format or not.
+&nbsp;     *
+&nbsp;     * @param format target FileFormat
+&nbsp;     * @return true, if given FileFormat &#39;format&#39; is supported as a target FileFormat by the SchemaConverter.
+&nbsp;     *         false otherwise
+&nbsp;     */
+&nbsp;    boolean supportsTargetFileFormat(FileFormat format);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the current SchemaConverter supports the given FileFormat as a source format or not.
+&nbsp;     *
+&nbsp;     * @param format source FileFormat
+&nbsp;     * @return true, if given FileFormat &#39;format&#39; is supported as a source FileFormat by the SchemaConverter.
+&nbsp;     *         false otherwise
+&nbsp;     */
+&nbsp;    boolean supportsSourceFileFormat(FileFormat format);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

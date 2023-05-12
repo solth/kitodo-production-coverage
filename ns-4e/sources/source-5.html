@@ -1,0 +1,186 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > DestinationReferenceSelector</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.metadata.copier</a>
+</div>
+
+<h1>Coverage Summary for Class: DestinationReferenceSelector (org.kitodo.production.metadata.copier)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DestinationReferenceSelector</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.metadata.copier;
+&nbsp;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.ConfigurationException;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyDocStructHelperInterface;
+&nbsp;
+&nbsp;/**
+&nbsp; * A DestinationReferenceSelector provides methods to retrieve document
+&nbsp; * structure nodes relative to the respective document structure that the result
+&nbsp; * of the operation shall be written to for reading from them.
+&nbsp; */
+&nbsp;public class DestinationReferenceSelector extends DataSelector {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Regular expression pattern to parse the path string.
+&nbsp;     */
+<b class="nc">&nbsp;    private static final Pattern DESTINATION_REFERENCE_SELECTOR_SCHEME = Pattern</b>
+<b class="nc">&nbsp;            .compile(Pattern.quote(RESPECTIVE_DESTINATION_REFERENCE) + &quot;(\\d+)([&quot; + METADATA_PATH_SEPARATOR</b>
+&nbsp;                    + METADATA_SEPARATOR + &quot;].*)&quot;);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Hierarchical level to retrieve (0 references the top level).
+&nbsp;     */
+&nbsp;    private final int index;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A further selector to read data relative to the resolved result of this
+&nbsp;     * selector.
+&nbsp;     */
+&nbsp;    private final MetadataSelector nextSelector;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new DestinationReferenceSelector.
+&nbsp;     *
+&nbsp;     * @param path
+&nbsp;     *            reference to resolve
+&nbsp;     * @throws ConfigurationException
+&nbsp;     *             if the path is syntactically wrong
+&nbsp;     */
+<b class="nc">&nbsp;    public DestinationReferenceSelector(String path) throws ConfigurationException {</b>
+<b class="nc">&nbsp;        Matcher pathSplitter = DESTINATION_REFERENCE_SELECTOR_SCHEME.matcher(path);</b>
+<b class="nc">&nbsp;        if (!pathSplitter.find()) {</b>
+<b class="nc">&nbsp;            throw new ConfigurationException(&quot;Invalid destination reference selector: &quot; + path);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        this.index = Integer.parseInt(pathSplitter.group(1));</b>
+<b class="nc">&nbsp;        this.nextSelector = MetadataSelector.create(pathSplitter.group(2));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the document structure level indicated by the index form the
+&nbsp;     * respective destination path.
+&nbsp;     *
+&nbsp;     * @see org.kitodo.production.metadata.copier.DataSelector#findIn(org.kitodo.production.metadata.copier.CopierData)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String findIn(CopierData data) {
+<b class="nc">&nbsp;        LegacyDocStructHelperInterface currentLevel = data.getLogicalDocStruct();</b>
+<b class="nc">&nbsp;        MetadataSelector destination = data.getDestination();</b>
+<b class="nc">&nbsp;        for (int descend = index; descend &gt; 0; descend--) {</b>
+<b class="nc">&nbsp;            if (!(destination instanceof MetadataPathSelector)) {</b>
+<b class="nc">&nbsp;                return null;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            int childReference = ((MetadataPathSelector) destination).getIndex();</b>
+<b class="nc">&nbsp;            currentLevel = currentLevel.getAllChildren().get(childReference);</b>
+<b class="nc">&nbsp;            destination = ((MetadataPathSelector) destination).getSelector();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return nextSelector.findIn(currentLevel);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

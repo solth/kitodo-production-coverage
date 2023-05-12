@@ -1,0 +1,811 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > IndexingService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.index</a>
+</div>
+
+<h1>Coverage Summary for Class: IndexingService (org.kitodo.production.services.index)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IndexingService</td>
+<td class="coverageStat">
+  <span class="percent">
+    28,2%
+  </span>
+  <span class="absValue">
+    (11/39)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    35,8%
+  </span>
+  <span class="absValue">
+    (81/226)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IndexingService$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IndexingService$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    28,6%
+  </span>
+  <span class="absValue">
+    (12/42)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    35,5%
+  </span>
+  <span class="absValue">
+    (82/231)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.index;
+&nbsp;
+&nbsp;import static java.lang.Math.toIntExact;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.StringReader;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.util.EnumMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.concurrent.ExecutorService;
+&nbsp;import java.util.concurrent.Executors;
+&nbsp;import java.util.concurrent.Future;
+&nbsp;import java.util.concurrent.ThreadFactory;
+&nbsp;
+&nbsp;import javax.faces.push.PushContext;
+&nbsp;import javax.json.Json;
+&nbsp;import javax.json.JsonObject;
+&nbsp;import javax.json.JsonReader;
+&nbsp;
+&nbsp;import org.apache.commons.io.IOUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.ConfigMain;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.elasticsearch.KitodoRestClient;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.data.elasticsearch.index.IndexRestClient;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.enums.IndexStates;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.IndexWorker;
+&nbsp;import org.kitodo.production.helper.IndexWorkerStatus;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.base.SearchService;
+&nbsp;
+&nbsp;public class IndexingService {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(IndexingService.class);</b>
+&nbsp;
+<b class="fc">&nbsp;    private static volatile IndexingService instance = null;</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final List&lt;ObjectType&gt; objectTypes = ObjectType.getIndexableObjectTypes();</b>
+<b class="fc">&nbsp;    private final Map&lt;ObjectType, SearchService&gt; searchServices = new EnumMap&lt;&gt;(ObjectType.class);</b>
+<b class="fc">&nbsp;    private final Map&lt;ObjectType, IndexStates&gt; objectIndexingStates = new EnumMap&lt;&gt;(ObjectType.class);</b>
+<b class="fc">&nbsp;    private final Map&lt;ObjectType, Integer&gt; countDatabaseObjects = new EnumMap&lt;&gt;(ObjectType.class);</b>
+&nbsp;
+&nbsp;    // messages for web socket communication
+&nbsp;    private static final String INDEXING_STARTED_MESSAGE = &quot;indexing_started&quot;;
+&nbsp;    static final String INDEXING_FINISHED_MESSAGE = &quot;indexing_finished&quot;;
+&nbsp;
+&nbsp;    public static final String DELETION_STARTED_MESSAGE = &quot;deletion_started&quot;;
+&nbsp;    private static final String DELETION_FINISHED_MESSAGE = &quot;deletion_finished&quot;;
+&nbsp;    private static final String DELETION_FAILED_MESSAGE = &quot;deletion_failed&quot;;
+&nbsp;
+&nbsp;    public static final String MAPPING_STARTED_MESSAGE = &quot;mapping_started&quot;;
+&nbsp;    private static final String MAPPING_FINISHED_MESSAGE = &quot;mapping_finished&quot;;
+&nbsp;    public static final String MAPPING_FAILED_MESSAGE = &quot;mapping_failed&quot;;
+&nbsp;
+&nbsp;    static final int PAUSE = 1000;
+&nbsp;
+<b class="fc">&nbsp;    private IndexWorkerStatus indexWorkerStatus = null;</b>
+<b class="fc">&nbsp;    private IndexManagmentThread indexAllThread = null;</b>
+<b class="fc">&nbsp;    private boolean indexingAll = false;</b>
+&nbsp;
+<b class="fc">&nbsp;    private ObjectType currentIndexState = ObjectType.NONE;</b>
+<b class="fc">&nbsp;    private IndexStates currentState = IndexStates.NO_STATE;</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final IndexRestClient indexRestClient = IndexRestClient.getInstance();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return singleton variable of type IndexingService.
+&nbsp;     *
+&nbsp;     * @return unique instance of IndexingService
+&nbsp;     */
+&nbsp;    public static IndexingService getInstance() {
+<b class="fc">&nbsp;        IndexingService localReference = instance;</b>
+<b class="fc">&nbsp;        if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;            synchronized (IndexingService.class) {</b>
+<b class="fc">&nbsp;                localReference = instance;</b>
+<b class="fc">&nbsp;                if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;                    localReference = new IndexingService();</b>
+<b class="fc">&nbsp;                    instance = localReference;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return localReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Standard constructor.
+&nbsp;     */
+<b class="fc">&nbsp;    private IndexingService() {</b>
+<b class="fc">&nbsp;        for (ObjectType objectType : objectTypes) {</b>
+<b class="fc">&nbsp;            searchServices.put(objectType, getService(objectType));</b>
+<b class="fc">&nbsp;            objectIndexingStates.put(objectType, IndexStates.NO_STATE);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        indexRestClient.setIndexBase(ConfigMain.getParameter(&quot;elasticsearch.index&quot;, &quot;kitodo&quot;));</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            countDatabaseObjects();</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private SearchService getService(ObjectType objectType) {
+<b class="fc">&nbsp;        if (!searchServices.containsKey(objectType) || Objects.isNull(searchServices.get(objectType))) {</b>
+<b class="fc">&nbsp;            switch (objectType) {</b>
+&nbsp;                case BATCH:
+<b class="fc">&nbsp;                    searchServices.put(objectType, ServiceManager.getBatchService());</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case DOCKET:
+<b class="fc">&nbsp;                    searchServices.put(objectType, ServiceManager.getDocketService());</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case PROCESS:
+<b class="fc">&nbsp;                    searchServices.put(objectType, ServiceManager.getProcessService());</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case PROJECT:
+<b class="fc">&nbsp;                    searchServices.put(objectType, ServiceManager.getProjectService());</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case RULESET:
+<b class="fc">&nbsp;                    searchServices.put(objectType, ServiceManager.getRulesetService());</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case TASK:
+<b class="fc">&nbsp;                    searchServices.put(objectType, ServiceManager.getTaskService());</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case TEMPLATE:
+<b class="fc">&nbsp;                    searchServices.put(objectType, ServiceManager.getTemplateService());</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case WORKFLOW:
+<b class="fc">&nbsp;                    searchServices.put(objectType, ServiceManager.getWorkflowService());</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case FILTER:
+<b class="fc">&nbsp;                    searchServices.put(objectType, ServiceManager.getFilterService());</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                default:
+<b class="nc">&nbsp;                    return null;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return searchServices.get(objectType);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the total number of all objects that can be indexed.
+&nbsp;     *
+&nbsp;     * @return long number of all items that can be written to the index
+&nbsp;     */
+&nbsp;    public long getTotalCount() {
+<b class="nc">&nbsp;        int totalCount = 0;</b>
+<b class="nc">&nbsp;        for (ObjectType objectType : objectTypes) {</b>
+<b class="nc">&nbsp;            totalCount += countDatabaseObjects.get(objectType);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return totalCount;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update counts of index and database objects.
+&nbsp;     */
+&nbsp;    private void updateCounts() throws DAOException {
+<b class="nc">&nbsp;        countDatabaseObjects();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Map&lt;ObjectType, Integer&gt; getCountDatabaseObjects() {
+<b class="nc">&nbsp;        return countDatabaseObjects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isIndexCorrupted() throws DAOException, DataException {
+<b class="nc">&nbsp;        updateCounts();</b>
+<b class="nc">&nbsp;        return getTotalCount() != getAllIndexed();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the number of all objects processed during the current indexing
+&nbsp;     * progress.
+&nbsp;     *
+&nbsp;     * @return long number of all currently indexed objects
+&nbsp;     * @throws ArithmeticException
+&nbsp;     *             if the value will not fit in a {@code long}
+&nbsp;     */
+&nbsp;    public long getAllIndexed() throws DataException {
+<b class="nc">&nbsp;        long allIndexed = 0;</b>
+<b class="nc">&nbsp;        for (ObjectType objectType : objectTypes) {</b>
+<b class="nc">&nbsp;            allIndexed = Math.addExact(allIndexed, getNumberOfIndexedObjects(objectType));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return allIndexed;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the number of indexed objects for the given ObjectType.
+&nbsp;     *
+&nbsp;     * @param objectType
+&nbsp;     *            ObjectType for which the number of indexed objects is returned
+&nbsp;     *
+&nbsp;     * @return number of indexed objects
+&nbsp;     */
+&nbsp;    public long getNumberOfIndexedObjects(ObjectType objectType) throws DataException {
+<b class="nc">&nbsp;        return searchServices.get(objectType).count();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count database objects. Execute it on application start and next on button
+&nbsp;     * click.
+&nbsp;     */
+&nbsp;    public void countDatabaseObjects() throws DAOException {
+<b class="fc">&nbsp;        for (ObjectType objectType : objectTypes) {</b>
+<b class="fc">&nbsp;            countDatabaseObjects.put(objectType, getNumberOfDatabaseObjects(objectType));</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Manage indexing for a given object type.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;This method is executed in the `IndexManagementThread`.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param type
+&nbsp;     *            type objects that get indexed
+&nbsp;     */
+&nbsp;    public IndexWorkerStatus runIndexing(ObjectType type, PushContext pushContext, boolean indexAllObjects) 
+&nbsp;            throws DataException, CustomResponseException, DAOException {
+<b class="nc">&nbsp;        SearchService searchService = searchServices.get(type);</b>
+<b class="nc">&nbsp;        int indexLimit = ConfigCore.getIntParameterOrDefaultValue(ParameterCore.ELASTICSEARCH_INDEXLIMIT);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (countDatabaseObjects.get(type) &gt; 0) {</b>
+<b class="nc">&nbsp;            if (indexAllObjects) {</b>
+&nbsp;                // only check for loose index data when indexing full objects
+<b class="nc">&nbsp;                Long amountInIndex = searchService.count();</b>
+<b class="nc">&nbsp;                long offset = 0L;</b>
+&nbsp;
+&nbsp;                // remove documents in index that are no longer available in database
+&nbsp;                // by iterating over all indexed documents in elastic search
+&nbsp;                try {
+<b class="nc">&nbsp;                    while (offset &lt; amountInIndex) {</b>
+&nbsp;                        // TODO: actually iterate over all elastic search documents
+<b class="nc">&nbsp;                        searchService.removeLooseIndexData(searchService.findAllIDs(offset, indexLimit));</b>
+<b class="nc">&nbsp;                        offset += indexLimit;</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                } catch (RuntimeException e) {</b>
+&nbsp;                    // this is an elastic search exception, but elastic search is not available here
+<b class="nc">&nbsp;                    logger.info(&quot;Cannot check documents beyond elastic search max_result_window, continuing ...&quot;);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            return spawnIndexingThreads(type, pushContext, indexAllObjects);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the number of objects in the database for the given ObjectType.
+&nbsp;     *
+&nbsp;     * @param objectType
+&nbsp;     *            name of ObjectType for which the number of database objects is
+&nbsp;     *            returned
+&nbsp;     * @return number of database objects
+&nbsp;     */
+&nbsp;    private int getNumberOfDatabaseObjects(ObjectType objectType) throws DAOException {
+<b class="fc">&nbsp;        SearchService searchService = searchServices.get(objectType);</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(searchService)) {</b>
+<b class="fc">&nbsp;            return toIntExact(searchService.countDatabaseRows());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ExecutorService createDeamonizedExecutorService(int threads) {
+<b class="nc">&nbsp;        return Executors.newFixedThreadPool(threads,</b>
+<b class="nc">&nbsp;            new ThreadFactory() {</b>
+&nbsp;                public Thread newThread(Runnable r) {
+<b class="nc">&nbsp;                    Thread t = Executors.defaultThreadFactory().newThread(r);</b>
+<b class="nc">&nbsp;                    t.setDaemon(true);</b>
+<b class="nc">&nbsp;                    return t;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create multiple indexing worker threads and wait until they are finished.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;This method is executed in the `IndexAllThread`.&lt;/p&gt;
+&nbsp;     * 
+&nbsp;     * @param type the object type to be indexed
+&nbsp;     * @param pollingChannel the UI polling channel for triggering updates
+&nbsp;     * @param indexAllObjects whehter all or only remaining objects are indexed
+&nbsp;     */
+&nbsp;    private IndexWorkerStatus spawnIndexingThreads(ObjectType type, PushContext pollingChannel, boolean indexAllObjects) 
+&nbsp;            throws DAOException {
+&nbsp;        // declare that indexing for type has started
+<b class="nc">&nbsp;        currentIndexState = type;</b>
+<b class="nc">&nbsp;        currentState = IndexStates.INDEXING_STARTED;</b>
+<b class="nc">&nbsp;        objectIndexingStates.put(type, IndexStates.INDEXING_STARTED);</b>
+&nbsp;
+<b class="nc">&nbsp;        int threads = ConfigCore.getIntParameterOrDefaultValue(ParameterCore.ELASTICSEARCH_THREADS);</b>
+<b class="nc">&nbsp;        int totalNumberOfObjects = getNumberOfDatabaseObjects(type);</b>
+<b class="nc">&nbsp;        int batchSize = ConfigCore.getIntParameterOrDefaultValue(ParameterCore.ELASTICSEARCH_BATCH);</b>
+<b class="nc">&nbsp;        int maxBatch = (int)Math.ceil((double)(totalNumberOfObjects) / (double)(batchSize));</b>
+&nbsp;
+&nbsp;        // create new thread-safe indexing status
+<b class="nc">&nbsp;        indexWorkerStatus = new IndexWorkerStatus(maxBatch);</b>
+&nbsp;
+<b class="nc">&nbsp;        logger.info(&quot;start &quot; + threads + &quot; threads for indexing &quot; + type.toString());</b>
+<b class="nc">&nbsp;        ExecutorService executor = null;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            executor = createDeamonizedExecutorService(threads);</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;Future&lt;?&gt;&gt; futures = new LinkedList&lt;Future&lt;?&gt;&gt;();</b>
+<b class="nc">&nbsp;            for (int i = 0; i &lt; threads; i++) {</b>
+<b class="nc">&nbsp;                Future&lt;?&gt; future = executor.submit(new IndexWorker(getService(type), type, indexWorkerStatus, indexAllObjects));</b>
+<b class="nc">&nbsp;                futures.add(future);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            waitWhileIndexing(type, futures, pollingChannel);</b>
+&nbsp;        } finally {
+<b class="nc">&nbsp;            if (Objects.nonNull(executor)) {</b>
+<b class="nc">&nbsp;                executor.shutdown();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return indexWorkerStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Wait and check whether index worker threads have finished or failed. 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;Also trigger UI updates every second.&lt;/p&gt;
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;This method is executed in the `IndexAllThread`.&lt;/p&gt;
+&nbsp;     * 
+&nbsp;     * @param type the object type currently being indexed
+&nbsp;     * @param futures a list of futures allowing to check the status of the worker threads
+&nbsp;     * @param pollingChannel the UI polling channel
+&nbsp;     */
+&nbsp;    private void waitWhileIndexing(ObjectType type, List&lt;Future&lt;?&gt;&gt; futures, PushContext pollingChannel) {
+&nbsp;        // send update that indexing has started (activating polling in user interface)
+<b class="nc">&nbsp;        pollingChannel.send(INDEXING_STARTED_MESSAGE + type);</b>
+&nbsp;
+&nbsp;        while (true) {
+&nbsp;            // check whether all jobs are done
+<b class="nc">&nbsp;            boolean done = true;</b>
+<b class="nc">&nbsp;            boolean failed = indexWorkerStatus.hasFailed() || indexWorkerStatus.isCanceled();</b>
+<b class="nc">&nbsp;            for (Future&lt;?&gt; future : futures) {</b>
+<b class="nc">&nbsp;                if (!future.isDone()) {</b>
+<b class="nc">&nbsp;                    done = false;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                if (future.isCancelled()) {</b>
+<b class="nc">&nbsp;                    failed = true;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+&nbsp;            // check for failure first (in case all threads have already stopped gracefully and are done)
+<b class="nc">&nbsp;            if (failed) {</b>
+<b class="nc">&nbsp;                logger.info(&quot;indexing of &quot; + type.toString() + &quot; failed, cleaning up&quot;);</b>
+<b class="nc">&nbsp;                currentIndexState = ObjectType.NONE;</b>
+<b class="nc">&nbsp;                currentState = IndexStates.INDEXING_FAILED;</b>
+<b class="nc">&nbsp;                objectIndexingStates.put(type, IndexStates.INDEXING_FAILED);</b>
+&nbsp;
+&nbsp;                // make sure to stop any remaining other worker threads
+<b class="nc">&nbsp;                for (Future&lt;?&gt; future : futures) {</b>
+<b class="nc">&nbsp;                    future.cancel(true);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (done) {</b>
+&nbsp;                // indexing has completed
+<b class="nc">&nbsp;                logger.info(&quot;indexing of &quot; + type.toString() + &quot; finished successfully&quot;);</b>
+<b class="nc">&nbsp;                currentIndexState = ObjectType.NONE;</b>
+<b class="nc">&nbsp;                currentState = IndexStates.INDEXING_SUCCESSFUL;</b>
+<b class="nc">&nbsp;                objectIndexingStates.put(type, IndexStates.INDEXING_SUCCESSFUL);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }           
+&nbsp;
+&nbsp;            // wait a bit
+&nbsp;            try {
+<b class="nc">&nbsp;                Thread.sleep(PAUSE);</b>
+<b class="nc">&nbsp;            } catch (InterruptedException e) {</b>
+<b class="nc">&nbsp;                logger.trace(&quot;Index management sleep interrupted while waiting for worker threads to finish indexing&quot;);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the progress in percent of the currently running indexing process. If
+&nbsp;     * the list of entries to be indexed is empty, this will return &quot;0&quot;.
+&nbsp;     *
+&nbsp;     * @param currentType
+&nbsp;     *            the ObjectType for which the progress will be determined
+&nbsp;     * @return the progress of the current indexing process in percent
+&nbsp;     */
+&nbsp;    public int getProgress(ObjectType currentType, PushContext pollingChannel) throws DataException {
+<b class="nc">&nbsp;        long numberOfObjects = countDatabaseObjects.get(currentType);</b>
+<b class="nc">&nbsp;        long nrOfIndexedObjects = getNumberOfIndexedObjects(currentType);</b>
+<b class="nc">&nbsp;        int progress = numberOfObjects &gt; 0 ? (int) ((nrOfIndexedObjects / (float) numberOfObjects) * 100) : 0;</b>
+<b class="nc">&nbsp;        if (Objects.equals(currentIndexState, currentType) &amp;&amp; (numberOfObjects == 0 || progress == 100)) {</b>
+<b class="nc">&nbsp;            currentIndexState = ObjectType.NONE;</b>
+<b class="nc">&nbsp;            if (numberOfObjects == 0) {</b>
+<b class="nc">&nbsp;                objectIndexingStates.put(currentType, IndexStates.NO_STATE);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                objectIndexingStates.put(currentType, IndexStates.INDEXING_SUCCESSFUL);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            pollingChannel.send(INDEXING_FINISHED_MESSAGE + currentType + &quot;!&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return progress;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create mapping which enables sorting and other aggregation functions.
+&nbsp;     */
+&nbsp;    public String createMapping() throws IOException, CustomResponseException {
+<b class="fc">&nbsp;        for (String mappingType : KitodoRestClient.MAPPING_TYPES) {</b>
+<b class="fc">&nbsp;            String mapping = readMapping(mappingType);</b>
+<b class="fc">&nbsp;            if (&quot;&quot;.equals(mapping)) {</b>
+<b class="nc">&nbsp;                if (indexRestClient.createIndex(null, mappingType)) {</b>
+<b class="nc">&nbsp;                    currentState = IndexStates.CREATING_MAPPING_SUCCESSFUL;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    currentState = IndexStates.CREATING_MAPPING_FAILED;</b>
+<b class="nc">&nbsp;                    return MAPPING_FAILED_MESSAGE;</b>
+&nbsp;                }
+&nbsp;            } else {
+<b class="fc">&nbsp;                if (indexRestClient.createIndex(mapping, mappingType)) {</b>
+<b class="fc">&nbsp;                    if (isMappingValid(mapping, mappingType)) {</b>
+<b class="fc">&nbsp;                        currentState = IndexStates.CREATING_MAPPING_SUCCESSFUL;</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        currentState = IndexStates.CREATING_MAPPING_FAILED;</b>
+<b class="nc">&nbsp;                        return MAPPING_FAILED_MESSAGE;</b>
+&nbsp;                    }
+&nbsp;                } else {
+<b class="nc">&nbsp;                    currentState = IndexStates.CREATING_MAPPING_FAILED;</b>
+<b class="nc">&nbsp;                    return MAPPING_FAILED_MESSAGE;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return MAPPING_FINISHED_MESSAGE;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete whole ElasticSearch index.
+&nbsp;     */
+&nbsp;    public String deleteIndex() {
+&nbsp;        try {
+<b class="nc">&nbsp;            indexRestClient.deleteAllIndexes();</b>
+<b class="nc">&nbsp;            currentState = IndexStates.DELETING_SUCCESSFUL;</b>
+<b class="nc">&nbsp;            return DELETION_FINISHED_MESSAGE;</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            currentState = IndexStates.DELETING_FAILED;</b>
+<b class="nc">&nbsp;            return DELETION_FAILED_MESSAGE;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isMappingValid(String mapping, String mappingType) {
+<b class="fc">&nbsp;        return isMappingEqualTo(mapping, mappingType);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return server information provided by the searchService and gathered by the
+&nbsp;     * rest client.
+&nbsp;     *
+&nbsp;     * @return String information about the server
+&nbsp;     */
+&nbsp;    public String getServerInformation() throws IOException {
+<b class="nc">&nbsp;        return indexRestClient.getServerInformation();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Tests and returns whether the ElasticSearch index has been created or not.
+&nbsp;     *
+&nbsp;     * @return whether the ElasticSearch index exists or not
+&nbsp;     */
+&nbsp;    public boolean indexExists() throws IOException, CustomResponseException {
+<b class="fc">&nbsp;        return indexRestClient.typeIndexesExist();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the state of the ES index. -2 = failed deleting the index -1 = failed
+&nbsp;     * creating ES mapping 1 = successfully created ES mapping 2 = successfully
+&nbsp;     * deleted index
+&nbsp;     *
+&nbsp;     * @return state of ES index
+&nbsp;     */
+&nbsp;    public IndexStates getIndexState() {
+<b class="nc">&nbsp;        return currentState;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setIndexState(IndexStates state) {
+<b class="nc">&nbsp;        currentState = state;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the index state of the given objectType.
+&nbsp;     *
+&nbsp;     * @param objectType
+&nbsp;     *            the objectType for which the IndexState should be returned
+&nbsp;     *
+&nbsp;     * @return indexing state of the given object type.
+&nbsp;     */
+&nbsp;    public IndexStates getObjectIndexState(ObjectType objectType) {
+<b class="nc">&nbsp;        return objectIndexingStates.get(objectType);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return static variable representing the global state. - return &#39;indexing
+&nbsp;     * failed&#39; state if any object type is in &#39;indexing failed&#39; state - return &#39;no
+&nbsp;     * state&#39; if any object type is in &#39;no state&#39; state - return &#39;indexing
+&nbsp;     * successful&#39; state if all object types are in &#39;indexing successful&#39; state
+&nbsp;     *
+&nbsp;     * @return static variable for global indexing state
+&nbsp;     */
+&nbsp;    public IndexStates getAllObjectsIndexingState() {
+<b class="nc">&nbsp;        for (ObjectType objectType : objectTypes) {</b>
+<b class="nc">&nbsp;            if (Objects.equals(objectIndexingStates.get(objectType), IndexStates.INDEXING_FAILED)) {</b>
+<b class="nc">&nbsp;                return IndexStates.INDEXING_FAILED;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (Objects.equals(objectIndexingStates.get(objectType), IndexStates.NO_STATE)) {</b>
+<b class="nc">&nbsp;                return IndexStates.NO_STATE;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return IndexStates.INDEXING_SUCCESSFUL;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return whether any indexing process is currently in progress or not.
+&nbsp;     *
+&nbsp;     * @return boolean Value indicating whether any indexing process is currently in
+&nbsp;     *         progress or not
+&nbsp;     */
+&nbsp;    public boolean indexingInProgress() {
+<b class="nc">&nbsp;        return !Objects.equals(this.currentIndexState, ObjectType.NONE) || indexingAll;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current mapping is empty.
+&nbsp;     *
+&nbsp;     * @return true if mapping is empty, otherwise false
+&nbsp;     */
+&nbsp;    public boolean isMappingEmpty() {
+<b class="nc">&nbsp;        String emptyMapping = &quot;{\n\&quot;mappings\&quot;: {\n\n    }\n}&quot;;</b>
+<b class="nc">&nbsp;        for (String mappingType : KitodoRestClient.MAPPING_TYPES) {</b>
+<b class="nc">&nbsp;            if (isMappingEqualTo(emptyMapping, mappingType)) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isMappingEqualTo(String mapping, String mappingType) {
+<b class="fc">&nbsp;        try (JsonReader mappingExpectedReader = Json.createReader(new StringReader(mapping));</b>
+<b class="fc">&nbsp;             JsonReader mappingCurrentReader = Json.createReader(new StringReader(indexRestClient.getMapping(mappingType)))) {</b>
+<b class="fc">&nbsp;            JsonObject mappingExpected = mappingExpectedReader.readObject();</b>
+<b class="fc">&nbsp;            JsonObject mappingCurrent = mappingCurrentReader.readObject().getJsonObject(indexRestClient.getIndexBase() + &quot;_&quot; + mappingType);</b>
+<b class="fc">&nbsp;            return mappingExpected.equals(mappingCurrent);</b>
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String readMapping(String mappingType) {
+<b class="fc">&nbsp;        ClassLoader classloader = Thread.currentThread().getContextClassLoader();</b>
+<b class="fc">&nbsp;        try (InputStream inputStream = classloader.getResourceAsStream(&quot;elasticsearch_mappings/&quot; + mappingType + &quot;.json&quot;)) {</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(inputStream)) {</b>
+<b class="fc">&nbsp;                String mapping = IOUtils.toString(inputStream, StandardCharsets.UTF_8);</b>
+<b class="fc">&nbsp;                try (JsonReader jsonReader = Json.createReader(new StringReader(mapping))) {</b>
+<b class="fc">&nbsp;                    JsonObject jsonObject = jsonReader.readObject();</b>
+<b class="fc">&nbsp;                    return jsonObject.toString();</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;Mapping not found!&quot;);</b>
+<b class="nc">&nbsp;                return &quot;&quot;;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void startIndexingThread(PushContext context, boolean indexAllObjects, ObjectType objectType) throws IllegalStateException {
+<b class="nc">&nbsp;        if (Objects.isNull(indexAllThread) || !indexAllThread.isAlive()) {</b>
+<b class="nc">&nbsp;            indexAllThread = new IndexManagmentThread(context, this, objectType, indexAllObjects);</b>
+<b class="nc">&nbsp;            indexAllThread.setName(&quot;IndexManagementThread&quot;);</b>
+<b class="nc">&nbsp;            indexAllThread.start();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;indexing already in progress, can not start again&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Start indexing of all objects of specific object type.
+&nbsp;     * 
+&nbsp;     * @param context the UI context
+&nbsp;     * @param objectType the object type to index
+&nbsp;     */
+&nbsp;    public void startIndexing(PushContext context, ObjectType objectType) {
+<b class="nc">&nbsp;        startIndexingThread(context, true, objectType);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Start indexing of remaining objects of specific object type.
+&nbsp;     * 
+&nbsp;     * @param context the UI context
+&nbsp;     * @param objectType the object type to index
+&nbsp;     */
+&nbsp;    public void startIndexingRemaining(PushContext context, ObjectType objectType) {
+<b class="nc">&nbsp;        startIndexingThread(context, false, objectType);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Start indexing of all database objects independent of object type.
+&nbsp;     */
+&nbsp;    public void startAllIndexing(PushContext context) {
+<b class="nc">&nbsp;        startIndexingThread(context, true, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Starts indexing all remaining database objects independent of object type.
+&nbsp;     */
+&nbsp;    public void startAllIndexingRemaining(PushContext pushContext) {
+<b class="nc">&nbsp;        startIndexingThread(pushContext, false, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void setIndexingAll(boolean indexing) {
+<b class="nc">&nbsp;        indexingAll = indexing;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void resetCurrentIndexState() {
+<b class="nc">&nbsp;        currentIndexState = ObjectType.NONE;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Cancels indexing upon user request.
+&nbsp;     */
+&nbsp;    public void cancelIndexing() {
+<b class="nc">&nbsp;        if (Objects.nonNull(indexWorkerStatus)) {</b>
+<b class="nc">&nbsp;            indexWorkerStatus.markAsCanceled();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get logger.
+&nbsp;     *
+&nbsp;     * @return value of logger
+&nbsp;     */
+&nbsp;    public static Logger getLogger() {
+<b class="nc">&nbsp;        return logger;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

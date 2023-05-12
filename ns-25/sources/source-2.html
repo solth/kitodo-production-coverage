@@ -1,0 +1,187 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileSec</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.entities</a>
+</div>
+
+<h1>Coverage Summary for Class: FileSec (org.kitodo.dataeditor.entities)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileSec</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92%
+  </span>
+  <span class="absValue">
+    (23/25)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.entities;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;
+&nbsp;import org.kitodo.dataeditor.MediaFile;
+&nbsp;import org.kitodo.dataeditor.MetsKitodoObjectFactory;
+&nbsp;import org.kitodo.dataformat.metskitodo.FileType;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType;
+&nbsp;
+&nbsp;public class FileSec extends MetsType.FileSec {
+&nbsp;
+<b class="fc">&nbsp;    private final MetsKitodoObjectFactory objectFactory = new MetsKitodoObjectFactory();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor to copy the data from parent class.
+&nbsp;     *
+&nbsp;     * @param fileSec
+&nbsp;     *            The MetsType.FileSec object.
+&nbsp;     */
+<b class="fc">&nbsp;    public FileSec(MetsType.FileSec fileSec) {</b>
+<b class="fc">&nbsp;        super.fileGrp = fileSec.getFileGrp();</b>
+<b class="fc">&nbsp;        super.id = fileSec.getID();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Inserts MediaFile objects into fileSec of mets object.
+&nbsp;     *
+&nbsp;     * @param mediaFiles
+&nbsp;     *            The list of media files.
+&nbsp;     */
+&nbsp;    public void insertMediaFiles(List&lt;MediaFile&gt; mediaFiles) {
+<b class="fc">&nbsp;        for (MediaFile mediaFile : mediaFiles) {</b>
+<b class="fc">&nbsp;            insertFileToFileGroupOfMets(mediaFile);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        writeFileIds();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void insertFileToFileGroupOfMets(MediaFile mediaFile) {
+<b class="fc">&nbsp;        FileType.FLocat fLocat = objectFactory.createFileTypeFLocat();</b>
+<b class="fc">&nbsp;        fLocat.setLOCTYPE(mediaFile.getLocationType().toString());</b>
+<b class="fc">&nbsp;        fLocat.setHref(mediaFile.getFilePath().getPath());</b>
+&nbsp;
+<b class="fc">&nbsp;        FileType fileType = objectFactory.createFileType();</b>
+<b class="fc">&nbsp;        fileType.setMIMETYPE(mediaFile.getMimeType());</b>
+<b class="fc">&nbsp;        fileType.getFLocat().add(fLocat);</b>
+&nbsp;
+<b class="fc">&nbsp;        getLocalFileGroup().getFile().add(fileType);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the local file group of given mets object as FileGrp object.
+&nbsp;     *
+&nbsp;     * @return The FileGrp object.
+&nbsp;     */
+&nbsp;    public MetsType.FileSec.FileGrp getLocalFileGroup() {
+<b class="fc">&nbsp;        for (MetsType.FileSec.FileGrp fileGrp : this.getFileGrp()) {</b>
+<b class="fc">&nbsp;            if (fileGrp.getUSE().equals(&quot;LOCAL&quot;)) {</b>
+<b class="fc">&nbsp;                return fileGrp;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        throw new NoSuchElementException(&quot;No local file group in mets object&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void writeFileIds() {
+<b class="fc">&nbsp;        int counter = 1;</b>
+<b class="fc">&nbsp;        for (FileType file : getLocalFileGroup().getFile()) {</b>
+<b class="fc">&nbsp;            file.setID(&quot;FILE_&quot; + String.format(&quot;%04d&quot;, counter));</b>
+<b class="fc">&nbsp;            counter++;</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

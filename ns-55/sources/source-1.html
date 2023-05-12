@@ -1,0 +1,197 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > KitodoMediaRenderer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.renderer</a>
+</div>
+
+<h1>Coverage Summary for Class: KitodoMediaRenderer (org.kitodo.production.renderer)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KitodoMediaRenderer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,2%
+  </span>
+  <span class="absValue">
+    (31/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.renderer;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import javax.faces.component.UIComponent;
+&nbsp;import javax.faces.component.UIParameter;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.faces.context.ResponseWriter;
+&nbsp;
+&nbsp;import org.primefaces.component.media.Media;
+&nbsp;import org.primefaces.component.media.MediaRenderer;
+&nbsp;import org.primefaces.util.HTML;
+&nbsp;
+<b class="fc">&nbsp;public class KitodoMediaRenderer extends MediaRenderer {</b>
+&nbsp;
+&nbsp;    private static final String PLAYER_HTML_VIDEO = &quot;html-video&quot;;
+&nbsp;
+&nbsp;    private static final String PLAYER_HTML_AUDIO = &quot;html-audio&quot;;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void encodeEnd(FacesContext context, UIComponent component) throws IOException {
+<b class="fc">&nbsp;        Media media = (Media) component;</b>
+<b class="fc">&nbsp;        ResponseWriter writer = context.getResponseWriter();</b>
+&nbsp;        String src;
+&nbsp;        try {
+<b class="fc">&nbsp;            src = getMediaSrc(context, media);</b>
+<b class="nc">&nbsp;        } catch (Exception ex) {</b>
+<b class="nc">&nbsp;            throw new IOException(ex);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        if (PLAYER_HTML_VIDEO.equals(media.getPlayer())) {</b>
+<b class="fc">&nbsp;            buildVideoTag(context, media, writer, src);</b>
+&nbsp;            return;
+<b class="fc">&nbsp;        } else if (PLAYER_HTML_AUDIO.equals(media.getPlayer())) {</b>
+<b class="fc">&nbsp;            buildAudioTag(context, media, writer, src);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        super.encodeEnd(context, component);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void buildVideoTag(FacesContext context, Media media, ResponseWriter writer, String src)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;        writer.startElement(&quot;video&quot;, media);</b>
+<b class="fc">&nbsp;        Optional&lt;UIComponent&gt; controlsParameter = media.getChildren().stream()</b>
+<b class="fc">&nbsp;                .filter(param -&gt; &quot;controls&quot;.equals(((UIParameter) param).getName())).findAny();</b>
+<b class="fc">&nbsp;        if (controlsParameter.isEmpty() || !Boolean.FALSE.toString()</b>
+<b class="fc">&nbsp;                .equals(((UIParameter) controlsParameter.get()).getValue())) {</b>
+<b class="fc">&nbsp;            writer.writeAttribute(&quot;controls&quot;, &quot;&quot;, null);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        buildMediaSource(context, media, writer, src);</b>
+<b class="fc">&nbsp;        writer.endElement(&quot;video&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void buildAudioTag(FacesContext context, Media media, ResponseWriter writer, String src)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;        writer.startElement(&quot;audio&quot;, media);</b>
+<b class="fc">&nbsp;        writer.writeAttribute(&quot;controls&quot;, &quot;&quot;, null);</b>
+<b class="fc">&nbsp;        buildMediaSource(context, media, writer, src);</b>
+<b class="fc">&nbsp;        writer.endElement(&quot;audio&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void buildMediaSource(FacesContext context, Media media, ResponseWriter writer, String src)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;        if (media.getStyleClass() != null) {</b>
+<b class="fc">&nbsp;            writer.writeAttribute(&quot;class&quot;, media.getStyleClass(), null);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        renderPassThruAttributes(context, media, HTML.MEDIA_ATTRS);</b>
+<b class="fc">&nbsp;        writer.startElement(&quot;source&quot;, media);</b>
+<b class="fc">&nbsp;        writer.writeAttribute(&quot;src&quot;, src, null);</b>
+&nbsp;
+<b class="fc">&nbsp;        Optional&lt;UIComponent&gt; typeParameter = media.getChildren().stream()</b>
+<b class="fc">&nbsp;                .filter(param -&gt; &quot;type&quot;.equals(((UIParameter) param).getName())).findFirst();</b>
+<b class="fc">&nbsp;        if (typeParameter.isPresent()) {</b>
+<b class="fc">&nbsp;            writer.writeAttribute(&quot;type&quot;, ((UIParameter) typeParameter.get()).getValue(), null);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        writer.endElement(&quot;source&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

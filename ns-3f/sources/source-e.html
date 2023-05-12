@@ -1,0 +1,495 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PaginationPanel</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: PaginationPanel (org.kitodo.production.forms.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PaginationPanel</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    18,5%
+  </span>
+  <span class="absValue">
+    (5/27)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    19,9%
+  </span>
+  <span class="absValue">
+    (27/136)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.dataeditor;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.ImmutablePair;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.exceptions.InvalidImagesException;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.MediaNotFoundException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.metadata.pagination.Paginator;
+&nbsp;import org.kitodo.production.helper.metadata.pagination.PaginatorMode;
+&nbsp;import org.kitodo.production.helper.metadata.pagination.PaginatorType;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;
+&nbsp;/**
+&nbsp; * Backing bean for the pagination panel.
+&nbsp; */
+&nbsp;public class PaginationPanel {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(PaginationPanel.class);</b>
+&nbsp;
+&nbsp;    private final DataEditorForm dataEditor;
+<b class="fc">&nbsp;    private boolean fictitiousCheckboxChecked = false;</b>
+&nbsp;    private List&lt;SelectItem&gt; paginationSelectionItems;
+<b class="fc">&nbsp;    private List&lt;Integer&gt; paginationSelectionSelectedItems = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private String paginationStartValue = &quot;1&quot;;</b>
+&nbsp;    private Map&lt;PaginatorType, String&gt; paginationTypeSelectItems;
+<b class="fc">&nbsp;    private PaginatorType paginationTypeSelectSelectedItem = PaginatorType.ARABIC;</b>
+&nbsp;    private List&lt;IllustratedSelectItem&gt; selectPaginationModeItems;
+&nbsp;    private IllustratedSelectItem selectPaginationModeSelectedItem;
+&nbsp;    private Map&lt;Boolean, String&gt; selectPaginationScopeItems;
+<b class="fc">&nbsp;    private Boolean selectPaginationScopeSelectedItem = Boolean.TRUE;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     *
+&nbsp;     * @param dataEditor DataEditorForm instance
+&nbsp;     */
+<b class="fc">&nbsp;    PaginationPanel(DataEditorForm dataEditor) {</b>
+<b class="fc">&nbsp;        this.dataEditor = dataEditor;</b>
+<b class="fc">&nbsp;        preparePaginationTypeSelectItems();</b>
+<b class="fc">&nbsp;        prepareSelectPaginationModeItems();</b>
+<b class="fc">&nbsp;        prepareSelectPaginationScopeItems();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks and updates media references in workpiece depending on changes in file system.
+&nbsp;     */
+&nbsp;    public void updateMediaReferences() {
+<b class="nc">&nbsp;        boolean mediaReferencesChanged = false;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            mediaReferencesChanged = ServiceManager.getFileService().searchForMedia(dataEditor.getProcess(),</b>
+<b class="nc">&nbsp;                    dataEditor.getWorkpiece());</b>
+<b class="nc">&nbsp;        } catch (InvalidImagesException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;        } catch (MediaNotFoundException e) {</b>
+<b class="nc">&nbsp;            Helper.setWarnMessage(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        dataEditor.setMediaUpdated(mediaReferencesChanged);</b>
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; physicalDivisions = dataEditor.getWorkpiece().getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted();</b>
+<b class="nc">&nbsp;        for (int i = 1; i &lt; physicalDivisions.size(); i++) {</b>
+<b class="nc">&nbsp;            PhysicalDivision physicalDivision = physicalDivisions.get(i - 1);</b>
+<b class="nc">&nbsp;            physicalDivision.setOrder(i);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        dataEditor.refreshStructurePanel();</b>
+<b class="nc">&nbsp;        dataEditor.getGalleryPanel().show();</b>
+<b class="nc">&nbsp;        show();</b>
+<b class="nc">&nbsp;        PrimeFaces.current().ajax().update(&quot;fileReferencesUpdatedDialog&quot;);</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;PF(&#39;fileReferencesUpdatedDialog&#39;).show();&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected items of the paginationSelection select menu.
+&nbsp;     *
+&nbsp;     * @return the selected items of the paginationSelection
+&nbsp;     */
+&nbsp;    public List&lt;Integer&gt; getPaginationSelectionSelectedItems() {
+<b class="nc">&nbsp;        return paginationSelectionSelectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected items of the paginationSelection select menu.
+&nbsp;     *
+&nbsp;     * @param selectedItems
+&nbsp;     *            selected items to set
+&nbsp;     */
+&nbsp;    public void setPaginationSelectionSelectedItems(List&lt;Integer&gt; selectedItems) {
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; physicalDivisions = dataEditor.getWorkpiece().getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted();</b>
+<b class="nc">&nbsp;        if (!selectedItems.isEmpty()) {</b>
+<b class="nc">&nbsp;            int lastItemIndex = selectedItems.get(selectedItems.size() - 1);</b>
+<b class="nc">&nbsp;            if (this.paginationSelectionSelectedItems.isEmpty()</b>
+<b class="nc">&nbsp;                    || !Objects.equals(this.paginationSelectionSelectedItems.get(</b>
+<b class="nc">&nbsp;                    this.paginationSelectionSelectedItems.size() - 1), lastItemIndex)) {</b>
+<b class="nc">&nbsp;                dataEditor.getStructurePanel().updateNodeSelection(</b>
+<b class="nc">&nbsp;                        dataEditor.getGalleryPanel().getGalleryMediaContent(physicalDivisions.get(lastItemIndex)),</b>
+<b class="nc">&nbsp;                        physicalDivisions.get(lastItemIndex).getLogicalDivisions().get(0));</b>
+<b class="nc">&nbsp;                updateMetadataPanel();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        dataEditor.getSelectedMedia().clear();</b>
+<b class="nc">&nbsp;        for (int i : selectedItems) {</b>
+<b class="nc">&nbsp;            for (LogicalDivision logicalDivision : physicalDivisions.get(i).getLogicalDivisions()) {</b>
+<b class="nc">&nbsp;                dataEditor.getSelectedMedia().add(new ImmutablePair&lt;&gt;(physicalDivisions.get(i), logicalDivision));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        this.paginationSelectionSelectedItems = selectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value of the paginationStart input box.
+&nbsp;     *
+&nbsp;     * @return the value of the paginationStart
+&nbsp;     */
+&nbsp;    public String getPaginationStartValue() {
+<b class="nc">&nbsp;        return paginationStartValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the value of the paginationStart input box.
+&nbsp;     *
+&nbsp;     * @param paginationStartValue
+&nbsp;     *            value to set
+&nbsp;     */
+&nbsp;    public void setPaginationStartValue(String paginationStartValue) {
+<b class="nc">&nbsp;        this.paginationStartValue = paginationStartValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the paginationTypeSelect drop-down menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the paginationTypeSelect
+&nbsp;     */
+&nbsp;    public PaginatorType getPaginationTypeSelectSelectedItem() {
+<b class="nc">&nbsp;        return paginationTypeSelectSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the paginationTypeSelect drop-down menu.
+&nbsp;     *
+&nbsp;     * @param paginationTypeSelectSelectedItem
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setPaginationTypeSelectSelectedItem(PaginatorType paginationTypeSelectSelectedItem) {
+<b class="nc">&nbsp;        this.paginationTypeSelectSelectedItem = paginationTypeSelectSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the selectPaginationMode drop-down menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the selectPaginationMode
+&nbsp;     */
+&nbsp;    public IllustratedSelectItem getSelectPaginationModeSelectedItem() {
+<b class="nc">&nbsp;        return selectPaginationModeSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the paginationModeSelect drop-down menu.
+&nbsp;     *
+&nbsp;     * @param selectPaginationModeSelectedItem
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setSelectPaginationModeSelectedItem(IllustratedSelectItem selectPaginationModeSelectedItem) {
+<b class="nc">&nbsp;        this.selectPaginationModeSelectedItem = selectPaginationModeSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the selectPaginationScope drop-down menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the selectPaginationScope
+&nbsp;     */
+&nbsp;    public Boolean getSelectPaginationScopeSelectedItem() {
+<b class="nc">&nbsp;        return selectPaginationScopeSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the paginationScopeSelect drop-down menu.
+&nbsp;     *
+&nbsp;     * @param selectPaginationScopeSelectedItem
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setSelectPaginationScopeSelectedItem(Boolean selectPaginationScopeSelectedItem) {
+<b class="nc">&nbsp;        this.selectPaginationScopeSelectedItem = selectPaginationScopeSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items for the paginationSelection select menu.
+&nbsp;     *
+&nbsp;     * @return the items for the paginationSelection
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getPaginationSelectionItems() {
+<b class="nc">&nbsp;        return paginationSelectionItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items for the paginationTypeSelect select menu.
+&nbsp;     *
+&nbsp;     * @return the items for the paginationTypeSelect
+&nbsp;     */
+&nbsp;    public Map&lt;PaginatorType, String&gt; getPaginationTypeSelectItems() {
+<b class="nc">&nbsp;        return paginationTypeSelectItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items for the paginationMode select menu.
+&nbsp;     *
+&nbsp;     * @return the items for the paginationMode
+&nbsp;     */
+&nbsp;    public List&lt;IllustratedSelectItem&gt; getSelectPaginationModeItems() {
+<b class="nc">&nbsp;        return selectPaginationModeItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items for the paginationScope select menu.
+&nbsp;     *
+&nbsp;     * @return the items for the paginationScope
+&nbsp;     */
+&nbsp;    public Map&lt;Boolean, String&gt; getSelectPaginationScopeItems() {
+<b class="nc">&nbsp;        return selectPaginationScopeItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the fictitiousCheckbox is checked.
+&nbsp;     *
+&nbsp;     * @return whether the fictitiousCheckbox is checked
+&nbsp;     */
+&nbsp;    public boolean isFictitiousCheckboxChecked() {
+<b class="nc">&nbsp;        return fictitiousCheckboxChecked;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets whether the fictitiousCheckbox is checked.
+&nbsp;     *
+&nbsp;     * @param fictitiousCheckboxChecked
+&nbsp;     *            whether the checkbox is checked
+&nbsp;     */
+&nbsp;    public void setFictitiousCheckboxChecked(boolean fictitiousCheckboxChecked) {
+<b class="nc">&nbsp;        this.fictitiousCheckboxChecked = fictitiousCheckboxChecked;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void preparePaginationSelectionItems() {
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; physicalDivisions = dataEditor.getWorkpiece().getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted();</b>
+<b class="nc">&nbsp;        paginationSelectionItems = new ArrayList&lt;&gt;(physicalDivisions.size());</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; physicalDivisions.size(); i++) {</b>
+<b class="nc">&nbsp;            View view = View.of(physicalDivisions.get(i));</b>
+<b class="nc">&nbsp;            String label = dataEditor.getStructurePanel().buildViewLabel(view);</b>
+<b class="nc">&nbsp;            paginationSelectionItems.add(new SelectItem(i, label));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * prepare selected items to pagination.
+&nbsp;     */
+&nbsp;    public void preparePaginationSelectionSelectedItems() {
+<b class="nc">&nbsp;        paginationSelectionSelectedItems = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; physicalDivisions = dataEditor.getWorkpiece().getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted();</b>
+<b class="nc">&nbsp;        for (Pair&lt;PhysicalDivision, LogicalDivision&gt; selectedElement : dataEditor.getSelectedMedia()) {</b>
+<b class="nc">&nbsp;            for (int i = 0; i &lt; physicalDivisions.size(); i++) {</b>
+<b class="nc">&nbsp;                PhysicalDivision physicalDivision = physicalDivisions.get(i);</b>
+<b class="nc">&nbsp;                if (physicalDivision.equals(selectedElement.getKey())) {</b>
+<b class="nc">&nbsp;                    paginationSelectionSelectedItems.add(i);</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void preparePaginationTypeSelectItems() {
+<b class="fc">&nbsp;        paginationTypeSelectItems = new LinkedHashMap&lt;&gt;(5);</b>
+<b class="fc">&nbsp;        paginationTypeSelectItems.put(PaginatorType.ARABIC, &quot;arabic&quot;);</b>
+<b class="fc">&nbsp;        paginationTypeSelectItems.put(PaginatorType.ROMAN, &quot;roman&quot;);</b>
+<b class="fc">&nbsp;        paginationTypeSelectItems.put(PaginatorType.UNCOUNTED, &quot;uncounted&quot;);</b>
+<b class="fc">&nbsp;        paginationTypeSelectItems.put(PaginatorType.FREETEXT, &quot;paginationFreetext&quot;);</b>
+<b class="fc">&nbsp;        paginationTypeSelectItems.put(PaginatorType.ADVANCED, &quot;paginationAdvanced&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareSelectPaginationModeItems() {
+<b class="fc">&nbsp;        selectPaginationModeItems = new ArrayList&lt;&gt;(6);</b>
+<b class="fc">&nbsp;        selectPaginationModeItems.add(new IllustratedSelectItem(PaginatorMode.PAGES, &quot;pageCount&quot;,</b>
+&nbsp;                &quot;paginierung_seite.svg&quot;));
+<b class="fc">&nbsp;        selectPaginationModeItems.add(new IllustratedSelectItem(PaginatorMode.DOUBLE_PAGES, &quot;columnCount&quot;,</b>
+&nbsp;                &quot;paginierung_spalte.svg&quot;));
+<b class="fc">&nbsp;        selectPaginationModeItems.add(new IllustratedSelectItem(PaginatorMode.FOLIATION, &quot;blattzaehlung&quot;,</b>
+&nbsp;                &quot;paginierung_blatt.svg&quot;));
+<b class="fc">&nbsp;        selectPaginationModeItems.add(new IllustratedSelectItem(PaginatorMode.RECTOVERSO_FOLIATION, &quot;blattzaehlungrectoverso&quot;,</b>
+&nbsp;                &quot;paginierung_blatt_rectoverso.svg&quot;));
+<b class="fc">&nbsp;        selectPaginationModeItems.add(new IllustratedSelectItem(PaginatorMode.RECTOVERSO, &quot;pageCountRectoVerso&quot;,</b>
+&nbsp;                &quot;paginierung_seite_rectoverso.svg&quot;));
+<b class="fc">&nbsp;        selectPaginationModeItems.add(new IllustratedSelectItem(PaginatorMode.DOUBLE_PAGES, &quot;pageCountDouble&quot;,</b>
+&nbsp;                &quot;paginierung_doppelseite.svg&quot;));
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareSelectPaginationScopeItems() {
+<b class="fc">&nbsp;        selectPaginationScopeItems = new HashMap&lt;&gt;(2);</b>
+<b class="fc">&nbsp;        selectPaginationScopeItems.put(Boolean.TRUE, &quot;abDerErstenMarkiertenSeite&quot;);</b>
+<b class="fc">&nbsp;        selectPaginationScopeItems.put(Boolean.FALSE, &quot;nurDieMarkiertenSeiten&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked if the start pagination action button is clicked.
+&nbsp;     */
+&nbsp;    public void startPaginationClick() {
+<b class="nc">&nbsp;        if (paginationSelectionSelectedItems.isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;fehlerBeimEinlesen&quot;, &quot;No pages selected for pagination.&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            dataEditor.getMetadataPanel().preserve();</b>
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException | NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;            logger.info(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        List&lt;Separator&gt; pageSeparators = Separator.factory(ConfigCore.getParameter(ParameterCore.PAGE_SEPARATORS));</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            String initializer = paginationTypeSelectSelectedItem.format(selectPaginationModeSelectedItem.getValue(),</b>
+<b class="nc">&nbsp;                paginationStartValue, fictitiousCheckboxChecked, pageSeparators.get(0).getSeparatorString());</b>
+<b class="nc">&nbsp;            Paginator paginator = new Paginator(initializer);</b>
+<b class="nc">&nbsp;            List&lt;PhysicalDivision&gt; physicalDivisions = dataEditor.getWorkpiece()</b>
+<b class="nc">&nbsp;                    .getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted();</b>
+<b class="nc">&nbsp;            if (selectPaginationScopeSelectedItem) {</b>
+<b class="nc">&nbsp;                for (int i = paginationSelectionSelectedItems.get(0); i &lt; physicalDivisions.size(); i++) {</b>
+<b class="nc">&nbsp;                    physicalDivisions.get(i).setOrderlabel(paginator.next());</b>
+&nbsp;                }
+&nbsp;            } else {
+<b class="nc">&nbsp;                for (int i : paginationSelectionSelectedItems) {</b>
+<b class="nc">&nbsp;                    physicalDivisions.get(i).setOrderlabel(paginator.next());</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;paginationFormatError&quot;, new Object[] { paginationStartValue });</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        paginationSelectionSelectedItems = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        preparePaginationSelectionItems();</b>
+<b class="nc">&nbsp;        dataEditor.refreshStructurePanel();</b>
+<b class="nc">&nbsp;        updateMetadataPanel();</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;PF(&#39;notifications&#39;).renderMessage({&#39;summary&#39;:&#39;&quot;</b>
+<b class="nc">&nbsp;                + Helper.getTranslation(&quot;paginationSaved&quot;) + &quot;&#39;,&#39;severity&#39;:&#39;info&#39;})&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void updateMetadataPanel() {
+<b class="nc">&nbsp;        if (dataEditor.getSelectedStructure().isPresent()) {</b>
+<b class="nc">&nbsp;            dataEditor.getMetadataPanel().showLogical(dataEditor.getSelectedStructure());</b>
+<b class="nc">&nbsp;        } else if (Objects.nonNull(dataEditor.getStructurePanel().getSelectedLogicalNode())</b>
+<b class="nc">&nbsp;                &amp;&amp; dataEditor.getStructurePanel().getSelectedLogicalNode().getData() instanceof StructureTreeNode</b>
+<b class="nc">&nbsp;                &amp;&amp; Objects.nonNull(dataEditor.getStructurePanel().getSelectedLogicalNode().getData())</b>
+<b class="nc">&nbsp;                &amp;&amp; ((StructureTreeNode) dataEditor.getStructurePanel().getSelectedLogicalNode().getData())</b>
+<b class="nc">&nbsp;                .getDataObject() instanceof View) {</b>
+<b class="nc">&nbsp;            View view = (View) ((StructureTreeNode) dataEditor.getStructurePanel().getSelectedLogicalNode().getData()).getDataObject();</b>
+<b class="nc">&nbsp;            dataEditor.getMetadataPanel().showPageInLogical(view.getPhysicalDivision());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Show.
+&nbsp;     */
+&nbsp;    public void show() {
+<b class="nc">&nbsp;        paginationSelectionSelectedItems = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        paginationTypeSelectSelectedItem = PaginatorType.ARABIC;</b>
+<b class="nc">&nbsp;        selectPaginationModeSelectedItem = null;</b>
+<b class="nc">&nbsp;        paginationStartValue = &quot;1&quot;;</b>
+<b class="nc">&nbsp;        fictitiousCheckboxChecked = false;</b>
+<b class="nc">&nbsp;        selectPaginationScopeSelectedItem = Boolean.TRUE;</b>
+<b class="nc">&nbsp;        preparePaginationSelectionItems();</b>
+<b class="nc">&nbsp;        preparePaginationSelectionSelectedItems();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

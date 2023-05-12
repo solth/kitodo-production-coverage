@@ -1,0 +1,295 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CommandService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.command</a>
+</div>
+
+<h1>Coverage Summary for Class: CommandService (org.kitodo.production.services.command)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CommandService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,9%
+  </span>
+  <span class="absValue">
+    (10/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,5%
+  </span>
+  <span class="absValue">
+    (32/37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.command;
+&nbsp;
+&nbsp;import io.reactivex.Flowable;
+&nbsp;import io.reactivex.schedulers.Schedulers;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Random;
+&nbsp;
+&nbsp;import org.kitodo.api.command.CommandInterface;
+&nbsp;import org.kitodo.api.command.CommandResult;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.serviceloader.KitodoServiceLoader;
+&nbsp;
+&nbsp;public class CommandService {
+&nbsp;    private final CommandInterface commandModule;
+<b class="fc">&nbsp;    private final ArrayList&lt;CommandResult&gt; finishedCommandResults = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private final Random random = new Random(1000000);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize Command Service.
+&nbsp;     */
+<b class="fc">&nbsp;    public CommandService() {</b>
+<b class="fc">&nbsp;        commandModule = new KitodoServiceLoader&lt;CommandInterface&gt;(CommandInterface.class).loadModule();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method executes a script string.
+&nbsp;     *
+&nbsp;     * @param script
+&nbsp;     *            Path to the script file with optional arguments (filepath
+&nbsp;     *            parameter1 parameter2 ...).
+&nbsp;     *
+&nbsp;     * @return The CommandResult.
+&nbsp;     *
+&nbsp;     * @throws IOException
+&nbsp;     *             an IOException
+&nbsp;     */
+&nbsp;    public CommandResult runCommand(String script) throws IOException {
+<b class="fc">&nbsp;        if (Objects.isNull(script)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        CommandResult commandResult = commandModule.runCommand(random.nextInt(), script);</b>
+<b class="fc">&nbsp;        List&lt;String&gt; commandResultMessages = commandResult.getMessages();</b>
+<b class="fc">&nbsp;        if (!commandResultMessages.isEmpty() &amp;&amp; commandResultMessages.get(0).contains(&quot;IOException&quot;)) {</b>
+<b class="fc">&nbsp;            throw new IOException(commandResultMessages.get(1));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return commandResult;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method executes a script file with parameters.
+&nbsp;     *
+&nbsp;     * @param scriptFile
+&nbsp;     *            The script file.
+&nbsp;     * @param parameter
+&nbsp;     *            The script parameters.
+&nbsp;     * @return The CommandResult.
+&nbsp;     *
+&nbsp;     * @throws IOException
+&nbsp;     *             an IOException
+&nbsp;     */
+&nbsp;    public CommandResult runCommand(File scriptFile, List&lt;String&gt; parameter) throws IOException {
+<b class="fc">&nbsp;        if (Objects.isNull(scriptFile)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String script = generateScriptString(scriptFile, parameter);</b>
+<b class="fc">&nbsp;        return runCommand(script);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method executes a script file.
+&nbsp;     *
+&nbsp;     * @param scriptFile
+&nbsp;     *            The script file.
+&nbsp;     *
+&nbsp;     * @return The CommandResult.
+&nbsp;     *
+&nbsp;     * @throws IOException
+&nbsp;     *             an IOException
+&nbsp;     */
+&nbsp;    public CommandResult runCommand(File scriptFile) throws IOException {
+<b class="fc">&nbsp;        if (Objects.isNull(scriptFile)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return runCommand(scriptFile.getAbsolutePath());</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method runs a specified script file asynchronously.
+&nbsp;     *
+&nbsp;     * @param script
+&nbsp;     *            The script.
+&nbsp;     */
+&nbsp;    public void runCommandAsync(String script) {
+<b class="fc">&nbsp;        if (Objects.nonNull(script)) {</b>
+<b class="fc">&nbsp;            KitodoServiceLoader&lt;CommandInterface&gt; serviceLoader = new KitodoServiceLoader&lt;&gt;(CommandInterface.class);</b>
+<b class="fc">&nbsp;            CommandInterface commandInterface = serviceLoader.loadModule();</b>
+&nbsp;
+<b class="fc">&nbsp;            Flowable&lt;CommandResult&gt; source = Flowable.fromCallable(() -&gt;</b>
+<b class="fc">&nbsp;                commandInterface.runCommand(random.nextInt(), script)</b>
+&nbsp;            );
+&nbsp;
+<b class="fc">&nbsp;            Flowable&lt;CommandResult&gt; commandBackgroundWorker = source.subscribeOn(Schedulers.io());</b>
+<b class="fc">&nbsp;            Flowable&lt;CommandResult&gt; commandResultListener = commandBackgroundWorker.observeOn(Schedulers.single());</b>
+<b class="fc">&nbsp;            commandResultListener.subscribe(this::handleCommandResult);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method executes a script file with parameters asynchronously.
+&nbsp;     *
+&nbsp;     * @param scriptFile
+&nbsp;     *            The script file.
+&nbsp;     * @param parameter
+&nbsp;     *            The script parameters.
+&nbsp;     */
+&nbsp;    public void runCommandAsync(File scriptFile, List&lt;String&gt; parameter) {
+<b class="fc">&nbsp;        if (Objects.nonNull(scriptFile)) {</b>
+<b class="fc">&nbsp;            String script = generateScriptString(scriptFile, parameter);</b>
+<b class="fc">&nbsp;            runCommandAsync(script);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method executes a script file asynchronously.
+&nbsp;     *
+&nbsp;     * @param scriptFile
+&nbsp;     *            The script file.
+&nbsp;     */
+&nbsp;    public void runCommandAsync(File scriptFile) {
+<b class="nc">&nbsp;        if (Objects.nonNull(scriptFile)) {</b>
+<b class="nc">&nbsp;            runCommandAsync(scriptFile.getAbsolutePath());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Should be used to handle finished asynchronous script executions.
+&nbsp;     *
+&nbsp;     * @param commandResult
+&nbsp;     *            The finished command result.
+&nbsp;     */
+&nbsp;    private void handleCommandResult(CommandResult commandResult) {
+&nbsp;
+<b class="fc">&nbsp;        finishedCommandResults.add(commandResult);</b>
+&nbsp;
+&nbsp;        // TODO add more result handling for frontend here
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates a String in the form of (filepath parameter1 parameter2 ...).
+&nbsp;     *
+&nbsp;     * @param file
+&nbsp;     *            The file.
+&nbsp;     *
+&nbsp;     * @param parameter
+&nbsp;     *            The parameters.
+&nbsp;     *
+&nbsp;     * @return The String.
+&nbsp;     */
+&nbsp;    private String generateScriptString(File file, List&lt;String&gt; parameter) {
+<b class="fc">&nbsp;        String scriptString = file.getAbsolutePath();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(parameter)) {</b>
+<b class="fc">&nbsp;            scriptString = scriptString + &quot; &quot; + String.join(&quot; &quot;, parameter);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return scriptString;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all finished CommandResults.
+&nbsp;     *
+&nbsp;     * @return The CommandResults.
+&nbsp;     */
+&nbsp;    public List&lt;CommandResult&gt; getFinishedCommandResults() {
+<b class="fc">&nbsp;        return finishedCommandResults;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,273 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetadataType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.metskitodo</a>
+</div>
+
+<h1>Coverage Summary for Class: MetadataType (org.kitodo.dataformat.metskitodo)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetadataType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    77,8%
+  </span>
+  <span class="absValue">
+    (7/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    74,1%
+  </span>
+  <span class="absValue">
+    (20/27)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;//
+&nbsp;// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.0 generiert 
+&nbsp;// Siehe &lt;a href=&quot;https://javaee.github.io/jaxb-v2/&quot;&gt;https://javaee.github.io/jaxb-v2/&lt;/a&gt; 
+&nbsp;// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+&nbsp;// Generiert: 2023.05.12 um 01:28:08 PM CEST 
+&nbsp;//
+&nbsp;
+&nbsp;
+&nbsp;package org.kitodo.dataformat.metskitodo;
+&nbsp;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlType;
+&nbsp;import javax.xml.bind.annotation.XmlValue;
+&nbsp;import org.jvnet.jaxb2_commons.lang.Equals2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.EqualsStrategy2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+&nbsp;import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+&nbsp;import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * &lt;p&gt;Java-Klasse für metadataType complex type.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * &amp;lt;complexType name=&quot;metadataType&quot;&amp;gt;
+&nbsp; *   &amp;lt;simpleContent&amp;gt;
+&nbsp; *     &amp;lt;extension base=&quot;&amp;lt;http://www.w3.org/2001/XMLSchema&amp;gt;string&quot;&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;name&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;anchorId&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}boolean&quot; /&amp;gt;
+&nbsp; *     &amp;lt;/extension&amp;gt;
+&nbsp; *   &amp;lt;/simpleContent&amp;gt;
+&nbsp; * &amp;lt;/complexType&amp;gt;
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * 
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;@XmlType(name = &quot;metadataType&quot;, namespace = &quot;http://meta.kitodo.org/v1/&quot;, propOrder = {
+&nbsp;    &quot;value&quot;
+&nbsp;})
+<b class="fc">&nbsp;public class MetadataType implements Equals2</b>
+&nbsp;{
+&nbsp;
+&nbsp;    @XmlValue
+&nbsp;    protected String value;
+&nbsp;    @XmlAttribute(name = &quot;name&quot;)
+&nbsp;    protected String name;
+&nbsp;    @XmlAttribute(name = &quot;anchorId&quot;)
+&nbsp;    protected Boolean anchorId;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der value-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getValue() {
+<b class="fc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der value-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setValue(String value) {
+<b class="fc">&nbsp;        this.value = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der name-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getName() {
+<b class="fc">&nbsp;        return name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der name-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setName(String value) {
+<b class="fc">&nbsp;        this.name = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der anchorId-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link Boolean }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public Boolean isAnchorId() {
+<b class="fc">&nbsp;        return anchorId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der anchorId-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link Boolean }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setAnchorId(Boolean value) {
+<b class="nc">&nbsp;        this.anchorId = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="fc">&nbsp;        if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        final MetadataType that = ((MetadataType) object);</b>
+&nbsp;        {
+&nbsp;            String lhsValue;
+<b class="fc">&nbsp;            lhsValue = this.getValue();</b>
+&nbsp;            String rhsValue;
+<b class="fc">&nbsp;            rhsValue = that.getValue();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;value&quot;, lhsValue), LocatorUtils.property(thatLocator, &quot;value&quot;, rhsValue), lhsValue, rhsValue, (this.value!= null), (that.value!= null))) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsName;
+<b class="fc">&nbsp;            lhsName = this.getName();</b>
+&nbsp;            String rhsName;
+<b class="fc">&nbsp;            rhsName = that.getName();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;name&quot;, lhsName), LocatorUtils.property(thatLocator, &quot;name&quot;, rhsName), lhsName, rhsName, (this.name!= null), (that.name!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            Boolean lhsAnchorId;
+<b class="fc">&nbsp;            lhsAnchorId = this.isAnchorId();</b>
+&nbsp;            Boolean rhsAnchorId;
+<b class="fc">&nbsp;            rhsAnchorId = that.isAnchorId();</b>
+<b class="fc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;anchorId&quot;, lhsAnchorId), LocatorUtils.property(thatLocator, &quot;anchorId&quot;, rhsAnchorId), lhsAnchorId, rhsAnchorId, (this.anchorId!= null), (that.anchorId!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(Object object) {
+<b class="nc">&nbsp;        final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;        return equals(null, null, object, strategy);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

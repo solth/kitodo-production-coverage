@@ -1,0 +1,285 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > XMLUtils</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: XMLUtils (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">XMLUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    16,7%
+  </span>
+  <span class="absValue">
+    (1/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    13,3%
+  </span>
+  <span class="absValue">
+    (4/30)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.io.ByteArrayInputStream;
+&nbsp;import java.io.ByteArrayOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.xml.XMLConstants;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;import javax.xml.transform.OutputKeys;
+&nbsp;import javax.xml.transform.Transformer;
+&nbsp;import javax.xml.transform.TransformerException;
+&nbsp;import javax.xml.transform.TransformerFactory;
+&nbsp;import javax.xml.transform.dom.DOMSource;
+&nbsp;import javax.xml.transform.stream.StreamResult;
+&nbsp;import javax.xml.xpath.XPath;
+&nbsp;import javax.xml.xpath.XPathExpressionException;
+&nbsp;import javax.xml.xpath.XPathFactory;
+&nbsp;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.Node;
+&nbsp;import org.xml.sax.InputSource;
+&nbsp;import org.xml.sax.SAXException;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class XMLUtils contains an omnium-gatherum of functions that work on XML.
+&nbsp; */
+&nbsp;public class XMLUtils {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private XMLUtils() {
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts an org.w3c.dom.Document to a
+&nbsp;     * ByteArray for Downloading
+&nbsp;     *
+&nbsp;     * @param data
+&nbsp;     *            The document to convert
+&nbsp;     * @param indent
+&nbsp;     *            No of spaces to use for indenting. Use “null” to disable
+&nbsp;     * @return the XML data as byte[]
+&nbsp;     * @throws TransformerException
+&nbsp;     *             when it is not possible to create a Transformer instance or
+&nbsp;     *             if an unrecoverable error occurs during the course of the
+&nbsp;     *             transformation
+&nbsp;     */
+&nbsp;    public static byte[] documentToByteArray(Document data, Integer indent) throws TransformerException {
+<b class="nc">&nbsp;        ByteArrayOutputStream result = new ByteArrayOutputStream();</b>
+&nbsp;
+<b class="nc">&nbsp;        Transformer transformer = TransformerFactory.newInstance().newTransformer();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(indent)) {</b>
+<b class="nc">&nbsp;            transformer.setOutputProperty(OutputKeys.INDENT, &quot;yes&quot;);</b>
+<b class="nc">&nbsp;            transformer.setOutputProperty(&quot;{http://xml.apache.org/xslt}indent-amount&quot;, indent.toString());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        transformer.transform(new DOMSource(data), new StreamResult(result));</b>
+<b class="nc">&nbsp;        return result.toByteArray();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the first child node from
+&nbsp;     * a node, identified by its node name.
+&nbsp;     *
+&nbsp;     * @param data
+&nbsp;     *            Document or Element whose children shall be examined
+&nbsp;     * @param tagName
+&nbsp;     *            name of the node to find
+&nbsp;     * @return first child node with that node name
+&nbsp;     * @throws NoSuchElementException
+&nbsp;     *             if no child node with that name can be found
+&nbsp;     */
+&nbsp;    public static Element getFirstChildWithTagName(Node data, String tagName) {
+<b class="nc">&nbsp;        for (Node element = data.getFirstChild(); Objects.nonNull(element); element = element.getNextSibling()) {</b>
+<b class="nc">&nbsp;            if (!(element instanceof Element)) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (element.getNodeName().equals(tagName)) {</b>
+<b class="nc">&nbsp;                return (Element) element;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        throw new NoSuchElementException(tagName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The function is a convenience method load a DOM Document object
+&nbsp;     * from an input stream.
+&nbsp;     *
+&nbsp;     * @param data
+&nbsp;     *            InputStream to read from
+&nbsp;     * @return the DOM Document encoded in the input stream’s data
+&nbsp;     * @throws SAXException
+&nbsp;     *             if any parse errors occur
+&nbsp;     * @throws IOException
+&nbsp;     *             if any IO errors occur
+&nbsp;     * @throws IOException
+&nbsp;     *             if a DocumentBuilder cannot be created which satisfies the
+&nbsp;     *             configuration requested—which never happens because we use
+&nbsp;     *             the default configuration here and that is definitely
+&nbsp;     *             supported, but in case - wrap it in IOException
+&nbsp;     */
+&nbsp;    public static Document load(InputStream data) throws SAXException, IOException {
+&nbsp;        try {
+<b class="nc">&nbsp;            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();</b>
+<b class="nc">&nbsp;            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);</b>
+<b class="nc">&nbsp;            return documentBuilderFactory.newDocumentBuilder().parse(data);</b>
+<b class="nc">&nbsp;        } catch (ParserConfigurationException e) {</b>
+<b class="nc">&nbsp;            throw new IOException(e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The function is a convenience method to obtain a new
+&nbsp;     * instance of a DOM Document object.
+&nbsp;     *
+&nbsp;     * @return A new DOM Document
+&nbsp;     * @throws IOException
+&nbsp;     *             if a DocumentBuilder cannot be created which satisfies the
+&nbsp;     *             configuration requested—which never happens because we use
+&nbsp;     *             the default configuration here and that is definitely
+&nbsp;     *             supported, but in case - wrap it in IOException
+&nbsp;     */
+&nbsp;    public static Document newDocument() throws IOException {
+&nbsp;        try {
+<b class="nc">&nbsp;            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();</b>
+<b class="nc">&nbsp;            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);</b>
+<b class="nc">&nbsp;            return documentBuilderFactory.newDocumentBuilder().newDocument();</b>
+<b class="nc">&nbsp;        } catch (ParserConfigurationException e) {</b>
+<b class="nc">&nbsp;            throw new IOException(e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parse given String &#39;xmlString&#39; and create Document from it.
+&nbsp;     *
+&nbsp;     * @param xmlString the String that will be parsed and converted to a Document
+&nbsp;     * @return Document
+&nbsp;     *          the Document created from the given String &#39;xmlString&#39;
+&nbsp;     * @throws ParserConfigurationException thrown when DocumentBuilder cannot be created
+&nbsp;     * @throws IOException thrown when input stream cannot be parsed
+&nbsp;     * @throws SAXException thrown when input stream cannot be parsed
+&nbsp;     */
+&nbsp;    public static Document parseXMLString(String xmlString) throws IOException, ParserConfigurationException,
+&nbsp;            SAXException {
+<b class="fc">&nbsp;        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();</b>
+<b class="fc">&nbsp;        factory.setNamespaceAware(true);</b>
+<b class="fc">&nbsp;        DocumentBuilder builder = factory.newDocumentBuilder();</b>
+<b class="fc">&nbsp;        return builder.parse(new InputSource(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8))));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Compile given String &quot;xpathString&quot; and check whether it contains a valid XPath (e.g. if the syntax is correct)
+&nbsp;     * Throws an exception if syntax is incorrect. Can be used to validate XPaths.
+&nbsp;     *
+&nbsp;     * @param xpathString String to be checked for correct XPath syntax
+&nbsp;     * @throws XPathExpressionException if provided String does not contain valid XPath syntax
+&nbsp;     */
+&nbsp;    public static void validateXPathSyntax(String xpathString) throws XPathExpressionException {
+<b class="nc">&nbsp;        XPathFactory factory = XPathFactory.newInstance();</b>
+<b class="nc">&nbsp;        XPath xpath = factory.newXPath();</b>
+<b class="nc">&nbsp;        xpath.compile(xpathString);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

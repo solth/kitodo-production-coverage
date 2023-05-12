@@ -1,0 +1,1758 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > StructLinkType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataformat.metskitodo</a>
+</div>
+
+<h1>Coverage Summary for Class: StructLinkType (org.kitodo.dataformat.metskitodo)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">StructLinkType</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,9%
+  </span>
+  <span class="absValue">
+    (3/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (6/24)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">StructLinkType$SmLink</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,6%
+  </span>
+  <span class="absValue">
+    (12/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    74,5%
+  </span>
+  <span class="absValue">
+    (38/51)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">StructLinkType$SmLinkGrp</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/57)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">StructLinkType$SmLinkGrp$SmArcLink</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/72)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">StructLinkType$SmLinkGrp$SmLocatorLink</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/47)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    19,7%
+  </span>
+  <span class="absValue">
+    (15/76)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    17,5%
+  </span>
+  <span class="absValue">
+    (44/251)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;//
+&nbsp;// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.0 generiert 
+&nbsp;// Siehe &lt;a href=&quot;https://javaee.github.io/jaxb-v2/&quot;&gt;https://javaee.github.io/jaxb-v2/&lt;/a&gt; 
+&nbsp;// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+&nbsp;// Generiert: 2023.05.12 um 01:28:08 PM CEST 
+&nbsp;//
+&nbsp;
+&nbsp;
+&nbsp;package org.kitodo.dataformat.metskitodo;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAnyAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;import javax.xml.bind.annotation.XmlElements;
+&nbsp;import javax.xml.bind.annotation.XmlID;
+&nbsp;import javax.xml.bind.annotation.XmlIDREF;
+&nbsp;import javax.xml.bind.annotation.XmlSchemaType;
+&nbsp;import javax.xml.bind.annotation.XmlSeeAlso;
+&nbsp;import javax.xml.bind.annotation.XmlType;
+&nbsp;import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+&nbsp;import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+&nbsp;import javax.xml.namespace.QName;
+&nbsp;import org.jvnet.jaxb2_commons.lang.Equals2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.EqualsStrategy2;
+&nbsp;import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+&nbsp;import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+&nbsp;import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * structLinkType: Complex Type for Structural Map Linking
+&nbsp; * 				The Structural Map Linking section allows for the specification of hyperlinks between different components of a METS structure delineated in a structural map.  structLink contains a single, repeatable element, smLink.  Each smLink element indicates a hyperlink between two nodes in the structMap.  The structMap nodes recorded in smLink are identified using their XML ID attribute	values.
+&nbsp; * 			
+&nbsp; * 
+&nbsp; * &lt;p&gt;Java-Klasse für structLinkType complex type.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * &amp;lt;complexType name=&quot;structLinkType&quot;&amp;gt;
+&nbsp; *   &amp;lt;complexContent&amp;gt;
+&nbsp; *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *       &amp;lt;choice maxOccurs=&quot;unbounded&quot;&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;smLink&quot;&amp;gt;
+&nbsp; *           &amp;lt;complexType&amp;gt;
+&nbsp; *             &amp;lt;complexContent&amp;gt;
+&nbsp; *               &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *                 &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}arcrole&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}title&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}show&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}actuate&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}to use=&quot;required&quot;&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}from use=&quot;required&quot;&quot;/&amp;gt;
+&nbsp; *               &amp;lt;/restriction&amp;gt;
+&nbsp; *             &amp;lt;/complexContent&amp;gt;
+&nbsp; *           &amp;lt;/complexType&amp;gt;
+&nbsp; *         &amp;lt;/element&amp;gt;
+&nbsp; *         &amp;lt;element name=&quot;smLinkGrp&quot;&amp;gt;
+&nbsp; *           &amp;lt;complexType&amp;gt;
+&nbsp; *             &amp;lt;complexContent&amp;gt;
+&nbsp; *               &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *                 &amp;lt;sequence&amp;gt;
+&nbsp; *                   &amp;lt;element name=&quot;smLocatorLink&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;2&quot;&amp;gt;
+&nbsp; *                     &amp;lt;complexType&amp;gt;
+&nbsp; *                       &amp;lt;complexContent&amp;gt;
+&nbsp; *                         &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *                           &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}locatorLink&quot;/&amp;gt;
+&nbsp; *                           &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *                         &amp;lt;/restriction&amp;gt;
+&nbsp; *                       &amp;lt;/complexContent&amp;gt;
+&nbsp; *                     &amp;lt;/complexType&amp;gt;
+&nbsp; *                   &amp;lt;/element&amp;gt;
+&nbsp; *                   &amp;lt;element name=&quot;smArcLink&quot; maxOccurs=&quot;unbounded&quot;&amp;gt;
+&nbsp; *                     &amp;lt;complexType&amp;gt;
+&nbsp; *                       &amp;lt;complexContent&amp;gt;
+&nbsp; *                         &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp; *                           &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}arcLink&quot;/&amp;gt;
+&nbsp; *                           &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *                           &amp;lt;attribute name=&quot;ARCTYPE&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp; *                           &amp;lt;attribute name=&quot;ADMID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREFS&quot; /&amp;gt;
+&nbsp; *                         &amp;lt;/restriction&amp;gt;
+&nbsp; *                       &amp;lt;/complexContent&amp;gt;
+&nbsp; *                     &amp;lt;/complexType&amp;gt;
+&nbsp; *                   &amp;lt;/element&amp;gt;
+&nbsp; *                 &amp;lt;/sequence&amp;gt;
+&nbsp; *                 &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}extendedLink&quot;/&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *                 &amp;lt;attribute name=&quot;ARCLINKORDER&quot; default=&quot;unordered&quot;&amp;gt;
+&nbsp; *                   &amp;lt;simpleType&amp;gt;
+&nbsp; *                     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}string&quot;&amp;gt;
+&nbsp; *                       &amp;lt;enumeration value=&quot;ordered&quot;/&amp;gt;
+&nbsp; *                       &amp;lt;enumeration value=&quot;unordered&quot;/&amp;gt;
+&nbsp; *                     &amp;lt;/restriction&amp;gt;
+&nbsp; *                   &amp;lt;/simpleType&amp;gt;
+&nbsp; *                 &amp;lt;/attribute&amp;gt;
+&nbsp; *               &amp;lt;/restriction&amp;gt;
+&nbsp; *             &amp;lt;/complexContent&amp;gt;
+&nbsp; *           &amp;lt;/complexType&amp;gt;
+&nbsp; *         &amp;lt;/element&amp;gt;
+&nbsp; *       &amp;lt;/choice&amp;gt;
+&nbsp; *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp; *       &amp;lt;anyAttribute processContents=&#39;lax&#39; namespace=&#39;##other&#39;/&amp;gt;
+&nbsp; *     &amp;lt;/restriction&amp;gt;
+&nbsp; *   &amp;lt;/complexContent&amp;gt;
+&nbsp; * &amp;lt;/complexType&amp;gt;
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * 
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;@XmlType(name = &quot;structLinkType&quot;, propOrder = {
+&nbsp;    &quot;smLinkOrSmLinkGrp&quot;
+&nbsp;})
+&nbsp;@XmlSeeAlso({
+&nbsp;    org.kitodo.dataformat.metskitodo.MetsType.StructLink.class
+&nbsp;})
+<b class="fc">&nbsp;public class StructLinkType implements Equals2</b>
+&nbsp;{
+&nbsp;
+&nbsp;    @XmlElements({
+&nbsp;        @XmlElement(name = &quot;smLink&quot;, type = StructLinkType.SmLink.class),
+&nbsp;        @XmlElement(name = &quot;smLinkGrp&quot;, type = StructLinkType.SmLinkGrp.class)
+&nbsp;    })
+&nbsp;    protected List&lt;Object&gt; smLinkOrSmLinkGrp;
+&nbsp;    @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;    @XmlID
+&nbsp;    @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;    protected String id;
+<b class="fc">&nbsp;    @XmlAnyAttribute</b>
+&nbsp;    private Map&lt;QName, String&gt; otherAttributes = new HashMap&lt;QName, String&gt;();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the value of the smLinkOrSmLinkGrp property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This accessor method returns a reference to the live list,
+&nbsp;     * not a snapshot. Therefore any modification you make to the
+&nbsp;     * returned list will be present inside the JAXB object.
+&nbsp;     * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the smLinkOrSmLinkGrp property.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * For example, to add a new item, do as follows:
+&nbsp;     * &lt;pre&gt;
+&nbsp;     *    getSmLinkOrSmLinkGrp().add(newItem);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Objects of the following type(s) are allowed in the list
+&nbsp;     * {@link StructLinkType.SmLink }
+&nbsp;     * {@link StructLinkType.SmLinkGrp }
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    public List&lt;Object&gt; getSmLinkOrSmLinkGrp() {
+<b class="fc">&nbsp;        if (smLinkOrSmLinkGrp == null) {</b>
+<b class="fc">&nbsp;            smLinkOrSmLinkGrp = new ArrayList&lt;Object&gt;();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this.smLinkOrSmLinkGrp;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     possible object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public String getID() {
+<b class="fc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Legt den Wert der id-Eigenschaft fest.
+&nbsp;     * 
+&nbsp;     * @param value
+&nbsp;     *     allowed object is
+&nbsp;     *     {@link String }
+&nbsp;     *     
+&nbsp;     */
+&nbsp;    public void setID(String value) {
+<b class="nc">&nbsp;        this.id = value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets a map that contains attributes that aren&#39;t bound to any typed property on this class.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;
+&nbsp;     * the map is keyed by the name of the attribute and 
+&nbsp;     * the value is the string value of the attribute.
+&nbsp;     * 
+&nbsp;     * the map returned by this method is live, and you can add new attribute
+&nbsp;     * by updating the map directly. Because of this design, there&#39;s no setter.
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     * @return
+&nbsp;     *     always non-null
+&nbsp;     */
+&nbsp;    public Map&lt;QName, String&gt; getOtherAttributes() {
+<b class="nc">&nbsp;        return otherAttributes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="nc">&nbsp;        if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (this == object) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        final StructLinkType that = ((StructLinkType) object);</b>
+&nbsp;        {
+&nbsp;            List&lt;Object&gt; lhsSmLinkOrSmLinkGrp;
+<b class="nc">&nbsp;            lhsSmLinkOrSmLinkGrp = (((this.smLinkOrSmLinkGrp!= null)&amp;&amp;(!this.smLinkOrSmLinkGrp.isEmpty()))?this.getSmLinkOrSmLinkGrp():null);</b>
+&nbsp;            List&lt;Object&gt; rhsSmLinkOrSmLinkGrp;
+<b class="nc">&nbsp;            rhsSmLinkOrSmLinkGrp = (((that.smLinkOrSmLinkGrp!= null)&amp;&amp;(!that.smLinkOrSmLinkGrp.isEmpty()))?that.getSmLinkOrSmLinkGrp():null);</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;smLinkOrSmLinkGrp&quot;, lhsSmLinkOrSmLinkGrp), LocatorUtils.property(thatLocator, &quot;smLinkOrSmLinkGrp&quot;, rhsSmLinkOrSmLinkGrp), lhsSmLinkOrSmLinkGrp, rhsSmLinkOrSmLinkGrp, ((this.smLinkOrSmLinkGrp!= null)&amp;&amp;(!this.smLinkOrSmLinkGrp.isEmpty())), ((that.smLinkOrSmLinkGrp!= null)&amp;&amp;(!that.smLinkOrSmLinkGrp.isEmpty())))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;        {
+&nbsp;            String lhsID;
+<b class="nc">&nbsp;            lhsID = this.getID();</b>
+&nbsp;            String rhsID;
+<b class="nc">&nbsp;            rhsID = that.getID();</b>
+<b class="nc">&nbsp;            if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean equals(Object object) {
+<b class="nc">&nbsp;        final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;        return equals(null, null, object, strategy);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;Java-Klasse für anonymous complex type.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp;     * 
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * &amp;lt;complexType&amp;gt;
+&nbsp;     *   &amp;lt;complexContent&amp;gt;
+&nbsp;     *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;     *       &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}arcrole&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}title&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}show&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}actuate&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}to use=&quot;required&quot;&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attribute ref=&quot;{http://www.w3.org/1999/xlink}from use=&quot;required&quot;&quot;/&amp;gt;
+&nbsp;     *     &amp;lt;/restriction&amp;gt;
+&nbsp;     *   &amp;lt;/complexContent&amp;gt;
+&nbsp;     * &amp;lt;/complexType&amp;gt;
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    @XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;    @XmlType(name = &quot;&quot;)
+<b class="fc">&nbsp;    public static class SmLink implements Equals2</b>
+&nbsp;    {
+&nbsp;
+&nbsp;        @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;        @XmlID
+&nbsp;        @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;        protected String id;
+&nbsp;        @XmlAttribute(name = &quot;arcrole&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String arcrole;
+&nbsp;        @XmlAttribute(name = &quot;title&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String title;
+&nbsp;        @XmlAttribute(name = &quot;show&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String show;
+&nbsp;        @XmlAttribute(name = &quot;actuate&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String actuate;
+&nbsp;        @XmlAttribute(name = &quot;to&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;, required = true)
+&nbsp;        protected String to;
+&nbsp;        @XmlAttribute(name = &quot;from&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;, required = true)
+&nbsp;        protected String from;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getID() {
+<b class="fc">&nbsp;            return id;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der id-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setID(String value) {
+<b class="nc">&nbsp;            this.id = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * 
+&nbsp;         * 								 xlink:arcrole - the role of the link, as per the xlink specification.  See http://www.w3.org/TR/xlink/
+&nbsp;         * 							
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getArcrole() {
+<b class="fc">&nbsp;            return arcrole;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der arcrole-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setArcrole(String value) {
+<b class="nc">&nbsp;            this.arcrole = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * 
+&nbsp;         * 								xlink:title - a title for the link (if needed), as per the xlink specification.  See http://www.w3.org/TR/xlink/
+&nbsp;         * 							
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getTitle() {
+<b class="fc">&nbsp;            return title;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der title-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setTitle(String value) {
+<b class="nc">&nbsp;            this.title = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * 
+&nbsp;         * 								xlink:show - see the xlink specification at http://www.w3.org/TR/xlink/
+&nbsp;         * 							
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getShow() {
+<b class="fc">&nbsp;            return show;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der show-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setShow(String value) {
+<b class="nc">&nbsp;            this.show = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * 
+&nbsp;         * 								xlink:actuate - see the xlink specification at http://www.w3.org/TR/xlink/
+&nbsp;         * 							
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getActuate() {
+<b class="fc">&nbsp;            return actuate;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der actuate-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setActuate(String value) {
+<b class="nc">&nbsp;            this.actuate = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * 
+&nbsp;         * 								xlink:to - the value of the label for the element in the structMap you are linking to.
+&nbsp;         * 							
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getTo() {
+<b class="fc">&nbsp;            return to;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der to-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setTo(String value) {
+<b class="fc">&nbsp;            this.to = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * 
+&nbsp;         * 								xlink:from - the value of the label for the element in the structMap you are linking from.
+&nbsp;         * 							
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getFrom() {
+<b class="fc">&nbsp;            return from;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der from-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setFrom(String value) {
+<b class="fc">&nbsp;            this.from = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="fc">&nbsp;            if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (this == object) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            final StructLinkType.SmLink that = ((StructLinkType.SmLink) object);</b>
+&nbsp;            {
+&nbsp;                String lhsID;
+<b class="fc">&nbsp;                lhsID = this.getID();</b>
+&nbsp;                String rhsID;
+<b class="fc">&nbsp;                rhsID = that.getID();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsArcrole;
+<b class="fc">&nbsp;                lhsArcrole = this.getArcrole();</b>
+&nbsp;                String rhsArcrole;
+<b class="fc">&nbsp;                rhsArcrole = that.getArcrole();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;arcrole&quot;, lhsArcrole), LocatorUtils.property(thatLocator, &quot;arcrole&quot;, rhsArcrole), lhsArcrole, rhsArcrole, (this.arcrole!= null), (that.arcrole!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsTitle;
+<b class="fc">&nbsp;                lhsTitle = this.getTitle();</b>
+&nbsp;                String rhsTitle;
+<b class="fc">&nbsp;                rhsTitle = that.getTitle();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;title&quot;, lhsTitle), LocatorUtils.property(thatLocator, &quot;title&quot;, rhsTitle), lhsTitle, rhsTitle, (this.title!= null), (that.title!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsShow;
+<b class="fc">&nbsp;                lhsShow = this.getShow();</b>
+&nbsp;                String rhsShow;
+<b class="fc">&nbsp;                rhsShow = that.getShow();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;show&quot;, lhsShow), LocatorUtils.property(thatLocator, &quot;show&quot;, rhsShow), lhsShow, rhsShow, (this.show!= null), (that.show!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsActuate;
+<b class="fc">&nbsp;                lhsActuate = this.getActuate();</b>
+&nbsp;                String rhsActuate;
+<b class="fc">&nbsp;                rhsActuate = that.getActuate();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;actuate&quot;, lhsActuate), LocatorUtils.property(thatLocator, &quot;actuate&quot;, rhsActuate), lhsActuate, rhsActuate, (this.actuate!= null), (that.actuate!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsTo;
+<b class="fc">&nbsp;                lhsTo = this.getTo();</b>
+&nbsp;                String rhsTo;
+<b class="fc">&nbsp;                rhsTo = that.getTo();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;to&quot;, lhsTo), LocatorUtils.property(thatLocator, &quot;to&quot;, rhsTo), lhsTo, rhsTo, (this.to!= null), (that.to!= null))) {</b>
+<b class="fc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsFrom;
+<b class="fc">&nbsp;                lhsFrom = this.getFrom();</b>
+&nbsp;                String rhsFrom;
+<b class="fc">&nbsp;                rhsFrom = that.getFrom();</b>
+<b class="fc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;from&quot;, lhsFrom), LocatorUtils.property(thatLocator, &quot;from&quot;, rhsFrom), lhsFrom, rhsFrom, (this.from!= null), (that.from!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(Object object) {
+<b class="fc">&nbsp;            final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="fc">&nbsp;            return equals(null, null, object, strategy);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;Java-Klasse für anonymous complex type.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp;     * 
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * &amp;lt;complexType&amp;gt;
+&nbsp;     *   &amp;lt;complexContent&amp;gt;
+&nbsp;     *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;     *       &amp;lt;sequence&amp;gt;
+&nbsp;     *         &amp;lt;element name=&quot;smLocatorLink&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;2&quot;&amp;gt;
+&nbsp;     *           &amp;lt;complexType&amp;gt;
+&nbsp;     *             &amp;lt;complexContent&amp;gt;
+&nbsp;     *               &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;     *                 &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}locatorLink&quot;/&amp;gt;
+&nbsp;     *                 &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;     *               &amp;lt;/restriction&amp;gt;
+&nbsp;     *             &amp;lt;/complexContent&amp;gt;
+&nbsp;     *           &amp;lt;/complexType&amp;gt;
+&nbsp;     *         &amp;lt;/element&amp;gt;
+&nbsp;     *         &amp;lt;element name=&quot;smArcLink&quot; maxOccurs=&quot;unbounded&quot;&amp;gt;
+&nbsp;     *           &amp;lt;complexType&amp;gt;
+&nbsp;     *             &amp;lt;complexContent&amp;gt;
+&nbsp;     *               &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;     *                 &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}arcLink&quot;/&amp;gt;
+&nbsp;     *                 &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;     *                 &amp;lt;attribute name=&quot;ARCTYPE&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp;     *                 &amp;lt;attribute name=&quot;ADMID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREFS&quot; /&amp;gt;
+&nbsp;     *               &amp;lt;/restriction&amp;gt;
+&nbsp;     *             &amp;lt;/complexContent&amp;gt;
+&nbsp;     *           &amp;lt;/complexType&amp;gt;
+&nbsp;     *         &amp;lt;/element&amp;gt;
+&nbsp;     *       &amp;lt;/sequence&amp;gt;
+&nbsp;     *       &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}extendedLink&quot;/&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;     *       &amp;lt;attribute name=&quot;ARCLINKORDER&quot; default=&quot;unordered&quot;&amp;gt;
+&nbsp;     *         &amp;lt;simpleType&amp;gt;
+&nbsp;     *           &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}string&quot;&amp;gt;
+&nbsp;     *             &amp;lt;enumeration value=&quot;ordered&quot;/&amp;gt;
+&nbsp;     *             &amp;lt;enumeration value=&quot;unordered&quot;/&amp;gt;
+&nbsp;     *           &amp;lt;/restriction&amp;gt;
+&nbsp;     *         &amp;lt;/simpleType&amp;gt;
+&nbsp;     *       &amp;lt;/attribute&amp;gt;
+&nbsp;     *     &amp;lt;/restriction&amp;gt;
+&nbsp;     *   &amp;lt;/complexContent&amp;gt;
+&nbsp;     * &amp;lt;/complexType&amp;gt;
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     * 
+&nbsp;     * 
+&nbsp;     */
+&nbsp;    @XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;    @XmlType(name = &quot;&quot;, propOrder = {
+&nbsp;        &quot;smLocatorLink&quot;,
+&nbsp;        &quot;smArcLink&quot;
+&nbsp;    })
+<b class="nc">&nbsp;    public static class SmLinkGrp implements Equals2</b>
+&nbsp;    {
+&nbsp;
+&nbsp;        @XmlElement(required = true)
+&nbsp;        protected List&lt;StructLinkType.SmLinkGrp.SmLocatorLink&gt; smLocatorLink;
+&nbsp;        @XmlElement(required = true)
+&nbsp;        protected List&lt;StructLinkType.SmLinkGrp.SmArcLink&gt; smArcLink;
+&nbsp;        @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;        @XmlID
+&nbsp;        @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;        protected String id;
+&nbsp;        @XmlAttribute(name = &quot;ARCLINKORDER&quot;)
+&nbsp;        protected String arclinkorder;
+&nbsp;        @XmlAttribute(name = &quot;type&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String type;
+&nbsp;        @XmlAttribute(name = &quot;role&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String role;
+&nbsp;        @XmlAttribute(name = &quot;title&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;        protected String title;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Gets the value of the smLocatorLink property.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * This accessor method returns a reference to the live list,
+&nbsp;         * not a snapshot. Therefore any modification you make to the
+&nbsp;         * returned list will be present inside the JAXB object.
+&nbsp;         * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the smLocatorLink property.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * For example, to add a new item, do as follows:
+&nbsp;         * &lt;pre&gt;
+&nbsp;         *    getSmLocatorLink().add(newItem);
+&nbsp;         * &lt;/pre&gt;
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * Objects of the following type(s) are allowed in the list
+&nbsp;         * {@link StructLinkType.SmLinkGrp.SmLocatorLink }
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         */
+&nbsp;        public List&lt;StructLinkType.SmLinkGrp.SmLocatorLink&gt; getSmLocatorLink() {
+<b class="nc">&nbsp;            if (smLocatorLink == null) {</b>
+<b class="nc">&nbsp;                smLocatorLink = new ArrayList&lt;StructLinkType.SmLinkGrp.SmLocatorLink&gt;();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return this.smLocatorLink;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Gets the value of the smArcLink property.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * This accessor method returns a reference to the live list,
+&nbsp;         * not a snapshot. Therefore any modification you make to the
+&nbsp;         * returned list will be present inside the JAXB object.
+&nbsp;         * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the smArcLink property.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * For example, to add a new item, do as follows:
+&nbsp;         * &lt;pre&gt;
+&nbsp;         *    getSmArcLink().add(newItem);
+&nbsp;         * &lt;/pre&gt;
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;
+&nbsp;         * Objects of the following type(s) are allowed in the list
+&nbsp;         * {@link StructLinkType.SmLinkGrp.SmArcLink }
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         */
+&nbsp;        public List&lt;StructLinkType.SmLinkGrp.SmArcLink&gt; getSmArcLink() {
+<b class="nc">&nbsp;            if (smArcLink == null) {</b>
+<b class="nc">&nbsp;                smArcLink = new ArrayList&lt;StructLinkType.SmLinkGrp.SmArcLink&gt;();</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return this.smArcLink;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getID() {
+<b class="nc">&nbsp;            return id;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der id-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setID(String value) {
+<b class="nc">&nbsp;            this.id = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der arclinkorder-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getARCLINKORDER() {
+<b class="nc">&nbsp;            if (arclinkorder == null) {</b>
+<b class="nc">&nbsp;                return &quot;unordered&quot;;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return arclinkorder;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der arclinkorder-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setARCLINKORDER(String value) {
+<b class="nc">&nbsp;            this.arclinkorder = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der type-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getType() {
+<b class="nc">&nbsp;            if (type == null) {</b>
+<b class="nc">&nbsp;                return &quot;extended&quot;;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return type;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der type-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setType(String value) {
+<b class="nc">&nbsp;            this.type = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der role-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getRole() {
+<b class="nc">&nbsp;            return role;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der role-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setRole(String value) {
+<b class="nc">&nbsp;            this.role = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Ruft den Wert der title-Eigenschaft ab.
+&nbsp;         * 
+&nbsp;         * @return
+&nbsp;         *     possible object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public String getTitle() {
+<b class="nc">&nbsp;            return title;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Legt den Wert der title-Eigenschaft fest.
+&nbsp;         * 
+&nbsp;         * @param value
+&nbsp;         *     allowed object is
+&nbsp;         *     {@link String }
+&nbsp;         *     
+&nbsp;         */
+&nbsp;        public void setTitle(String value) {
+<b class="nc">&nbsp;            this.title = value;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="nc">&nbsp;            if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (this == object) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            final StructLinkType.SmLinkGrp that = ((StructLinkType.SmLinkGrp) object);</b>
+&nbsp;            {
+&nbsp;                List&lt;StructLinkType.SmLinkGrp.SmLocatorLink&gt; lhsSmLocatorLink;
+<b class="nc">&nbsp;                lhsSmLocatorLink = (((this.smLocatorLink!= null)&amp;&amp;(!this.smLocatorLink.isEmpty()))?this.getSmLocatorLink():null);</b>
+&nbsp;                List&lt;StructLinkType.SmLinkGrp.SmLocatorLink&gt; rhsSmLocatorLink;
+<b class="nc">&nbsp;                rhsSmLocatorLink = (((that.smLocatorLink!= null)&amp;&amp;(!that.smLocatorLink.isEmpty()))?that.getSmLocatorLink():null);</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;smLocatorLink&quot;, lhsSmLocatorLink), LocatorUtils.property(thatLocator, &quot;smLocatorLink&quot;, rhsSmLocatorLink), lhsSmLocatorLink, rhsSmLocatorLink, ((this.smLocatorLink!= null)&amp;&amp;(!this.smLocatorLink.isEmpty())), ((that.smLocatorLink!= null)&amp;&amp;(!that.smLocatorLink.isEmpty())))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                List&lt;StructLinkType.SmLinkGrp.SmArcLink&gt; lhsSmArcLink;
+<b class="nc">&nbsp;                lhsSmArcLink = (((this.smArcLink!= null)&amp;&amp;(!this.smArcLink.isEmpty()))?this.getSmArcLink():null);</b>
+&nbsp;                List&lt;StructLinkType.SmLinkGrp.SmArcLink&gt; rhsSmArcLink;
+<b class="nc">&nbsp;                rhsSmArcLink = (((that.smArcLink!= null)&amp;&amp;(!that.smArcLink.isEmpty()))?that.getSmArcLink():null);</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;smArcLink&quot;, lhsSmArcLink), LocatorUtils.property(thatLocator, &quot;smArcLink&quot;, rhsSmArcLink), lhsSmArcLink, rhsSmArcLink, ((this.smArcLink!= null)&amp;&amp;(!this.smArcLink.isEmpty())), ((that.smArcLink!= null)&amp;&amp;(!that.smArcLink.isEmpty())))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsID;
+<b class="nc">&nbsp;                lhsID = this.getID();</b>
+&nbsp;                String rhsID;
+<b class="nc">&nbsp;                rhsID = that.getID();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsARCLINKORDER;
+<b class="nc">&nbsp;                lhsARCLINKORDER = this.getARCLINKORDER();</b>
+&nbsp;                String rhsARCLINKORDER;
+<b class="nc">&nbsp;                rhsARCLINKORDER = that.getARCLINKORDER();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;arclinkorder&quot;, lhsARCLINKORDER), LocatorUtils.property(thatLocator, &quot;arclinkorder&quot;, rhsARCLINKORDER), lhsARCLINKORDER, rhsARCLINKORDER, (this.arclinkorder!= null), (that.arclinkorder!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsType;
+<b class="nc">&nbsp;                lhsType = this.getType();</b>
+&nbsp;                String rhsType;
+<b class="nc">&nbsp;                rhsType = that.getType();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;type&quot;, lhsType), LocatorUtils.property(thatLocator, &quot;type&quot;, rhsType), lhsType, rhsType, (this.type!= null), (that.type!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsRole;
+<b class="nc">&nbsp;                lhsRole = this.getRole();</b>
+&nbsp;                String rhsRole;
+<b class="nc">&nbsp;                rhsRole = that.getRole();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;role&quot;, lhsRole), LocatorUtils.property(thatLocator, &quot;role&quot;, rhsRole), lhsRole, rhsRole, (this.role!= null), (that.role!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            {
+&nbsp;                String lhsTitle;
+<b class="nc">&nbsp;                lhsTitle = this.getTitle();</b>
+&nbsp;                String rhsTitle;
+<b class="nc">&nbsp;                rhsTitle = that.getTitle();</b>
+<b class="nc">&nbsp;                if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;title&quot;, lhsTitle), LocatorUtils.property(thatLocator, &quot;title&quot;, rhsTitle), lhsTitle, rhsTitle, (this.title!= null), (that.title!= null))) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public boolean equals(Object object) {
+<b class="nc">&nbsp;            final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;            return equals(null, null, object, strategy);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * 
+&nbsp;         * 										The structMap arc link element &lt;smArcLink&gt; is of xlink:type &quot;arc&quot; It can be used to establish a traversal link between two &lt;div&gt; elements as identified by &lt;smLocatorLink&gt; elements within the same smLinkGrp element. The associated xlink:from and xlink:to attributes identify the from and to sides of the arc link by referencing the xlink:label attribute values on the participating smLocatorLink elements.
+&nbsp;         * 									
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;Java-Klasse für anonymous complex type.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp;         * 
+&nbsp;         * &lt;pre&gt;
+&nbsp;         * &amp;lt;complexType&amp;gt;
+&nbsp;         *   &amp;lt;complexContent&amp;gt;
+&nbsp;         *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;         *       &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}arcLink&quot;/&amp;gt;
+&nbsp;         *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;         *       &amp;lt;attribute name=&quot;ARCTYPE&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&amp;gt;
+&nbsp;         *       &amp;lt;attribute name=&quot;ADMID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}IDREFS&quot; /&amp;gt;
+&nbsp;         *     &amp;lt;/restriction&amp;gt;
+&nbsp;         *   &amp;lt;/complexContent&amp;gt;
+&nbsp;         * &amp;lt;/complexType&amp;gt;
+&nbsp;         * &lt;/pre&gt;
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         */
+&nbsp;        @XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;        @XmlType(name = &quot;&quot;)
+<b class="nc">&nbsp;        public static class SmArcLink implements Equals2</b>
+&nbsp;        {
+&nbsp;
+&nbsp;            @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;            @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;            @XmlID
+&nbsp;            @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;            protected String id;
+&nbsp;            @XmlAttribute(name = &quot;ARCTYPE&quot;)
+&nbsp;            protected String arctype;
+&nbsp;            @XmlAttribute(name = &quot;ADMID&quot;)
+&nbsp;            @XmlIDREF
+&nbsp;            @XmlSchemaType(name = &quot;IDREFS&quot;)
+&nbsp;            protected List&lt;Object&gt; admid;
+&nbsp;            @XmlAttribute(name = &quot;type&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String type;
+&nbsp;            @XmlAttribute(name = &quot;arcrole&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String arcrole;
+&nbsp;            @XmlAttribute(name = &quot;title&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String title;
+&nbsp;            @XmlAttribute(name = &quot;show&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String show;
+&nbsp;            @XmlAttribute(name = &quot;actuate&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String actuate;
+&nbsp;            @XmlAttribute(name = &quot;from&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String from;
+&nbsp;            @XmlAttribute(name = &quot;to&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String to;
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getID() {
+<b class="nc">&nbsp;                return id;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der id-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setID(String value) {
+<b class="nc">&nbsp;                this.id = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der arctype-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getARCTYPE() {
+<b class="nc">&nbsp;                return arctype;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der arctype-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setARCTYPE(String value) {
+<b class="nc">&nbsp;                this.arctype = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Gets the value of the admid property.
+&nbsp;             * 
+&nbsp;             * &lt;p&gt;
+&nbsp;             * This accessor method returns a reference to the live list,
+&nbsp;             * not a snapshot. Therefore any modification you make to the
+&nbsp;             * returned list will be present inside the JAXB object.
+&nbsp;             * This is why there is not a &lt;CODE&gt;set&lt;/CODE&gt; method for the admid property.
+&nbsp;             * 
+&nbsp;             * &lt;p&gt;
+&nbsp;             * For example, to add a new item, do as follows:
+&nbsp;             * &lt;pre&gt;
+&nbsp;             *    getADMID().add(newItem);
+&nbsp;             * &lt;/pre&gt;
+&nbsp;             * 
+&nbsp;             * 
+&nbsp;             * &lt;p&gt;
+&nbsp;             * Objects of the following type(s) are allowed in the list
+&nbsp;             * {@link Object }
+&nbsp;             * 
+&nbsp;             * 
+&nbsp;             */
+&nbsp;            public List&lt;Object&gt; getADMID() {
+<b class="nc">&nbsp;                if (admid == null) {</b>
+<b class="nc">&nbsp;                    admid = new ArrayList&lt;Object&gt;();</b>
+&nbsp;                }
+<b class="nc">&nbsp;                return this.admid;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der type-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getType() {
+<b class="nc">&nbsp;                if (type == null) {</b>
+<b class="nc">&nbsp;                    return &quot;arc&quot;;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    return type;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der type-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setType(String value) {
+<b class="nc">&nbsp;                this.type = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der arcrole-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getArcrole() {
+<b class="nc">&nbsp;                return arcrole;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der arcrole-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setArcrole(String value) {
+<b class="nc">&nbsp;                this.arcrole = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der title-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getTitle() {
+<b class="nc">&nbsp;                return title;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der title-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setTitle(String value) {
+<b class="nc">&nbsp;                this.title = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der show-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getShow() {
+<b class="nc">&nbsp;                return show;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der show-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setShow(String value) {
+<b class="nc">&nbsp;                this.show = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der actuate-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getActuate() {
+<b class="nc">&nbsp;                return actuate;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der actuate-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setActuate(String value) {
+<b class="nc">&nbsp;                this.actuate = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der from-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getFrom() {
+<b class="nc">&nbsp;                return from;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der from-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setFrom(String value) {
+<b class="nc">&nbsp;                this.from = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der to-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getTo() {
+<b class="nc">&nbsp;                return to;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der to-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setTo(String value) {
+<b class="nc">&nbsp;                this.to = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="nc">&nbsp;                if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                if (this == object) {</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                final StructLinkType.SmLinkGrp.SmArcLink that = ((StructLinkType.SmLinkGrp.SmArcLink) object);</b>
+&nbsp;                {
+&nbsp;                    String lhsID;
+<b class="nc">&nbsp;                    lhsID = this.getID();</b>
+&nbsp;                    String rhsID;
+<b class="nc">&nbsp;                    rhsID = that.getID();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsARCTYPE;
+<b class="nc">&nbsp;                    lhsARCTYPE = this.getARCTYPE();</b>
+&nbsp;                    String rhsARCTYPE;
+<b class="nc">&nbsp;                    rhsARCTYPE = that.getARCTYPE();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;arctype&quot;, lhsARCTYPE), LocatorUtils.property(thatLocator, &quot;arctype&quot;, rhsARCTYPE), lhsARCTYPE, rhsARCTYPE, (this.arctype!= null), (that.arctype!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    List&lt;Object&gt; lhsADMID;
+<b class="nc">&nbsp;                    lhsADMID = (((this.admid!= null)&amp;&amp;(!this.admid.isEmpty()))?this.getADMID():null);</b>
+&nbsp;                    List&lt;Object&gt; rhsADMID;
+<b class="nc">&nbsp;                    rhsADMID = (((that.admid!= null)&amp;&amp;(!that.admid.isEmpty()))?that.getADMID():null);</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;admid&quot;, lhsADMID), LocatorUtils.property(thatLocator, &quot;admid&quot;, rhsADMID), lhsADMID, rhsADMID, ((this.admid!= null)&amp;&amp;(!this.admid.isEmpty())), ((that.admid!= null)&amp;&amp;(!that.admid.isEmpty())))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsType;
+<b class="nc">&nbsp;                    lhsType = this.getType();</b>
+&nbsp;                    String rhsType;
+<b class="nc">&nbsp;                    rhsType = that.getType();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;type&quot;, lhsType), LocatorUtils.property(thatLocator, &quot;type&quot;, rhsType), lhsType, rhsType, (this.type!= null), (that.type!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsArcrole;
+<b class="nc">&nbsp;                    lhsArcrole = this.getArcrole();</b>
+&nbsp;                    String rhsArcrole;
+<b class="nc">&nbsp;                    rhsArcrole = that.getArcrole();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;arcrole&quot;, lhsArcrole), LocatorUtils.property(thatLocator, &quot;arcrole&quot;, rhsArcrole), lhsArcrole, rhsArcrole, (this.arcrole!= null), (that.arcrole!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsTitle;
+<b class="nc">&nbsp;                    lhsTitle = this.getTitle();</b>
+&nbsp;                    String rhsTitle;
+<b class="nc">&nbsp;                    rhsTitle = that.getTitle();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;title&quot;, lhsTitle), LocatorUtils.property(thatLocator, &quot;title&quot;, rhsTitle), lhsTitle, rhsTitle, (this.title!= null), (that.title!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsShow;
+<b class="nc">&nbsp;                    lhsShow = this.getShow();</b>
+&nbsp;                    String rhsShow;
+<b class="nc">&nbsp;                    rhsShow = that.getShow();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;show&quot;, lhsShow), LocatorUtils.property(thatLocator, &quot;show&quot;, rhsShow), lhsShow, rhsShow, (this.show!= null), (that.show!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsActuate;
+<b class="nc">&nbsp;                    lhsActuate = this.getActuate();</b>
+&nbsp;                    String rhsActuate;
+<b class="nc">&nbsp;                    rhsActuate = that.getActuate();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;actuate&quot;, lhsActuate), LocatorUtils.property(thatLocator, &quot;actuate&quot;, rhsActuate), lhsActuate, rhsActuate, (this.actuate!= null), (that.actuate!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsFrom;
+<b class="nc">&nbsp;                    lhsFrom = this.getFrom();</b>
+&nbsp;                    String rhsFrom;
+<b class="nc">&nbsp;                    rhsFrom = that.getFrom();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;from&quot;, lhsFrom), LocatorUtils.property(thatLocator, &quot;from&quot;, rhsFrom), lhsFrom, rhsFrom, (this.from!= null), (that.from!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsTo;
+<b class="nc">&nbsp;                    lhsTo = this.getTo();</b>
+&nbsp;                    String rhsTo;
+<b class="nc">&nbsp;                    rhsTo = that.getTo();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;to&quot;, lhsTo), LocatorUtils.property(thatLocator, &quot;to&quot;, rhsTo), lhsTo, rhsTo, (this.to!= null), (that.to!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            public boolean equals(Object object) {
+<b class="nc">&nbsp;                final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;                return equals(null, null, object, strategy);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;        }
+&nbsp;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * &lt;p&gt;Java-Klasse für anonymous complex type.
+&nbsp;         * 
+&nbsp;         * &lt;p&gt;Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+&nbsp;         * 
+&nbsp;         * &lt;pre&gt;
+&nbsp;         * &amp;lt;complexType&amp;gt;
+&nbsp;         *   &amp;lt;complexContent&amp;gt;
+&nbsp;         *     &amp;lt;restriction base=&quot;{http://www.w3.org/2001/XMLSchema}anyType&quot;&amp;gt;
+&nbsp;         *       &amp;lt;attGroup ref=&quot;{http://www.w3.org/1999/xlink}locatorLink&quot;/&amp;gt;
+&nbsp;         *       &amp;lt;attribute name=&quot;ID&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}ID&quot; /&amp;gt;
+&nbsp;         *     &amp;lt;/restriction&amp;gt;
+&nbsp;         *   &amp;lt;/complexContent&amp;gt;
+&nbsp;         * &amp;lt;/complexType&amp;gt;
+&nbsp;         * &lt;/pre&gt;
+&nbsp;         * 
+&nbsp;         * 
+&nbsp;         */
+&nbsp;        @XmlAccessorType(XmlAccessType.FIELD)
+&nbsp;        @XmlType(name = &quot;&quot;)
+<b class="nc">&nbsp;        public static class SmLocatorLink implements Equals2</b>
+&nbsp;        {
+&nbsp;
+&nbsp;            @XmlAttribute(name = &quot;ID&quot;)
+&nbsp;            @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+&nbsp;            @XmlID
+&nbsp;            @XmlSchemaType(name = &quot;ID&quot;)
+&nbsp;            protected String id;
+&nbsp;            @XmlAttribute(name = &quot;type&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String type;
+&nbsp;            @XmlAttribute(name = &quot;href&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;, required = true)
+&nbsp;            @XmlSchemaType(name = &quot;anyURI&quot;)
+&nbsp;            protected String href;
+&nbsp;            @XmlAttribute(name = &quot;role&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String role;
+&nbsp;            @XmlAttribute(name = &quot;title&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String title;
+&nbsp;            @XmlAttribute(name = &quot;label&quot;, namespace = &quot;http://www.w3.org/1999/xlink&quot;)
+&nbsp;            protected String label;
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der id-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getID() {
+<b class="nc">&nbsp;                return id;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der id-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setID(String value) {
+<b class="nc">&nbsp;                this.id = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der type-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getType() {
+<b class="nc">&nbsp;                if (type == null) {</b>
+<b class="nc">&nbsp;                    return &quot;locator&quot;;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    return type;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der type-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setType(String value) {
+<b class="nc">&nbsp;                this.type = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der href-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getHref() {
+<b class="nc">&nbsp;                return href;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der href-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setHref(String value) {
+<b class="nc">&nbsp;                this.href = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der role-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getRole() {
+<b class="nc">&nbsp;                return role;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der role-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setRole(String value) {
+<b class="nc">&nbsp;                this.role = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der title-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getTitle() {
+<b class="nc">&nbsp;                return title;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der title-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setTitle(String value) {
+<b class="nc">&nbsp;                this.title = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Ruft den Wert der label-Eigenschaft ab.
+&nbsp;             * 
+&nbsp;             * @return
+&nbsp;             *     possible object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public String getLabel() {
+<b class="nc">&nbsp;                return label;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            /**
+&nbsp;             * Legt den Wert der label-Eigenschaft fest.
+&nbsp;             * 
+&nbsp;             * @param value
+&nbsp;             *     allowed object is
+&nbsp;             *     {@link String }
+&nbsp;             *     
+&nbsp;             */
+&nbsp;            public void setLabel(String value) {
+<b class="nc">&nbsp;                this.label = value;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy2 strategy) {
+<b class="nc">&nbsp;                if ((object == null)||(this.getClass()!= object.getClass())) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                if (this == object) {</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                final StructLinkType.SmLinkGrp.SmLocatorLink that = ((StructLinkType.SmLinkGrp.SmLocatorLink) object);</b>
+&nbsp;                {
+&nbsp;                    String lhsID;
+<b class="nc">&nbsp;                    lhsID = this.getID();</b>
+&nbsp;                    String rhsID;
+<b class="nc">&nbsp;                    rhsID = that.getID();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;id&quot;, lhsID), LocatorUtils.property(thatLocator, &quot;id&quot;, rhsID), lhsID, rhsID, (this.id!= null), (that.id!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsType;
+<b class="nc">&nbsp;                    lhsType = this.getType();</b>
+&nbsp;                    String rhsType;
+<b class="nc">&nbsp;                    rhsType = that.getType();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;type&quot;, lhsType), LocatorUtils.property(thatLocator, &quot;type&quot;, rhsType), lhsType, rhsType, (this.type!= null), (that.type!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsHref;
+<b class="nc">&nbsp;                    lhsHref = this.getHref();</b>
+&nbsp;                    String rhsHref;
+<b class="nc">&nbsp;                    rhsHref = that.getHref();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;href&quot;, lhsHref), LocatorUtils.property(thatLocator, &quot;href&quot;, rhsHref), lhsHref, rhsHref, (this.href!= null), (that.href!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsRole;
+<b class="nc">&nbsp;                    lhsRole = this.getRole();</b>
+&nbsp;                    String rhsRole;
+<b class="nc">&nbsp;                    rhsRole = that.getRole();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;role&quot;, lhsRole), LocatorUtils.property(thatLocator, &quot;role&quot;, rhsRole), lhsRole, rhsRole, (this.role!= null), (that.role!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsTitle;
+<b class="nc">&nbsp;                    lhsTitle = this.getTitle();</b>
+&nbsp;                    String rhsTitle;
+<b class="nc">&nbsp;                    rhsTitle = that.getTitle();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;title&quot;, lhsTitle), LocatorUtils.property(thatLocator, &quot;title&quot;, rhsTitle), lhsTitle, rhsTitle, (this.title!= null), (that.title!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                {
+&nbsp;                    String lhsLabel;
+<b class="nc">&nbsp;                    lhsLabel = this.getLabel();</b>
+&nbsp;                    String rhsLabel;
+<b class="nc">&nbsp;                    rhsLabel = that.getLabel();</b>
+<b class="nc">&nbsp;                    if (!strategy.equals(LocatorUtils.property(thisLocator, &quot;label&quot;, lhsLabel), LocatorUtils.property(thatLocator, &quot;label&quot;, rhsLabel), lhsLabel, rhsLabel, (this.label!= null), (that.label!= null))) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            public boolean equals(Object object) {
+<b class="nc">&nbsp;                final EqualsStrategy2 strategy = JAXBEqualsStrategy.INSTANCE;</b>
+<b class="nc">&nbsp;                return equals(null, null, object, strategy);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

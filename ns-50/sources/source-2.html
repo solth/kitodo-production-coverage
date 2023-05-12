@@ -1,0 +1,265 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LazyHitModel</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model</a>
+</div>
+
+<h1>Coverage Summary for Class: LazyHitModel (org.kitodo.production.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LazyHitModel</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7,1%
+  </span>
+  <span class="absValue">
+    (1/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    17,9%
+  </span>
+  <span class="absValue">
+    (5/28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model;
+&nbsp;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.kitodo.api.externaldatamanagement.SearchResult;
+&nbsp;import org.kitodo.api.externaldatamanagement.SingleHit;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;import org.primefaces.model.LazyDataModel;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;public class LazyHitModel extends LazyDataModel&lt;Object&gt; {
+&nbsp;
+&nbsp;    private ImportConfiguration importConfiguration;
+<b class="fc">&nbsp;    private String selectedField = &quot;&quot;;</b>
+<b class="fc">&nbsp;    private String searchTerm = &quot;&quot;;</b>
+<b class="fc">&nbsp;    private int importDepth = 2;</b>
+&nbsp;
+<b class="fc">&nbsp;    private SearchResult searchResult = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Empty default constructor. Sets default catalog and search field, if configured.
+&nbsp;     */
+<b class="fc">&nbsp;    public LazyHitModel() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object getRowData(String rowKey) {
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object getRowKey(Object inObject) {
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int getRowCount() {
+<b class="nc">&nbsp;        if (Objects.nonNull(this.searchResult)) {</b>
+<b class="nc">&nbsp;            return this.searchResult.getNumberOfHits();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Object&gt; load(int first, int resultSize, String sortField, SortOrder sortOrder, Map filters) {
+&nbsp;
+<b class="nc">&nbsp;        searchResult = ServiceManager.getImportService().performSearch(</b>
+&nbsp;                this.selectedField, this.searchTerm, this.importConfiguration, first, resultSize);
+&nbsp;
+<b class="nc">&nbsp;        if (Objects.isNull(searchResult) || Objects.isNull(searchResult.getHits())) {</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return searchResult.getHits().stream().map(r -&gt; (Object)r).collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of hits from last search result.
+&nbsp;     *
+&nbsp;     * @return list of hits
+&nbsp;     */
+&nbsp;    public List&lt;SingleHit&gt; getHits() {
+<b class="nc">&nbsp;        if (Objects.nonNull(this.searchResult)) {</b>
+<b class="nc">&nbsp;            return this.searchResult.getHits();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Getter for importConfiguration.
+&nbsp;     *
+&nbsp;     * @return value of importConfiguration
+&nbsp;     */
+&nbsp;    public ImportConfiguration getImportConfiguration() {
+<b class="nc">&nbsp;        return importConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Setter for importConfiguration. This also sets the catalogs default search field, if configured.
+&nbsp;     *
+&nbsp;     * @param importConfiguration ImportConfiguration
+&nbsp;     */
+&nbsp;    public void setImportConfiguration(ImportConfiguration importConfiguration) {
+<b class="nc">&nbsp;        this.importConfiguration = importConfiguration;</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(importConfiguration)) {</b>
+<b class="nc">&nbsp;            this.setSelectedField(ImportService.getDefaultSearchField(importConfiguration));</b>
+<b class="nc">&nbsp;            this.setImportDepth(ServiceManager.getImportService().getDefaultImportDepth(importConfiguration));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get searchTerm.
+&nbsp;     *
+&nbsp;     * @return value of searchTerm
+&nbsp;     */
+&nbsp;    public String getSearchTerm() {
+<b class="nc">&nbsp;        return this.searchTerm;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set searchTerm.
+&nbsp;     *
+&nbsp;     * @param searchTerm as java.lang.String
+&nbsp;     */
+&nbsp;    public void setSearchTerm(String searchTerm) {
+<b class="nc">&nbsp;        this.searchTerm = searchTerm;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selectedField.
+&nbsp;     *
+&nbsp;     * @return value of selectedField
+&nbsp;     */
+&nbsp;    public String getSelectedField() {
+<b class="nc">&nbsp;        return this.selectedField;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selectedField.
+&nbsp;     *
+&nbsp;     * @param field as java.lang.String
+&nbsp;     */
+&nbsp;    public void setSelectedField(String field) {
+<b class="nc">&nbsp;        this.selectedField = field;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get import depth.
+&nbsp;     *
+&nbsp;     * @return import depth
+&nbsp;     */
+&nbsp;    public int getImportDepth() {
+<b class="nc">&nbsp;        return importDepth;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set import depth.
+&nbsp;     *
+&nbsp;     * @param depth import depth
+&nbsp;     */
+&nbsp;    public void setImportDepth(int depth) {
+<b class="nc">&nbsp;        importDepth = depth;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

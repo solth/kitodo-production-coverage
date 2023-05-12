@@ -1,0 +1,354 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Setting</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset.xml</a>
+</div>
+
+<h1>Coverage Summary for Class: Setting (org.kitodo.dataeditor.ruleset.xml)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Setting</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    35,3%
+  </span>
+  <span class="absValue">
+    (6/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    38,9%
+  </span>
+  <span class="absValue">
+    (7/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset.xml;
+&nbsp;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;
+&nbsp;/**
+&nbsp; * Display settings for the edit mask related to a specific key.
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+<b class="fc">&nbsp;public class Setting {</b>
+&nbsp;    /**
+&nbsp;     * Key whose representation is influenced.
+&nbsp;     */
+&nbsp;    @XmlAttribute(required = true)
+&nbsp;    private String key;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A field for a value for this key is always displayed in the form, even if
+&nbsp;     * there is no value for it yet. Normally, only fields are displayed for
+&nbsp;     * which there are values or which the user has additionally selected by
+&nbsp;     * hand. In this way you do not have to create frequently needed fields
+&nbsp;     * every time by hand.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private Boolean alwaysShowing;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Whether the field can be edited. By default this is the case. Here
+&nbsp;     * editing can be prohibited for individual fields, which are then only
+&nbsp;     * displayed; if in a field e.g. work instructions are available. In
+&nbsp;     * particular, in combination with acquisition stages, the function makes
+&nbsp;     * sense that a field cannot be changed in a particular acquisition stage,
+&nbsp;     * or can only be changed in a specific one. It’s not supposed to bring the
+&nbsp;     * editor into a read-only mode, this should be possible in other ways.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private Boolean editable;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This will hide a field, even if a value has been entered for this field.
+&nbsp;     * Normally, there are rules in the ruleset that say which fields are
+&nbsp;     * allowed, but if data is in fields, they will still be displayed, even if
+&nbsp;     * the field is not allowed. With this switch you can hide the fields. The
+&nbsp;     * application must take care that it retains the data anyway and does not
+&nbsp;     * forget, even if they do not run over the input mask.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private Boolean excluded;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This can be used to request a larger input field. Normally, the display
+&nbsp;     * consists of one-line input fields, and that&#39;s usually enough. But if
+&nbsp;     * there is a lot of text in a field, for example the abstract of a
+&nbsp;     * scientific article, or an e-mail body, then you can switch to a larger
+&nbsp;     * field here.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private Boolean multiline;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The settings for sub-keys.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlElement(name = &quot;setting&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)</b>
+&nbsp;    private List&lt;Setting&gt; settings = new LinkedList&lt;&gt;();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value “always showing” if one is set. This getter returns
+&nbsp;     * {@code null} if the attribute was not entered. This is needed, for
+&nbsp;     * example, when merging attributes. If only the simple value (with default,
+&nbsp;     * if no value was specified) is needed, use {@link #isAlwaysShowing()}.
+&nbsp;     * 
+&nbsp;     * @return the value “always showing”, if set, else {@code null}
+&nbsp;     */
+&nbsp;    public Boolean getAlwaysShowing() {
+<b class="nc">&nbsp;        return alwaysShowing;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value “editable” if one is set. This getter returns
+&nbsp;     * {@code null} if the attribute was not entered. This is needed, for
+&nbsp;     * example, when merging attributes. If only the simple value (with default,
+&nbsp;     * if no value was specified) is needed, use {@link #isEditable()}.
+&nbsp;     * 
+&nbsp;     * @return the value “editable”, if set, else {@code null}
+&nbsp;     */
+&nbsp;    public Boolean getEditable() {
+<b class="nc">&nbsp;        return editable;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value “excluded” if one is set. This getter returns
+&nbsp;     * {@code null} if the attribute was not entered. This is needed, for
+&nbsp;     * example, when merging attributes. If only the simple value (with default,
+&nbsp;     * if no value was specified) is needed, use {@link #isExcluded()}.
+&nbsp;     * 
+&nbsp;     * @return the value “excluded”, if set, else {@code null}
+&nbsp;     */
+&nbsp;    public Boolean getExcluded() {
+<b class="nc">&nbsp;        return excluded;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the key whose representation is influenced.
+&nbsp;     * 
+&nbsp;     * @return the key whose representation is influenced
+&nbsp;     */
+&nbsp;    public String getKey() {
+<b class="fc">&nbsp;        return key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value “multiline” if one is set. This getter returns
+&nbsp;     * {@code null} if the attribute was not entered. This is needed, for
+&nbsp;     * example, when merging attributes. If only the simple value (with default,
+&nbsp;     * if no value was specified) is needed, use {@link #isMultiline()}.
+&nbsp;     * 
+&nbsp;     * @return the value “multiline”, if set, else {@code null}
+&nbsp;     */
+&nbsp;    public Boolean getMultiline() {
+<b class="nc">&nbsp;        return multiline;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the editor settings.
+&nbsp;     *
+&nbsp;     * @return the editor settings
+&nbsp;     */
+&nbsp;    public List&lt;Setting&gt; getSettings() {
+<b class="fc">&nbsp;        return settings;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the “always showing” value or otherwise the default value if the
+&nbsp;     * attribute is not set.
+&nbsp;     * 
+&nbsp;     * @return the “always showing” value or its default value
+&nbsp;     */
+&nbsp;    public boolean isAlwaysShowing() {
+<b class="fc">&nbsp;        return alwaysShowing != null ? alwaysShowing : false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the “editable” value or otherwise the default value if the
+&nbsp;     * attribute is not set.
+&nbsp;     * 
+&nbsp;     * @return the “editable” value or its default value
+&nbsp;     */
+&nbsp;    public boolean isEditable() {
+<b class="nc">&nbsp;        return editable != null ? editable : true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the “excluded” value or otherwise the default value if the
+&nbsp;     * attribute is not set.
+&nbsp;     * 
+&nbsp;     * @return the “excluded” value or its default value
+&nbsp;     */
+&nbsp;    public boolean isExcluded() {
+<b class="fc">&nbsp;        return excluded != null ? excluded : false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the “multiline” value or otherwise the default value if the
+&nbsp;     * attribute is not set.
+&nbsp;     * 
+&nbsp;     * @return the “multiline” value or its default value
+&nbsp;     */
+&nbsp;    public boolean isMultiline() {
+<b class="fc">&nbsp;        return multiline != null ? multiline : false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This sets the “always showing” value. If you set the value to
+&nbsp;     * {@code null}, no attribute is written.
+&nbsp;     * 
+&nbsp;     * @param alwaysShowing
+&nbsp;     *            “always showing” value to set
+&nbsp;     */
+&nbsp;    public void setAlwaysShowing(Boolean alwaysShowing) {
+<b class="nc">&nbsp;        this.alwaysShowing = alwaysShowing;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This sets the “editable” value. If you set the value to {@code null}, no
+&nbsp;     * attribute is written.
+&nbsp;     * 
+&nbsp;     * @param editable
+&nbsp;     *            “editable” value to set
+&nbsp;     */
+&nbsp;    public void setEditable(Boolean editable) {
+<b class="nc">&nbsp;        this.editable = editable;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This sets the “excluded” value. If you set the value to {@code null}, no
+&nbsp;     * attribute is written.
+&nbsp;     * 
+&nbsp;     * @param excluded
+&nbsp;     *            “excluded” value to set
+&nbsp;     */
+&nbsp;    public void setExcluded(Boolean excluded) {
+<b class="nc">&nbsp;        this.excluded = excluded;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the key whose representation is influenced.
+&nbsp;     * 
+&nbsp;     * @param key
+&nbsp;     *            the key whose representation is influenced
+&nbsp;     */
+&nbsp;    public void setKey(String key) {
+<b class="nc">&nbsp;        this.key = key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This sets the “multi-line” value. If you set the value to {@code null},
+&nbsp;     * no attribute is written.
+&nbsp;     * 
+&nbsp;     * @param multiline
+&nbsp;     *            “multi-line” value to set
+&nbsp;     */
+&nbsp;    public void setMultiline(Boolean multiline) {
+<b class="nc">&nbsp;        this.multiline = multiline;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the settings for nested keys.
+&nbsp;     * 
+&nbsp;     * @param settings
+&nbsp;     *            the settings for nested keys
+&nbsp;     */
+&nbsp;    public void setSettings(List&lt;Setting&gt; settings) {
+<b class="nc">&nbsp;        this.settings = settings;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

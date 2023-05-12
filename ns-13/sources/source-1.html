@@ -1,0 +1,224 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Parameter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.config.beans</a>
+</div>
+
+<h1>Coverage Summary for Class: Parameter (org.kitodo.config.beans)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Parameter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,6%
+  </span>
+  <span class="absValue">
+    (5/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    77,8%
+  </span>
+  <span class="absValue">
+    (14/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.config.beans;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public class Parameter&lt;T&gt; {
+&nbsp;
+&nbsp;    private String key;
+&nbsp;    private T defaultValue;
+&nbsp;    private List&lt;T&gt; possibleValues;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Public constructor with given key.
+&nbsp;     * 
+&nbsp;     * @param key
+&nbsp;     *            of parameter
+&nbsp;     */
+<b class="fc">&nbsp;    public Parameter(String key) {</b>
+<b class="fc">&nbsp;        this.key = key;</b>
+<b class="fc">&nbsp;        this.defaultValue = null;</b>
+<b class="fc">&nbsp;        this.possibleValues = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Public constructor with given key and default value.
+&nbsp;     * 
+&nbsp;     * @param key
+&nbsp;     *            of parameter
+&nbsp;     * @param defaultValue
+&nbsp;     *            of parameter
+&nbsp;     */
+<b class="fc">&nbsp;    public Parameter(String key, T defaultValue) {</b>
+<b class="fc">&nbsp;        this.key = key;</b>
+<b class="fc">&nbsp;        this.defaultValue = defaultValue;</b>
+<b class="fc">&nbsp;        this.possibleValues = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Public constructor with given key, default value.
+&nbsp;     * 
+&nbsp;     * @param key
+&nbsp;     *            of parameter
+&nbsp;     * @param defaultValue
+&nbsp;     *            of parameter
+&nbsp;     * @param possibleValues
+&nbsp;     *            of parameter
+&nbsp;     */
+<b class="fc">&nbsp;    public Parameter(String key, T defaultValue, List&lt;T&gt; possibleValues) {</b>
+<b class="fc">&nbsp;        this.key = key;</b>
+<b class="fc">&nbsp;        this.defaultValue = defaultValue;</b>
+<b class="fc">&nbsp;        this.possibleValues = possibleValues;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get key.
+&nbsp;     *
+&nbsp;     * @return value of key
+&nbsp;     */
+&nbsp;    public String getKey() {
+<b class="fc">&nbsp;        return key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set key.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            as java.lang.String
+&nbsp;     */
+&nbsp;    public void setKey(String key) {
+<b class="nc">&nbsp;        this.key = key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get default value.
+&nbsp;     *
+&nbsp;     * @return value of defaultValue
+&nbsp;     */
+&nbsp;    public T getDefaultValue() {
+<b class="fc">&nbsp;        return defaultValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set default value.
+&nbsp;     *
+&nbsp;     * @param defaultValue
+&nbsp;     *            as T
+&nbsp;     */
+&nbsp;    public void setDefaultValue(T defaultValue) {
+<b class="nc">&nbsp;        this.defaultValue = defaultValue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get possible values.
+&nbsp;     *
+&nbsp;     * @return value of possible values
+&nbsp;     */
+&nbsp;    public List&lt;T&gt; getPossibleValues() {
+<b class="nc">&nbsp;        return possibleValues;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set possible values.
+&nbsp;     *
+&nbsp;     * @param possibleValues
+&nbsp;     *            as java.util.List&amp;lt;T&amp;gt;
+&nbsp;     */
+&nbsp;    public void setPossibleValues(List&lt;T&gt; possibleValues) {
+<b class="nc">&nbsp;        this.possibleValues = possibleValues;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

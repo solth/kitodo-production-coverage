@@ -1,0 +1,475 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessHelper (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (14/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,2%
+  </span>
+  <span class="absValue">
+    (75/88)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.MetadataGroup;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessDetail;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessFieldedMetadata;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyMetsModsDigitalDocumentHelper;
+&nbsp;import org.kitodo.production.process.TiffHeaderGenerator;
+&nbsp;import org.kitodo.production.process.TitleGenerator;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.Node;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;
+<b class="nc">&nbsp;public class ProcessHelper {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ProcessHelper.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return a List of ProcessDetail objects for the given TempProcess
+&nbsp;     * &#39;tempProcess&#39;.
+&nbsp;     *
+&nbsp;     * @param tempProcess
+&nbsp;     *            the TempProcess for which the List of ProcessDetail objects is
+&nbsp;     *            created
+&nbsp;     * @param managementInterface
+&nbsp;     *            RulesetManagementInterface used to create the metadata of the
+&nbsp;     *            process
+&nbsp;     * @param acquisitionStage
+&nbsp;     *            String containing the acquisitionStage
+&nbsp;     * @param priorityList
+&nbsp;     *            List of LanguageRange objects used as priority list
+&nbsp;     * @return List of ProcessDetail objects
+&nbsp;     * @throws InvalidMetadataValueException
+&nbsp;     *             thrown if TempProcess contains invalid metadata
+&nbsp;     * @throws NoSuchMetadataFieldException
+&nbsp;     *             thrown if TempProcess contains undefined metadata
+&nbsp;     */
+&nbsp;    public static List&lt;ProcessDetail&gt; transformToProcessDetails(TempProcess tempProcess,
+&nbsp;            RulesetManagementInterface managementInterface, String acquisitionStage,
+&nbsp;            List&lt;Locale.LanguageRange&gt; priorityList)
+&nbsp;            throws InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="fc">&nbsp;        ProcessFieldedMetadata metadata = initializeProcessDetails(tempProcess.getWorkpiece().getLogicalStructure(),</b>
+&nbsp;            managementInterface, acquisitionStage, priorityList);
+<b class="fc">&nbsp;        metadata.preserve();</b>
+<b class="fc">&nbsp;        return metadata.getRows();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create and return an instance of &#39;ProcessFieldedMetadata&#39; for the given
+&nbsp;     * LogicalDivision &#39;structure&#39;, RulesetManagementInterface
+&nbsp;     * &#39;managementInterface&#39;, acquisition stage String &#39;stage&#39; and List of
+&nbsp;     * LanguageRange &#39;priorityList&#39;.
+&nbsp;     *
+&nbsp;     * @param structure
+&nbsp;     *            LogicalDivision for which to create a ProcessFieldedMetadata
+&nbsp;     * @param managementInterface
+&nbsp;     *            RulesetManagementInterface used to create ProcessFieldedMetadata
+&nbsp;     * @param stage
+&nbsp;     *            String containing acquisition stage used to create
+&nbsp;     *            ProcessFieldedMetadata
+&nbsp;     * @param priorityList
+&nbsp;     *            List of LanguageRange objects used to create
+&nbsp;     *            ProcessFieldedMetadata
+&nbsp;     * @return the created ProcessFieldedMetadata
+&nbsp;     */
+&nbsp;    public static ProcessFieldedMetadata initializeProcessDetails(LogicalDivision structure,
+&nbsp;            RulesetManagementInterface managementInterface, String stage, List&lt;Locale.LanguageRange&gt; priorityList) {
+<b class="fc">&nbsp;        StructuralElementViewInterface divisionView = managementInterface.getStructuralElementView(structure.getType(),</b>
+&nbsp;                stage, priorityList);
+<b class="fc">&nbsp;        return new ProcessFieldedMetadata(structure, divisionView);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates TSL/ATS dependent fields of temp process.
+&nbsp;     *
+&nbsp;     * @param tempProcess
+&nbsp;     *         the temp process to generate TSL/ATS dependent fields
+&nbsp;     * @param processDetails
+&nbsp;     *         the process details of temp process
+&nbsp;     * @param parentTempProcesses
+&nbsp;     *         the parent temp processes
+&nbsp;     * @param docType
+&nbsp;     *         current division
+&nbsp;     * @param rulesetManagementInterface
+&nbsp;     *         interface that provides access to the ruleset
+&nbsp;     * @param acquisitionStage
+&nbsp;     *         current acquisition level
+&nbsp;     * @param priorityList
+&nbsp;     *         weighted list of user-preferred display languages
+&nbsp;     * @throws ProcessGenerationException
+&nbsp;     *         thrown if process title cannot be created
+&nbsp;     */
+&nbsp;    public static void generateAtstslFields(TempProcess tempProcess, List&lt;ProcessDetail&gt; processDetails,
+&nbsp;            List&lt;TempProcess&gt; parentTempProcesses, String docType,
+&nbsp;            RulesetManagementInterface rulesetManagementInterface, String acquisitionStage,
+&nbsp;            List&lt;Locale.LanguageRange&gt; priorityList) throws ProcessGenerationException {
+<b class="fc">&nbsp;        generateAtstslFields(tempProcess, processDetails, parentTempProcesses, docType, rulesetManagementInterface, acquisitionStage,</b>
+&nbsp;                priorityList, null, false);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates TSL/ATS dependent fields of temp process.
+&nbsp;     *
+&nbsp;     * @param tempProcess
+&nbsp;     *         the temp process to generate TSL/ATS dependent fields
+&nbsp;     * @param parentTempProcesses
+&nbsp;     *         the parent temp processes
+&nbsp;     * @param acquisitionStage
+&nbsp;     *         current acquisition level
+&nbsp;     * @param force
+&nbsp;     *         force regeneration atstsl fields if process title already exists
+&nbsp;     * @throws ProcessGenerationException
+&nbsp;     *         thrown if process title cannot be created
+&nbsp;     * @throws InvalidMetadataValueException
+&nbsp;     *         thrown if process workpiece contains invalid metadata
+&nbsp;     * @throws NoSuchMetadataFieldException
+&nbsp;     *         thrown if process workpiece contains undefined metadata
+&nbsp;     * @throws IOException
+&nbsp;     *         thrown if ruleset file cannot be loaded
+&nbsp;     */
+&nbsp;    public static void generateAtstslFields(TempProcess tempProcess, List&lt;TempProcess&gt; parentTempProcesses,
+&nbsp;            String acquisitionStage, boolean force)
+&nbsp;            throws ProcessGenerationException, InvalidMetadataValueException, NoSuchMetadataFieldException,
+&nbsp;            IOException {
+<b class="fc">&nbsp;        RulesetManagementInterface rulesetManagementInterface = ServiceManager.getRulesetService()</b>
+<b class="fc">&nbsp;                .openRuleset(tempProcess.getProcess().getRuleset());</b>
+<b class="fc">&nbsp;        List&lt;Locale.LanguageRange&gt; priorityList = ServiceManager.getUserService().getCurrentMetadataLanguage();</b>
+<b class="fc">&nbsp;        String docType = tempProcess.getWorkpiece().getLogicalStructure().getType();</b>
+<b class="fc">&nbsp;        List&lt;ProcessDetail&gt; processDetails = transformToProcessDetails(tempProcess, rulesetManagementInterface,</b>
+&nbsp;                acquisitionStage, priorityList);
+<b class="fc">&nbsp;        generateAtstslFields(tempProcess, processDetails, parentTempProcesses, docType, rulesetManagementInterface,</b>
+&nbsp;                acquisitionStage, priorityList, null, force);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates TSL/ATS dependent fields of temp process.
+&nbsp;     *
+&nbsp;     * @param tempProcess
+&nbsp;     *            the temp process to generate TSL/ATS dependent fields
+&nbsp;     * @param processDetails
+&nbsp;     *            the process details of temp process
+&nbsp;     * @param parentTempProcesses
+&nbsp;     *            the parent temp processes of temp process
+&nbsp;     * @param docType
+&nbsp;     *            current division or docType to get the title definition from
+&nbsp;     * @param rulesetManagementInterface
+&nbsp;     *            interface that provides access to the ruleset
+&nbsp;     * @param acquisitionStage
+&nbsp;     *            current acquisition level
+&nbsp;     * @param priorityList
+&nbsp;     *            weighted list of user-preferred display languages
+&nbsp;     * @param parentProcess
+&nbsp;     *            the process of the selected title record
+&nbsp;     * @param force
+&nbsp;     *            force regeneration atstsl fields if process title already exists
+&nbsp;     * @throws ProcessGenerationException
+&nbsp;     *             thrown if process title cannot be created
+&nbsp;     */
+&nbsp;    public static void generateAtstslFields(TempProcess tempProcess, List&lt;ProcessDetail&gt; processDetails,
+&nbsp;            List&lt;TempProcess&gt; parentTempProcesses, String docType,
+&nbsp;            RulesetManagementInterface rulesetManagementInterface, String acquisitionStage,
+&nbsp;            List&lt;Locale.LanguageRange&gt; priorityList, Process parentProcess, boolean force)
+&nbsp;            throws ProcessGenerationException {
+<b class="fc">&nbsp;        if (!shouldGenerateAtstslFields(tempProcess) &amp;&amp; !force) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String titleDefinition = getTitleDefinition(rulesetManagementInterface, docType, acquisitionStage,</b>
+&nbsp;                priorityList);
+<b class="fc">&nbsp;        String currentTitle = TitleGenerator.getValueOfMetadataID(TitleGenerator.TITLE_DOC_MAIN, processDetails);</b>
+<b class="fc">&nbsp;        if (StringUtils.isBlank(currentTitle)) {</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(parentProcess)) {</b>
+<b class="fc">&nbsp;                if (titleDefinition.startsWith(&quot;+&quot;)) {</b>
+<b class="fc">&nbsp;                    titleDefinition = &#39;\&#39;&#39; + parentProcess.getTitle() + &#39;\&#39;&#39; + titleDefinition;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                currentTitle = getTitleFromWorkpiece(parentProcess);</b>
+<b class="fc">&nbsp;            } else if (Objects.nonNull(parentTempProcesses)) {</b>
+<b class="fc">&nbsp;                currentTitle = getTitleFromParents(parentTempProcesses, rulesetManagementInterface, acquisitionStage,</b>
+&nbsp;                        priorityList);
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        tempProcess.setAtstsl(</b>
+<b class="fc">&nbsp;                generateProcessTitleAndGetAtstsl(processDetails, titleDefinition, tempProcess.getProcess(),</b>
+&nbsp;                        currentTitle));
+&nbsp;
+<b class="fc">&nbsp;        tempProcess.setTiffHeaderDocumentName(tempProcess.getProcess().getTitle());</b>
+<b class="fc">&nbsp;        String tiffDefinition = ServiceManager.getImportService().getTiffDefinition();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(tiffDefinition)) {</b>
+<b class="fc">&nbsp;            tempProcess.setTiffHeaderImageDescription(generateTiffHeader(processDetails, tempProcess.getAtstsl(),</b>
+<b class="fc">&nbsp;                    ServiceManager.getImportService().getTiffDefinition(), docType));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the title definition of doc type view.
+&nbsp;     *
+&nbsp;     * @param rulesetManagementInterface
+&nbsp;     *         interface that provides access to the ruleset
+&nbsp;     * @param docType
+&nbsp;     *         current division
+&nbsp;     * @param acquisitionStage
+&nbsp;     *         current acquisition level
+&nbsp;     * @param priorityList
+&nbsp;     *         weighted list of user-preferred display languages
+&nbsp;     * @return the process title of doc type view
+&nbsp;     */
+&nbsp;    public static String getTitleDefinition(RulesetManagementInterface rulesetManagementInterface, String docType,
+&nbsp;            String acquisitionStage, List&lt;Locale.LanguageRange&gt; priorityList) {
+<b class="fc">&nbsp;        StructuralElementViewInterface docTypeView = rulesetManagementInterface.getStructuralElementView(docType,</b>
+&nbsp;                acquisitionStage, priorityList);
+<b class="fc">&nbsp;        return docTypeView.getProcessTitle().orElse(&quot;&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts DOM node list of Kitodo metadata elements to metadata objects.
+&nbsp;     *
+&nbsp;     * @param nodes
+&nbsp;     *            node list to convert to metadata
+&nbsp;     * @param domain
+&nbsp;     *            domain of metadata
+&nbsp;     * @return metadata from node list
+&nbsp;     */
+&nbsp;    public static HashSet&lt;Metadata&gt; convertMetadata(NodeList nodes, MdSec domain) {
+<b class="fc">&nbsp;        HashSet&lt;Metadata&gt; allMetadata = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(nodes)) {</b>
+<b class="fc">&nbsp;            for (int index = 0; index &lt; nodes.getLength(); index++) {</b>
+<b class="fc">&nbsp;                Node node = nodes.item(index);</b>
+<b class="fc">&nbsp;                if (!(node instanceof Element)) {</b>
+<b class="nc">&nbsp;                    continue;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                Element element = (Element) node;</b>
+&nbsp;                Metadata metadata;
+<b class="fc">&nbsp;                switch (element.getLocalName()) {</b>
+&nbsp;                    case &quot;metadata&quot;:
+<b class="fc">&nbsp;                        MetadataEntry entry = new MetadataEntry();</b>
+<b class="fc">&nbsp;                        entry.setValue(element.getTextContent());</b>
+<b class="fc">&nbsp;                        metadata = entry;</b>
+<b class="fc">&nbsp;                        break;</b>
+&nbsp;                    case &quot;metadataGroup&quot;: {
+<b class="fc">&nbsp;                        MetadataGroup group = new MetadataGroup();</b>
+<b class="fc">&nbsp;                        group.setMetadata(convertMetadata(element.getChildNodes(), null));</b>
+<b class="fc">&nbsp;                        metadata = group;</b>
+<b class="fc">&nbsp;                        break;</b>
+&nbsp;                    }
+&nbsp;                    default:
+<b class="nc">&nbsp;                        continue;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                metadata.setKey(element.getAttribute(&quot;name&quot;));</b>
+<b class="fc">&nbsp;                metadata.setDomain(domain);</b>
+<b class="fc">&nbsp;                allMetadata.add(metadata);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return allMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate and set the title to process using current title parameter and gets the atstsl.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *         of the work to generate atstsl
+&nbsp;     * @return String atstsl
+&nbsp;     */
+&nbsp;    private static String generateProcessTitleAndGetAtstsl(List&lt;ProcessDetail&gt; processDetails, String titleDefinition,
+&nbsp;            Process process, String title) throws ProcessGenerationException {
+<b class="fc">&nbsp;        TitleGenerator titleGenerator = new TitleGenerator(null, processDetails);</b>
+<b class="fc">&nbsp;        String newTitle = titleGenerator.generateTitle(titleDefinition, null, title);</b>
+<b class="fc">&nbsp;        process.setTitle(newTitle);</b>
+&nbsp;        // atstsl is created in title generator and next used in tiff header generator
+<b class="fc">&nbsp;        return titleGenerator.getAtstsl();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static boolean shouldGenerateAtstslFields(TempProcess tempProcess) {
+<b class="fc">&nbsp;        return StringUtils.isBlank(tempProcess.getProcess().getTitle());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate tiff header.
+&nbsp;     */
+&nbsp;    private static String generateTiffHeader(List&lt;ProcessDetail&gt; processDetails, String atstsl, String tiffDefinition,
+&nbsp;            String docType) throws ProcessGenerationException {
+<b class="fc">&nbsp;        TiffHeaderGenerator tiffHeaderGenerator = new TiffHeaderGenerator(atstsl, processDetails);</b>
+<b class="fc">&nbsp;        return tiffHeaderGenerator.generateTiffHeader(tiffDefinition, docType);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getTitleFromWorkpiece(Process process) {
+&nbsp;        try {
+<b class="fc">&nbsp;            LegacyMetsModsDigitalDocumentHelper metsModsDigitalDocumentHelper = ServiceManager.getProcessService()</b>
+<b class="fc">&nbsp;                    .readMetadataFile(process);</b>
+<b class="fc">&nbsp;            return getTitleFromMetadata(</b>
+<b class="fc">&nbsp;                    metsModsDigitalDocumentHelper.getWorkpiece().getLogicalStructure().getMetadata());</b>
+<b class="fc">&nbsp;        } catch (IOException | NullPointerException e) {</b>
+<b class="fc">&nbsp;            logger.error(e.getMessage(), e);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return StringUtils.EMPTY;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getTitleFromParents(List&lt;TempProcess&gt; parentTempProcesses,
+&nbsp;            RulesetManagementInterface rulesetManagementInterface, String acquisitionStage,
+&nbsp;            List&lt;Locale.LanguageRange&gt; priorityList) {
+<b class="fc">&nbsp;        if (parentTempProcesses.size() == 0) {</b>
+<b class="nc">&nbsp;            return StringUtils.EMPTY;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        for (TempProcess tempProcess : parentTempProcesses) {</b>
+&nbsp;            String title;
+<b class="fc">&nbsp;            if (Objects.nonNull(tempProcess.getMetadataNodes())) {</b>
+<b class="nc">&nbsp;                ProcessFieldedMetadata processFieldedMetadata = initializeTempProcessDetails(tempProcess,</b>
+&nbsp;                        rulesetManagementInterface, acquisitionStage, priorityList);
+<b class="nc">&nbsp;                title = getTitleFromMetadata(processFieldedMetadata.getChildMetadata());</b>
+<b class="nc">&nbsp;            } else {</b>
+<b class="fc">&nbsp;                title = getTitleFromWorkpiece(tempProcess.getProcess());</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            if (StringUtils.isNotBlank(title)) {</b>
+<b class="fc">&nbsp;                return title;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return StringUtils.EMPTY;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static ProcessFieldedMetadata initializeTempProcessDetails(TempProcess tempProcess,
+&nbsp;            RulesetManagementInterface rulesetManagementInterface, String acquisitionStage,
+&nbsp;            List&lt;Locale.LanguageRange&gt; priorityList) {
+<b class="nc">&nbsp;        ProcessFieldedMetadata metadata = initializeProcessDetails(tempProcess.getWorkpiece().getLogicalStructure(),</b>
+&nbsp;                rulesetManagementInterface, acquisitionStage, priorityList);
+<b class="nc">&nbsp;        metadata.setMetadata(convertMetadata(tempProcess.getMetadataNodes(), MdSec.DMD_SEC));</b>
+<b class="nc">&nbsp;        return metadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String getTitleFromMetadata(Collection&lt;Metadata&gt; metadata) {
+<b class="fc">&nbsp;        Optional&lt;Metadata&gt; metadataOptional = metadata.parallelStream()</b>
+<b class="fc">&nbsp;                .filter(metadataItem -&gt; TitleGenerator.TITLE_DOC_MAIN.equals(metadataItem.getKey())).findFirst();</b>
+<b class="fc">&nbsp;        if (metadataOptional.isPresent() &amp;&amp; metadataOptional.get() instanceof MetadataEntry) {</b>
+<b class="fc">&nbsp;            return ((MetadataEntry) metadataOptional.get()).getValue();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return StringUtils.EMPTY;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

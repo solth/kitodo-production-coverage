@@ -1,0 +1,173 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LongTermPreservationValidation</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.longtermpreservationvalidation</a>
+</div>
+
+<h1>Coverage Summary for Class: LongTermPreservationValidation (org.kitodo.longtermpreservationvalidation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LongTermPreservationValidation</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (14/16)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.longtermpreservationvalidation;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.EnumMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.kitodo.api.validation.ValidationResult;
+&nbsp;import org.kitodo.api.validation.longtermpreservation.FileType;
+&nbsp;import org.kitodo.api.validation.longtermpreservation.LongTermPreservationValidationInterface;
+&nbsp;
+&nbsp;/**
+&nbsp; * A LongTermPreservationValidationInterface implementation using Jhove.
+&nbsp; */
+<b class="fc">&nbsp;public class LongTermPreservationValidation implements LongTermPreservationValidationInterface {</b>
+&nbsp;    /**
+&nbsp;     * Returns the matching module name for the given file type.
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;serial&quot;)
+<b class="fc">&nbsp;    private static final Map&lt;FileType, String&gt; MODULE_NAMES = new EnumMap&lt;&gt;(FileType.class);</b>
+&nbsp;
+&nbsp;    static {
+<b class="fc">&nbsp;        MODULE_NAMES.put(FileType.GIF, &quot;GIF-hul&quot;);</b>
+<b class="fc">&nbsp;        MODULE_NAMES.put(FileType.JPEG, &quot;JPEG-hul&quot;);</b>
+<b class="fc">&nbsp;        MODULE_NAMES.put(FileType.JPEG_2000, &quot;JPEG2000-hul&quot;);</b>
+<b class="fc">&nbsp;        MODULE_NAMES.put(FileType.PDF, &quot;PDF-hul&quot;);</b>
+<b class="fc">&nbsp;        MODULE_NAMES.put(FileType.PNG, &quot;PNG-gdm&quot;);</b>
+<b class="fc">&nbsp;        MODULE_NAMES.put(FileType.TIFF, &quot;TIFF-hul&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Modules to initialize.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final List&lt;String&gt; MODULES = Arrays.asList(&quot;edu.harvard.hul.ois.jhove.module.GifModule&quot;,</b>
+&nbsp;        &quot;edu.harvard.hul.ois.jhove.module.Jpeg2000Module&quot;, &quot;edu.harvard.hul.ois.jhove.module.JpegModule&quot;,
+&nbsp;        &quot;edu.harvard.hul.ois.jhove.module.PdfModule&quot;, &quot;com.mcgath.jhove.module.PngModule&quot;,
+&nbsp;        &quot;edu.harvard.hul.ois.jhove.module.TiffModule&quot;);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@inheritDoc}&lt;!-- . --&gt;
+&nbsp;     *
+&nbsp;     * @param fileUri
+&nbsp;     *            file URI to validate
+&nbsp;     * @param fileType
+&nbsp;     *            file type to validate
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public ValidationResult validate(URI fileUri, FileType fileType) {
+<b class="fc">&nbsp;        KitodoOutputHandler result = new KitodoOutputHandler();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            KitodoJhoveBase jhoveBase = new KitodoJhoveBase(MODULES);</b>
+<b class="fc">&nbsp;            jhoveBase.validate(fileUri.getPath(), MODULE_NAMES.get(fileType), result);</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            result.treatException(e);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return result.toValidationResult();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

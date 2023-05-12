@@ -1,0 +1,194 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TaskStatus</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.enums</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskStatus (org.kitodo.data.database.enums)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskStatus</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,1%
+  </span>
+  <span class="absValue">
+    (16/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.enums;
+&nbsp;
+&nbsp;/**
+&nbsp; * Enum for status of steps, each one with integer value for database, with
+&nbsp; * title and images for gui.
+&nbsp; */
+<b class="fc">&nbsp;public enum TaskStatus {</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Locked = step not startable.
+&nbsp;     */
+<b class="fc">&nbsp;    LOCKED(0, &quot;statusLocked&quot;, &quot;steplocked&quot;),</b>
+&nbsp;    /**
+&nbsp;     * Open = someone can begin with this step.
+&nbsp;     */
+<b class="fc">&nbsp;    OPEN(1, &quot;statusOpen&quot;, &quot;stepopen&quot;),</b>
+&nbsp;    /**
+&nbsp;     * Inwork = someone is currently working on that step.
+&nbsp;     */
+<b class="fc">&nbsp;    INWORK(2, &quot;statusInProcessing&quot;, &quot;stepinwork&quot;),</b>
+&nbsp;    /**
+&nbsp;     * Done = step is executed.
+&nbsp;     */
+<b class="fc">&nbsp;    DONE(3, &quot;statusDone&quot;, &quot;stepdone&quot;);</b>
+&nbsp;
+&nbsp;    private int value;
+&nbsp;    private String title;
+&nbsp;    private String searchString;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor, initializes integer value, title and big
+&nbsp;     * image.
+&nbsp;     */
+<b class="fc">&nbsp;    TaskStatus(int inValue, String inTitle, String searchString) {</b>
+<b class="fc">&nbsp;        this.value = inValue;</b>
+<b class="fc">&nbsp;        this.title = inTitle;</b>
+<b class="fc">&nbsp;        this.searchString = searchString;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return integer value for database savings.
+&nbsp;     *
+&nbsp;     * @return value as integer
+&nbsp;     */
+&nbsp;    public Integer getValue() {
+<b class="fc">&nbsp;        return this.value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get title from status type.
+&nbsp;     *
+&nbsp;     * @return title
+&nbsp;     */
+&nbsp;    public String getTitle() {
+<b class="fc">&nbsp;        return this.title;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve StepStatus by integer value, necessary for database handlings,
+&nbsp;     * where only integer is saved but not type safe.
+&nbsp;     *
+&nbsp;     * @param value
+&nbsp;     *            as integer value
+&nbsp;     * @return {@link TaskStatus} for given integer
+&nbsp;     */
+&nbsp;    public static TaskStatus getStatusFromValue(Integer value) {
+<b class="fc">&nbsp;        if (value != null) {</b>
+<b class="fc">&nbsp;            for (TaskStatus taskStatus : values()) {</b>
+<b class="fc">&nbsp;                if (taskStatus.getValue() == value.intValue()) {</b>
+<b class="fc">&nbsp;                    return taskStatus;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return LOCKED;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getSearchString() {
+<b class="nc">&nbsp;        return this.searchString;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

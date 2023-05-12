@@ -1,0 +1,168 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Type</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset.xml</a>
+</div>
+
+<h1>Coverage Summary for Class: Type (org.kitodo.dataeditor.ruleset.xml)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Type</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset.xml;
+&nbsp;
+&nbsp;import javax.xml.bind.annotation.XmlEnum;
+&nbsp;import javax.xml.bind.annotation.XmlEnumValue;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class is a backing bean for the XML attribute type in the ruleset. With
+&nbsp; * it, JAXB can map the attribute to an enum. These are constants from XML
+&nbsp; * Schema data types.
+&nbsp; */
+<b class="fc">&nbsp;@XmlEnum(String.class)</b>
+&nbsp;public enum Type {
+&nbsp;    /**
+&nbsp;     * A URI. This can be a URL, and it is usually also. There are also others
+&nbsp;     * possible here, e.g. URN.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;anyURI&quot;)</b>
+&nbsp;    ANY_URI,
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Boolean is a value from a set of values with exactly two values, which
+&nbsp;     * are usually called “true” and “false”. In our case, the Boolean behaves a
+&nbsp;     * bit differently, in the form that it either consists of a fixed, but in
+&nbsp;     * principle arbitrary, value, or no value is written. But even in this
+&nbsp;     * variant, there are exactly two cases that are distinguished.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;boolean&quot;)</b>
+&nbsp;    BOOLEAN,
+&nbsp;
+&nbsp;    /**
+&nbsp;     * According to the specification, a top-open interval of exactly one day in
+&nbsp;     * length on the timeline, beginning at the moment of the beginning of the
+&nbsp;     * day in the respective time zone. In short, a valid date according to the
+&nbsp;     * Gregorian calendar without specifying a time zone. The date is stored in
+&nbsp;     * a string of ten characters, which must conform to the following pattern:
+&nbsp;     * “yyyy-mm-dd”.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;date&quot;)</b>
+&nbsp;    DATE,
+&nbsp;
+&nbsp;    /**
+&nbsp;     * An integer. The data type according to the XML schema is not limited in
+&nbsp;     * size and also allows zero and negative numbers. For a limitation, for
+&nbsp;     * example, it can be combined with a regular expression.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;integer&quot;)</b>
+&nbsp;    INTEGER,
+&nbsp;
+&nbsp;    /**
+&nbsp;     * In short, you can enter everything there. That is also the standard case.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;string&quot;)</b>
+&nbsp;    STRING
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,195 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > KitodoVersionListener</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.version</a>
+</div>
+
+<h1>Coverage Summary for Class: KitodoVersionListener (org.kitodo.production.version)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KitodoVersionListener</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.version;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.jar.Manifest;
+&nbsp;
+&nbsp;import javax.servlet.ServletContext;
+&nbsp;import javax.servlet.ServletContextEvent;
+&nbsp;import javax.servlet.ServletContextListener;
+&nbsp;import javax.servlet.annotation.WebListener;
+&nbsp;import javax.servlet.http.HttpSessionAttributeListener;
+&nbsp;import javax.servlet.http.HttpSessionBindingEvent;
+&nbsp;import javax.servlet.http.HttpSessionEvent;
+&nbsp;import javax.servlet.http.HttpSessionListener;
+&nbsp;
+&nbsp;import org.kitodo.production.security.SecurityUserDetails;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.springframework.security.core.context.SecurityContextImpl;
+&nbsp;
+&nbsp;/**
+&nbsp; * Listener to set up Kitodo versioning information from Manifest on application
+&nbsp; * startup.
+&nbsp; */
+&nbsp;@WebListener
+<b class="nc">&nbsp;public class KitodoVersionListener implements ServletContextListener, HttpSessionListener, HttpSessionAttributeListener {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void contextInitialized(ServletContextEvent sce) {
+&nbsp;        // Retrieve Manifest file as Stream
+<b class="nc">&nbsp;        ServletContext context = sce.getServletContext();</b>
+<b class="nc">&nbsp;        InputStream rs = context.getResourceAsStream(&quot;/META-INF/MANIFEST.MF&quot;);</b>
+&nbsp;        // Use Manifest to setup version information
+<b class="nc">&nbsp;        if (Objects.nonNull(rs)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                Manifest m = new Manifest(rs);</b>
+<b class="nc">&nbsp;                KitodoVersion.setupFromManifest(m);</b>
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                context.log(e.getMessage());</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void contextDestroyed(ServletContextEvent sce) {
+&nbsp;        // nothing is done here
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void sessionCreated(HttpSessionEvent se) {
+&nbsp;        // nothing is done here
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void sessionDestroyed(HttpSessionEvent se) {
+<b class="nc">&nbsp;        Object securityContextObject = se.getSession().getAttribute(&quot;SPRING_SECURITY_CONTEXT&quot;);</b>
+<b class="nc">&nbsp;        if (securityContextObject instanceof SecurityContextImpl) {</b>
+<b class="nc">&nbsp;            SecurityContextImpl securityContext = (SecurityContextImpl) securityContextObject;</b>
+<b class="nc">&nbsp;            Object principal = securityContext.getAuthentication().getPrincipal();</b>
+<b class="nc">&nbsp;            if (principal instanceof SecurityUserDetails) {</b>
+<b class="nc">&nbsp;                ServiceManager.getSessionService().expireSessionsOfUser((SecurityUserDetails) principal);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void attributeAdded(HttpSessionBindingEvent sbe) {
+&nbsp;        // nothing is done here
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void attributeRemoved(HttpSessionBindingEvent sbe) {
+&nbsp;        // nothing is done here
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void attributeReplaced(HttpSessionBindingEvent sbe) {
+&nbsp;        // nothing is done here
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

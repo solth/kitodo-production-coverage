@@ -1,0 +1,886 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ServiceManager</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services</a>
+</div>
+
+<h1>Coverage Summary for Class: ServiceManager (org.kitodo.production.services)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ServiceManager</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,4%
+  </span>
+  <span class="absValue">
+    (70/82)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,4%
+  </span>
+  <span class="absValue">
+    (140/164)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services;
+&nbsp;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.production.services.command.CommandService;
+&nbsp;import org.kitodo.production.services.command.KitodoScriptService;
+&nbsp;import org.kitodo.production.services.data.AuthorityService;
+&nbsp;import org.kitodo.production.services.data.BatchService;
+&nbsp;import org.kitodo.production.services.data.ClientService;
+&nbsp;import org.kitodo.production.services.data.CommentService;
+&nbsp;import org.kitodo.production.services.data.DataEditorSettingService;
+&nbsp;import org.kitodo.production.services.data.DocketService;
+&nbsp;import org.kitodo.production.services.data.FilterService;
+&nbsp;import org.kitodo.production.services.data.FolderService;
+&nbsp;import org.kitodo.production.services.data.ImportConfigurationService;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;import org.kitodo.production.services.data.LdapGroupService;
+&nbsp;import org.kitodo.production.services.data.LdapServerService;
+&nbsp;import org.kitodo.production.services.data.ListColumnService;
+&nbsp;import org.kitodo.production.services.data.MappingFileService;
+&nbsp;import org.kitodo.production.services.data.MassImportService;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.data.ProjectService;
+&nbsp;import org.kitodo.production.services.data.PropertyService;
+&nbsp;import org.kitodo.production.services.data.RoleService;
+&nbsp;import org.kitodo.production.services.data.RulesetService;
+&nbsp;import org.kitodo.production.services.data.SearchFieldService;
+&nbsp;import org.kitodo.production.services.data.TaskService;
+&nbsp;import org.kitodo.production.services.data.TemplateService;
+&nbsp;import org.kitodo.production.services.data.UserService;
+&nbsp;import org.kitodo.production.services.data.WorkflowConditionService;
+&nbsp;import org.kitodo.production.services.data.WorkflowService;
+&nbsp;import org.kitodo.production.services.dataeditor.DataEditorService;
+&nbsp;import org.kitodo.production.services.dataeditor.RulesetManagementService;
+&nbsp;import org.kitodo.production.services.dataformat.MetsService;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;import org.kitodo.production.services.image.ImageService;
+&nbsp;import org.kitodo.production.services.index.IndexingService;
+&nbsp;import org.kitodo.production.services.migration.MigrationService;
+&nbsp;import org.kitodo.production.services.schema.SchemaService;
+&nbsp;import org.kitodo.production.services.security.SecurityAccessService;
+&nbsp;import org.kitodo.production.services.security.SessionService;
+&nbsp;import org.kitodo.production.services.validation.FileStructureValidationService;
+&nbsp;import org.kitodo.production.services.validation.LongTermPreservationValidationService;
+&nbsp;import org.kitodo.production.services.validation.MetadataValidationService;
+&nbsp;
+&nbsp;public class ServiceManager {
+&nbsp;
+&nbsp;    private static AuthorityService authorityService;
+&nbsp;    private static BatchService batchService;
+&nbsp;    private static ClientService clientService;
+&nbsp;    private static CommandService commandService;
+&nbsp;    private static CommentService commentService;
+&nbsp;    private static DataEditorService dataEditorService;
+&nbsp;    private static DataEditorSettingService dataEditorSettingService;
+&nbsp;    private static DocketService docketService;
+&nbsp;    private static FileService fileService;
+&nbsp;    private static FileStructureValidationService fileStructureValidationService;
+&nbsp;    private static FilterService filterService;
+&nbsp;    private static FolderService folderService;
+&nbsp;    private static ImageService imageService;
+&nbsp;    private static ImportService importService;
+&nbsp;    private static IndexingService indexingService;
+&nbsp;    private static KitodoScriptService kitodoScriptService;
+&nbsp;    private static LdapGroupService ldapGroupService;
+&nbsp;    private static LdapServerService ldapServerService;
+&nbsp;    private static ListColumnService listColumnService;
+&nbsp;    private static LongTermPreservationValidationService longTermPreservationValidationService;
+&nbsp;    private static MetadataValidationService metadataValidationService;
+&nbsp;    private static MappingFileService mappingFileService;
+&nbsp;    private static MassImportService massImportService;
+&nbsp;    private static MetsService metsService;
+&nbsp;    private static MigrationService migrationService;
+&nbsp;    private static ImportConfigurationService importConfigurationService;
+&nbsp;    private static PropertyService propertyService;
+&nbsp;    private static ProcessService processService;
+&nbsp;    private static ProjectService projectService;
+&nbsp;    private static RoleService roleService;
+&nbsp;    private static RulesetService rulesetService;
+&nbsp;    private static RulesetManagementService rulesetManagementService;
+&nbsp;    private static SchemaService schemaService;
+&nbsp;    private static SearchFieldService searchFieldService;
+&nbsp;    private static SecurityAccessService securityAccessService;
+&nbsp;    private static SessionService sessionService;
+&nbsp;    private static TaskService taskService;
+&nbsp;    private static TemplateService templateService;
+&nbsp;    private static UserService userService;
+&nbsp;    private static WorkflowService workflowService;
+&nbsp;    private static WorkflowConditionService workflowConditionService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor.
+&nbsp;     */
+&nbsp;    private ServiceManager() {
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeAuthorizationService() {
+<b class="fc">&nbsp;        if (Objects.isNull(authorityService)) {</b>
+<b class="fc">&nbsp;            authorityService = AuthorityService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeBatchService() {
+<b class="fc">&nbsp;        if (Objects.isNull(batchService)) {</b>
+<b class="fc">&nbsp;            batchService = BatchService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeClientService() {
+<b class="fc">&nbsp;        if (Objects.isNull(clientService)) {</b>
+<b class="fc">&nbsp;            clientService = ClientService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeDataEditorService() {
+<b class="fc">&nbsp;        if (Objects.isNull(dataEditorService)) {</b>
+<b class="fc">&nbsp;            dataEditorService = new DataEditorService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeDocketService() {
+<b class="fc">&nbsp;        if (Objects.isNull(docketService)) {</b>
+<b class="fc">&nbsp;            docketService = DocketService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeFilterService() {
+<b class="fc">&nbsp;        if (Objects.isNull(filterService)) {</b>
+<b class="fc">&nbsp;            filterService = FilterService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeKitodoScriptService() {
+<b class="fc">&nbsp;        if (Objects.isNull(kitodoScriptService)) {</b>
+<b class="fc">&nbsp;            kitodoScriptService = KitodoScriptService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeImageService() {
+<b class="fc">&nbsp;        if (Objects.isNull(imageService)) {</b>
+<b class="fc">&nbsp;            imageService = ImageService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeImportService() {
+<b class="fc">&nbsp;        if (Objects.isNull(importService)) {</b>
+<b class="fc">&nbsp;            importService = ImportService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeLdapGroupService() {
+<b class="fc">&nbsp;        if (Objects.isNull(ldapGroupService)) {</b>
+<b class="fc">&nbsp;            ldapGroupService = new LdapGroupService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeLdapServerService() {
+<b class="fc">&nbsp;        if (Objects.isNull(ldapServerService)) {</b>
+<b class="fc">&nbsp;            ldapServerService = LdapServerService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeMetsService() {
+<b class="fc">&nbsp;        if (Objects.isNull(metsService)) {</b>
+<b class="fc">&nbsp;            metsService = MetsService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeMassImportService() {
+<b class="nc">&nbsp;        if (Objects.isNull(massImportService)) {</b>
+<b class="nc">&nbsp;            massImportService = MassImportService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializePropertyService() {
+<b class="fc">&nbsp;        if (Objects.isNull(propertyService)) {</b>
+<b class="fc">&nbsp;            propertyService = PropertyService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeProcessService() {
+<b class="fc">&nbsp;        if (Objects.isNull(processService)) {</b>
+<b class="fc">&nbsp;            processService = ProcessService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeFolderService() {
+<b class="fc">&nbsp;        if (Objects.isNull(folderService)) {</b>
+<b class="fc">&nbsp;            folderService = new FolderService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeProjectService() {
+<b class="fc">&nbsp;        if (Objects.isNull(projectService)) {</b>
+<b class="fc">&nbsp;            projectService = ProjectService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeRulesetService() {
+<b class="fc">&nbsp;        if (Objects.isNull(rulesetService)) {</b>
+<b class="fc">&nbsp;            rulesetService = RulesetService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeSessionService() {
+<b class="nc">&nbsp;        if (Objects.isNull(sessionService)) {</b>
+<b class="nc">&nbsp;            sessionService = SessionService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeSecurityAccessService() {
+<b class="fc">&nbsp;        if (Objects.isNull(securityAccessService)) {</b>
+<b class="fc">&nbsp;            securityAccessService = SecurityAccessService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeTaskService() {
+<b class="fc">&nbsp;        if (Objects.isNull(taskService)) {</b>
+<b class="fc">&nbsp;            taskService = TaskService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeTemplateService() {
+<b class="fc">&nbsp;        if (Objects.isNull(templateService)) {</b>
+<b class="fc">&nbsp;            templateService = TemplateService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeRoleService() {
+<b class="fc">&nbsp;        if (Objects.isNull(roleService)) {</b>
+<b class="fc">&nbsp;            roleService = RoleService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeUserService() {
+<b class="fc">&nbsp;        if (Objects.isNull(userService)) {</b>
+<b class="fc">&nbsp;            userService = UserService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeWorkflowService() {
+<b class="fc">&nbsp;        if (Objects.isNull(workflowService)) {</b>
+<b class="fc">&nbsp;            workflowService = WorkflowService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeWorkflowConditionService() {
+<b class="fc">&nbsp;        if (Objects.isNull(workflowConditionService)) {</b>
+<b class="fc">&nbsp;            workflowConditionService = WorkflowConditionService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeFileService() {
+<b class="fc">&nbsp;        if (Objects.isNull(fileService)) {</b>
+<b class="fc">&nbsp;            fileService = new FileService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeCommandService() {
+<b class="fc">&nbsp;        if (Objects.isNull(commandService)) {</b>
+<b class="fc">&nbsp;            commandService = new CommandService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeSchemaService() {
+<b class="fc">&nbsp;        if (Objects.isNull(schemaService)) {</b>
+<b class="fc">&nbsp;            schemaService = new SchemaService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeFileStructureValidationService() {
+<b class="nc">&nbsp;        if (Objects.isNull(fileStructureValidationService)) {</b>
+<b class="nc">&nbsp;            fileStructureValidationService = new FileStructureValidationService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeLongTermPreservationValidationService() {
+<b class="nc">&nbsp;        if (Objects.isNull(longTermPreservationValidationService)) {</b>
+<b class="nc">&nbsp;            longTermPreservationValidationService = new LongTermPreservationValidationService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeMetadataValidationService() {
+<b class="nc">&nbsp;        if (Objects.isNull(metadataValidationService)) {</b>
+<b class="nc">&nbsp;            metadataValidationService = new MetadataValidationService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeMigrationService() {
+<b class="fc">&nbsp;        if (Objects.isNull(migrationService)) {</b>
+<b class="fc">&nbsp;            migrationService = new MigrationService();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeRulesetManagementService() {
+<b class="fc">&nbsp;        if (Objects.isNull(rulesetManagementService)) {</b>
+<b class="fc">&nbsp;            rulesetManagementService = RulesetManagementService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeListColumnService() {
+<b class="fc">&nbsp;        if (Objects.isNull(listColumnService)) {</b>
+<b class="fc">&nbsp;            listColumnService = ListColumnService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeCommentService() {
+<b class="fc">&nbsp;        if (Objects.isNull(commentService)) {</b>
+<b class="fc">&nbsp;            commentService = CommentService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeIndexingService() {
+<b class="fc">&nbsp;        if (Objects.isNull(indexingService)) {</b>
+<b class="fc">&nbsp;            indexingService = IndexingService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeDataEditorSettingService() {
+<b class="fc">&nbsp;        if (Objects.isNull(dataEditorSettingService)) {</b>
+<b class="fc">&nbsp;            dataEditorSettingService = DataEditorSettingService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeOpacConfigurationService() {
+<b class="fc">&nbsp;        if (Objects.isNull(importConfigurationService)) {</b>
+<b class="fc">&nbsp;            importConfigurationService = ImportConfigurationService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeSearchFieldService() {
+<b class="nc">&nbsp;        if (Objects.isNull(searchFieldService)) {</b>
+<b class="nc">&nbsp;            searchFieldService = SearchFieldService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void initializeMappingFileService() {
+<b class="fc">&nbsp;        if (Objects.isNull(mappingFileService)) {</b>
+<b class="fc">&nbsp;            mappingFileService = MappingFileService.getInstance();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize AuthorityService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return AuthorityService object
+&nbsp;     */
+&nbsp;    public static AuthorityService getAuthorityService() {
+<b class="fc">&nbsp;        initializeAuthorizationService();</b>
+<b class="fc">&nbsp;        return authorityService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize BatchService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return BatchService object
+&nbsp;     */
+&nbsp;    public static BatchService getBatchService() {
+<b class="fc">&nbsp;        initializeBatchService();</b>
+<b class="fc">&nbsp;        return batchService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize ClientService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return ClientService object
+&nbsp;     */
+&nbsp;    public static ClientService getClientService() {
+<b class="fc">&nbsp;        initializeClientService();</b>
+<b class="fc">&nbsp;        return clientService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize DataEditorService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return DataEditorService object
+&nbsp;     */
+&nbsp;    public static DataEditorService getDataEditorService() {
+<b class="fc">&nbsp;        initializeDataEditorService();</b>
+<b class="fc">&nbsp;        return dataEditorService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize DocketService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return DocketService object
+&nbsp;     */
+&nbsp;    public static DocketService getDocketService() {
+<b class="fc">&nbsp;        initializeDocketService();</b>
+<b class="fc">&nbsp;        return docketService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize FilterService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return FilterService object
+&nbsp;     */
+&nbsp;    public static FilterService getFilterService() {
+<b class="fc">&nbsp;        initializeFilterService();</b>
+<b class="fc">&nbsp;        return filterService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize ImportService if it is not yet initialized and return it.
+&nbsp;     * @return ImportService object
+&nbsp;     */
+&nbsp;    public static ImportService getImportService() {
+<b class="fc">&nbsp;        initializeImportService();</b>
+<b class="fc">&nbsp;        return importService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize LdapGroupService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return LdapGroupService object
+&nbsp;     */
+&nbsp;    public static LdapGroupService getLdapGroupService() {
+<b class="fc">&nbsp;        initializeLdapGroupService();</b>
+<b class="fc">&nbsp;        return ldapGroupService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize LdapServerService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return LdapServerService object
+&nbsp;     */
+&nbsp;    public static LdapServerService getLdapServerService() {
+<b class="fc">&nbsp;        initializeLdapServerService();</b>
+<b class="fc">&nbsp;        return ldapServerService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize ImageService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return ImageService object
+&nbsp;     */
+&nbsp;    public static ImageService getImageService() {
+<b class="fc">&nbsp;        initializeImageService();</b>
+<b class="fc">&nbsp;        return imageService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize MetsService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return MetsService object
+&nbsp;     */
+&nbsp;    public static MetsService getMetsService() {
+<b class="fc">&nbsp;        initializeMetsService();</b>
+<b class="fc">&nbsp;        return metsService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize MassImportService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return MassImportService object
+&nbsp;     */
+&nbsp;    public static MassImportService getMassImportService() {
+<b class="nc">&nbsp;        initializeMassImportService();</b>
+<b class="nc">&nbsp;        return massImportService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize PropertyService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return PropertyService object
+&nbsp;     */
+&nbsp;    public static PropertyService getPropertyService() {
+<b class="fc">&nbsp;        initializePropertyService();</b>
+<b class="fc">&nbsp;        return propertyService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize ProcessService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return ProcessService object
+&nbsp;     */
+&nbsp;    public static ProcessService getProcessService() {
+<b class="fc">&nbsp;        initializeProcessService();</b>
+<b class="fc">&nbsp;        return processService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize FolderService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return FolderService object
+&nbsp;     */
+&nbsp;    public static FolderService getFolderService() {
+<b class="fc">&nbsp;        initializeFolderService();</b>
+<b class="fc">&nbsp;        return folderService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize ProjectService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return ProjectService object
+&nbsp;     */
+&nbsp;    public static ProjectService getProjectService() {
+<b class="fc">&nbsp;        initializeProjectService();</b>
+<b class="fc">&nbsp;        return projectService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize RulesetService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return RulesetService object
+&nbsp;     */
+&nbsp;    public static RulesetService getRulesetService() {
+<b class="fc">&nbsp;        initializeRulesetService();</b>
+<b class="fc">&nbsp;        return rulesetService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize SessionService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return SessionService object
+&nbsp;     */
+&nbsp;    public static SessionService getSessionService() {
+<b class="nc">&nbsp;        initializeSessionService();</b>
+<b class="nc">&nbsp;        return sessionService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize SecurityAccessService if it is not yet initialized and next
+&nbsp;     * return it.
+&nbsp;     *
+&nbsp;     * @return SecurityAccessService object
+&nbsp;     */
+&nbsp;    public static SecurityAccessService getSecurityAccessService() {
+<b class="fc">&nbsp;        initializeSecurityAccessService();</b>
+<b class="fc">&nbsp;        return securityAccessService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize TaskService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return TaskService object
+&nbsp;     */
+&nbsp;    public static TaskService getTaskService() {
+<b class="fc">&nbsp;        initializeTaskService();</b>
+<b class="fc">&nbsp;        return taskService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize TemplateService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return TemplateService object
+&nbsp;     */
+&nbsp;    public static TemplateService getTemplateService() {
+<b class="fc">&nbsp;        initializeTemplateService();</b>
+<b class="fc">&nbsp;        return templateService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize RoleService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return RoleService object
+&nbsp;     */
+&nbsp;    public static RoleService getRoleService() {
+<b class="fc">&nbsp;        initializeRoleService();</b>
+<b class="fc">&nbsp;        return roleService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize UserService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return UserService object
+&nbsp;     */
+&nbsp;    public static UserService getUserService() {
+<b class="fc">&nbsp;        initializeUserService();</b>
+<b class="fc">&nbsp;        return userService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize WorkflowService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return WorkflowService object
+&nbsp;     */
+&nbsp;    public static WorkflowService getWorkflowService() {
+<b class="fc">&nbsp;        initializeWorkflowService();</b>
+<b class="fc">&nbsp;        return workflowService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize WorkflowConditionService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return WorkflowConditionService object
+&nbsp;     */
+&nbsp;    public static WorkflowConditionService getWorkflowConditionService() {
+<b class="fc">&nbsp;        initializeWorkflowConditionService();</b>
+<b class="fc">&nbsp;        return workflowConditionService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize FileService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return FileService object
+&nbsp;     */
+&nbsp;    public static FileService getFileService() {
+<b class="fc">&nbsp;        initializeFileService();</b>
+<b class="fc">&nbsp;        return fileService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize CommandService if it is not yet initialized and next return
+&nbsp;     * it.
+&nbsp;     *
+&nbsp;     * @return CommandService object
+&nbsp;     */
+&nbsp;    public static CommandService getCommandService() {
+<b class="fc">&nbsp;        initializeCommandService();</b>
+<b class="fc">&nbsp;        return commandService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize SchemaService if it is not yet initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return SchemaService object
+&nbsp;     */
+&nbsp;    public static SchemaService getSchemaService() {
+<b class="fc">&nbsp;        initializeSchemaService();</b>
+<b class="fc">&nbsp;        return schemaService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize FileStructureValidationService if it is not yet initialized
+&nbsp;     * and next return it.
+&nbsp;     *
+&nbsp;     * @return FileStructureValidationService object
+&nbsp;     */
+&nbsp;    public static FileStructureValidationService getFileStructureValidationService() {
+<b class="nc">&nbsp;        initializeFileStructureValidationService();</b>
+<b class="nc">&nbsp;        return fileStructureValidationService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize KitodoScriptService if it is not yet initialized and next
+&nbsp;     * return it.
+&nbsp;     *
+&nbsp;     * @return KitodoScriptService object
+&nbsp;     */
+&nbsp;    public static KitodoScriptService getKitodoScriptService() {
+<b class="fc">&nbsp;        initializeKitodoScriptService();</b>
+<b class="fc">&nbsp;        return kitodoScriptService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize LongTermPreservationValidationService if it is not yet
+&nbsp;     * initialized and next return it.
+&nbsp;     *
+&nbsp;     * @return LongTermPreservationValidationService object
+&nbsp;     */
+&nbsp;    public static LongTermPreservationValidationService getLongTermPreservationValidationService() {
+<b class="nc">&nbsp;        initializeLongTermPreservationValidationService();</b>
+<b class="nc">&nbsp;        return longTermPreservationValidationService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize MetadataValidationService if it is not yet initialized and
+&nbsp;     * next return it.
+&nbsp;     *
+&nbsp;     * @return MetadataValidationService object
+&nbsp;     */
+&nbsp;    public static MetadataValidationService getMetadataValidationService() {
+<b class="nc">&nbsp;        initializeMetadataValidationService();</b>
+<b class="nc">&nbsp;        return metadataValidationService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize MigrationService if it is not yet initialized and
+&nbsp;     * next return it.
+&nbsp;     *
+&nbsp;     * @return MigrationService object
+&nbsp;     */
+&nbsp;    public static MigrationService getMigrationService() {
+<b class="fc">&nbsp;        initializeMigrationService();</b>
+<b class="fc">&nbsp;        return migrationService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize RulesetManagementService if it is not yet initialized and next
+&nbsp;     * return it.
+&nbsp;     *
+&nbsp;     * @return RulesetService object
+&nbsp;     */
+&nbsp;    public static RulesetManagementService getRulesetManagementService() {
+<b class="fc">&nbsp;        initializeRulesetManagementService();</b>
+<b class="fc">&nbsp;        return rulesetManagementService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize ListColumnService if it is not yet initialized and return it.
+&nbsp;     *
+&nbsp;     * @return ColumnService object
+&nbsp;     */
+&nbsp;    public static ListColumnService getListColumnService() {
+<b class="fc">&nbsp;        initializeListColumnService();</b>
+<b class="fc">&nbsp;        return listColumnService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize CommentService if it is not yet initialized and return it.
+&nbsp;     *
+&nbsp;     * @return CommentService object
+&nbsp;     */
+&nbsp;    public static CommentService getCommentService() {
+<b class="fc">&nbsp;        initializeCommentService();</b>
+<b class="fc">&nbsp;        return commentService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize IndexingService if it is not yet initialize and return it.
+&nbsp;     *
+&nbsp;     * @return IndexingService object
+&nbsp;     */
+&nbsp;    public static IndexingService getIndexingService() {
+<b class="fc">&nbsp;        initializeIndexingService();</b>
+<b class="fc">&nbsp;        return indexingService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get dataEditorSettingService.
+&nbsp;     *
+&nbsp;     * @return value of dataEditorSettingService
+&nbsp;     */
+&nbsp;    public static DataEditorSettingService getDataEditorSettingService() {
+<b class="fc">&nbsp;        initializeDataEditorSettingService();</b>
+<b class="fc">&nbsp;        return dataEditorSettingService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get importConfigurationService.
+&nbsp;     *
+&nbsp;     * @return value of importConfigurationService
+&nbsp;     */
+&nbsp;    public static ImportConfigurationService getImportConfigurationService() {
+<b class="fc">&nbsp;        initializeOpacConfigurationService();</b>
+<b class="fc">&nbsp;        return importConfigurationService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get searchFieldService.
+&nbsp;     *
+&nbsp;     * @return value of searchFieldService
+&nbsp;     */
+&nbsp;    public static SearchFieldService getSearchFieldService() {
+<b class="nc">&nbsp;        initializeSearchFieldService();</b>
+<b class="nc">&nbsp;        return searchFieldService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get mappingFileService.
+&nbsp;     *
+&nbsp;     * @return value of mappingFileService
+&nbsp;     */
+&nbsp;    public static MappingFileService getMappingFileService() {
+<b class="fc">&nbsp;        initializeMappingFileService();</b>
+<b class="fc">&nbsp;        return mappingFileService;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

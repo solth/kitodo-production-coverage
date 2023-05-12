@@ -1,0 +1,933 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessFieldedMetadata</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessFieldedMetadata (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessFieldedMetadata</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (27/45)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    53,5%
+  </span>
+  <span class="absValue">
+    (154/288)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ProcessFieldedMetadata$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    60,9%
+  </span>
+  <span class="absValue">
+    (28/46)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    53,6%
+  </span>
+  <span class="absValue">
+    (155/289)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.function.BiConsumer;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.commons.collections4.list.UnmodifiableList;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.Level;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.MetadataGroup;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.ComplexMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.Domain;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.InputType;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.MetadataViewWithValuesInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.SimpleMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.api.dataformat.Division;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.production.services.dataeditor.DataEditorService;
+&nbsp;import org.primefaces.model.DefaultTreeNode;
+&nbsp;import org.primefaces.model.TreeNode;
+&nbsp;
+<b class="fc">&nbsp;public class ProcessFieldedMetadata extends ProcessDetail implements Serializable {</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ProcessFieldedMetadata.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * An empty metadata group for the empty metadata panel showing. The empty metadata panel can be displayed if the
+&nbsp;     * element selected in the structure window isn’t a structure (has no metadata).
+&nbsp;     */
+<b class="fc">&nbsp;    public static final ProcessFieldedMetadata EMPTY = new ProcessFieldedMetadata();</b>
+&nbsp;    public static final String METADATA_KEY_LABEL = &quot;LABEL&quot;;
+&nbsp;    public static final String METADATA_KEY_ORDERLABEL = &quot;ORDERLABEL&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Fields the user has selected to show in addition, with no data yet.
+&nbsp;     */
+<b class="fc">&nbsp;    private final Collection&lt;String&gt; additionallySelectedFields = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    private boolean copy;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The division this panel is related to, if it isn’t a sub-panel.
+&nbsp;     */
+&nbsp;    private Division&lt;?&gt; division;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata which is excluded by the rule set.
+&nbsp;     */
+&nbsp;    private Collection&lt;Metadata&gt; hiddenMetadata;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The metadata object with the content of this panel.
+&nbsp;     */
+&nbsp;    private final HashSet&lt;Metadata&gt; metadata;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The key of the metadata group displaying here.
+&nbsp;     */
+&nbsp;    private String metadataKey;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The definition of this panel in the rule set.
+&nbsp;     */
+&nbsp;    private ComplexMetadataViewInterface metadataView;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The tree node that JSF has to display.
+&nbsp;     */
+&nbsp;    protected TreeNode treeNode;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates an empty metadata group.
+&nbsp;     */
+&nbsp;    public ProcessFieldedMetadata() {
+<b class="fc">&nbsp;        super(null, null);</b>
+<b class="fc">&nbsp;        this.treeNode = new DefaultTreeNode();</b>
+<b class="fc">&nbsp;        treeNode.setExpanded(true);</b>
+<b class="fc">&nbsp;        this.metadata = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        this.hiddenMetadata = Collections.emptyList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new root metadata group representing the metadata table
+&nbsp;     * content in the processMetadata.
+&nbsp;     *
+&nbsp;     * @param structure
+&nbsp;     *            structure selected by the user
+&nbsp;     * @param divisionView
+&nbsp;     *            information about that structure from the rule set
+&nbsp;     */
+&nbsp;    public ProcessFieldedMetadata(Division&lt;?&gt; structure, StructuralElementViewInterface divisionView) {
+<b class="fc">&nbsp;        this(null, structure, divisionView, null, null, structure.getMetadata());</b>
+<b class="fc">&nbsp;        buildTreeNodeAndCreateMetadataTable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add the metadata of this fielded metadata.
+&nbsp;     *
+&nbsp;     * @param potentialMetadataItems
+&nbsp;     *            metadata to add if not exist
+&nbsp;     * @return returns count of added metadata
+&nbsp;     */
+&nbsp;    public int addMetadataIfNotExists(Collection&lt;Metadata&gt; potentialMetadataItems) {
+<b class="nc">&nbsp;        Collection&lt;Metadata&gt; metadataToAdd = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        potentialMetadataItems.forEach( potentialMetadataItem -&gt; {</b>
+<b class="nc">&nbsp;            if (metadata.stream().noneMatch(item -&gt; item.getKey().equals(potentialMetadataItem.getKey()))) {</b>
+<b class="nc">&nbsp;                if (!(METADATA_KEY_LABEL.equals(potentialMetadataItem.getKey()) &amp;&amp; StringUtils.isNotEmpty(</b>
+<b class="nc">&nbsp;                        division.getLabel()) || METADATA_KEY_ORDERLABEL.equals(</b>
+<b class="nc">&nbsp;                        potentialMetadataItem.getKey()) &amp;&amp; StringUtils.isNotEmpty(division.getOrderlabel()))) {</b>
+<b class="nc">&nbsp;                    metadataToAdd.add(potentialMetadataItem);</b>
+&nbsp;                }
+&nbsp;
+&nbsp;            }
+&nbsp;        });
+<b class="nc">&nbsp;        metadata.addAll(metadataToAdd);</b>
+&nbsp;
+<b class="nc">&nbsp;        TreeNode editedTreeNode = treeNode;</b>
+&nbsp;
+<b class="nc">&nbsp;        buildTreeNodeAndCreateMetadataTable();</b>
+&nbsp;
+<b class="nc">&nbsp;        overwriteTreeNodes(editedTreeNode.getChildren(), treeNode.getChildren());</b>
+&nbsp;
+<b class="nc">&nbsp;        return metadataToAdd.size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void buildTreeNodeAndCreateMetadataTable() {
+<b class="fc">&nbsp;        treeNode = new DefaultTreeNode();</b>
+<b class="fc">&nbsp;        treeNode.setExpanded(true);</b>
+<b class="fc">&nbsp;        createMetadataTable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Overwrites the target list with source list of tree nodes based on the
+&nbsp;     * metadata id.
+&nbsp;     *
+&nbsp;     * @param source
+&nbsp;     *            The list of source tree nodes
+&nbsp;     * @param target
+&nbsp;     *            The list of target tree nodes
+&nbsp;     */
+&nbsp;    private static void overwriteTreeNodes(List&lt;TreeNode&gt; source, List&lt;TreeNode&gt; target) {
+<b class="nc">&nbsp;        int index = 0;</b>
+<b class="nc">&nbsp;        for (TreeNode targetNode : target) {</b>
+<b class="nc">&nbsp;            ProcessDetail row = (ProcessDetail) targetNode.getData();</b>
+<b class="nc">&nbsp;            Optional&lt;TreeNode&gt; treeNodeOptional = source.stream().filter(</b>
+<b class="nc">&nbsp;                sourceNode -&gt; ((ProcessDetail) sourceNode.getData()).getMetadataID().equals(row.getMetadataID()))</b>
+<b class="nc">&nbsp;                    .findFirst();</b>
+<b class="nc">&nbsp;            if (treeNodeOptional.isPresent()) {</b>
+<b class="nc">&nbsp;                target.set(index, treeNodeOptional.get());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            index++;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a sub-panel for a metadata group.
+&nbsp;     *
+&nbsp;     * @param metadataView
+&nbsp;     *            information about that group from the rule set
+&nbsp;     * @param metadata
+&nbsp;     *            data of the group, may be empty but must be modifiable
+&nbsp;     */
+&nbsp;    private ProcessFieldedMetadata(ProcessFieldedMetadata parent, ComplexMetadataViewInterface metadataView,
+&nbsp;            HashSet&lt;Metadata&gt; metadata) {
+<b class="fc">&nbsp;        this(parent, null, metadataView, metadataView.getLabel(), metadataView.getId(), metadata);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new fielded metadata. This constructor is called from one of
+&nbsp;     * the above ones and does the work.
+&nbsp;     *
+&nbsp;     * @param structure
+&nbsp;     *            structure selected by the user, null in case of a sub-panel
+&nbsp;     * @param metadataView
+&nbsp;     *            information about that structure or group from the rule set
+&nbsp;     * @param metadata
+&nbsp;     *            metadata, may be empty but must be modifiable
+&nbsp;     */
+&nbsp;    private ProcessFieldedMetadata(ProcessFieldedMetadata parent, Division&lt;?&gt; structure,
+&nbsp;            ComplexMetadataViewInterface metadataView, String label, String metadataKey,
+&nbsp;                                   HashSet&lt;Metadata&gt; metadata) {
+<b class="fc">&nbsp;        super(parent, label);</b>
+<b class="fc">&nbsp;        this.division = structure;</b>
+<b class="fc">&nbsp;        this.metadata = metadata;</b>
+<b class="fc">&nbsp;        this.metadataView = metadataView;</b>
+<b class="fc">&nbsp;        this.metadataKey = metadataKey;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ProcessFieldedMetadata(ProcessFieldedMetadata parent, MetadataGroup group) {
+<b class="nc">&nbsp;        this(parent, null, null, group.getKey(), group.getKey(), group.getMetadata());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ProcessFieldedMetadata(ProcessFieldedMetadata template) {
+<b class="nc">&nbsp;        this(template.container, null, template.metadataView, template.label, template.metadataKey,</b>
+&nbsp;                new HashSet&lt;&gt;(template.metadata));
+<b class="nc">&nbsp;        copy = true;</b>
+<b class="nc">&nbsp;        hiddenMetadata = template.hiddenMetadata;</b>
+<b class="nc">&nbsp;        treeNode = new DefaultTreeNode(this, template.getTreeNode().getParent());</b>
+<b class="nc">&nbsp;        createMetadataTable();</b>
+<b class="nc">&nbsp;        treeNode.setExpanded(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The method for building the metadata table.
+&nbsp;     */
+&nbsp;    private void createMetadataTable() {
+&nbsp;        // the existing metadata is passed to the rule set, which sorts it
+<b class="fc">&nbsp;        Collection&lt;Metadata&gt; entered = addLabels(new HashSet&lt;&gt;(metadata));</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(treeNode) &amp;&amp; !treeNode.getChildren().isEmpty()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                entered = entered.stream().filter(metadataElem -&gt; !(metadataElem instanceof MetadataGroup))</b>
+<b class="nc">&nbsp;                        .collect(Collectors.toSet());</b>
+<b class="nc">&nbsp;                entered.addAll(DataEditorService.getExistingMetadataRows(treeNode.getChildren()));</b>
+<b class="nc">&nbsp;            } catch (InvalidMetadataValueException e) {</b>
+<b class="nc">&nbsp;                logger.error(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        List&lt;MetadataViewWithValuesInterface&gt; tableData = metadataView.getSortedVisibleMetadata(entered, additionallySelectedFields);</b>
+<b class="fc">&nbsp;        treeNode.getChildren().clear();</b>
+<b class="fc">&nbsp;        hiddenMetadata = Collections.emptyList();</b>
+<b class="fc">&nbsp;        for (MetadataViewWithValuesInterface rowData : tableData) {</b>
+<b class="fc">&nbsp;            Optional&lt;MetadataViewInterface&gt; optionalMetadataView = rowData.getMetadata();</b>
+<b class="fc">&nbsp;            Collection&lt;Metadata&gt; values = rowData.getValues();</b>
+<b class="fc">&nbsp;            if (optionalMetadataView.isPresent()) {</b>
+<b class="fc">&nbsp;                MetadataViewInterface metadataView = optionalMetadataView.get();</b>
+<b class="fc">&nbsp;                if (metadataView.isComplex()) {</b>
+<b class="fc">&nbsp;                    createMetadataGroupPanel((ComplexMetadataViewInterface) metadataView, values);</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    if (!createMetadataEntryEdit((SimpleMetadataViewInterface) metadataView, values)) {</b>
+&nbsp;                        /*
+&nbsp;                         * If a conditional metadata was set automatically,
+&nbsp;                         * start over. This is necessary to update dependent
+&nbsp;                         * fields above or below.
+&nbsp;                         */
+<b class="nc">&nbsp;                        logger.debug(&quot;Metadata was changed. Restarting.&quot;);</b>
+<b class="nc">&nbsp;                        createMetadataTable();</b>
+<b class="nc">&nbsp;                        break;</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="fc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                hiddenMetadata = values;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The method for building the metadata table if the group and thus
+&nbsp;     * everything in it is undefined in the ruleset.
+&nbsp;     */
+&nbsp;    private void createUndefinedMetadataTable() {
+<b class="nc">&nbsp;        treeNode.getChildren().clear();</b>
+<b class="nc">&nbsp;        hiddenMetadata = Collections.emptyList();</b>
+<b class="nc">&nbsp;        for (Metadata entry : metadata) {</b>
+<b class="nc">&nbsp;            createMetadataEntryEdit(null, Collections.singletonList(entry));</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads the labels from the structure (if any) and adds them to the
+&nbsp;     * returned metadata collection.
+&nbsp;     *
+&nbsp;     * @param metadata
+&nbsp;     *            available metadata
+&nbsp;     * @return metadata with labels, if any
+&nbsp;     */
+&nbsp;    private Collection&lt;Metadata&gt; addLabels(Collection&lt;Metadata&gt; metadata) {
+<b class="fc">&nbsp;        Collection&lt;Metadata&gt; displayMetadata = metadata;</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(division)) {</b>
+<b class="fc">&nbsp;            displayMetadata = new HashSet&lt;&gt;(metadata);</b>
+<b class="fc">&nbsp;            for (URI contentId : division.getContentIds()) {</b>
+<b class="nc">&nbsp;                MetadataEntry contentIdEntry = new MetadataEntry();</b>
+<b class="nc">&nbsp;                contentIdEntry.setKey(&quot;CONTENTIDS&quot;);</b>
+<b class="nc">&nbsp;                contentIdEntry.setValue(contentId.toString());</b>
+<b class="nc">&nbsp;                displayMetadata.add(contentIdEntry);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(division.getLabel())) {</b>
+<b class="nc">&nbsp;                MetadataEntry label = new MetadataEntry();</b>
+<b class="nc">&nbsp;                label.setKey(METADATA_KEY_LABEL);</b>
+<b class="nc">&nbsp;                label.setValue(division.getLabel());</b>
+<b class="nc">&nbsp;                displayMetadata.add(label);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (Objects.nonNull(division.getOrderlabel())) {</b>
+<b class="nc">&nbsp;                MetadataEntry label = new MetadataEntry();</b>
+<b class="nc">&nbsp;                label.setKey(METADATA_KEY_ORDERLABEL);</b>
+<b class="nc">&nbsp;                label.setValue(division.getOrderlabel());</b>
+<b class="nc">&nbsp;                displayMetadata.add(label);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return displayMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates an object to represent a metadata group. This is done by
+&nbsp;     * creating a {@code FieldedMetadataGroup} recursively.
+&nbsp;     *
+&nbsp;     * @param complexMetadataView
+&nbsp;     *            information about that group from the rule set
+&nbsp;     * @param values
+&nbsp;     *            data for that group, must contain at most one element
+&nbsp;     */
+&nbsp;    public void createMetadataGroupPanel(ComplexMetadataViewInterface complexMetadataView,
+&nbsp;                                                           Collection&lt;Metadata&gt; values) {
+&nbsp;        HashSet&lt;Metadata&gt; value;
+&nbsp;
+<b class="fc">&nbsp;        switch (values.size()) {</b>
+&nbsp;            case 0:
+<b class="fc">&nbsp;                value = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            case 1:
+<b class="fc">&nbsp;                Metadata nextMetadata = values.iterator().next();</b>
+<b class="fc">&nbsp;                if (nextMetadata instanceof MetadataGroup) {</b>
+<b class="fc">&nbsp;                    MetadataGroup metadataGroup = (MetadataGroup) nextMetadata;</b>
+<b class="fc">&nbsp;                    value = metadataGroup.getMetadata();</b>
+<b class="fc">&nbsp;                } else {</b>
+<b class="nc">&nbsp;                    throw new IllegalStateException(&quot;Got simple metadata entry with key \&quot;&quot; + nextMetadata.getKey()</b>
+&nbsp;                            + &quot;\&quot; which is declared as substructured key in the rule set.&quot;);
+&nbsp;                }
+&nbsp;                break;
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalStateException(&quot;Too many (&quot; + values.size() + &quot;) complex metadata of type \&quot;&quot;</b>
+&nbsp;                        + metadataKey + &quot;\&quot; in a single row. Must be 0 or 1 per row.&quot;);
+&nbsp;        }
+<b class="fc">&nbsp;        ProcessFieldedMetadata metadata = new ProcessFieldedMetadata(this, complexMetadataView, value);</b>
+<b class="fc">&nbsp;        metadata.treeNode = new DefaultTreeNode(metadata, treeNode);</b>
+<b class="fc">&nbsp;        metadata.createMetadataTable();</b>
+<b class="fc">&nbsp;        metadata.treeNode.setExpanded(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates an object to represent a single-row metadata input.
+&nbsp;     *
+&nbsp;     * @param simpleMetadataView
+&nbsp;     *            presentation information about the metadata entry from the
+&nbsp;     *            ruleset
+&nbsp;     * @param values
+&nbsp;     *            the value(s) to be displayed
+&nbsp;     * @return whether the input field could be generated. If an automatic
+&nbsp;     *         preset has been added to the metadata, false is returned. In that
+&nbsp;     *         case, the rule set must be invoked again to update the options
+&nbsp;     *         for dependent fields.
+&nbsp;     */
+&nbsp;    public boolean createMetadataEntryEdit(SimpleMetadataViewInterface simpleMetadataView,
+&nbsp;                                                 Collection&lt;Metadata&gt; values) {
+&nbsp;
+&nbsp;        ProcessDetail data;
+&nbsp;        try {
+<b class="fc">&nbsp;            InputType inputType = Objects.isNull(simpleMetadataView) ? InputType.ONE_LINE_TEXT</b>
+<b class="fc">&nbsp;                    : simpleMetadataView.getInputType();</b>
+<b class="fc">&nbsp;            switch (inputType) {</b>
+&nbsp;                case MULTIPLE_SELECTION:
+&nbsp;                case MULTI_LINE_SINGLE_SELECTION:
+&nbsp;                case ONE_LINE_SINGLE_SELECTION:
+<b class="fc">&nbsp;                    List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; leadingFields = getListForLeadingMetadataFields();</b>
+<b class="fc">&nbsp;                    Map&lt;String, String&gt; options = simpleMetadataView.getSelectItems(leadingFields);</b>
+<b class="fc">&nbsp;                    boolean dependent = leadingFields.parallelStream().flatMap(map -&gt; map.entrySet().parallelStream())</b>
+<b class="fc">&nbsp;                            .anyMatch(entry -&gt; Boolean.TRUE.equals(entry.getValue()));</b>
+<b class="fc">&nbsp;                    if (dependent &amp;&amp; !options.isEmpty() &amp;&amp; addAutoPresetForConditionalMetadata(simpleMetadataView, options, values)) {</b>
+<b class="nc">&nbsp;                        return false;</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                    data = new ProcessSelectMetadata(this, simpleMetadataView, simpleValues(values), dependent);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case BOOLEAN:
+<b class="nc">&nbsp;                    data = new ProcessBooleanMetadata(this, simpleMetadataView, oneValue(values, MetadataEntry.class));</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                case DATE:
+<b class="nc">&nbsp;                    data = new ProcessDateMetadata(this, simpleMetadataView, oneValue(values, MetadataEntry.class));</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                case INTEGER:
+&nbsp;                case MULTI_LINE_TEXT:
+&nbsp;                case ONE_LINE_TEXT:
+<b class="fc">&nbsp;                    data = new ProcessTextMetadata(this, simpleMetadataView, oneValue(values, MetadataEntry.class));</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                default:
+<b class="nc">&nbsp;                    throw new IllegalStateException(&quot;complete switch&quot;);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            new DefaultTreeNode(data, treeNode).setExpanded(true);</b>
+<b class="nc">&nbsp;        } catch (IllegalStateException e) {</b>
+<b class="nc">&nbsp;            logger.catching(Level.WARN, e);</b>
+<b class="nc">&nbsp;            ProcessFieldedMetadata metadata = new ProcessFieldedMetadata(this, oneValue(values, MetadataGroup.class));</b>
+<b class="nc">&nbsp;            metadata.treeNode = new DefaultTreeNode(metadata, treeNode);</b>
+<b class="nc">&nbsp;            metadata.createUndefinedMetadataTable();</b>
+<b class="nc">&nbsp;            metadata.treeNode.setExpanded(true);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A value must be set for conditional metadata, as there is no no-selection
+&nbsp;     * option. In this case, the first possible value is already displayed as
+&nbsp;     * selected, even if it is not yet reflected in the metadata before saving.
+&nbsp;     * In this case, no options are offered in selection fields that depend on
+&nbsp;     * this field, because their options are based on the metadata. Therefore,
+&nbsp;     * in this case, the metadata must be set explicitly. Then, a termination
+&nbsp;     * must take place and the rule set must be invoked again in order to
+&nbsp;     * correctly populate the dependent fields with options.
+&nbsp;     *
+&nbsp;     * @param view
+&nbsp;     *            view that gives the access the select items
+&nbsp;     * @param metadataForInput
+&nbsp;     *            list of metadata, to which a preset will be added if necessary
+&nbsp;     * @return true, if the current tree building process must be restarted,
+&nbsp;     *         because the metadata was changed
+&nbsp;     */
+&nbsp;    private boolean addAutoPresetForConditionalMetadata(SimpleMetadataViewInterface view, Map&lt;String, String&gt; options,
+&nbsp;            Collection&lt;Metadata&gt; metadataForInput) {
+&nbsp;
+<b class="nc">&nbsp;        if (metadataForInput.isEmpty()) {</b>
+<b class="nc">&nbsp;            MetadataEntry autoPreset = new MetadataEntry();</b>
+<b class="nc">&nbsp;            autoPreset.setKey(view.getId());</b>
+<b class="nc">&nbsp;            if (Objects.isNull(container)) {</b>
+<b class="nc">&nbsp;                autoPreset.setDomain(DOMAIN_TO_MDSEC.get(view.getDomain().orElse(Domain.DESCRIPTION)));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            autoPreset.setValue(options.entrySet().iterator().next().getKey());</b>
+<b class="nc">&nbsp;            metadata.add(autoPreset);</b>
+&nbsp;
+<b class="nc">&nbsp;            logger.debug(&quot;Added metadata {} to {}&quot;, autoPreset, metadataKey);</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the collection of simple metadata entries. Throws an
+&nbsp;     * IllegalStateException if a cannot be casted.
+&nbsp;     *
+&nbsp;     * @param values
+&nbsp;     *            values obtained
+&nbsp;     * @return a collection of simple metadata entries
+&nbsp;     */
+&nbsp;    @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot; })
+&nbsp;    private Collection&lt;MetadataEntry&gt; simpleValues(Collection&lt;Metadata&gt; values) {
+<b class="fc">&nbsp;        Optional&lt;Metadata&gt; fault = values.parallelStream().filter(entry -&gt; !(entry instanceof MetadataEntry)).findAny();</b>
+<b class="fc">&nbsp;        if (fault.isPresent()) {</b>
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Got complex metadata entry with key \&quot;&quot; + fault.get().getKey()</b>
+&nbsp;                    + &quot;\&quot; which isn&#39;t declared as substructured key in the rule set.&quot;);
+&nbsp;        }
+<b class="fc">&nbsp;        return (Collection) values;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the only metadata entry or null. Throws an IllegalStateException
+&nbsp;     * if the value is ambiguous or cannot be cast.
+&nbsp;     *
+&nbsp;     * @param &lt;T&gt;
+&nbsp;     *
+&nbsp;     * @param values
+&nbsp;     *            values obtained
+&nbsp;     * @return the only entry or null
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    private &lt;T extends Metadata&gt; T oneValue(Collection&lt;Metadata&gt; values, Class&lt;T&gt; subclass) {
+<b class="fc">&nbsp;        switch (values.size()) {</b>
+&nbsp;            case 0:
+<b class="fc">&nbsp;                return null;</b>
+&nbsp;            case 1:
+<b class="fc">&nbsp;                Metadata nextMetadata = values.iterator().next();</b>
+<b class="fc">&nbsp;                if (subclass.isAssignableFrom(nextMetadata.getClass())) {</b>
+<b class="fc">&nbsp;                    return (T) nextMetadata;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    throw new IllegalStateException(&quot;Got complex metadata entry with key \&quot;&quot; + nextMetadata.getKey()</b>
+&nbsp;                            + &quot;\&quot; which isn&#39;t declared as substructured key in the rule set.&quot;);
+&nbsp;                }
+&nbsp;            default:
+<b class="nc">&nbsp;                throw new IllegalStateException(&quot;Too many (&quot; + values.size() + &quot;) metadata of type \&quot;&quot;</b>
+<b class="nc">&nbsp;                        + values.iterator().next().getKey() + &quot;\&quot; in a single row. Must be 0 or 1 per row.&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds an additionally selected field.
+&nbsp;     *
+&nbsp;     * @param additionallySelectedField
+&nbsp;     *            additionally selected field to add
+&nbsp;     * @throws NoSuchMetadataFieldException
+&nbsp;     *             if the method has to save the entries in order to rebuild the
+&nbsp;     *             display with the new field, but when saving an attempt is
+&nbsp;     *             made to write a non-existing &amp;lt;mets:div&gt; attribute
+&nbsp;     */
+&nbsp;    public void addAdditionallySelectedField(String additionallySelectedField) throws NoSuchMetadataFieldException {
+<b class="nc">&nbsp;        additionallySelectedFields.add(additionallySelectedField);</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            preserve();</b>
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException e) {</b>
+<b class="nc">&nbsp;            logger.info(e.getLocalizedMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        createMetadataTable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Duplicates a process detail.
+&nbsp;     *
+&nbsp;     * @param processDetail
+&nbsp;     *            process detail to copy
+&nbsp;     */
+&nbsp;    public void copy(ProcessDetail processDetail) {
+<b class="fc">&nbsp;        if (Objects.isNull(division)) {</b>
+<b class="nc">&nbsp;            container.copy(processDetail);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            searchRecursiveAndCopy(treeNode, processDetail);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static boolean searchRecursiveAndCopy(TreeNode treeNode, ProcessDetail processDetail) {
+<b class="fc">&nbsp;        List&lt;TreeNode&gt; children = treeNode.getChildren();</b>
+<b class="fc">&nbsp;        for (int index = 0; index &lt; children.size(); index++) {</b>
+<b class="fc">&nbsp;            TreeNode child = children.get(index);</b>
+<b class="fc">&nbsp;            Object childData = child.getData();</b>
+<b class="fc">&nbsp;            if (Objects.equals(childData, processDetail)) {</b>
+<b class="fc">&nbsp;                TreeNode copy = null;</b>
+<b class="fc">&nbsp;                if (childData instanceof ProcessSimpleMetadata) {</b>
+<b class="fc">&nbsp;                    ProcessSimpleMetadata copyData = ((ProcessSimpleMetadata) childData).getClone();</b>
+<b class="fc">&nbsp;                    copy = new DefaultTreeNode(copyData, treeNode);</b>
+<b class="fc">&nbsp;                    copy.setExpanded(child.isExpanded());</b>
+<b class="fc">&nbsp;                } else if (childData instanceof ProcessFieldedMetadata) {</b>
+<b class="nc">&nbsp;                    ProcessFieldedMetadata copyData = new ProcessFieldedMetadata((ProcessFieldedMetadata) childData);</b>
+<b class="nc">&nbsp;                    copy = copyData.treeNode;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                treeNode.getChildren().add(index + 1, copy);</b>
+<b class="fc">&nbsp;            } else if (searchRecursiveAndCopy(child, processDetail)) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the division.
+&nbsp;     * @return the division
+&nbsp;     */
+&nbsp;    public Division&lt;?&gt; getDivision() {
+<b class="nc">&nbsp;        return division;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getMetadataID() {
+<b class="fc">&nbsp;        return metadataKey;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getInput() {
+<b class="nc">&nbsp;        return &quot;dataTable&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; getListForLeadingMetadataFields() {
+<b class="fc">&nbsp;        List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; result = Objects.isNull(container) ? new ArrayList&lt;&gt;()</b>
+<b class="fc">&nbsp;                : container.getListForLeadingMetadataFields();</b>
+<b class="fc">&nbsp;        Map&lt;String, MetadataEntry&gt; metadataEntryMap = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        treeNode.getChildren().stream().map(TreeNode::getData).filter(ProcessSimpleMetadata.class::isInstance)</b>
+<b class="fc">&nbsp;                .map(ProcessSimpleMetadata.class::cast).map(ProcessDetail::getMetadataID).forEachOrdered(key -&gt; {</b>
+<b class="fc">&nbsp;                    MetadataEntry metadataEntry = new MetadataEntry();</b>
+<b class="fc">&nbsp;                    metadataEntry.setKey(key);</b>
+<b class="fc">&nbsp;                    metadataEntryMap.put(key, metadataEntry);</b>
+&nbsp;                });
+<b class="fc">&nbsp;        metadata.stream().filter(MetadataEntry.class::isInstance).map(MetadataEntry.class::cast)</b>
+<b class="fc">&nbsp;                .forEachOrdered(key -&gt; metadataEntryMap.put(key.getKey(), key));</b>
+<b class="fc">&nbsp;        result.add(metadataEntryMap.entrySet().stream()</b>
+<b class="fc">&nbsp;            .collect(Collectors.toMap(Entry::getValue, all -&gt; Boolean.FALSE)));</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the metadata of a metadata group, when used recursively.
+&nbsp;     *
+&nbsp;     * @return the metadata of the metadata group
+&nbsp;     * @throws InvalidMetadataValueException
+&nbsp;     *             if some value is invalid
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Collection&lt;Metadata&gt; getMetadataWithFilledValues() throws InvalidMetadataValueException {
+<b class="fc">&nbsp;        return getMetadata(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Collection&lt;Metadata&gt; getMetadata(boolean skipEmpty) throws InvalidMetadataValueException {
+<b class="fc">&nbsp;        assert division == null;</b>
+<b class="fc">&nbsp;        MetadataGroup result = new MetadataGroup();</b>
+<b class="fc">&nbsp;        result.setKey(metadataKey);</b>
+<b class="fc">&nbsp;        result.setDomain(DOMAIN_TO_MDSEC.get(metadataView.getDomain().orElse(Domain.DESCRIPTION)));</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            this.preserve();</b>
+<b class="nc">&nbsp;        } catch (NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;never happening exception&quot;);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (skipEmpty) {</b>
+<b class="fc">&nbsp;            result.setMetadata(metadata instanceof List ? metadata : new HashSet&lt;&gt;(metadata));</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            result.setMetadata(new HashSet&lt;&gt;(DataEditorService.getExistingMetadataRows(treeNode.getChildren())));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return Collections.singletonList(result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return this ProcessFieldedMetadata as MetadataGroup.
+&nbsp;     *
+&nbsp;     * @return MetadataGroup representing this ProcessFieldedMetadata
+&nbsp;     */
+&nbsp;    public Collection&lt;Metadata&gt; getChildMetadata() {
+<b class="nc">&nbsp;        return metadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the rows that JSF has to display.
+&nbsp;     *
+&nbsp;     * @return the rows that JSF has to display
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDetail&gt; getRows() {
+<b class="fc">&nbsp;        List&lt;ProcessDetail&gt; rows = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (TreeNode child : treeNode.getChildren()) {</b>
+<b class="fc">&nbsp;            rows.add((ProcessDetail) child.getData());</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return new UnmodifiableList&lt;&gt;(rows);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    Pair&lt;BiConsumer&lt;Division&lt;?&gt;, String&gt;, String&gt; getStructureFieldValue() {
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public TreeNode getTreeNode() {
+<b class="fc">&nbsp;        return treeNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isUndefined() {
+<b class="nc">&nbsp;        return Objects.isNull(metadataView) || metadataView.isUndefined();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isRequired() {
+<b class="fc">&nbsp;        return Objects.nonNull(metadataView) &amp;&amp; metadataView.getMinOccurs() &gt; 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isValid() {
+<b class="fc">&nbsp;        for (ProcessDetail row : getRows()) {</b>
+<b class="fc">&nbsp;            if (!row.isValid()) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void markLeadingMetadataFields(List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; leadingMetadataFields) {
+<b class="fc">&nbsp;        int lastIndex = leadingMetadataFields.size() - 1;</b>
+<b class="fc">&nbsp;        if (lastIndex &gt; 0) {</b>
+<b class="fc">&nbsp;            container.markLeadingMetadataFields(leadingMetadataFields.subList(0, lastIndex));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        final List&lt;String&gt; leadingMetadataKeys = leadingMetadataFields.get(lastIndex).entrySet().parallelStream()</b>
+<b class="fc">&nbsp;                .filter(entry -&gt; Boolean.TRUE.equals(entry.getValue())).map(entry -&gt; entry.getKey().getKey())</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="fc">&nbsp;        treeNode.getChildren().parallelStream().map(TreeNode::getData).map(ProcessDetail.class::cast)</b>
+<b class="fc">&nbsp;                .filter(processDetail -&gt; leadingMetadataKeys.contains(processDetail.getMetadataID()))</b>
+<b class="fc">&nbsp;                .forEach(ProcessDetail::setLeading);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads the contents of the processMetadata and stores the values in the
+&nbsp;     * appropriate place. If the line is used to edit a field of the METS
+&nbsp;     * structure, this field is set, otherwise the metadata will be stored in
+&nbsp;     * the list. The hidden metadata is also written back there again.
+&nbsp;     *
+&nbsp;     * @throws InvalidMetadataValueException
+&nbsp;     *             if the content of a metadata input field is syntactically
+&nbsp;     *             wrong
+&nbsp;     * @throws NoSuchMetadataFieldException
+&nbsp;     *             if an input shall be saved to a field of the structure, but
+&nbsp;     *             there is no setter corresponding to the name configured in
+&nbsp;     *             the rule set
+&nbsp;     */
+&nbsp;    public void preserve() throws InvalidMetadataValueException, NoSuchMetadataFieldException {
+&nbsp;        try {
+<b class="fc">&nbsp;            if (Objects.nonNull(division)) {</b>
+<b class="fc">&nbsp;                division.getContentIds().clear();</b>
+<b class="fc">&nbsp;                division.setOrderlabel(null);</b>
+<b class="fc">&nbsp;                division.setLabel(null);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            metadata.clear();</b>
+<b class="fc">&nbsp;            for (TreeNode child : treeNode.getChildren()) {</b>
+<b class="fc">&nbsp;                ProcessDetail row = (ProcessDetail) child.getData();</b>
+<b class="fc">&nbsp;                Pair&lt;BiConsumer&lt;Division&lt;?&gt;, String&gt;, String&gt; metsFieldValue = row.getStructureFieldValue();</b>
+<b class="fc">&nbsp;                if (Objects.nonNull(metsFieldValue)) {</b>
+<b class="nc">&nbsp;                    metsFieldValue.getKey().accept(division, metsFieldValue.getValue());</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    metadata.addAll(row.getMetadataWithFilledValues());</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(hiddenMetadata)) {</b>
+<b class="fc">&nbsp;                metadata.addAll(hiddenMetadata);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (InvalidMetadataValueException invalidValueException) {</b>
+<b class="nc">&nbsp;            if (Objects.isNull(division)) {</b>
+<b class="nc">&nbsp;                invalidValueException.addParent(metadataKey);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            throw invalidValueException;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (copy) {</b>
+<b class="nc">&nbsp;            MetadataGroup metadataGroup = new MetadataGroup();</b>
+<b class="nc">&nbsp;            metadataGroup.setKey(metadataKey);</b>
+<b class="nc">&nbsp;            Optional&lt;Domain&gt; optionalDomain = metadataView.getDomain();</b>
+<b class="nc">&nbsp;            optionalDomain.ifPresent(domain -&gt; metadataGroup.setDomain(DOMAIN_TO_MDSEC.get(domain)));</b>
+<b class="nc">&nbsp;            metadataGroup.setMetadata(metadata);</b>
+<b class="nc">&nbsp;            container.metadata.add(metadataGroup);</b>
+<b class="nc">&nbsp;            copy = false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes a process detail.
+&nbsp;     *
+&nbsp;     * @param toDelete
+&nbsp;     *            process detail to delete
+&nbsp;     */
+&nbsp;    public void remove(ProcessDetail toDelete) throws InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="nc">&nbsp;        Iterator&lt;TreeNode&gt; treeNodesIterator = treeNode.getChildren().iterator();</b>
+<b class="nc">&nbsp;        while (treeNodesIterator.hasNext()) {</b>
+<b class="nc">&nbsp;            TreeNode treeNode = treeNodesIterator.next();</b>
+<b class="nc">&nbsp;            if (treeNode.getData().equals(toDelete)) {</b>
+<b class="nc">&nbsp;                treeNodesIterator.remove();</b>
+<b class="nc">&nbsp;                preserve();</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Overwrites the metadata of this process fielded metadata.
+&nbsp;     *
+&nbsp;     * @param metadata
+&nbsp;     *            metadata to overwrite with
+&nbsp;     */
+&nbsp;    public void setMetadata(Collection&lt;Metadata&gt; metadata) {
+<b class="nc">&nbsp;        this.metadata.clear();</b>
+<b class="nc">&nbsp;        this.metadata.addAll(metadata);</b>
+<b class="nc">&nbsp;        buildTreeNodeAndCreateMetadataTable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get metadataView.
+&nbsp;     *
+&nbsp;     * @return value of metadataView
+&nbsp;     */
+&nbsp;    public ComplexMetadataViewInterface getMetadataView() {
+<b class="fc">&nbsp;        return metadataView;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get additionallySelectedFields.
+&nbsp;     *
+&nbsp;     * @return value of additionallySelectedFields
+&nbsp;     */
+&nbsp;    public Collection&lt;String&gt; getAdditionallySelectedFields() {
+<b class="nc">&nbsp;        return additionallySelectedFields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get occurrences of a metadata in the treeNode.
+&nbsp;     * @param metadataKey as String
+&nbsp;     * @return occurrences
+&nbsp;     */
+&nbsp;    public int getOccurrences(String metadataKey) {
+<b class="nc">&nbsp;        int occ = 0;</b>
+<b class="nc">&nbsp;        for (TreeNode treeNode : treeNode.getChildren()) {</b>
+<b class="nc">&nbsp;            if (((ProcessDetail) treeNode.getData()).getMetadataID().equals(metadataKey)) {</b>
+<b class="nc">&nbsp;                occ++;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return occ;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int getMinOccurs() {
+<b class="nc">&nbsp;        return metadataView.getMinOccurs();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

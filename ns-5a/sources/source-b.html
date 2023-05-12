@@ -1,0 +1,180 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LdapGroupService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data</a>
+</div>
+
+<h1>Coverage Summary for Class: LdapGroupService (org.kitodo.production.services.data)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LdapGroupService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    20%
+  </span>
+  <span class="absValue">
+    (1/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4,2%
+  </span>
+  <span class="absValue">
+    (1/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.LdapGroup;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.database.persistence.LdapGroupDAO;
+&nbsp;import org.kitodo.production.services.data.base.SearchDatabaseService;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;public class LdapGroupService extends SearchDatabaseService&lt;LdapGroup, LdapGroupDAO&gt; {
+&nbsp;
+&nbsp;    public LdapGroupService() {
+<b class="fc">&nbsp;        super(new LdapGroupDAO());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countDatabaseRows() throws DAOException {
+<b class="nc">&nbsp;        return countDatabaseRows(&quot;SELECT COUNT(*) FROM LdapGroup&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countResults(Map filters) throws DAOException {
+<b class="nc">&nbsp;        return countDatabaseRows();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;LdapGroup&gt; loadData(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
+<b class="nc">&nbsp;        return new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Duplicate the LDAP group with the given ID &#39;itemId&#39;.
+&nbsp;     *
+&nbsp;     * @return the duplicated LdapGroup
+&nbsp;     */
+&nbsp;    public LdapGroup duplicateLdapGroup(LdapGroup baseLdapGroup) {
+<b class="nc">&nbsp;        LdapGroup duplicatedLdapGroup = new LdapGroup();</b>
+&nbsp;
+&nbsp;        // LDAP group _title_ and _displayName_ should explicitly _not_ be duplicated!
+<b class="nc">&nbsp;        duplicatedLdapGroup.setHomeDirectory(baseLdapGroup.getHomeDirectory());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setGidNumber(baseLdapGroup.getGidNumber());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setUserDN(baseLdapGroup.getUserDN());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setObjectClasses(baseLdapGroup.getObjectClasses());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setSn(baseLdapGroup.getSn());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setUid(baseLdapGroup.getUid());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setDescription(baseLdapGroup.getDescription());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setGecos(baseLdapGroup.getGecos());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setLoginShell(baseLdapGroup.getLoginShell());</b>
+&nbsp;
+<b class="nc">&nbsp;        duplicatedLdapGroup.setSambaSID(baseLdapGroup.getSambaSID());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setSambaAcctFlags(baseLdapGroup.getSambaAcctFlags());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setSambaKickoffTime(baseLdapGroup.getSambaKickoffTime());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setSambaLogonHours(baseLdapGroup.getSambaLogonHours());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setSambaLogonScript(baseLdapGroup.getSambaLogonScript());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setSambaPasswordHistory(baseLdapGroup.getSambaPasswordHistory());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setSambaPrimaryGroupSID(baseLdapGroup.getSambaPrimaryGroupSID());</b>
+<b class="nc">&nbsp;        duplicatedLdapGroup.setSambaPwdMustChange(baseLdapGroup.getSambaPwdMustChange());</b>
+&nbsp;
+<b class="nc">&nbsp;        duplicatedLdapGroup.setLdapServer(baseLdapGroup.getLdapServer());</b>
+&nbsp;
+<b class="nc">&nbsp;        return duplicatedLdapGroup;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

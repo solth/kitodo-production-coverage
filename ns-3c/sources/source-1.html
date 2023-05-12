@@ -1,0 +1,522 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FilterMenu</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.filters</a>
+</div>
+
+<h1>Coverage Summary for Class: FilterMenu (org.kitodo.production.filters)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FilterMenu</td>
+<td class="coverageStat">
+  <span class="percent">
+    22,2%
+  </span>
+  <span class="absValue">
+    (6/27)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    15,5%
+  </span>
+  <span class="absValue">
+    (20/129)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">FilterMenu$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    21,4%
+  </span>
+  <span class="absValue">
+    (6/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    15,4%
+  </span>
+  <span class="absValue">
+    (20/130)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.filters;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;
+&nbsp;import org.kitodo.production.enums.FilterPart;
+&nbsp;import org.kitodo.production.enums.FilterString;
+&nbsp;import org.kitodo.production.forms.CurrentTaskForm;
+&nbsp;import org.kitodo.production.forms.ProcessForm;
+&nbsp;import org.kitodo.production.forms.UserForm;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.FilterService;
+&nbsp;
+&nbsp;public class FilterMenu {
+&nbsp;
+&nbsp;    private static final int MAX_SUGGESTIONS = 15;
+<b class="fc">&nbsp;    private static final List&lt;FilterString&gt; processCategories = Arrays.asList(</b>
+&nbsp;            FilterString.TASK,
+&nbsp;            FilterString.TASKINWORK,
+&nbsp;            FilterString.TASKLOCKED,
+&nbsp;            FilterString.TASKOPEN,
+&nbsp;            FilterString.TASKDONE,
+&nbsp;            FilterString.PROJECT,
+&nbsp;            FilterString.ID,
+&nbsp;            FilterString.PARENTPROCESSID,
+&nbsp;            FilterString.PROCESS,
+&nbsp;            FilterString.BATCH,
+&nbsp;            FilterString.PROPERTY
+&nbsp;    );
+<b class="fc">&nbsp;    private static final List&lt;FilterString&gt; taskCategories = Arrays.asList(</b>
+&nbsp;            FilterString.TASK,
+&nbsp;            FilterString.TASKINWORK,
+&nbsp;            FilterString.TASKOPEN,
+&nbsp;            FilterString.PROJECT,
+&nbsp;            FilterString.ID,
+&nbsp;            FilterString.PROCESS,
+&nbsp;            FilterString.BATCH,
+&nbsp;            FilterString.PROPERTY
+&nbsp;    );
+<b class="fc">&nbsp;    private static final List&lt;String&gt; userCategories = Arrays.asList(</b>
+&nbsp;            &quot;id:&quot;,
+&nbsp;            &quot;name:&quot;,
+&nbsp;            &quot;surname:&quot;,
+&nbsp;            &quot;login:&quot;,
+&nbsp;            &quot;ldapLogin:&quot;,
+&nbsp;            &quot;active:&quot;,
+&nbsp;            &quot;deleted:&quot;,
+&nbsp;            &quot;location:&quot;,
+&nbsp;            &quot;metadataLanguage:&quot;,
+&nbsp;            &quot;withMassDownload:&quot;,
+&nbsp;            &quot;configProductionDateShow:&quot;,
+&nbsp;            &quot;tableSize:&quot;,
+&nbsp;            &quot;language:&quot;
+&nbsp;    );
+&nbsp;
+<b class="fc">&nbsp;    private ProcessForm processForm = null;</b>
+<b class="fc">&nbsp;    private CurrentTaskForm taskForm = null;</b>
+<b class="fc">&nbsp;    private UserForm userForm = null;</b>
+&nbsp;    private List&lt;Suggestion&gt; suggestions;
+&nbsp;    private final List&lt;ParsedFilter&gt; parsedFilters;
+&nbsp;    private String filterInEditMode;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor of filter menu for processes.
+&nbsp;     *
+&nbsp;     * @param processForm instance of ProcessForm
+&nbsp;     */
+<b class="fc">&nbsp;    public FilterMenu(ProcessForm processForm) {</b>
+<b class="fc">&nbsp;        this.processForm = processForm;</b>
+<b class="fc">&nbsp;        suggestions = createSuggestionsForProcessCategory(&quot;&quot;);</b>
+<b class="fc">&nbsp;        parsedFilters = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor of filter menu for tasks.
+&nbsp;     *
+&nbsp;     * @param taskForm instance of CurrentTaskForm
+&nbsp;     */
+<b class="fc">&nbsp;    public FilterMenu(CurrentTaskForm taskForm) {</b>
+<b class="fc">&nbsp;        this.taskForm = taskForm;</b>
+<b class="fc">&nbsp;        suggestions = createSuggestionsForTaskCategory(&quot;&quot;);</b>
+<b class="fc">&nbsp;        parsedFilters = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor of filter menu for users.
+&nbsp;     *
+&nbsp;     * @param userForm instance of UserForm
+&nbsp;     */
+<b class="nc">&nbsp;    public FilterMenu(UserForm userForm) {</b>
+<b class="nc">&nbsp;        this.userForm = userForm;</b>
+<b class="nc">&nbsp;        suggestions = createSuggestionsForUserCategory(&quot;&quot;);</b>
+<b class="nc">&nbsp;        parsedFilters = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of suggestions.
+&nbsp;     *
+&nbsp;     * @return List of suggestion objects
+&nbsp;     */
+&nbsp;    public List&lt;Suggestion&gt; getSuggestions() {
+<b class="nc">&nbsp;        return suggestions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create suggestions based on a String passed from a {@code &lt;p:remoteCommand/&gt;}.
+&nbsp;     */
+&nbsp;    public void updateSuggestions() {
+<b class="nc">&nbsp;        Map&lt;String, String&gt; params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();</b>
+<b class="nc">&nbsp;        updateSuggestions(params.get(&quot;input&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create suggestions based on the given input string.
+&nbsp;     *
+&nbsp;     * @param input String to get suggestions for
+&nbsp;     */
+&nbsp;    public void updateSuggestions(String input) {
+&nbsp;        // remove quotation marks and minus
+<b class="nc">&nbsp;        String strippedInput = input.replaceAll(&quot;^[\&quot;-]+|\&quot;$&quot;, &quot;&quot;);</b>
+&nbsp;
+&nbsp;        // determine the last part of the input
+<b class="nc">&nbsp;        int lastColonIndex = strippedInput.lastIndexOf(&quot;:&quot;);</b>
+<b class="nc">&nbsp;        if (lastColonIndex == -1) {</b>
+&nbsp;            // category should be suggested
+<b class="nc">&nbsp;            if (Objects.nonNull(processForm)) {</b>
+<b class="nc">&nbsp;                suggestions = createSuggestionsForProcessCategory(input);</b>
+<b class="nc">&nbsp;            } else if (Objects.nonNull(taskForm)) {</b>
+<b class="nc">&nbsp;                suggestions = createSuggestionsForTaskCategory(input);</b>
+<b class="nc">&nbsp;            } else if (Objects.nonNull(userForm)) {</b>
+<b class="nc">&nbsp;                suggestions = createSuggestionsForUserCategory(input);</b>
+&nbsp;            }
+&nbsp;        } else {
+&nbsp;            // at least one colon in the input string
+<b class="nc">&nbsp;            String lastPart = input.substring(lastColonIndex + 1);</b>
+<b class="nc">&nbsp;            Pattern patternNextCategory = Pattern.compile(&quot;(?&lt;= \\| )\\w?$&quot;);</b>
+<b class="nc">&nbsp;            Matcher matcherNextCategory = patternNextCategory.matcher(lastPart);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(processForm)) {</b>
+<b class="nc">&nbsp;                if (matcherNextCategory.find()) {</b>
+&nbsp;                    // strings ends with &quot; | &quot;
+<b class="nc">&nbsp;                    suggestions = createSuggestionsForProcessCategory(matcherNextCategory.group());</b>
+&nbsp;                } else {
+&nbsp;                    // process value should be suggested
+<b class="nc">&nbsp;                    Pattern patternPreviousCategory = Pattern.compile(&quot;\\w+:(?!.*:)&quot;);</b>
+<b class="nc">&nbsp;                    Matcher matcherPreviousCategory = patternPreviousCategory.matcher(input);</b>
+<b class="nc">&nbsp;                    String category = matcherPreviousCategory.find() ? matcherPreviousCategory.group() : &quot;&quot;;</b>
+<b class="nc">&nbsp;                    suggestions = createSuggestionsForProcessValue(checkFilterCategory(category, processCategories), lastPart);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } else if (Objects.nonNull(taskForm)) {</b>
+<b class="nc">&nbsp;                if (matcherNextCategory.find()) {</b>
+&nbsp;                    // strings ends with &quot; | &quot;
+<b class="nc">&nbsp;                    suggestions = createSuggestionsForTaskCategory(matcherNextCategory.group());</b>
+&nbsp;                } else {
+&nbsp;                    // process/task value should be suggested
+<b class="nc">&nbsp;                    Pattern patternPreviousCategory = Pattern.compile(&quot;\\w+:(?!.*:)&quot;);</b>
+<b class="nc">&nbsp;                    Matcher matcherPreviousCategory = patternPreviousCategory.matcher(input);</b>
+<b class="nc">&nbsp;                    String category = matcherPreviousCategory.find() ? matcherPreviousCategory.group() : &quot;&quot;;</b>
+<b class="nc">&nbsp;                    suggestions = createSuggestionsForTaskValue(checkFilterCategory(category, taskCategories), lastPart);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } else if (Objects.nonNull(userForm)) {</b>
+<b class="nc">&nbsp;                if (matcherNextCategory.find()) {</b>
+&nbsp;                    // strings ends with &quot; | &quot;
+<b class="nc">&nbsp;                    suggestions = createSuggestionsForUserCategory(matcherNextCategory.group());</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Suggestion&gt; filterSuggestionsForCategory(String input, List&lt;FilterString&gt; suggestions) {
+<b class="fc">&nbsp;        return suggestions.stream()</b>
+<b class="fc">&nbsp;                .filter(filterString -&gt; filterString.getFilterEnglish().startsWith(input.toLowerCase())</b>
+<b class="nc">&nbsp;                        || filterString.getFilterGerman().startsWith(input.toLowerCase()))</b>
+<b class="fc">&nbsp;                .map(filterString -&gt; new Suggestion(input, filterString.getFilterEnglish(), FilterPart.CATEGORY))</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Suggestion&gt; createSuggestionsForProcessCategory(String input) {
+<b class="fc">&nbsp;        return filterSuggestionsForCategory(input, processCategories);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Suggestion&gt; createSuggestionsForTaskCategory(String input) {
+<b class="fc">&nbsp;        return filterSuggestionsForCategory(input, taskCategories);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Suggestion&gt; createSuggestionsForProcessValue(FilterString category, String input) {
+<b class="nc">&nbsp;        List&lt;Suggestion&gt; suggestions = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(category)) {</b>
+<b class="nc">&nbsp;            return suggestions;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        FilterService filterService = ServiceManager.getFilterService();</b>
+<b class="nc">&nbsp;        switch (category) {</b>
+&nbsp;            case TASK:
+&nbsp;            case TASKINWORK:
+&nbsp;            case TASKLOCKED:
+&nbsp;            case TASKOPEN:
+&nbsp;            case TASKDONE:
+&nbsp;            case TASKDONETITLE:
+<b class="nc">&nbsp;                suggestions.addAll(createStringSuggestionsMatchingInput(input, filterService.initStepTitles(), FilterPart.VALUE));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case PROJECT:
+<b class="nc">&nbsp;                suggestions.addAll(createStringSuggestionsMatchingInput(input, filterService.initProjects(), FilterPart.VALUE));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case PROPERTY:
+<b class="nc">&nbsp;                suggestions.addAll(createStringSuggestionsMatchingInput(input,</b>
+<b class="nc">&nbsp;                    filterService.initProcessPropertyTitles(), FilterPart.VALUE));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            default:
+&nbsp;                // Do nothing
+&nbsp;                break;
+&nbsp;        }
+<b class="nc">&nbsp;        return suggestions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Suggestion&gt; createSuggestionsForTaskValue(FilterString category, String input) {
+<b class="nc">&nbsp;        List&lt;Suggestion&gt; suggestions = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(category)) {</b>
+<b class="nc">&nbsp;            return suggestions;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        FilterService filterService = ServiceManager.getFilterService();</b>
+<b class="nc">&nbsp;        switch (category) {</b>
+&nbsp;            case TASK:
+&nbsp;            case TASKINWORK:
+&nbsp;            case TASKOPEN:
+<b class="nc">&nbsp;                suggestions.addAll(createStringSuggestionsMatchingInput(input, filterService.initStepTitles(), FilterPart.VALUE));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case PROJECT:
+<b class="nc">&nbsp;                suggestions.addAll(createStringSuggestionsMatchingInput(input, filterService.initProjects(), FilterPart.VALUE));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            case PROPERTY:
+<b class="nc">&nbsp;                suggestions.addAll(createStringSuggestionsMatchingInput(input,</b>
+<b class="nc">&nbsp;                    filterService.initProcessPropertyTitles(), FilterPart.VALUE));</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            default:
+&nbsp;                // Do nothing
+&nbsp;                break;
+&nbsp;        }
+<b class="nc">&nbsp;        return suggestions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Suggestion&gt; createSuggestionsForUserCategory(String input) {
+<b class="nc">&nbsp;        return createStringSuggestionsMatchingInput(input, userCategories, FilterPart.CATEGORY);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Suggestion&gt; createStringSuggestionsMatchingInput(String input, List&lt;String&gt; suggestions, FilterPart filterPart) {
+<b class="nc">&nbsp;        return suggestions.stream()</b>
+<b class="nc">&nbsp;                .filter(suggestion -&gt; suggestion.startsWith(input))</b>
+<b class="nc">&nbsp;                .limit(MAX_SUGGESTIONS)</b>
+<b class="nc">&nbsp;                .map(suggestion -&gt; new Suggestion(input, suggestion, filterPart))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the category passed as String matches a FilterString.
+&nbsp;     *
+&nbsp;     * @param categoryInput as String
+&nbsp;     * @return FilterString matching the given String
+&nbsp;     */
+&nbsp;    private FilterString checkFilterCategory(String categoryInput, List&lt;FilterString&gt; categories) {
+<b class="nc">&nbsp;        return categories.stream()</b>
+<b class="nc">&nbsp;                .filter(f -&gt; f.getFilterGerman().equals(categoryInput.toLowerCase())</b>
+<b class="nc">&nbsp;                        || f.getFilterEnglish().equals(categoryInput.toLowerCase()))</b>
+<b class="nc">&nbsp;                .findFirst().orElse(null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get parsedFilters.
+&nbsp;     *
+&nbsp;     * @return value of parsedFilters
+&nbsp;     */
+&nbsp;    public List&lt;ParsedFilter&gt; getParsedFilters() {
+<b class="nc">&nbsp;        return parsedFilters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get filterInEditMode.
+&nbsp;     *
+&nbsp;     * @return value of filterInEditMode
+&nbsp;     */
+&nbsp;    public String getFilterInEditMode() {
+<b class="nc">&nbsp;        return filterInEditMode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set filterInEditMode.
+&nbsp;     *
+&nbsp;     * @param filterInEditMode as java.lang.String
+&nbsp;     */
+&nbsp;    public void setFilterInEditMode(String filterInEditMode) {
+<b class="nc">&nbsp;        this.filterInEditMode = filterInEditMode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void addParsedFilter(String plainFilter) {
+<b class="nc">&nbsp;        parsedFilters.add(new ParsedFilter(plainFilter));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove the given filter from the list of ParsedFilters.
+&nbsp;     * This method does not take care of the actual plain filter used for filtering.
+&nbsp;     *
+&nbsp;     * @param filterToBeRemoved as ParsedFilter object
+&nbsp;     */
+&nbsp;    public void removeParsedFilter(ParsedFilter filterToBeRemoved) {
+<b class="nc">&nbsp;        parsedFilters.remove(filterToBeRemoved);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parse the given filter string.
+&nbsp;     * The given string is split into separate filters before being transformed into ParsedFilter objects.
+&nbsp;     *
+&nbsp;     * @param filterString String containing one or multiple filters
+&nbsp;     */
+&nbsp;    public void parseFilters(String filterString) {
+<b class="nc">&nbsp;        parsedFilters.clear();</b>
+<b class="nc">&nbsp;        List&lt;String&gt; plainFilters = List.of(filterString.split(&quot; ?\&quot;| (?=\\|)|(?&lt;=\\|) &quot;));</b>
+<b class="nc">&nbsp;        for (String plainFilter : plainFilters) {</b>
+<b class="nc">&nbsp;            if (plainFilter.replaceAll(&quot;\\s&quot;, &quot;&quot;).length() &gt; 0) {</b>
+<b class="nc">&nbsp;                parsedFilters.add(new ParsedFilter(plainFilter));</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Submit the entered filters and apply them.
+&nbsp;     */
+&nbsp;    public void submitFilters() {
+<b class="nc">&nbsp;        Map&lt;String, String&gt; params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();</b>
+<b class="nc">&nbsp;        filterInEditMode = params.get(&quot;input&quot;);</b>
+<b class="nc">&nbsp;        if (filterInEditMode.length() &gt; 0) {</b>
+<b class="nc">&nbsp;            addParsedFilter(filterInEditMode);</b>
+<b class="nc">&nbsp;            filterInEditMode = &quot;&quot;;</b>
+<b class="nc">&nbsp;            updateSuggestions(&quot;&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        updateFilters();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove the given filter.
+&nbsp;     *
+&nbsp;     * @param filterToBeRemoved as ParsedFilter object
+&nbsp;     */
+&nbsp;    public void removeFilter(ParsedFilter filterToBeRemoved) {
+<b class="nc">&nbsp;        removeParsedFilter(filterToBeRemoved);</b>
+<b class="nc">&nbsp;        updateFilters();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove the filter passed in the request.
+&nbsp;     * The filter can be passed as plain filter string from a {@code &lt;p:remoteCommand/&gt;} as request parameter.
+&nbsp;     */
+&nbsp;    public void removeFilter() {
+<b class="nc">&nbsp;        Map&lt;String, String&gt; params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();</b>
+<b class="nc">&nbsp;        removeFilter(new ParsedFilter(params.get(&quot;plainFilter&quot;)));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Build plain filter string from parsed filters and set filter in form class.
+&nbsp;     */
+&nbsp;    public void updateFilters() {
+<b class="nc">&nbsp;        StringBuilder newFilter = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (ParsedFilter parsedFilter : parsedFilters) {</b>
+<b class="nc">&nbsp;            if (newFilter.length() &gt; 0) {</b>
+<b class="nc">&nbsp;                newFilter.append(&quot; &quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            newFilter.append(parsedFilter.getPlainFilter());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(processForm)) {</b>
+<b class="nc">&nbsp;            processForm.setFilter(newFilter.toString());</b>
+<b class="nc">&nbsp;        } else if (Objects.nonNull(taskForm)) {</b>
+<b class="nc">&nbsp;            taskForm.setFilter(newFilter.toString());</b>
+<b class="nc">&nbsp;        } else if (Objects.nonNull(userForm)) {</b>
+<b class="nc">&nbsp;            userForm.setFilter(newFilter.toString());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

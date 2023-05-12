@@ -1,0 +1,828 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > WorkflowControllerService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.workflow</a>
+</div>
+
+<h1>Coverage Summary for Class: WorkflowControllerService (org.kitodo.production.services.workflow)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WorkflowControllerService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85%
+  </span>
+  <span class="absValue">
+    (34/40)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,6%
+  </span>
+  <span class="absValue">
+    (230/326)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.workflow;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.concurrent.locks.ReentrantLock;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.command.CommandResult;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.validation.State;
+&nbsp;import org.kitodo.api.validation.ValidationResult;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Comment;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.beans.WorkflowCondition;
+&nbsp;import org.kitodo.data.database.enums.TaskEditType;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.enums.WorkflowConditionType;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.elasticsearch.index.converter.ProcessConverter;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.VariableReplacer;
+&nbsp;import org.kitodo.production.helper.WebDav;
+&nbsp;import org.kitodo.production.helper.metadata.ImageHelper;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyMetsModsDigitalDocumentHelper;
+&nbsp;import org.kitodo.production.helper.metadata.legacytypeimplementations.LegacyPrefsHelper;
+&nbsp;import org.kitodo.production.helper.tasks.TaskManager;
+&nbsp;import org.kitodo.production.metadata.MetadataLock;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.TaskService;
+&nbsp;import org.kitodo.production.thread.TaskScriptThread;
+&nbsp;
+<b class="fc">&nbsp;public class WorkflowControllerService {</b>
+&nbsp;
+<b class="fc">&nbsp;    private List&lt;Task&gt; automaticTasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private boolean flagWait = false;</b>
+<b class="fc">&nbsp;    private final ReentrantLock flagWaitLock = new ReentrantLock();</b>
+<b class="fc">&nbsp;    private final WebDav webDav = new WebDav();</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(WorkflowControllerService.class);</b>
+<b class="fc">&nbsp;    private final TaskService taskService = ServiceManager.getTaskService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set Task status up.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            to change status up
+&nbsp;     */
+&nbsp;    public void setTaskStatusUp(Task task) throws DataException, IOException, DAOException {
+<b class="fc">&nbsp;        setTaskStatusUp(Collections.singletonList(task));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set Task status up.
+&nbsp;     *
+&nbsp;     * @param tasks
+&nbsp;     *            to change status up
+&nbsp;     */
+&nbsp;    public void setTaskStatusUp(List&lt;Task&gt; tasks) throws DataException, IOException, DAOException {
+<b class="fc">&nbsp;        for (Task task : tasks) {</b>
+<b class="fc">&nbsp;            if (task.getProcessingStatus() != TaskStatus.DONE) {</b>
+<b class="fc">&nbsp;                setProcessingStatusUp(task);</b>
+<b class="fc">&nbsp;                task.setEditType(TaskEditType.ADMIN);</b>
+<b class="fc">&nbsp;                if (task.getProcessingStatus() == TaskStatus.DONE) {</b>
+<b class="fc">&nbsp;                    close(task);</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    task.setProcessingTime(new Date());</b>
+<b class="fc">&nbsp;                    taskService.replaceProcessingUser(task, getCurrentUser());</b>
+<b class="fc">&nbsp;                    ServiceManager.getTaskService().save(task);</b>
+<b class="fc">&nbsp;                    ServiceManager.getProcessService().save(task.getProcess());</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Change Task status down.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            to change status down
+&nbsp;     */
+&nbsp;    public void setTaskStatusDown(Task task) {
+<b class="fc">&nbsp;        setTaskStatusDown(Collections.singletonList(task));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Change Task status down.
+&nbsp;     *
+&nbsp;     * @param tasks
+&nbsp;     *            to change status down
+&nbsp;     */
+&nbsp;    public void setTaskStatusDown(List&lt;Task&gt; tasks) {
+<b class="fc">&nbsp;        for (Task task : tasks) {</b>
+<b class="fc">&nbsp;            task.setEditType(TaskEditType.ADMIN);</b>
+<b class="fc">&nbsp;            task.setProcessingTime(new Date());</b>
+<b class="fc">&nbsp;            taskService.replaceProcessingUser(task, getCurrentUser());</b>
+<b class="fc">&nbsp;            setProcessingStatusDown(task);</b>
+<b class="fc">&nbsp;            if (task.getProcessingStatus() == TaskStatus.LOCKED) {</b>
+<b class="fc">&nbsp;                List&lt;Task&gt; previousTasks = getPreviousTasks(task);</b>
+<b class="fc">&nbsp;                for (Task previousTask : previousTasks) {</b>
+<b class="fc">&nbsp;                    setProcessingStatusDown(previousTask);</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Change Task status up for list of tasks assigned to given Process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void setTasksStatusUp(Process process) throws DataException, IOException, DAOException {
+<b class="fc">&nbsp;        List&lt;Task&gt; currentTask = ServiceManager.getProcessService().getCurrentTasks(process);</b>
+<b class="fc">&nbsp;        if (currentTask.isEmpty()) {</b>
+<b class="nc">&nbsp;            activateNextTasks(process.getTasks());</b>
+&nbsp;            return;
+&nbsp;        }
+<b class="fc">&nbsp;        setTaskStatusUp(currentTask);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Change Task status down for list of tasks assigned to given Process.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void setTasksStatusDown(Process process) {
+<b class="fc">&nbsp;        List&lt;Task&gt; currentTask = ServiceManager.getProcessService().getCurrentTasks(process);</b>
+<b class="fc">&nbsp;        if (currentTask.isEmpty()) {</b>
+<b class="nc">&nbsp;            currentTask = getLastClosedTask(process);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        setTaskStatusDown(currentTask);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Task&gt; getLastClosedTask(Process process) {
+<b class="nc">&nbsp;        List&lt;Task&gt; lastOpenTasks = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        int ordering = 0;</b>
+<b class="nc">&nbsp;        for (Task task : process.getTasks()) {</b>
+<b class="nc">&nbsp;            if (TaskStatus.DONE.equals(task.getProcessingStatus())) {</b>
+<b class="nc">&nbsp;                if (task.getOrdering() &gt; ordering) {</b>
+<b class="nc">&nbsp;                    lastOpenTasks.clear();</b>
+&nbsp;                }
+<b class="nc">&nbsp;                lastOpenTasks.add(task);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return lastOpenTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean validateMetadata(Task task) throws IOException, DAOException {
+<b class="nc">&nbsp;        URI metadataFileUri = ServiceManager.getProcessService().getMetadataFileUri(task.getProcess());</b>
+<b class="nc">&nbsp;        Workpiece workpiece = ServiceManager.getMetsService().loadWorkpiece(metadataFileUri);</b>
+<b class="nc">&nbsp;        RulesetManagementInterface ruleset = ServiceManager.getRulesetManagementService().getRulesetManagement();</b>
+<b class="nc">&nbsp;        ruleset.load(new File(Paths.get(</b>
+<b class="nc">&nbsp;                ConfigCore.getParameter(ParameterCore.DIR_RULESETS),</b>
+<b class="nc">&nbsp;                task.getProcess().getRuleset().getFile()).toString()));</b>
+<b class="nc">&nbsp;        ValidationResult validationResult = ServiceManager.getMetadataValidationService().validate(workpiece, ruleset);</b>
+<b class="nc">&nbsp;        boolean strictValidation = ConfigCore.getBooleanParameter(ParameterCore.VALIDATION_FAIL_ON_WARNING);</b>
+<b class="nc">&nbsp;        State state = validationResult.getState();</b>
+<b class="nc">&nbsp;        if (State.ERROR.equals(state) || (strictValidation &amp;&amp; !State.SUCCESS.equals(state))) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(Helper.getTranslation(&quot;dataEditor.validation.state.error&quot;));</b>
+<b class="nc">&nbsp;            for (String message : validationResult.getResultMessages()) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(message);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (strictValidation) {</b>
+<b class="nc">&nbsp;            return State.SUCCESS.equals(state);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return !State.ERROR.equals(state);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Close method task called by user action.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void closeTaskByUser(Task task) throws DataException, IOException, DAOException {
+&nbsp;        // if the result of the task is to be verified first, then if necessary,
+&nbsp;        // cancel the completion
+<b class="fc">&nbsp;        if (task.isTypeCloseVerify()) {</b>
+&nbsp;            // metadata validation
+<b class="nc">&nbsp;            if (task.isTypeMetadata()</b>
+<b class="nc">&nbsp;                    &amp;&amp; ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.USE_META_DATA_VALIDATION)</b>
+<b class="nc">&nbsp;                    &amp;&amp; !validateMetadata(task)) {</b>
+<b class="nc">&nbsp;                throw new DataException(&quot;Error on metadata validation!&quot;);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // image validation
+<b class="nc">&nbsp;            if (task.isTypeImagesWrite()) {</b>
+<b class="nc">&nbsp;                ImageHelper mih = new ImageHelper();</b>
+<b class="nc">&nbsp;                URI imageFolder = ServiceManager.getProcessService().getImagesOriginDirectory(false, task.getProcess());</b>
+<b class="nc">&nbsp;                if (!mih.checkIfImagesValid(task.getProcess().getTitle(), imageFolder)) {</b>
+<b class="nc">&nbsp;                    throw new DataException(&quot;Error on image validation!&quot;);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        // unlock the process
+<b class="fc">&nbsp;        MetadataLock.setFree(task.getProcess().getId());</b>
+<b class="fc">&nbsp;        if (task.isTypeImagesRead() || task.isTypeImagesWrite()) {</b>
+<b class="nc">&nbsp;            this.webDav.uploadFromHome(task.getProcess());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        task.setEditType(TaskEditType.MANUAL_SINGLE);</b>
+<b class="fc">&nbsp;        close(task);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Close task.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            as Task object
+&nbsp;     */
+&nbsp;    public void close(Task task) throws DataException, IOException, DAOException {
+<b class="fc">&nbsp;        task.setProcessingStatus(TaskStatus.DONE);</b>
+<b class="fc">&nbsp;        task.setCorrection(false);</b>
+<b class="fc">&nbsp;        task.setProcessingTime(new Date());</b>
+<b class="fc">&nbsp;        User user = null;</b>
+<b class="fc">&nbsp;        if (!task.isTypeAutomatic()) {</b>
+<b class="fc">&nbsp;            user = getCurrentUser();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        taskService.replaceProcessingUser(task, user);</b>
+<b class="fc">&nbsp;        task.setProcessingEnd(new Date());</b>
+&nbsp;
+<b class="fc">&nbsp;        taskService.save(task);</b>
+&nbsp;
+<b class="fc">&nbsp;        automaticTasks = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        activateTasksForClosedTask(task);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if all children of a process are closed.
+&nbsp;     * @param process the process to check
+&nbsp;     * @return true if all children are closed
+&nbsp;     */
+&nbsp;    public static boolean allChildrenClosed(Process process) {
+<b class="fc">&nbsp;        if (!process.getChildren().isEmpty()) {</b>
+<b class="fc">&nbsp;            boolean allChildrenClosed = true;</b>
+<b class="fc">&nbsp;            for (Process child : process.getChildren()) {</b>
+<b class="fc">&nbsp;                allChildrenClosed &amp;= &quot;100000000&quot;.equals(child.getSortHelperStatus())</b>
+<b class="fc">&nbsp;                        || &quot;100000000000&quot;.equals(child.getSortHelperStatus());</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            return allChildrenClosed;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Taken from CurrentTaskForm.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void assignTaskToUser(Task task) {
+<b class="fc">&nbsp;        this.flagWaitLock.lock();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            if (!this.flagWait) {</b>
+<b class="fc">&nbsp;                this.flagWait = true;</b>
+&nbsp;
+<b class="fc">&nbsp;                task.setProcessingStatus(TaskStatus.INWORK);</b>
+<b class="fc">&nbsp;                task.setEditType(TaskEditType.MANUAL_SINGLE);</b>
+<b class="fc">&nbsp;                task.setProcessingTime(new Date());</b>
+<b class="fc">&nbsp;                taskService.replaceProcessingUser(task, getCurrentUser());</b>
+<b class="fc">&nbsp;                if (Objects.isNull(task.getProcessingBegin())) {</b>
+<b class="nc">&nbsp;                    task.setProcessingBegin(new Date());</b>
+&nbsp;                }
+&nbsp;
+<b class="fc">&nbsp;                Process process = task.getProcess();</b>
+&nbsp;
+<b class="fc">&nbsp;                List&lt;Task&gt; concurrentTasks = getConcurrentTasksForClose(process.getTasks(), task);</b>
+<b class="fc">&nbsp;                for (Task concurrentTask : concurrentTasks) {</b>
+<b class="nc">&nbsp;                    concurrentTask.setProcessingStatus(TaskStatus.LOCKED);</b>
+<b class="nc">&nbsp;                    taskService.save(concurrentTask);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;
+<b class="fc">&nbsp;                updateProcessSortHelperStatus(process);</b>
+&nbsp;
+&nbsp;                // if it is an image task, then download the images into the
+&nbsp;                // user home directory
+<b class="fc">&nbsp;                if (task.isTypeImagesRead() || task.isTypeImagesWrite()) {</b>
+<b class="nc">&nbsp;                    downloadToHome(task);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;stepInWorkError&quot;);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            this.flagWait = false;</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;stepSaveError&quot;, logger, e);</b>
+&nbsp;        } finally {
+<b class="fc">&nbsp;            this.flagWaitLock.unlock();</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Unassing user from task.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void unassignTaskFromUser(Task task) throws DataException {
+<b class="fc">&nbsp;        if (task.isTypeImagesRead() || task.isTypeImagesWrite()) {</b>
+<b class="nc">&nbsp;            this.webDav.uploadFromHome(task.getProcess());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        task.setProcessingStatus(TaskStatus.OPEN);</b>
+<b class="fc">&nbsp;        taskService.replaceProcessingUser(task, null);</b>
+&nbsp;        // if we have a correction task here then never remove startdate
+<b class="fc">&nbsp;        if (task.isCorrection()) {</b>
+<b class="nc">&nbsp;            task.setProcessingBegin(null);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        task.setEditType(TaskEditType.MANUAL_SINGLE);</b>
+<b class="fc">&nbsp;        task.setProcessingTime(new Date());</b>
+&nbsp;
+<b class="fc">&nbsp;        taskService.save(task);</b>
+&nbsp;
+&nbsp;        // unlock the process
+<b class="fc">&nbsp;        MetadataLock.setFree(task.getProcess().getId());</b>
+&nbsp;
+<b class="fc">&nbsp;        updateProcessSortHelperStatus(task.getProcess());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Unified method for report problem .
+&nbsp;     *
+&nbsp;     * @param comment as Comment object
+&nbsp;     */
+&nbsp;    public void reportProblem(Comment comment) throws DataException {
+<b class="fc">&nbsp;        Task currentTask = comment.getCurrentTask();</b>
+<b class="fc">&nbsp;        if (currentTask.isTypeImagesRead() || currentTask.isTypeImagesWrite()) {</b>
+<b class="fc">&nbsp;            this.webDav.uploadFromHome(getCurrentUser(), comment.getProcess());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Date date = new Date();</b>
+<b class="fc">&nbsp;        currentTask.setProcessingStatus(TaskStatus.LOCKED);</b>
+<b class="fc">&nbsp;        currentTask.setEditType(TaskEditType.MANUAL_SINGLE);</b>
+<b class="fc">&nbsp;        currentTask.setProcessingTime(date);</b>
+<b class="fc">&nbsp;        taskService.replaceProcessingUser(currentTask, getCurrentUser());</b>
+<b class="fc">&nbsp;        currentTask.setProcessingBegin(null);</b>
+<b class="fc">&nbsp;        taskService.save(currentTask);</b>
+&nbsp;
+<b class="fc">&nbsp;        Task correctionTask = comment.getCorrectionTask();</b>
+<b class="fc">&nbsp;        correctionTask.setProcessingStatus(TaskStatus.OPEN);</b>
+<b class="fc">&nbsp;        correctionTask.setProcessingEnd(null);</b>
+<b class="fc">&nbsp;        correctionTask.setCorrection(true);</b>
+<b class="fc">&nbsp;        taskService.save(correctionTask);</b>
+&nbsp;
+<b class="fc">&nbsp;        lockTasksBetweenCurrentAndCorrectionTask(currentTask, correctionTask);</b>
+<b class="fc">&nbsp;        updateProcessSortHelperStatus(currentTask.getProcess());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Unified method for solve problem.
+&nbsp;     *
+&nbsp;     * @param comment
+&nbsp;     *              as Comment object
+&nbsp;     */
+&nbsp;    public void solveProblem(Comment comment) throws DataException, DAOException, IOException {
+<b class="fc">&nbsp;        closeTaskByUser(comment.getCorrectionTask());</b>
+<b class="fc">&nbsp;        comment.setCurrentTask(ServiceManager.getTaskService().getById(comment.getCurrentTask().getId()));</b>
+<b class="fc">&nbsp;        comment.setCorrectionTask(ServiceManager.getTaskService().getById(comment.getCorrectionTask().getId()));</b>
+<b class="fc">&nbsp;        comment.setCorrected(Boolean.TRUE);</b>
+<b class="fc">&nbsp;        comment.setCorrectionDate(new Date());</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            ServiceManager.getCommentService().saveToDatabase(comment);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorSaving&quot;, new Object[] {&quot;comment&quot;}, logger, e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processing status up. This method adds double check of task status.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    private void setProcessingStatusUp(Task task) {
+<b class="fc">&nbsp;        if (task.getProcessingStatus() != TaskStatus.DONE) {</b>
+<b class="fc">&nbsp;            TaskStatus newTaskStatus = TaskStatus.getStatusFromValue(task.getProcessingStatus().getValue() + 1);</b>
+<b class="fc">&nbsp;            task.setProcessingStatus(newTaskStatus);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processing status down. This method adds double check of task status.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    private void setProcessingStatusDown(Task task) {
+<b class="fc">&nbsp;        if (task.getProcessingStatus() != TaskStatus.LOCKED) {</b>
+<b class="fc">&nbsp;            TaskStatus newTaskStatus = TaskStatus.getStatusFromValue(task.getProcessingStatus().getValue() - 1);</b>
+<b class="fc">&nbsp;            task.setProcessingStatus(newTaskStatus);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void activateTasksForClosedTask(Task closedTask) throws DataException, IOException, DAOException {
+<b class="fc">&nbsp;        Process process = closedTask.getProcess();</b>
+&nbsp;
+&nbsp;        // check if there are tasks that take place in parallel but are not yet
+&nbsp;        // completed
+<b class="fc">&nbsp;        List&lt;Task&gt; tasks = process.getTasks();</b>
+<b class="fc">&nbsp;        List&lt;Task&gt; concurrentTasksForOpen = getConcurrentTasksForOpen(tasks, closedTask);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (concurrentTasksForOpen.isEmpty() &amp;&amp; !isAnotherTaskInWorkWhichBlocksOtherTasks(tasks, closedTask)) {</b>
+<b class="fc">&nbsp;            if (!closedTask.isLast()) {</b>
+<b class="fc">&nbsp;                activateNextTasks(getAllHigherTasks(tasks, closedTask));</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            activateConcurrentTasks(concurrentTasksForOpen);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        process = ServiceManager.getProcessService().getById(process.getId());</b>
+&nbsp;
+<b class="fc">&nbsp;        URI imagesOrigDirectory = ServiceManager.getProcessService().getImagesOriginDirectory(true, process);</b>
+<b class="fc">&nbsp;        Integer numberOfFiles = ServiceManager.getFileService().getNumberOfFiles(imagesOrigDirectory);</b>
+<b class="fc">&nbsp;        if (!process.getSortHelperImages().equals(numberOfFiles)) {</b>
+<b class="fc">&nbsp;            process.setSortHelperImages(numberOfFiles);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        ServiceManager.getProcessService().save(process);</b>
+<b class="fc">&nbsp;        process = ServiceManager.getProcessService().getById(process.getId());</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Task automaticTask : automaticTasks) {</b>
+<b class="nc">&nbsp;            automaticTask.setProcessingBegin(new Date());</b>
+<b class="nc">&nbsp;            TaskScriptThread thread = new TaskScriptThread(automaticTask);</b>
+<b class="nc">&nbsp;            TaskManager.addTask(thread);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        closeParent(process);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void closeParent(Process process) throws DataException {
+<b class="fc">&nbsp;        if (Objects.nonNull(process.getParent()) &amp;&amp; allChildrenClosed(process.getParent())) {</b>
+<b class="nc">&nbsp;            process.getParent().setSortHelperStatus(&quot;100000000&quot;);</b>
+<b class="nc">&nbsp;            ServiceManager.getProcessService().save(process.getParent());</b>
+<b class="nc">&nbsp;            closeParent(process.getParent());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void lockTasksBetweenCurrentAndCorrectionTask(Task currentTask, Task correctionTask) throws DataException {
+<b class="fc">&nbsp;        List&lt;Task&gt; allTasksInBetween = taskService.getAllTasksInBetween(correctionTask.getOrdering(),</b>
+<b class="fc">&nbsp;            currentTask.getOrdering(), currentTask.getProcess().getId());</b>
+<b class="fc">&nbsp;        for (Task taskInBetween : allTasksInBetween) {</b>
+<b class="fc">&nbsp;            taskInBetween.setProcessingStatus(TaskStatus.LOCKED);</b>
+<b class="fc">&nbsp;            taskInBetween.setCorrection(true);</b>
+<b class="fc">&nbsp;            taskInBetween.setProcessingEnd(null);</b>
+<b class="fc">&nbsp;            taskService.save(taskInBetween);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Task&gt; getAllHigherTasks(List&lt;Task&gt; tasks, Task task) {
+<b class="fc">&nbsp;        List&lt;Task&gt; allHigherTasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Task tempTask : tasks) {</b>
+<b class="fc">&nbsp;            if (tempTask.getOrdering() &gt; task.getOrdering()) {</b>
+<b class="fc">&nbsp;                allHigherTasks.add(tempTask);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        allHigherTasks.sort(Comparator.comparing(Task::getOrdering));</b>
+<b class="fc">&nbsp;        return allHigherTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Task&gt; getConcurrentTasksForClose(List&lt;Task&gt; tasks, Task task) {
+<b class="fc">&nbsp;        List&lt;Task&gt; allConcurrentTasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Task tempTask : tasks) {</b>
+<b class="fc">&nbsp;            if (tempTask.getOrdering().equals(task.getOrdering()) &amp;&amp; tempTask.getProcessingStatus().getValue() &lt; 2</b>
+<b class="fc">&nbsp;                    &amp;&amp; !tempTask.getId().equals(task.getId()) &amp;&amp; !tempTask.isConcurrent()) {</b>
+<b class="nc">&nbsp;                allConcurrentTasks.add(tempTask);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return allConcurrentTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Task&gt; getConcurrentTasksForOpen(List&lt;Task&gt; tasks, Task task) {
+<b class="fc">&nbsp;        boolean blocksOtherTasks = isAnotherTaskInWorkWhichBlocksOtherTasks(tasks, task);</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Task&gt; allConcurrentTasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Task tempTask : tasks) {</b>
+<b class="fc">&nbsp;            if (tempTask.getOrdering().equals(task.getOrdering()) &amp;&amp; tempTask.getProcessingStatus().getValue() &lt; 3</b>
+<b class="fc">&nbsp;                    &amp;&amp; !tempTask.getId().equals(task.getId())) {</b>
+<b class="fc">&nbsp;                if (blocksOtherTasks) {</b>
+<b class="fc">&nbsp;                    if (tempTask.isConcurrent()) {</b>
+<b class="nc">&nbsp;                        allConcurrentTasks.add(tempTask);</b>
+&nbsp;                    }
+&nbsp;                } else {
+<b class="fc">&nbsp;                    allConcurrentTasks.add(tempTask);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return allConcurrentTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isAnotherTaskInWorkWhichBlocksOtherTasks(List&lt;Task&gt; tasks, Task task) {
+<b class="fc">&nbsp;        for (Task tempTask : tasks) {</b>
+<b class="fc">&nbsp;            if (tempTask.getOrdering().equals(task.getOrdering()) &amp;&amp; tempTask.getProcessingStatus() == TaskStatus.INWORK</b>
+<b class="fc">&nbsp;                    &amp;&amp; !tempTask.getId().equals(task.getId()) &amp;&amp; !tempTask.isConcurrent()) {</b>
+<b class="fc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Activate the concurrent tasks.
+&nbsp;     */
+&nbsp;    private void activateConcurrentTasks(List&lt;Task&gt; concurrentTasks) throws DataException, IOException, DAOException {
+<b class="fc">&nbsp;        for (Task concurrentTask : concurrentTasks) {</b>
+<b class="fc">&nbsp;            if (concurrentTask.getProcessingStatus().equals(TaskStatus.LOCKED)) {</b>
+<b class="fc">&nbsp;                activateTask(concurrentTask);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If no open parallel tasks are available, activate the next tasks.
+&nbsp;     */
+&nbsp;    public void activateNextTasks(List&lt;Task&gt; allHigherTasks) throws DataException, IOException, DAOException {
+<b class="fc">&nbsp;        List&lt;Task&gt; nextTasks = getNextTasks(allHigherTasks);</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Task nextTask : nextTasks) {</b>
+<b class="fc">&nbsp;            activateTask(nextTask);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Task&gt; getNextTasks(List&lt;Task&gt; allHigherTasks) {
+<b class="fc">&nbsp;        int ordering = 0;</b>
+<b class="fc">&nbsp;        boolean matched = false;</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Task&gt; nextTasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Task higherTask : allHigherTasks) {</b>
+<b class="fc">&nbsp;            if (ordering &lt; higherTask.getOrdering() &amp;&amp; !matched) {</b>
+<b class="fc">&nbsp;                ordering = higherTask.getOrdering();</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            if (ordering == higherTask.getOrdering() &amp;&amp; higherTask.getProcessingStatus().getValue() &lt; 2) {</b>
+<b class="fc">&nbsp;                nextTasks.add(higherTask);</b>
+<b class="fc">&nbsp;                matched = true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return nextTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Task&gt; getPreviousTasks(Task higherTask) {
+<b class="fc">&nbsp;        List&lt;Task&gt; tasks = higherTask.getProcess().getTasks();</b>
+&nbsp;
+<b class="fc">&nbsp;        boolean isConcurrentOpenTask = false;</b>
+<b class="fc">&nbsp;        List&lt;Task&gt; previousTasks = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        List&lt;Task&gt; concurrentTasks = getConcurrentTasksForClose(tasks, higherTask);</b>
+<b class="fc">&nbsp;        for (Task concurrentTask : concurrentTasks) {</b>
+<b class="nc">&nbsp;            if (concurrentTask.getProcessingStatus().equals(TaskStatus.LOCKED)) {</b>
+<b class="nc">&nbsp;                isConcurrentOpenTask = true;</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (!isConcurrentOpenTask) {</b>
+<b class="fc">&nbsp;            boolean matched = false;</b>
+<b class="fc">&nbsp;            int ordering = higherTask.getOrdering() - 1;</b>
+<b class="fc">&nbsp;            for (Task task : tasks) {</b>
+<b class="fc">&nbsp;                if (task.getOrdering() &gt; ordering &amp;&amp; task.getOrdering() &lt; higherTask.getOrdering() &amp;&amp; !matched) {</b>
+<b class="nc">&nbsp;                    ordering = task.getOrdering();</b>
+&nbsp;                }
+<b class="fc">&nbsp;                if (ordering == task.getOrdering()) {</b>
+<b class="fc">&nbsp;                    previousTasks.add(task);</b>
+<b class="fc">&nbsp;                    matched = true;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return previousTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If no open parallel tasks are available, activate the next tasks.
+&nbsp;     */
+&nbsp;    private void activateTask(Task task) throws DataException, IOException, DAOException {
+<b class="fc">&nbsp;        if ((!task.isCorrection() || task.isRepeatOnCorrection())</b>
+<b class="fc">&nbsp;                &amp;&amp; isWorkflowConditionFulfilled(task.getProcess(), task.getWorkflowCondition())) {</b>
+&nbsp;            // activate the task if it is not fully automatic
+<b class="fc">&nbsp;            task.setProcessingStatus(TaskStatus.OPEN);</b>
+<b class="fc">&nbsp;            task.setProcessingTime(new Date());</b>
+<b class="fc">&nbsp;            task.setEditType(TaskEditType.AUTOMATIC);</b>
+&nbsp;
+<b class="fc">&nbsp;            processAutomaticTask(task);</b>
+&nbsp;
+<b class="fc">&nbsp;            taskService.save(task);</b>
+&nbsp;        } else {
+&nbsp;            // close task as it is not going to be executed
+<b class="fc">&nbsp;            task.setProcessingStatus(TaskStatus.DONE);</b>
+<b class="fc">&nbsp;            task.setProcessingTime(new Date());</b>
+<b class="fc">&nbsp;            task.setProcessingEnd(new Date());</b>
+<b class="fc">&nbsp;            task.setEditType(TaskEditType.AUTOMATIC);</b>
+&nbsp;
+<b class="fc">&nbsp;            task.setCorrection(false);</b>
+<b class="fc">&nbsp;            taskService.save(task);</b>
+&nbsp;
+<b class="fc">&nbsp;            activateTasksForClosedTask(task);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isWorkflowConditionFulfilled(Process process, WorkflowCondition workflowCondition)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;        if (Objects.isNull(workflowCondition) || workflowCondition.getType().equals(WorkflowConditionType.NONE)) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            if (workflowCondition.getType().equals(WorkflowConditionType.SCRIPT)) {</b>
+<b class="nc">&nbsp;                return runScriptCondition(workflowCondition.getValue(), process);</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            if (workflowCondition.getType().equals(WorkflowConditionType.XPATH)) {</b>
+<b class="fc">&nbsp;                return runXPathCondition(process, workflowCondition.getValue());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean runScriptCondition(String script, Process process) throws IOException {
+<b class="nc">&nbsp;        LegacyPrefsHelper legacyPrefsHelper = ServiceManager.getRulesetService().getPreferences(process.getRuleset());</b>
+&nbsp;
+<b class="nc">&nbsp;        LegacyMetsModsDigitalDocumentHelper legacyMetsModsDigitalDocumentHelper = ServiceManager.getProcessService()</b>
+<b class="nc">&nbsp;                .readMetadataFile(ServiceManager.getFileService().getMetadataFilePath(process), legacyPrefsHelper)</b>
+<b class="nc">&nbsp;                .getDigitalDocument();</b>
+<b class="nc">&nbsp;        VariableReplacer replacer = new VariableReplacer(legacyMetsModsDigitalDocumentHelper.getWorkpiece(),</b>
+&nbsp;                process, null);
+&nbsp;
+<b class="nc">&nbsp;        script = replacer.replace(script);</b>
+&nbsp;
+<b class="nc">&nbsp;        CommandResult commandResult = ServiceManager.getCommandService().runCommand(script);</b>
+<b class="nc">&nbsp;        return commandResult.isSuccessful();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean runXPathCondition(Process process, String xpath) throws IOException {
+<b class="fc">&nbsp;        return ServiceManager.getProcessService().getNodeListFromMetadataFile(process, xpath).getLength() &gt; 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processAutomaticTask(Task task) {
+&nbsp;        // if it is an automatic task with script
+<b class="fc">&nbsp;        if (task.isTypeAutomatic()) {</b>
+<b class="nc">&nbsp;            task.setProcessingStatus(TaskStatus.INWORK);</b>
+<b class="nc">&nbsp;            automaticTasks.add(task);</b>
+&nbsp;        } 
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update process sort helper status.
+&nbsp;     *
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public static void updateProcessSortHelperStatus(Process process) {
+<b class="fc">&nbsp;        if (!process.getTasks().isEmpty()) {</b>
+<b class="fc">&nbsp;            String value = ProcessConverter.getCombinedProgressAsString(process, false);</b>
+<b class="fc">&nbsp;            process.setSortHelperStatus(value);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download to user home directory.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    private void downloadToHome(Task task) {
+<b class="nc">&nbsp;        task.setProcessingTime(new Date());</b>
+<b class="nc">&nbsp;        if (ServiceManager.getSecurityAccessService().isAuthenticated()) {</b>
+<b class="nc">&nbsp;            taskService.replaceProcessingUser(task, getCurrentUser());</b>
+<b class="nc">&nbsp;            this.webDav.downloadToHome(task.getProcess(), !task.isTypeImagesWrite());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private User getCurrentUser() {
+<b class="fc">&nbsp;        return ServiceManager.getUserService().getCurrentUser();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set up processing status for given list of processes.
+&nbsp;     */
+&nbsp;    public void setTaskStatusUpForProcesses(List&lt;Process&gt; processes) {
+<b class="nc">&nbsp;        for (Process processForStatus : processes) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                setTasksStatusUp(processForStatus);</b>
+<b class="nc">&nbsp;            } catch (DataException | IOException | DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;errorChangeTaskStatus&quot;,</b>
+<b class="nc">&nbsp;                        new Object[] {Helper.getTranslation(&quot;up&quot;), processForStatus.getId() }, logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set down processing status for given list of processes.
+&nbsp;     */
+&nbsp;    public void setTaskStatusDownForProcesses(List&lt;Process&gt; processes) {
+<b class="nc">&nbsp;        for (Process processForStatus : processes) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                setTasksStatusDown(processForStatus);</b>
+<b class="nc">&nbsp;                ServiceManager.getProcessService().save(processForStatus, true);</b>
+<b class="nc">&nbsp;                updateProcessSortHelperStatus(processForStatus);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;errorChangeTaskStatus&quot;,</b>
+<b class="nc">&nbsp;                        new Object[] {Helper.getTranslation(&quot;down&quot;), processForStatus.getId() }, logger, e);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

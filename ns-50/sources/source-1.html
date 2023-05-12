@@ -1,0 +1,266 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LazyDTOModel</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model</a>
+</div>
+
+<h1>Coverage Summary for Class: LazyDTOModel (org.kitodo.production.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LazyDTOModel</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37,5%
+  </span>
+  <span class="absValue">
+    (18/48)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model;
+&nbsp;
+&nbsp;import static java.lang.Math.toIntExact;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.elasticsearch.ElasticsearchStatusException;
+&nbsp;import org.elasticsearch.index.query.QueryShardException;
+&nbsp;import org.hibernate.exception.SQLGrammarException;
+&nbsp;import org.kitodo.config.ConfigMain;
+&nbsp;import org.kitodo.data.database.beans.BaseBean;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.data.elasticsearch.index.IndexRestClient;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.FilterException;
+&nbsp;import org.kitodo.production.dto.BaseDTO;
+&nbsp;import org.kitodo.production.services.data.FilterService;
+&nbsp;import org.kitodo.production.services.data.base.SearchDatabaseService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;import org.primefaces.model.FilterMeta;
+&nbsp;import org.primefaces.model.LazyDataModel;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;public class LazyDTOModel extends LazyDataModel&lt;Object&gt; {
+&nbsp;
+&nbsp;    final transient SearchDatabaseService searchService;
+<b class="fc">&nbsp;    static final Logger logger = LogManager.getLogger(LazyDTOModel.class);</b>
+<b class="fc">&nbsp;    private static final IndexRestClient indexRestClient = IndexRestClient.getInstance();</b>
+<b class="fc">&nbsp;    transient List entities = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    String filterString = &quot;&quot;;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a LazyDTOModel instance that allows fetching data from the data
+&nbsp;     * source lazily, e.g. only the number of datasets that will be displayed in the
+&nbsp;     * frontend.
+&nbsp;     *
+&nbsp;     * @param searchService
+&nbsp;     *            the searchService which is used to retrieve data from the data
+&nbsp;     *            source
+&nbsp;     */
+<b class="fc">&nbsp;    public LazyDTOModel(SearchDatabaseService searchService) {</b>
+<b class="fc">&nbsp;        indexRestClient.setIndexBase(ConfigMain.getParameter(&quot;elasticsearch.index&quot;, &quot;kitodo&quot;));</b>
+<b class="fc">&nbsp;        this.searchService = searchService;</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            this.setRowCount(toIntExact(searchService.countDatabaseRows()));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
+<b class="nc">&nbsp;            this.setRowCount(0);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object getRowData(String rowKey) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return searchService.getById(Integer.parseInt(rowKey));</b>
+<b class="nc">&nbsp;        } catch (DAOException | NumberFormatException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object getRowKey(Object inObject) {
+<b class="nc">&nbsp;        if (inObject instanceof BaseDTO) {</b>
+<b class="nc">&nbsp;            BaseDTO dto = (BaseDTO) inObject;</b>
+<b class="nc">&nbsp;            return dto.getId();</b>
+<b class="nc">&nbsp;        } else if (inObject instanceof BaseBean) {</b>
+<b class="nc">&nbsp;            BaseBean bean = (BaseBean) inObject;</b>
+<b class="nc">&nbsp;            return bean.getId();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public List&lt;Object&gt; load(int first, int pageSize, String sortField, SortOrder sortOrder,
+&nbsp;            Map&lt;String, FilterMeta&gt; filters) {
+<b class="fc">&nbsp;        if (indexRunning()) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                HashMap&lt;String, String&gt; filterMap = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;                if (!StringUtils.isBlank(this.filterString)) {</b>
+<b class="nc">&nbsp;                    filterMap.put(FilterService.FILTER_STRING, this.filterString);</b>
+&nbsp;                }
+<b class="fc">&nbsp;                setRowCount(toIntExact(searchService.countResults(filterMap)));</b>
+<b class="fc">&nbsp;                entities = searchService.loadData(first, pageSize, sortField, sortOrder, filterMap);</b>
+<b class="fc">&nbsp;                logger.info(&quot;{} entities loaded!&quot;, entities.size());</b>
+<b class="fc">&nbsp;                return entities;</b>
+<b class="nc">&nbsp;            } catch (DAOException | DataException | ElasticsearchStatusException | QueryShardException</b>
+&nbsp;                    | SQLGrammarException e) {
+<b class="nc">&nbsp;                setRowCount(0);</b>
+<b class="nc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            } catch (FilterException e) {</b>
+<b class="nc">&nbsp;                setRowCount(0);</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;sticky-notifications&#39;).renderMessage(&quot;</b>
+<b class="nc">&nbsp;                        + &quot;{&#39;summary&#39;:&#39;Filter error&#39;,&#39;detail&#39;:&#39;&quot; + e.getMessage() + &quot;&#39;,&#39;severity&#39;:&#39;error&#39;});&quot;);</b>
+<b class="nc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            logger.info(&quot;Index not found!&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return new LinkedList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks and returns whether the ElasticSearch index is running or not.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * NOTE: This wrapper function is necessary because the calling &quot;load&quot; function
+&nbsp;     * overwrites a function from the PrimeFaces LazyDataModel and therefore its
+&nbsp;     * method signature cannot be changed, e.g. now thrown exceptions can be added
+&nbsp;     * to it.
+&nbsp;     *
+&nbsp;     * @return whether the ElasticSearch index is running or not
+&nbsp;     */
+&nbsp;    boolean indexRunning() {
+&nbsp;        try {
+<b class="fc">&nbsp;            return indexRestClient.typeIndexesExist();</b>
+<b class="nc">&nbsp;        } catch (IOException | CustomResponseException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get entities.
+&nbsp;     *
+&nbsp;     * @return value of entities
+&nbsp;     */
+&nbsp;    public List getEntities() {
+<b class="nc">&nbsp;        return entities;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set filter String.
+&nbsp;     *
+&nbsp;     * @param filter
+&nbsp;     *      as String
+&nbsp;     */
+&nbsp;    public void setFilterString(String filter) {
+<b class="nc">&nbsp;        this.filterString = filter;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,145 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TaskState</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.tasks</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskState (org.kitodo.production.helper.tasks)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskState</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.tasks;
+&nbsp;
+&nbsp;import org.kitodo.production.helper.tasks.EmptyTask.Behaviour;
+&nbsp;
+&nbsp;/**
+&nbsp; * TaskState defines a set of states that a task can be in. Their meanings are
+&nbsp; * the following:
+&nbsp; * 
+&nbsp; * &lt;dl&gt;
+&nbsp; * &lt;dt&gt;{@code CRASHED}&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;The thread has terminated abnormally. The field “exception” is holding
+&nbsp; * the exception that has occurred.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;{@code FINISHED}&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;The thread has finished its work without errors and is available for
+&nbsp; * clean-up.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;{@code NEW}&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;The thread has not yet been started.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;{@code STOPPED}&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;The thread was stopped by a front end user—resulting in a call to its
+&nbsp; * {@link EmptyTask#interrupt(Behaviour)} method with
+&nbsp; * {@link EmptyTask.Behaviour}.PREPARE_FOR_RESTART— and is able to restart after
+&nbsp; * cloning and replacing it.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;{@code STOPPING}&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;The thread has received a request to interrupt but didn’t stop yet.&lt;/dd&gt;
+&nbsp; * &lt;dt&gt;{@code WORKING}&lt;/dt&gt;
+&nbsp; * &lt;dd&gt;The thread is in operation.&lt;/dd&gt;
+&nbsp; * &lt;/dl&gt;
+&nbsp; */
+<b class="fc">&nbsp;public enum TaskState {</b>
+<b class="fc">&nbsp;    CRASHED, FINISHED, NEW, STOPPED, STOPPING, WORKING</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,275 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Cell</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model.bibliography.course</a>
+</div>
+
+<h1>Coverage Summary for Class: Cell (org.kitodo.production.model.bibliography.course)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Cell</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/24)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Cell$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/25)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model.bibliography.course;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+<b class="nc">&nbsp;public class Cell {</b>
+&nbsp;    /**
+&nbsp;     * The field date holds the date that this cell represents in the course
+&nbsp;     * of time.
+&nbsp;     */
+<b class="nc">&nbsp;    protected LocalDate date = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field issues holds the possible issues for that day.
+&nbsp;     */
+<b class="nc">&nbsp;    protected List&lt;Issue&gt; issues = Collections.emptyList();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field onBlock contains the statement, whether the day is covered
+&nbsp;     * by the currently showing block (or otherwise needs to be greyed-out
+&nbsp;     * in the front end).
+&nbsp;     */
+&nbsp;    // do not grey out dates which aren&#39;t defined by the calendar system
+<b class="nc">&nbsp;    protected boolean onBlock = true;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the day of month (that is a number in
+&nbsp;     * 1−31) of the date the cell represents, followed by a full stop, as
+&nbsp;     * read-only property &quot;day&quot;. For cells which are undefined by the
+&nbsp;     * calendar system, it returns the empty String.
+&nbsp;     *
+&nbsp;     * @return the day of month in enumerative form
+&nbsp;     */
+&nbsp;    public String getDay() {
+<b class="nc">&nbsp;        if (Objects.isNull(date)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return Integer.toString(date.getDayOfMonth()).concat(&quot;.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the issues that may have appeared on
+&nbsp;     * that day as read-only field “issues”.
+&nbsp;     *
+&nbsp;     * @return the issues optionally appeared that day
+&nbsp;     */
+&nbsp;    public List&lt;Issue&gt; getIssues() {
+<b class="nc">&nbsp;        return issues;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The function getStyleClass returns the CSS class names to be printed
+&nbsp;     * into the HTML to display the table cell state as read-only property
+&nbsp;     * “styleClass”.
+&nbsp;     *
+&nbsp;     * @return the cell’s CSS style class name
+&nbsp;     */
+&nbsp;    public String getStyleClass() {
+<b class="nc">&nbsp;        if (Objects.isNull(date)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (onBlock) {</b>
+<b class="nc">&nbsp;            switch (date.getDayOfWeek()) {</b>
+&nbsp;                case SATURDAY:
+<b class="nc">&nbsp;                    return &quot;saturday&quot;;</b>
+&nbsp;                case SUNDAY:
+<b class="nc">&nbsp;                    return &quot;sunday&quot;;</b>
+&nbsp;                default:
+<b class="nc">&nbsp;                    return &quot;weekday&quot;;</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            switch (date.getDayOfWeek()) {</b>
+&nbsp;                case SATURDAY:
+<b class="nc">&nbsp;                    return &quot;saturdayNoBlock&quot;;</b>
+&nbsp;                case SUNDAY:
+<b class="nc">&nbsp;                    return &quot;sundayNoBlock&quot;;</b>
+&nbsp;                default:
+<b class="nc">&nbsp;                    return &quot;weekdayNoBlock&quot;;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the date represented by this calendar sheet
+&nbsp;     * cell.
+&nbsp;     *
+&nbsp;     * @param date
+&nbsp;     *            the date represented by this calendar sheet cell
+&nbsp;     */
+&nbsp;    public void setDate(LocalDate date) {
+<b class="nc">&nbsp;        this.date = date;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get date.
+&nbsp;     *
+&nbsp;     * @return value of date
+&nbsp;     */
+&nbsp;    public LocalDate getDate() {
+<b class="nc">&nbsp;        return date;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the list of possible issues for the date
+&nbsp;     * represented by this calendar sheet cell.
+&nbsp;     *
+&nbsp;     * @param issues
+&nbsp;     *            the list of issues possible in this cell
+&nbsp;     */
+&nbsp;    public void setIssues(List&lt;Issue&gt; issues) {
+<b class="nc">&nbsp;        this.issues = issues;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set boolean onBlock.
+&nbsp;     * Shows whether the date of this cell is part of the given block&#39;s period of time.
+&nbsp;     *
+&nbsp;     * @param onBlock
+&nbsp;     *            whether the day is covered by the currently showing block
+&nbsp;     */
+&nbsp;    public void setOnBlock(boolean onBlock) {
+<b class="nc">&nbsp;        this.onBlock = onBlock;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get onBlock.
+&nbsp;     *
+&nbsp;     * @return value of onBlock
+&nbsp;     */
+&nbsp;    public boolean isOnBlock() {
+<b class="nc">&nbsp;        return onBlock;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

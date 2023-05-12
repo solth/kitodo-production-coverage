@@ -1,0 +1,514 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CatalogConfigurationImporter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: CatalogConfigurationImporter (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CatalogConfigurationImporter</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/201)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.net.URL;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.HierarchicalConfiguration;
+&nbsp;import org.apache.commons.io.FileUtils;
+&nbsp;import org.apache.commons.lang.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.externaldatamanagement.ImportConfigurationType;
+&nbsp;import org.kitodo.api.externaldatamanagement.SearchInterfaceType;
+&nbsp;import org.kitodo.api.schemaconverter.MetadataFormat;
+&nbsp;import org.kitodo.api.schemaconverter.MetadataFormatConversion;
+&nbsp;import org.kitodo.config.KitodoConfig;
+&nbsp;import org.kitodo.config.OPACConfig;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.beans.MappingFile;
+&nbsp;import org.kitodo.data.database.beans.SearchField;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.exceptions.InvalidPortException;
+&nbsp;import org.kitodo.exceptions.MandatoryParameterMissingException;
+&nbsp;import org.kitodo.exceptions.MappingFilesMissingException;
+&nbsp;import org.kitodo.exceptions.UndefinedMappingFileException;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class provides a way to convert catalog import configurations from existing &#39;kitodo_opac.xml&#39;
+&nbsp; * configuration files into new &#39;ImportConfiguration&#39; objects.
+&nbsp; */
+<b class="nc">&nbsp;public class CatalogConfigurationImporter {</b>
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(CatalogConfigurationImporter.class);</b>
+<b class="nc">&nbsp;    private static final String FILE_UPLOAD_DEFAULT_POSTFIX = &quot; - &quot;</b>
+<b class="nc">&nbsp;            + Helper.getTranslation(&quot;newProcess.fileUpload.heading&quot;);</b>
+&nbsp;    private static final String SEARCH_FIELD = &quot;searchField&quot;;
+&nbsp;    private static final String LABEL = &quot;[@label]&quot;;
+&nbsp;    private static final String VALUE = &quot;[@value]&quot;;
+&nbsp;    private static final String MAPPING_FILES = &quot;mappingFiles&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert catalog configuration with title &#39;opacTitle&#39; to new &#39;ImportConfiguration&#39; object. Also creates
+&nbsp;     * corresponding SearchField objects and assigns MappingFile objects according to original XML configuration.
+&nbsp;     * @param catalogName title of catalog configuration in XML file
+&nbsp;     * @throws DAOException when available MappingFile objects could not be loaded from database or new
+&nbsp;     *                      ImportConfiguration object could not be saved to database
+&nbsp;     * @throws UndefinedMappingFileException when XML catalog configuration contains mapping file for which no
+&nbsp;     *                                       corresponding MappingFile instance can be found
+&nbsp;     * @throws MappingFilesMissingException when XML catalog configuration does not contain mandatory &#39;mappingFiles&#39;
+&nbsp;     *                                       element.
+&nbsp;     * @throws InvalidPortException when XML catalog configuration contains an invalid port value.
+&nbsp;     */
+&nbsp;    private void convertOpacConfig(String catalogName, List&lt;String&gt; currentConfigurations) throws DAOException,
+&nbsp;            UndefinedMappingFileException, MappingFilesMissingException, MandatoryParameterMissingException,
+&nbsp;            InvalidPortException, URISyntaxException, IOException {
+<b class="nc">&nbsp;        HierarchicalConfiguration opacConfiguration = OPACConfig.getCatalog(catalogName);</b>
+<b class="nc">&nbsp;        String fileUploadTitle = catalogName + FILE_UPLOAD_DEFAULT_POSTFIX;</b>
+<b class="nc">&nbsp;        if (OPACConfig.getFileUploadConfig(catalogName) &amp;&amp; !currentConfigurations.contains(fileUploadTitle)) {</b>
+<b class="nc">&nbsp;            createFileUploadConfiguration(catalogName, fileUploadTitle);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        ImportConfiguration importConfiguration = null;</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(opacConfiguration)) {</b>
+<b class="nc">&nbsp;            importConfiguration = new ImportConfiguration();</b>
+<b class="nc">&nbsp;            importConfiguration.setTitle(catalogName);</b>
+<b class="nc">&nbsp;            importConfiguration.setDescription(OPACConfig.getOPACDescription(catalogName));</b>
+<b class="nc">&nbsp;            importConfiguration.setConfigurationType(ImportConfigurationType.OPAC_SEARCH.toString());</b>
+<b class="nc">&nbsp;            importConfiguration.setReturnFormat(OPACConfig.getReturnFormat(catalogName).toUpperCase());</b>
+<b class="nc">&nbsp;            setMetadataFormat(importConfiguration, catalogName);</b>
+<b class="nc">&nbsp;            setParentMappingFile(importConfiguration);</b>
+<b class="nc">&nbsp;            setSearchInterfaceType(importConfiguration, catalogName);</b>
+<b class="nc">&nbsp;            setUrl(importConfiguration, catalogName);</b>
+<b class="nc">&nbsp;            setItemFields(importConfiguration, catalogName);</b>
+<b class="nc">&nbsp;            importConfiguration.setDefaultImportDepth(OPACConfig.getDefaultImportDepth(catalogName));</b>
+<b class="nc">&nbsp;            setCredentials(importConfiguration, catalogName);</b>
+<b class="nc">&nbsp;            importConfiguration.setIdPrefix(OPACConfig.getIdentifierPrefix(catalogName));</b>
+<b class="nc">&nbsp;            importConfiguration.setParentElementTrimMode(OPACConfig.getParentIDTrimMode(catalogName));</b>
+<b class="nc">&nbsp;            importConfiguration.setQueryDelimiter(OPACConfig.getQueryDelimiter(catalogName));</b>
+<b class="nc">&nbsp;            importConfiguration.setPrestructuredImport(OPACConfig.isPrestructuredImport(catalogName));</b>
+<b class="nc">&nbsp;            if (SearchInterfaceType.SRU.name().equals(importConfiguration.getInterfaceType())</b>
+<b class="nc">&nbsp;                    || SearchInterfaceType.CUSTOM.name().equals(importConfiguration.getInterfaceType())) {</b>
+<b class="nc">&nbsp;                setSearchFields(importConfiguration, catalogName);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            importConfiguration.setMappingFiles(getMappingFiles(importConfiguration));</b>
+<b class="nc">&nbsp;            importConfiguration.setPrestructuredImport(OPACConfig.isPrestructuredImport(catalogName));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        ServiceManager.getImportConfigurationService().saveToDatabase(importConfiguration);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setUrl(ImportConfiguration importConfiguration, String opacTitle)
+&nbsp;            throws MandatoryParameterMissingException, InvalidPortException {
+<b class="nc">&nbsp;        importConfiguration.setScheme(OPACConfig.getScheme(opacTitle));</b>
+<b class="nc">&nbsp;        importConfiguration.setHost(OPACConfig.getHost(opacTitle));</b>
+<b class="nc">&nbsp;        importConfiguration.setPath(OPACConfig.getPath(opacTitle));</b>
+<b class="nc">&nbsp;        importConfiguration.setPort(getPort(opacTitle));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setCredentials(ImportConfiguration importConfiguration, String opacTitle) {
+&nbsp;        try {
+<b class="nc">&nbsp;            importConfiguration.setUsername(OPACConfig.getUsername(opacTitle));</b>
+<b class="nc">&nbsp;            importConfiguration.setPassword(OPACConfig.getPassword(opacTitle));</b>
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            logger.info(&quot;No credentials configured for configuration &#39;&quot; + opacTitle + &quot;&#39;.&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setSearchInterfaceType(ImportConfiguration importConfiguration, String opacTitle)
+&nbsp;            throws MandatoryParameterMissingException {
+&nbsp;        // use new &quot;CUSTOM&quot; type if SearchInterfaceType is null or could not be recognized
+<b class="nc">&nbsp;        SearchInterfaceType type = OPACConfig.getInterfaceType(opacTitle);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(type) &amp;&amp; Arrays.asList(SearchInterfaceType.values()).contains(type)) {</b>
+<b class="nc">&nbsp;            importConfiguration.setInterfaceType(type.name());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            importConfiguration.setInterfaceType(SearchInterfaceType.CUSTOM.name());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (SearchInterfaceType.SRU.equals(type)) {</b>
+<b class="nc">&nbsp;            importConfiguration.setSruVersion(OPACConfig.getSruVersion(opacTitle));</b>
+<b class="nc">&nbsp;            importConfiguration.setSruRecordSchema(OPACConfig.getSruRecordSchema(opacTitle));</b>
+<b class="nc">&nbsp;        } else if (SearchInterfaceType.OAI.equals(type)) {</b>
+<b class="nc">&nbsp;            importConfiguration.setOaiMetadataPrefix(OPACConfig.getOaiMetadataPrefix(opacTitle));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setMetadataFormat(ImportConfiguration importConfiguration, String opacTitle) {
+&nbsp;        // set MetadataFormat to &quot;OTHER&quot; if configuration contains a value different from the options in the
+&nbsp;        // &quot;MetadataFormat.java&quot; enum!
+<b class="nc">&nbsp;        String metadataFormat = OPACConfig.getMetadataFormat(opacTitle).toUpperCase();</b>
+<b class="nc">&nbsp;        if (Arrays.stream(MetadataFormat.values()).map(MetadataFormat::name).collect(Collectors.toList())</b>
+<b class="nc">&nbsp;                .contains(metadataFormat)) {</b>
+<b class="nc">&nbsp;            importConfiguration.setMetadataFormat(metadataFormat);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            importConfiguration.setMetadataFormat(MetadataFormat.OTHER.name());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        importConfiguration.setMetadataRecordIdXPath(MetadataFormat.getDefaultRecordIdXpath(metadataFormat));</b>
+<b class="nc">&nbsp;        importConfiguration.setMetadataRecordTitleXPath(MetadataFormat.getDefaultRecordTitleXpath(metadataFormat));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setSearchFields(ImportConfiguration importConfiguration, String opacTitle) {
+<b class="nc">&nbsp;        importConfiguration.setSearchFields(getSearchFields(importConfiguration));</b>
+<b class="nc">&nbsp;        for (SearchField searchField : importConfiguration.getSearchFields()) {</b>
+<b class="nc">&nbsp;            if (OPACConfig.getDefaultSearchField(opacTitle).equals(searchField.getLabel())) {</b>
+<b class="nc">&nbsp;                importConfiguration.setDefaultSearchField(searchField);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        for (SearchField searchField : importConfiguration.getSearchFields()) {</b>
+<b class="nc">&nbsp;            if (OPACConfig.getIdentifierParameter(opacTitle).equals(searchField.getValue())) {</b>
+<b class="nc">&nbsp;                importConfiguration.setIdSearchField(searchField);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setItemFields(ImportConfiguration importConfiguration, String opacTitle) {
+<b class="nc">&nbsp;        importConfiguration.setItemFieldXpath(OPACConfig.getExemplarFieldXPath(opacTitle));</b>
+<b class="nc">&nbsp;        importConfiguration.setItemFieldOwnerSubPath(OPACConfig.getExemplarFieldOwnerXPath(opacTitle));</b>
+<b class="nc">&nbsp;        importConfiguration.setItemFieldOwnerMetadata(OPACConfig.getExemplarFieldOwnerMetadata(opacTitle));</b>
+<b class="nc">&nbsp;        importConfiguration.setItemFieldSignatureSubPath(OPACConfig.getExemplarFieldSignatureXPath(opacTitle));</b>
+<b class="nc">&nbsp;        importConfiguration.setItemFieldSignatureMetadata(OPACConfig.getExemplarFieldSignatureMetadata(opacTitle));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void createFileUploadConfiguration(String catalogTitle, String fileUploadConfigurationTitle)
+&nbsp;            throws DAOException, UndefinedMappingFileException, MappingFilesMissingException, URISyntaxException,
+&nbsp;            IOException {
+<b class="nc">&nbsp;        ImportConfiguration fileUploadConfiguration = new ImportConfiguration();</b>
+<b class="nc">&nbsp;        fileUploadConfiguration.setConfigurationType(ImportConfigurationType.FILE_UPLOAD.name());</b>
+<b class="nc">&nbsp;        fileUploadConfiguration.setTitle(catalogTitle);</b>
+<b class="nc">&nbsp;        fileUploadConfiguration.setDescription(OPACConfig.getOPACDescription(catalogTitle));</b>
+<b class="nc">&nbsp;        fileUploadConfiguration.setReturnFormat(OPACConfig.getReturnFormat(catalogTitle).toUpperCase());</b>
+<b class="nc">&nbsp;        setMetadataFormat(fileUploadConfiguration, catalogTitle);</b>
+<b class="nc">&nbsp;        setParentMappingFile(fileUploadConfiguration);</b>
+<b class="nc">&nbsp;        fileUploadConfiguration.setMappingFiles(getMappingFiles(fileUploadConfiguration));</b>
+&nbsp;        // update title to include &quot;File upload&quot; postfix! (original title is required until here to load mapping files!)
+<b class="nc">&nbsp;        fileUploadConfiguration.setTitle(fileUploadConfigurationTitle);</b>
+<b class="nc">&nbsp;        ServiceManager.getImportConfigurationService().saveToDatabase(fileUploadConfiguration);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setParentMappingFile(ImportConfiguration config) throws DAOException {
+<b class="nc">&nbsp;        for (MappingFile mappingFile : ServiceManager.getMappingFileService().getAll()) {</b>
+<b class="nc">&nbsp;            if (mappingFile.getFile().equals(OPACConfig.getXsltMappingFileForParentInRecord(config.getTitle()))) {</b>
+<b class="nc">&nbsp;                config.setParentMappingFile(mappingFile);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;SearchField&gt; getSearchFields(ImportConfiguration configuration) {
+<b class="nc">&nbsp;        List&lt;SearchField&gt; searchFields = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (HierarchicalConfiguration searchFieldConfig : OPACConfig.getSearchFields(configuration.getTitle())</b>
+<b class="nc">&nbsp;                .configurationsAt(SEARCH_FIELD)) {</b>
+<b class="nc">&nbsp;            SearchField searchField = new SearchField();</b>
+<b class="nc">&nbsp;            searchField.setLabel(searchFieldConfig.getString(LABEL));</b>
+<b class="nc">&nbsp;            searchField.setValue(searchFieldConfig.getString(VALUE));</b>
+<b class="nc">&nbsp;            searchField.setImportConfiguration(configuration);</b>
+<b class="nc">&nbsp;            searchFields.add(searchField);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return searchFields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;MappingFile&gt; getMappingFiles(ImportConfiguration configuration) throws UndefinedMappingFileException,
+&nbsp;            DAOException, MappingFilesMissingException, URISyntaxException, IOException {
+<b class="nc">&nbsp;        List&lt;MappingFile&gt; mappingFiles = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;MappingFile&gt; allMappingFiles = ServiceManager.getMappingFileService().getAll();</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            OPACConfig.getCatalog(configuration.getTitle()).configurationAt(MAPPING_FILES);</b>
+<b class="nc">&nbsp;            for (String filename : OPACConfig.getXsltMappingFiles(configuration.getTitle())) {</b>
+<b class="nc">&nbsp;                mappingFiles.add(getConfiguredMappingFile(allMappingFiles, filename, configuration));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            logger.info(&quot;No &#39;mappingFiles&#39; element found in catalog configuration &#39;&quot; + configuration.getTitle()</b>
+&nbsp;                    + &quot;&#39;, trying to determine default mapping files.&quot;);
+<b class="nc">&nbsp;            String formatName = OPACConfig.getMetadataFormat(configuration.getTitle());</b>
+<b class="nc">&nbsp;            MetadataFormat metadataFormat = MetadataFormat.getMetadataFormat(formatName);</b>
+<b class="nc">&nbsp;            List&lt;MetadataFormatConversion&gt; defaultConversions = MetadataFormatConversion</b>
+<b class="nc">&nbsp;                    .getDefaultConfigurationFileName(metadataFormat);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (Objects.nonNull(defaultConversions)) {</b>
+&nbsp;                // add default metadata files to ImportConfiguration
+<b class="nc">&nbsp;                URI xsltDir = Paths.get(KitodoConfig.getParameter(&quot;directory.xslt&quot;)).toUri();</b>
+<b class="nc">&nbsp;                for (MetadataFormatConversion metadataFormatConversion : defaultConversions) {</b>
+<b class="nc">&nbsp;                    MappingFile mappingFile = null;</b>
+&nbsp;                    // Check, if default conversion has already been converted to MappingFile object
+<b class="nc">&nbsp;                    for (MappingFile currentFile : allMappingFiles) {</b>
+<b class="nc">&nbsp;                        if (currentFile.getFile().equals(metadataFormatConversion.getFileName())) {</b>
+<b class="nc">&nbsp;                            mappingFile = currentFile;</b>
+<b class="nc">&nbsp;                            mappingFile.getImportConfigurations().add(configuration);</b>
+<b class="nc">&nbsp;                            break;</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                    }</b>
+&nbsp;                    // Create new MappingFile object if current default conversion has not yet been converted
+<b class="nc">&nbsp;                    if (Objects.isNull(mappingFile)) {</b>
+<b class="nc">&nbsp;                        mappingFile = getMappingFile(xsltDir, metadataFormatConversion, formatName);</b>
+<b class="nc">&nbsp;                        mappingFile.getImportConfigurations().add(configuration);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    mappingFiles.add(mappingFile);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                throw new MappingFilesMissingException(formatName);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return mappingFiles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private MappingFile getConfiguredMappingFile(List&lt;MappingFile&gt; allMappingFiles, String filename,
+&nbsp;                                                 ImportConfiguration configuration)
+&nbsp;            throws UndefinedMappingFileException {
+<b class="nc">&nbsp;        MappingFile mappingFile = null;</b>
+&nbsp;        // Find mapping file object by filename
+<b class="nc">&nbsp;        for (MappingFile currentFile : allMappingFiles) {</b>
+<b class="nc">&nbsp;            if (currentFile.getFile().equals(filename)) {</b>
+<b class="nc">&nbsp;                mappingFile = currentFile;</b>
+<b class="nc">&nbsp;                mappingFile.getImportConfigurations().add(configuration);</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        if (Objects.isNull(mappingFile)) {</b>
+&nbsp;            // Happens when user skips conversion of a mapping file used in the current import configuration!
+<b class="nc">&nbsp;            throw new UndefinedMappingFileException(filename);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return mappingFile;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private MappingFile getMappingFile(URI xsltDir, MetadataFormatConversion metadataFormatConversion,
+&nbsp;                                             String formatName)
+&nbsp;            throws IOException, URISyntaxException, DAOException {
+<b class="nc">&nbsp;        MappingFile mappingFile = new MappingFile();</b>
+<b class="nc">&nbsp;        URI xsltFile = xsltDir.resolve(new URI(metadataFormatConversion.getFileName()));</b>
+<b class="nc">&nbsp;        if (!new File(xsltFile).exists() &amp;&amp; Objects.nonNull(metadataFormatConversion.getSource())) {</b>
+<b class="nc">&nbsp;            downloadXSLTFile(metadataFormatConversion.getSource(), xsltFile);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        mappingFile.setFile(metadataFormatConversion.getFileName());</b>
+<b class="nc">&nbsp;        mappingFile.setTitle(metadataFormatConversion.getFileName());</b>
+<b class="nc">&nbsp;        mappingFile.setPrestructuredImport(false);</b>
+<b class="nc">&nbsp;        mappingFile.setInputMetadataFormat(formatName);</b>
+<b class="nc">&nbsp;        mappingFile.setOutputMetadataFormat(metadataFormatConversion.getTargetFormat().name());</b>
+<b class="nc">&nbsp;        mappingFile.setImportConfigurations(new LinkedList&lt;&gt;());</b>
+<b class="nc">&nbsp;        ServiceManager.getMappingFileService().saveToDatabase(mappingFile);</b>
+<b class="nc">&nbsp;        return mappingFile;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return &#39;port&#39; value of catalog with name &#39;catalogName&#39; from &#39;kitodo_opac.xml&#39; configuration file.
+&nbsp;     *
+&nbsp;     * @param catalogName name of catalog
+&nbsp;     * @return port value as integer
+&nbsp;     * @throws InvalidPortException if port value retrieved from &#39;kitodo_opac.xml&#39; is not an integer between 0 and 65535
+&nbsp;     */
+&nbsp;    public static Integer getPort(String catalogName) throws InvalidPortException {
+&nbsp;        try {
+<b class="nc">&nbsp;            String portString = OPACConfig.getPort(catalogName);</b>
+<b class="nc">&nbsp;            if (StringUtils.isNotBlank(portString)) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    int port = Integer.parseInt(portString);</b>
+<b class="nc">&nbsp;                    if (port &lt; 0 || port &gt; 65535) {</b>
+<b class="nc">&nbsp;                        throw new InvalidPortException(portString);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    return port;</b>
+<b class="nc">&nbsp;                } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                    throw new InvalidPortException(portString);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (MandatoryParameterMissingException e) {</b>
+&nbsp;            // ignore exception because &quot;port&quot; is not mandatory
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve MappingFile objects from database for all catalog configurations in given list &#39;catalogs&#39;.
+&nbsp;     * @param catalogs list of catalog names as Strings
+&nbsp;     * @return map containing mapping file names as keys and
+&nbsp;     *         - corresponding MappingFile objects as values if it exists
+&nbsp;     *         - null otherwise
+&nbsp;     * @throws DAOException when MappingFile objects could not be loaded from database
+&nbsp;     */
+&nbsp;    public HashMap&lt;String, MappingFile&gt; getAllMappingFiles(List&lt;String&gt; catalogs) throws DAOException {
+<b class="nc">&nbsp;        HashMap&lt;String, MappingFile&gt; allMappingFiles = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (String catalogName : catalogs) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                List&lt;String&gt; mappingFileNames = OPACConfig.getXsltMappingFiles(catalogName);</b>
+<b class="nc">&nbsp;                String parentMappingFilename = OPACConfig.getXsltMappingFileForParentInRecord(catalogName);</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(parentMappingFilename) &amp;&amp; !mappingFileNames.contains(parentMappingFilename)) {</b>
+<b class="nc">&nbsp;                    mappingFileNames.add(parentMappingFilename);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                for (String xsltFilename : mappingFileNames) {</b>
+<b class="nc">&nbsp;                    if (!allMappingFiles.containsKey(xsltFilename)) {</b>
+<b class="nc">&nbsp;                        allMappingFiles.put(xsltFilename, null);</b>
+<b class="nc">&nbsp;                        for (MappingFile mappingFile : ServiceManager.getMappingFileService().getAll()) {</b>
+<b class="nc">&nbsp;                            if (mappingFile.getFile().equals(xsltFilename)) {</b>
+<b class="nc">&nbsp;                                allMappingFiles.put(xsltFilename, mappingFile);</b>
+<b class="nc">&nbsp;                                break;</b>
+&nbsp;                            }
+<b class="nc">&nbsp;                        }</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;Unable to import OPAC configuration &#39;&quot; + catalogName + &quot;&#39; (&quot; + e.getMessage() + &quot;)&quot;);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return allMappingFiles;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Import all catalog configurations in given list &#39;catalogs&#39; from configuration file &#39;kitodo_opac.xml&#39; to new
+&nbsp;     * ImportConfigurations. Return a map containing the results of the import process. The map contains the catalog
+&nbsp;     * names as keys and potential error messages as values. Map entries with empty values mark successful catalog
+&nbsp;     * configuration imports.
+&nbsp;     *
+&nbsp;     * @param catalogs list of catalog configurations to import from &#39;kitodo_opac.xml&#39; by name
+&nbsp;     * @return success map of catalog configuration import process
+&nbsp;     * @throws DAOException when existing ImportConfigurations could not be retrieved from database
+&nbsp;     */
+&nbsp;    public HashMap&lt;String, String&gt; importCatalogConfigurations(List&lt;String&gt; catalogs) throws DAOException {
+<b class="nc">&nbsp;        HashMap&lt;String, String&gt; conversions = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;String&gt; currentConfigurations = ServiceManager.getImportConfigurationService().getAll()</b>
+<b class="nc">&nbsp;                .stream().map(ImportConfiguration::getTitle).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        for (String catalog : catalogs) {</b>
+<b class="nc">&nbsp;            if (currentConfigurations.contains(catalog)) {</b>
+<b class="nc">&nbsp;                conversions.put(catalog, Helper.getTranslation(&quot;importConfig.migration.error.configurationExists&quot;));</b>
+&nbsp;            } else {
+&nbsp;                try {
+<b class="nc">&nbsp;                    convertOpacConfig(catalog, currentConfigurations);</b>
+<b class="nc">&nbsp;                    conversions.put(catalog, null);</b>
+<b class="nc">&nbsp;                } catch (UndefinedMappingFileException | MappingFilesMissingException</b>
+&nbsp;                         | MandatoryParameterMissingException | InvalidPortException | URISyntaxException
+&nbsp;                         | IOException e) {
+<b class="nc">&nbsp;                    conversions.put(catalog, e.getMessage());</b>
+<b class="nc">&nbsp;                } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                    if (Objects.nonNull(e.getCause()) &amp;&amp; Objects.nonNull(e.getCause().getCause())) {</b>
+<b class="nc">&nbsp;                        conversions.put(catalog, e.getCause().getCause().getMessage());</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        conversions.put(catalog, e.getMessage());</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return conversions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Download XSLT file from given URL &#39;source&#39; and save it to file located at given URI &#39;target&#39;.
+&nbsp;     * @param source URL of XSLT file to download.
+&nbsp;     * @param target URI of location where downloaded files should be saved.
+&nbsp;     * @throws IOException when file cannot be saved to provided location
+&nbsp;     */
+&nbsp;    public static void downloadXSLTFile(URL source, URI target) throws IOException {
+<b class="nc">&nbsp;        if (Objects.nonNull(source) &amp;&amp; Objects.nonNull(target)) {</b>
+<b class="nc">&nbsp;            FileUtils.copyURLToFile(source, new File(target));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

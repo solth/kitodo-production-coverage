@@ -1,0 +1,252 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetadataImportDialog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: MetadataImportDialog (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetadataImportDialog</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (2/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    9,3%
+  </span>
+  <span class="absValue">
+    (4/43)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.ProcessHelper;
+&nbsp;import org.kitodo.production.helper.TempProcess;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;import org.omnifaces.util.Ajax;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;
+&nbsp;public abstract class MetadataImportDialog {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(MetadataImportDialog.class);</b>
+&nbsp;    public final CreateProcessForm createProcessForm;
+&nbsp;
+&nbsp;    static final String FORM_CLIENTID = &quot;editForm&quot;;
+&nbsp;    static final String GROWL_MESSAGE =
+&nbsp;            &quot;PF(&#39;notifications&#39;).renderMessage({&#39;summary&#39;:&#39;SUMMARY&#39;,&#39;detail&#39;:&#39;DETAIL&#39;,&#39;severity&#39;:&#39;SEVERITY&#39;});&quot;;
+<b class="fc">&nbsp;    List&lt;ImportConfiguration&gt; importConfigurations = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Standard constructor.
+&nbsp;     *
+&nbsp;     * @param createProcessForm
+&nbsp;     *         CreateProcessForm instance to which this ImportDialog is assigned.
+&nbsp;     */
+<b class="fc">&nbsp;    MetadataImportDialog(CreateProcessForm createProcessForm) {</b>
+<b class="fc">&nbsp;        this.createProcessForm = createProcessForm;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void attachToExistingParentAndGenerateAtstslIfNotExist(TempProcess tempProcess)
+&nbsp;            throws ProcessGenerationException, IOException, InvalidMetadataValueException,
+&nbsp;            NoSuchMetadataFieldException {
+&nbsp;        // if fewer processes are imported than configured in the frontend, it can mean that
+&nbsp;        // - the OPAC does not have as many processes in the hierarchy or
+&nbsp;        // - one process of the hierarchy was already in the DB and import ended at this point
+<b class="nc">&nbsp;        int numberOfProcesses = this.createProcessForm.getProcesses().size();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (numberOfProcesses &lt; 1) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Error: list of processes is empty!&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        TempProcess parentTempProcess = ServiceManager.getImportService().getParentTempProcess();</b>
+<b class="nc">&nbsp;        if (numberOfProcesses == 1 &amp;&amp; Objects.nonNull(parentTempProcess)) {</b>
+&nbsp;            // case 1: only one process was imported =&gt; load DB parent into &quot;TitleRecordLinkTab&quot;
+<b class="nc">&nbsp;            this.createProcessForm.getTitleRecordLinkTab().setParentAsTitleRecord(parentTempProcess.getProcess());</b>
+&nbsp;        } else {
+&nbsp;            // case 2: multiple processes imported and one ancestor found in DB =&gt; add ancestor to list
+<b class="nc">&nbsp;            if (Objects.nonNull(parentTempProcess)) {</b>
+<b class="nc">&nbsp;                this.createProcessForm.getProcesses().add(parentTempProcess);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (StringUtils.isBlank(tempProcess.getAtstsl()) &amp;&amp; Objects.nonNull(parentTempProcess)) {</b>
+<b class="nc">&nbsp;            ProcessHelper.generateAtstslFields(tempProcess, Collections.singletonList(parentTempProcess),</b>
+&nbsp;                    ImportService.ACQUISITION_STAGE_CREATE, true);
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Show growl message.
+&nbsp;     *
+&nbsp;     * @param summary General message
+&nbsp;     * @param detail Message detail
+&nbsp;     */
+&nbsp;    public void showGrowlMessage(String summary, String detail) {
+<b class="nc">&nbsp;        String script = GROWL_MESSAGE.replace(&quot;SUMMARY&quot;, summary).replace(&quot;DETAIL&quot;, detail)</b>
+<b class="nc">&nbsp;                .replace(&quot;SEVERITY&quot;, &quot;info&quot;);</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(script);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of catalogs.
+&nbsp;     *
+&nbsp;     * @return list of catalogs
+&nbsp;     */
+&nbsp;    public List&lt;ImportConfiguration&gt; getImportConfigurations() {
+<b class="nc">&nbsp;        if (Objects.isNull(importConfigurations)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                importConfigurations = ServiceManager.getImportConfigurationService().getAll();</b>
+<b class="nc">&nbsp;            } catch (IllegalArgumentException | DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;                importConfigurations = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return importConfigurations;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add not existing metadata fields to metadata table with metadata values of
+&nbsp;     * first process in given list &quot;processes&quot; on successful import.
+&nbsp;     *
+&nbsp;     * @param processes
+&nbsp;     *            The linked list of TempProcess instances
+&nbsp;     */
+&nbsp;    void extendsMetadataTableOfMetadataTab(LinkedList&lt;TempProcess&gt; processes) {
+<b class="nc">&nbsp;        int countOfAddedMetadata = 0;</b>
+<b class="nc">&nbsp;        if (processes.size() &gt; 0) {</b>
+<b class="nc">&nbsp;            TempProcess process = processes.getFirst();</b>
+<b class="nc">&nbsp;            if (process.getMetadataNodes().getLength() &gt; 0) {</b>
+<b class="nc">&nbsp;                if (createProcessForm.getProcessDataTab().getDocType()</b>
+<b class="nc">&nbsp;                        .equals(process.getWorkpiece().getLogicalStructure().getType())) {</b>
+<b class="nc">&nbsp;                    Collection&lt;Metadata&gt; metadata = ProcessHelper</b>
+<b class="nc">&nbsp;                            .convertMetadata(process.getMetadataNodes(), MdSec.DMD_SEC);</b>
+<b class="nc">&nbsp;                    countOfAddedMetadata = createProcessForm.getProcessMetadata().getProcessDetails()</b>
+<b class="nc">&nbsp;                            .addMetadataIfNotExists(metadata);</b>
+<b class="nc">&nbsp;                } else {</b>
+<b class="nc">&nbsp;                    Helper.setWarnMessage(Helper.getTranslation(&quot;errorAdditionalImport&quot;));</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        Ajax.update(FORM_CLIENTID);</b>
+<b class="nc">&nbsp;        String summary = Helper</b>
+<b class="nc">&nbsp;                .getTranslation(&quot;newProcess.catalogueSearch.additionalImportSuccessfulSummary&quot;);</b>
+<b class="nc">&nbsp;        String detail = Helper</b>
+<b class="nc">&nbsp;                .getTranslation(&quot;newProcess.catalogueSearch.additionalImportSuccessfulDetail&quot;,</b>
+<b class="nc">&nbsp;                        String.valueOf(countOfAddedMetadata));</b>
+<b class="nc">&nbsp;        showGrowlMessage(summary, detail);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,658 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > WorkflowForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: WorkflowForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WorkflowForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    36,1%
+  </span>
+  <span class="absValue">
+    (13/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    31,5%
+  </span>
+  <span class="absValue">
+    (56/178)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.BufferedReader;
+&nbsp;import java.io.BufferedWriter;
+&nbsp;import java.io.ByteArrayInputStream;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.InputStreamReader;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.io.OutputStreamWriter;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.commons.io.IOUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.data.database.beans.Role;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.beans.Workflow;
+&nbsp;import org.kitodo.data.database.enums.WorkflowStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.WorkflowException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.model.LazyDTOModel;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.DataEditorSettingService;
+&nbsp;import org.kitodo.production.services.data.TemplateService;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;import org.kitodo.production.workflow.model.Converter;
+&nbsp;import org.kitodo.production.workflow.model.Reader;
+&nbsp;
+&nbsp;@Named(&quot;WorkflowForm&quot;)
+&nbsp;@SessionScoped
+&nbsp;public class WorkflowForm extends BaseForm {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(WorkflowForm.class);</b>
+<b class="fc">&nbsp;    private Workflow workflow = new Workflow();</b>
+&nbsp;
+<b class="fc">&nbsp;    private final transient DataEditorSettingService dataEditorSettingService = ServiceManager.getDataEditorSettingService();</b>
+<b class="fc">&nbsp;    private final transient FileService fileService = ServiceManager.getFileService();</b>
+&nbsp;    private String svgDiagram;
+<b class="fc">&nbsp;    private boolean dataEditorSettingsDefined = false;</b>
+&nbsp;    private String xmlDiagram;
+&nbsp;    private WorkflowStatus workflowStatus;
+&nbsp;    private static final String BPMN_EXTENSION = &quot;.bpmn20.xml&quot;;
+&nbsp;    private static final String SVG_EXTENSION = &quot;.svg&quot;;
+&nbsp;    private static final String SVG_DIAGRAM_URI = &quot;svgDiagramURI&quot;;
+&nbsp;    private static final String XML_DIAGRAM_URI = &quot;xmlDiagramURI&quot;;
+<b class="fc">&nbsp;    private final String workflowEditPath = MessageFormat.format(REDIRECT_PATH, &quot;workflowEdit&quot;);</b>
+&nbsp;    private Integer roleId;
+&nbsp;    private boolean migration;
+<b class="fc">&nbsp;    private static final String MIGRATION_FORM_PATH = MessageFormat.format(REDIRECT_PATH,&quot;system&quot;);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+<b class="fc">&nbsp;    public WorkflowForm() {</b>
+<b class="fc">&nbsp;        super.setLazyDTOModel(new LazyDTOModel(ServiceManager.getWorkflowService()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of workflow statues for select list.
+&nbsp;     *
+&nbsp;     * @return list of SelectItem objects
+&nbsp;     */
+&nbsp;    public WorkflowStatus[] getWorkflowStatuses() {
+<b class="nc">&nbsp;        return WorkflowStatus.values();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get workflowStatus.
+&nbsp;     *
+&nbsp;     * @return value of workflowStatus
+&nbsp;     */
+&nbsp;    public WorkflowStatus getWorkflowStatus() {
+<b class="nc">&nbsp;        return workflowStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set workflowStatus.
+&nbsp;     *
+&nbsp;     * @param workflowStatus as org.kitodo.data.database.enums.WorkflowStatus
+&nbsp;     */
+&nbsp;    public void setWorkflowStatus(WorkflowStatus workflowStatus) {
+<b class="fc">&nbsp;        this.workflowStatus = workflowStatus;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Read XML for file chosen out of the select list.
+&nbsp;     */
+&nbsp;    public void readXMLDiagram() {
+<b class="fc">&nbsp;        URI xmlDiagramURI = new File(</b>
+<b class="fc">&nbsp;                ConfigCore.getKitodoDiagramDirectory() + encodeXMLDiagramName(this.workflow.getTitle())).toURI();</b>
+&nbsp;
+<b class="fc">&nbsp;        try (InputStream inputStream = fileService.read(xmlDiagramURI);</b>
+<b class="fc">&nbsp;                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {</b>
+<b class="fc">&nbsp;            StringBuilder sb = new StringBuilder();</b>
+<b class="fc">&nbsp;            String line = bufferedReader.readLine();</b>
+<b class="fc">&nbsp;            while (Objects.nonNull(line)) {</b>
+<b class="fc">&nbsp;                sb.append(line).append(&quot;\n&quot;);</b>
+<b class="fc">&nbsp;                line = bufferedReader.readLine();</b>
+&nbsp;            }
+<b class="fc">&nbsp;            xmlDiagram = sb.toString();</b>
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save workflow and redirect to list view.
+&nbsp;     *
+&nbsp;     * @return url to list view
+&nbsp;     */
+&nbsp;    public String saveAndRedirect() {
+<b class="nc">&nbsp;        if (migration &amp;&amp; WorkflowStatus.DRAFT.equals(this.workflowStatus)) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(Helper.getTranslation(&quot;errorMigrationDraft&quot;));</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            if (saveFiles()) {</b>
+<b class="nc">&nbsp;                this.workflow.setStatus(this.workflowStatus);</b>
+<b class="nc">&nbsp;                saveWorkflow();</b>
+<b class="nc">&nbsp;                if (!this.workflow.getTemplates().isEmpty()) {</b>
+<b class="nc">&nbsp;                    updateTemplateTasks();</b>
+&nbsp;                }
+<b class="nc">&nbsp;                if (migration) {</b>
+<b class="nc">&nbsp;                    migration = false;</b>
+<b class="nc">&nbsp;                    return MIGRATION_FORM_PATH + &quot;&amp;workflowId=&quot; + workflow.getId();</b>
+&nbsp;                }
+<b class="nc">&nbsp;                return projectsPage;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException | DAOException | DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorDiagramFile&quot;, new Object[] {this.workflow.getTitle() }, logger, e);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;        } catch (WorkflowException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorDiagramTask&quot;, new Object[] {this.workflow.getTitle(), e.getMessage() }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update the tasks of the templates associated with the current workflow and delete associated
+&nbsp;     * editor settings.
+&nbsp;     */
+&nbsp;    public void updateTemplateTasks() throws DAOException, IOException, WorkflowException, DataException {
+<b class="fc">&nbsp;        Converter converter = new Converter(this.workflow.getTitle());</b>
+<b class="fc">&nbsp;        for (Template workflowTemplate : this.workflow.getTemplates()) {</b>
+<b class="fc">&nbsp;            List&lt;Task&gt; templateTasks = new ArrayList&lt;&gt;(workflowTemplate.getTasks());</b>
+<b class="fc">&nbsp;            if (!templateTasks.isEmpty()) {</b>
+<b class="fc">&nbsp;                if (this.dataEditorSettingsDefined) {</b>
+<b class="fc">&nbsp;                    for (Task templateTask : templateTasks) {</b>
+<b class="fc">&nbsp;                        this.dataEditorSettingService.removeFromDatabaseByTaskId(templateTask.getId());</b>
+<b class="fc">&nbsp;                    }</b>
+&nbsp;                }
+<b class="fc">&nbsp;                workflowTemplate.getTasks().clear();</b>
+<b class="fc">&nbsp;                TemplateService templateService = ServiceManager.getTemplateService();</b>
+<b class="fc">&nbsp;                converter.convertWorkflowToTemplate(workflowTemplate);</b>
+<b class="fc">&nbsp;                templateService.save(workflowTemplate, true);</b>
+<b class="fc">&nbsp;                new WorkflowControllerService().activateNextTasks(workflowTemplate.getTasks());</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the workflow has associated data editor settings.
+&nbsp;     * @return value of dataEditorSettingsDefined
+&nbsp;     */
+&nbsp;    public boolean hasWorkflowDataEditorSettingsDefined() {
+<b class="nc">&nbsp;        return this.dataEditorSettingsDefined;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Cancel Workflow creation.
+&nbsp;     * @return redirectPath
+&nbsp;     */
+&nbsp;    public String cancel() {
+<b class="nc">&nbsp;        if (migration) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getWorkflowService().remove(workflow);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_DELETING, new Object[] {this.workflow.getTitle(), e.getMessage() }, logger,</b>
+&nbsp;                    e);
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            migration = false;</b>
+<b class="nc">&nbsp;            return MIGRATION_FORM_PATH;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return &quot;projects?keepPagination=true&amp;faces-redirect=true&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Archive active workflow.
+&nbsp;     */
+&nbsp;    public void archive() {
+<b class="nc">&nbsp;        this.workflow.setStatus(WorkflowStatus.ARCHIVED);</b>
+<b class="nc">&nbsp;        saveWorkflow();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove workflow if no template is assigned to it.
+&nbsp;     */
+&nbsp;    public void delete() {
+<b class="nc">&nbsp;        if (!this.workflow.getTemplates().isEmpty()) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;templateAssignedError&quot;);</b>
+&nbsp;        } else {
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getWorkflowService().remove(this.workflow);</b>
+&nbsp;
+<b class="nc">&nbsp;                String diagramDirectory = ConfigCore.getKitodoDiagramDirectory();</b>
+<b class="nc">&nbsp;                URI svgDiagramURI = new File(</b>
+<b class="nc">&nbsp;                        diagramDirectory + decodeXMLDiagramName(this.workflow.getTitle()) + SVG_EXTENSION).toURI();</b>
+<b class="nc">&nbsp;                URI xmlDiagramURI = new File(diagramDirectory + encodeXMLDiagramName(this.workflow.getTitle()))</b>
+<b class="nc">&nbsp;                        .toURI();</b>
+&nbsp;
+<b class="nc">&nbsp;                fileService.delete(svgDiagramURI);</b>
+<b class="nc">&nbsp;                fileService.delete(xmlDiagramURI);</b>
+<b class="nc">&nbsp;            } catch (DataException | IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_DELETING, new Object[] {ObjectType.WORKFLOW.getTranslationSingular() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Save content of the diagram files.
+&nbsp;     *
+&nbsp;     * @return true if save, false if not
+&nbsp;     */
+&nbsp;    private boolean saveFiles() throws IOException, WorkflowException {
+<b class="nc">&nbsp;        Map&lt;String, String&gt; requestParameterMap = FacesContext.getCurrentInstance().getExternalContext()</b>
+<b class="nc">&nbsp;                .getRequestParameterMap();</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, URI&gt; diagramsUris = getDiagramUris();</b>
+&nbsp;
+<b class="nc">&nbsp;        URI svgDiagramURI = diagramsUris.get(SVG_DIAGRAM_URI);</b>
+<b class="nc">&nbsp;        URI xmlDiagramURI = diagramsUris.get(XML_DIAGRAM_URI);</b>
+&nbsp;
+<b class="nc">&nbsp;        xmlDiagram = requestParameterMap.get(&quot;editForm:workflowTabView:xmlDiagram&quot;);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(xmlDiagram)) {</b>
+<b class="nc">&nbsp;            svgDiagram = StringUtils.substringAfter(xmlDiagram, &quot;kitodo-diagram-separator&quot;);</b>
+<b class="nc">&nbsp;            xmlDiagram = StringUtils.substringBefore(xmlDiagram, &quot;kitodo-diagram-separator&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            Reader reader = new Reader(new ByteArrayInputStream(xmlDiagram.getBytes(StandardCharsets.UTF_8)));</b>
+<b class="nc">&nbsp;            reader.validateWorkflowTasks();</b>
+&nbsp;
+<b class="nc">&nbsp;            Converter converter = new Converter(new ByteArrayInputStream(xmlDiagram.getBytes(StandardCharsets.UTF_8)));</b>
+<b class="nc">&nbsp;            converter.validateWorkflowTaskList();</b>
+&nbsp;
+<b class="nc">&nbsp;            saveFile(svgDiagramURI, svgDiagram);</b>
+<b class="nc">&nbsp;            saveFile(xmlDiagramURI, xmlDiagram);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return fileService.fileExist(xmlDiagramURI) &amp;&amp; fileService.fileExist(svgDiagramURI);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Map&lt;String, URI&gt; getDiagramUris() {
+<b class="nc">&nbsp;        return getDiagramUris(this.workflow.getTitle());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Map&lt;String, URI&gt; getDiagramUris(String fileName) {
+<b class="nc">&nbsp;        String diagramDirectory = ConfigCore.getKitodoDiagramDirectory();</b>
+<b class="nc">&nbsp;        URI svgDiagramURI = new File(diagramDirectory + decodeXMLDiagramName(fileName) + SVG_EXTENSION)</b>
+<b class="nc">&nbsp;                .toURI();</b>
+<b class="nc">&nbsp;        URI xmlDiagramURI = new File(diagramDirectory + encodeXMLDiagramName(fileName)).toURI();</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, URI&gt; diagramUris = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        diagramUris.put(SVG_DIAGRAM_URI, svgDiagramURI);</b>
+<b class="nc">&nbsp;        diagramUris.put(XML_DIAGRAM_URI, xmlDiagramURI);</b>
+<b class="nc">&nbsp;        return diagramUris;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void saveFile(URI fileURI, String fileContent) {
+<b class="fc">&nbsp;        try (OutputStream outputStream = fileService.write(fileURI);</b>
+<b class="fc">&nbsp;                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream))) {</b>
+<b class="fc">&nbsp;            bufferedWriter.write(fileContent);</b>
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String decodeXMLDiagramName(String xmlDiagramName) {
+<b class="nc">&nbsp;        if (xmlDiagramName.contains(BPMN_EXTENSION)) {</b>
+<b class="nc">&nbsp;            return xmlDiagramName.replace(BPMN_EXTENSION, &quot;&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return xmlDiagramName;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    private String encodeXMLDiagramName(String xmlDiagramName) {
+<b class="fc">&nbsp;        if (!xmlDiagramName.contains(BPMN_EXTENSION)) {</b>
+<b class="fc">&nbsp;            return xmlDiagramName + BPMN_EXTENSION;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return xmlDiagramName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void saveWorkflow() {
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getWorkflowService().save(this.workflow, true);</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create new workflow.
+&nbsp;     *
+&nbsp;     * @return page
+&nbsp;     */
+&nbsp;    public String newWorkflow() {
+<b class="nc">&nbsp;        this.workflow = new Workflow();</b>
+<b class="nc">&nbsp;        this.workflow.setClient(ServiceManager.getUserService().getSessionClientOfAuthenticatedUser());</b>
+<b class="nc">&nbsp;        return workflowEditPath + &quot;&amp;id=&quot; + (Objects.isNull(this.workflow.getId()) ? 0 : this.workflow.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Duplicate the selected workflow.
+&nbsp;     *
+&nbsp;     * @param itemId
+&nbsp;     *            ID of the workflow to duplicate
+&nbsp;     * @return page address; either redirect to the edit workflow page or return
+&nbsp;     *         &#39;null&#39; if the workflow could not be retrieved, which will prompt JSF
+&nbsp;     *         to remain on the same page and reuse the bean.
+&nbsp;     */
+&nbsp;    public String duplicate(Integer itemId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Workflow baseWorkflow = ServiceManager.getWorkflowService().getById(itemId);</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;String, URI&gt; diagramsUris = getDiagramUris(baseWorkflow.getTitle());</b>
+&nbsp;
+<b class="nc">&nbsp;            URI xmlDiagramURI = diagramsUris.get(XML_DIAGRAM_URI);</b>
+&nbsp;
+<b class="nc">&nbsp;            this.workflow = ServiceManager.getWorkflowService().duplicateWorkflow(baseWorkflow);</b>
+<b class="nc">&nbsp;            setWorkflowStatus(WorkflowStatus.DRAFT);</b>
+<b class="nc">&nbsp;            Map&lt;String, URI&gt; diagramsCopyUris = getDiagramUris();</b>
+&nbsp;
+<b class="nc">&nbsp;            URI xmlDiagramCopyURI = diagramsCopyUris.get(XML_DIAGRAM_URI);</b>
+&nbsp;
+<b class="nc">&nbsp;            try (InputStream xmlInputStream = ServiceManager.getFileService().read(xmlDiagramURI)) {</b>
+<b class="nc">&nbsp;                this.xmlDiagram = IOUtils.toString(xmlInputStream, StandardCharsets.UTF_8);</b>
+<b class="nc">&nbsp;                saveFile(xmlDiagramCopyURI, this.xmlDiagram);</b>
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;unableToDuplicateWorkflow&quot;, logger, e);</b>
+<b class="nc">&nbsp;                return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            return workflowEditPath;</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DUPLICATE, new Object[] {ObjectType.WORKFLOW.getTranslationSingular() },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set workflow by id.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of workflow to set
+&nbsp;     */
+&nbsp;    public void setWorkflowById(int id) {
+&nbsp;        try {
+<b class="nc">&nbsp;            setWorkflow(ServiceManager.getWorkflowService().getById(id));</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.WORKFLOW.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method being used as viewAction for workflow edit form. If the given
+&nbsp;     * parameter &#39;id&#39; is &#39;0&#39;, the form for creating a new workflow will be
+&nbsp;     * displayed.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of the workflow to load
+&nbsp;     */
+&nbsp;    public void load(int id) {
+&nbsp;        try {
+<b class="fc">&nbsp;            if (!Objects.equals(id, 0)) {</b>
+<b class="fc">&nbsp;                Workflow workflow = ServiceManager.getWorkflowService().getById(id);</b>
+<b class="fc">&nbsp;                setWorkflow(workflow);</b>
+<b class="fc">&nbsp;                setWorkflowStatus(workflow.getStatus());</b>
+<b class="fc">&nbsp;                readXMLDiagram();</b>
+<b class="fc">&nbsp;                this.dataEditorSettingsDefined = this.dataEditorSettingService.areDataEditorSettingsDefinedForWorkflow(workflow);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            setSaveDisabled(false);</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_ONE, new Object[] {ObjectType.WORKFLOW.getTranslationSingular(), id },</b>
+&nbsp;                logger, e);
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get role id.
+&nbsp;     *
+&nbsp;     * @return value of roleId
+&nbsp;     */
+&nbsp;    public Integer getRoleId() {
+<b class="nc">&nbsp;        return roleId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set role idd.
+&nbsp;     *
+&nbsp;     * @param roleId
+&nbsp;     *            as Integer.
+&nbsp;     */
+&nbsp;    public void setRoleId(Integer roleId) {
+<b class="nc">&nbsp;        this.roleId = roleId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get hidden list of roles.
+&nbsp;     *
+&nbsp;     * @return hidden list of roles
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getRoles() {
+<b class="nc">&nbsp;        List&lt;SelectItem&gt; selectItems = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;Role&gt; roles = ServiceManager.getRoleService()</b>
+<b class="nc">&nbsp;                .getAllRolesByClientId(ServiceManager.getUserService().getSessionClientId());</b>
+<b class="nc">&nbsp;        for (Role role : roles) {</b>
+<b class="nc">&nbsp;            selectItems.add(new SelectItem(role.getId(), role.getTitle(), null));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return selectItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get workflow.
+&nbsp;     *
+&nbsp;     * @return value of workflow
+&nbsp;     */
+&nbsp;    public Workflow getWorkflow() {
+<b class="nc">&nbsp;        return workflow;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set workflow.
+&nbsp;     *
+&nbsp;     * @param workflow
+&nbsp;     *            as Workflow
+&nbsp;     */
+&nbsp;    public void setWorkflow(Workflow workflow) {
+<b class="fc">&nbsp;        this.workflow = workflow;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get content of XML diagram file.
+&nbsp;     *
+&nbsp;     * @return content of XML diagram file as String
+&nbsp;     */
+&nbsp;    public String getXmlDiagram() {
+<b class="fc">&nbsp;        return xmlDiagram;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set content of XML diagram file.
+&nbsp;     *
+&nbsp;     * @param xmlDiagram
+&nbsp;     *            content of XML diagram as String
+&nbsp;     */
+&nbsp;    public void setXmlDiagram(String xmlDiagram) {
+<b class="fc">&nbsp;        this.xmlDiagram = xmlDiagram;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get content of SVG diagram file.
+&nbsp;     *
+&nbsp;     * @return content of SVG diagram file as String
+&nbsp;     */
+&nbsp;    String getSvgDiagram() {
+<b class="fc">&nbsp;        return svgDiagram;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set content of SVG diagram file.
+&nbsp;     *
+&nbsp;     * @param svgDiagram
+&nbsp;     *            content of SVG diagram as String
+&nbsp;     */
+&nbsp;    void setSvgDiagram(String svgDiagram) {
+<b class="fc">&nbsp;        this.svgDiagram = svgDiagram;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get migration.
+&nbsp;     *
+&nbsp;     * @return value of migration
+&nbsp;     */
+&nbsp;    public boolean isMigration() {
+<b class="nc">&nbsp;        return migration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set migration.
+&nbsp;     *
+&nbsp;     * @param migration as boolean
+&nbsp;     */
+&nbsp;    public void setMigration(boolean migration) {
+<b class="nc">&nbsp;        this.migration = migration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get language.
+&nbsp;     *
+&nbsp;     * @return language of the currently logged in user
+&nbsp;     */
+&nbsp;    public String getLanguage() {
+<b class="nc">&nbsp;        return ServiceManager.getUserService().getCurrentUser().getLanguage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set language.
+&nbsp;     *
+&nbsp;     * @param language as String
+&nbsp;     */
+&nbsp;    public void setLanguage(String language) {
+&nbsp;        // We don&#39;t need to do anything. The language value is written into a hidden input field for the localization
+&nbsp;        // of the editor. On saving the workflow form it gets submitted again. Therefore, a setter is expected, and we
+&nbsp;        // only need it for completeness’s sake. If we find a better way to get the language value into the editor&#39;s JS
+&nbsp;        // we should do so. :)
+<b class="nc">&nbsp;    }</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

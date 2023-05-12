@@ -1,0 +1,224 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ConvertRunner</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.imagemanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: ConvertRunner (org.kitodo.imagemanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConvertRunner</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,6%
+  </span>
+  <span class="absValue">
+    (20/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.imagemanagement;
+&nbsp;
+&nbsp;import java.io.ByteArrayOutputStream;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Random;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;
+&nbsp;import org.apache.commons.exec.CommandLine;
+&nbsp;import org.apache.commons.exec.DefaultExecutor;
+&nbsp;import org.apache.commons.exec.ExecuteWatchdog;
+&nbsp;import org.apache.commons.exec.Executor;
+&nbsp;import org.apache.commons.exec.PumpStreamHandler;
+&nbsp;import org.apache.commons.io.FilenameUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.im4java.core.IMOperation;
+&nbsp;import org.kitodo.config.KitodoConfig;
+&nbsp;import org.kitodo.config.enums.ParameterImageManagement;
+&nbsp;
+&nbsp;/**
+&nbsp; * Executes the {@code convert} command.
+&nbsp; */
+<b class="fc">&nbsp;class ConvertRunner {</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ConvertRunner.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@code convert} command without path.
+&nbsp;     */
+&nbsp;    private static final String CONVERT_COMMAND = &quot;convert&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Randomness generator used to distribute the requests evenly on several
+&nbsp;     * configured SSH hosts.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Random RANDOMNESS_GENERATOR = new Random();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Default timeout.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final int DEFAULT_TIMEOUT_MINS = (int) TimeUnit.MINUTES.convert(2, TimeUnit.HOURS);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@code convert} command, optionally with full path.
+&nbsp;     */
+<b class="fc">&nbsp;    private String convertCommand = CONVERT_COMMAND;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Executes the ImageMagick command using Apache Commons Exec.
+&nbsp;     *
+&nbsp;     * @param commandLine
+&nbsp;     *            command line to execute
+&nbsp;     * @throws IOException
+&nbsp;     *             if I/O fails
+&nbsp;     */
+&nbsp;    void run(IMOperation commandLine) throws IOException {
+<b class="fc">&nbsp;        Executor executor = new DefaultExecutor();</b>
+&nbsp;
+<b class="fc">&nbsp;        OutputStream outAndErr = new ByteArrayOutputStream();</b>
+<b class="fc">&nbsp;        executor.setStreamHandler(new PumpStreamHandler(outAndErr));</b>
+&nbsp;
+<b class="fc">&nbsp;        long timeoutMillis = 1000 * KitodoConfig.getIntParameter(ParameterImageManagement.TIMEOUT_SEC, DEFAULT_TIMEOUT_MINS);</b>
+<b class="fc">&nbsp;        executor.setWatchdog(new ExecuteWatchdog(timeoutMillis));</b>
+&nbsp;
+&nbsp;        CommandLine command;
+&nbsp;        try {
+<b class="fc">&nbsp;            String sshHosts = KitodoConfig.getParameter(ParameterImageManagement.SSH_HOST);</b>
+<b class="nc">&nbsp;            command = new CommandLine(&quot;ssh&quot;);</b>
+<b class="nc">&nbsp;            String[] hosts = sshHosts.split(&quot;,&quot;);</b>
+<b class="nc">&nbsp;            String host = hosts[RANDOMNESS_GENERATOR.nextInt(hosts.length)];</b>
+<b class="nc">&nbsp;            command.addArgument(host, false);</b>
+<b class="nc">&nbsp;            command.addArgument(convertCommand + &#39; &#39; + commandLine.toString(), false);</b>
+<b class="fc">&nbsp;        } catch (NoSuchElementException e) {</b>
+<b class="fc">&nbsp;            logger.trace(&quot;SSH not configured.&quot;, e);</b>
+<b class="fc">&nbsp;            command = new CommandLine(convertCommand);</b>
+<b class="fc">&nbsp;            command.addArguments(commandLine.toString());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            logger.debug(&quot;Executing: {}&quot;, command);</b>
+<b class="fc">&nbsp;            logger.trace(&quot;Timeout: {} mins&quot;, timeoutMillis / 60000d);</b>
+<b class="fc">&nbsp;            executor.execute(command);</b>
+<b class="fc">&nbsp;            logger.debug(&quot;Command output:{}{}&quot;, System.lineSeparator(), outAndErr.toString());</b>
+<b class="nc">&nbsp;        } catch (IOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Command output:{}{}&quot;, System.lineSeparator(), outAndErr.toString());</b>
+<b class="nc">&nbsp;            throw e;</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set the search path. This can either be the directory, or the name of the
+&nbsp;     * executable.
+&nbsp;     *
+&nbsp;     * @param path
+&nbsp;     *            the path
+&nbsp;     */
+&nbsp;    void setSearchPath(String path) {
+<b class="nc">&nbsp;        if (!new File(path).exists()) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;path must exist: &quot; + path);</b>
+<b class="nc">&nbsp;        } else if (new File(path).isDirectory()) {</b>
+<b class="nc">&nbsp;            convertCommand = FilenameUtils.concat(path, CONVERT_COMMAND);</b>
+<b class="nc">&nbsp;        } else if (new File(path).canExecute()) {</b>
+<b class="nc">&nbsp;            convertCommand = path;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;path must either be a directory, or an executable: &quot; + path);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

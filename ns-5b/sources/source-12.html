@@ -1,0 +1,240 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PropertyService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data</a>
+</div>
+
+<h1>Coverage Summary for Class: PropertyService (org.kitodo.production.services.data)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PropertyService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,6%
+  </span>
+  <span class="absValue">
+    (7/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69%
+  </span>
+  <span class="absValue">
+    (20/29)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Property;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.database.persistence.PropertyDAO;
+&nbsp;import org.kitodo.production.services.data.base.SearchDatabaseService;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;public class PropertyService extends SearchDatabaseService&lt;Property, PropertyDAO&gt; {
+&nbsp;
+<b class="fc">&nbsp;    private static volatile PropertyService instance = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor with Searcher and Indexer assigning.
+&nbsp;     */
+&nbsp;    private PropertyService() {
+<b class="fc">&nbsp;        super(new PropertyDAO());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return singleton variable of type PropertyService.
+&nbsp;     *
+&nbsp;     * @return unique instance of PropertyService
+&nbsp;     */
+&nbsp;    public static PropertyService getInstance() {
+<b class="fc">&nbsp;        PropertyService localReference = instance;</b>
+<b class="fc">&nbsp;        if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;            synchronized (PropertyService.class) {</b>
+<b class="fc">&nbsp;                localReference = instance;</b>
+<b class="fc">&nbsp;                if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;                    localReference = new PropertyService();</b>
+<b class="fc">&nbsp;                    instance = localReference;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return localReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countDatabaseRows() throws DAOException {
+<b class="fc">&nbsp;        return countDatabaseRows(&quot;SELECT COUNT(*) FROM Property&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countResults(Map filters) throws DAOException {
+<b class="nc">&nbsp;        return countDatabaseRows();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Property&gt; loadData(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
+<b class="nc">&nbsp;        return new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find all distinct property titles.
+&nbsp;     *
+&nbsp;     * @return a list of titles.
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; findDistinctTitles() {
+<b class="fc">&nbsp;        return dao.retrieveDistinctTitles();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find properties with exact title for possible certain property type.
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            of the searched property
+&nbsp;     * @return list of JSON objects with properties
+&nbsp;     */
+&nbsp;    public List&lt;Property&gt; findByTitle(String title) {
+<b class="nc">&nbsp;        HashMap&lt;String, Object&gt; parameters = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        parameters.put(&quot;title&quot;, title);</b>
+<b class="nc">&nbsp;        return getByQuery(&quot;from Property as property where property.title=:title&quot;, parameters);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find properties with exact value for possible certain property type.
+&nbsp;     *
+&nbsp;     * @param value
+&nbsp;     *            of the searched property
+&nbsp;     * @return list of JSON objects with properties
+&nbsp;     */
+&nbsp;    List&lt;Property&gt; findByValue(String value) {
+<b class="fc">&nbsp;        HashMap&lt;String, Object&gt; parameters = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        parameters.put(&quot;value&quot;, value);</b>
+<b class="fc">&nbsp;        return getByQuery(&quot;from Property as property where property.value=:value&quot;, parameters);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find properties with exact title and type. Necessary to assure that user
+&nbsp;     * pickup type from the list which contains enums. //TODO:add enum in future
+&nbsp;     *
+&nbsp;     * @param title
+&nbsp;     *            of the searched property
+&nbsp;     * @param value
+&nbsp;     *            of the searched property
+&nbsp;     * @return list of JSON objects with batches of exact type
+&nbsp;     */
+&nbsp;    List&lt;Property&gt; findByTitleAndValue(String title, String value) {
+<b class="fc">&nbsp;        HashMap&lt;String, Object&gt; parameters = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        parameters.put(&quot;title&quot;, title);</b>
+<b class="fc">&nbsp;        parameters.put(&quot;value&quot;, value);</b>
+<b class="fc">&nbsp;        return getByQuery(&quot;from Property as property where property.title=:title and property.value=:value&quot;, parameters);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Transfer property for duplication.
+&nbsp;     *
+&nbsp;     * @param property
+&nbsp;     *            as Property object
+&nbsp;     * @return duplicated property as Property object
+&nbsp;     */
+&nbsp;    public Property transfer(Property property) {
+<b class="nc">&nbsp;        Property newProperty = new Property();</b>
+<b class="nc">&nbsp;        newProperty.setTitle(property.getTitle());</b>
+<b class="nc">&nbsp;        newProperty.setValue(property.getValue());</b>
+<b class="nc">&nbsp;        return newProperty;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

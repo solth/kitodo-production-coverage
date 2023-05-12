@@ -1,0 +1,301 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ActiveMQProcessor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.interfaces.activemq</a>
+</div>
+
+<h1>Coverage Summary for Class: ActiveMQProcessor (org.kitodo.production.interfaces.activemq)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ActiveMQProcessor</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/38)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.interfaces.activemq;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import javax.jms.JMSException;
+&nbsp;import javax.jms.MapMessage;
+&nbsp;import javax.jms.Message;
+&nbsp;import javax.jms.MessageConsumer;
+&nbsp;import javax.jms.MessageListener;
+&nbsp;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Client;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.enums.ReportLevel;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.security.SecurityUserDetails;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.security.core.context.SecurityContext;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class ActiveMQProcessor offers general services, such as making the
+&nbsp; * incoming messages available as MapMessages and publishing the results. When I
+&nbsp; * came clear that this code would be necessary for every processor, I thought
+&nbsp; * an abstract class would be the right place for it. ActiveMQProcessor also
+&nbsp; * provides a place to save the checker for the ActiveMQDirector, to be able to
+&nbsp; * shut it down later.
+&nbsp; */
+&nbsp;public abstract class ActiveMQProcessor implements MessageListener {
+&nbsp;    /**
+&nbsp;     * The name of the queue from which this processor is processing messages.
+&nbsp;     */
+&nbsp;    private String queueName;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The message consumer object that actually receives the messages and
+&nbsp;     * executes {@link #process(MapMessageObjectReader)}.
+&nbsp;     */
+&nbsp;    private MessageConsumer messageConsumer;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Must be implemented to let the service do what it should do.
+&nbsp;     *
+&nbsp;     * @param ticket
+&nbsp;     *            an object providing access to the fields of the received map
+&nbsp;     *            message
+&nbsp;     */
+&nbsp;    protected abstract void process(MapMessageObjectReader ticket) throws DAOException, JMSException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Instantiating the class ActiveMQProcessor always requires to pass the
+&nbsp;     * name of the queue it should be attached to. That means, your constructor
+&nbsp;     * should look like this:
+&nbsp;     *
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * public MyServiceProcessor() {
+&nbsp;     *     super(ConfigCore.getParameter(&quot;activeMQ.myService.queue&quot;, null));
+&nbsp;     * }
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * If the parameter is not set in kitodo_config.properties, it will return
+&nbsp;     * “null” and so prevents it from being set up in ActiveMQDirector.
+&nbsp;     *
+&nbsp;     * @param queueName
+&nbsp;     *            the queue name, if configured, or “null” to prevent the
+&nbsp;     *            processor from being connected.
+&nbsp;     */
+<b class="nc">&nbsp;    public ActiveMQProcessor(String queueName) {</b>
+<b class="nc">&nbsp;        this.queueName = queueName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Provides a corset which checks the message being a MapMessage, performs a
+&nbsp;     * type safe type cast, and extracts the job’s ID to be able to send useful
+&nbsp;     * results to the results topic, which it does after the abstract method
+&nbsp;     * process() has finished.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Since this will be the same for all processors which use MapMessages, I
+&nbsp;     * extracted the portion into the abstract class.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void onMessage(Message arg) {
+&nbsp;        MapMessageObjectReader message;
+<b class="nc">&nbsp;        String ticketID = null;</b>
+&nbsp;
+&nbsp;        try {
+&nbsp;            // Basic check message
+<b class="nc">&nbsp;            message = getMessageFromObjectReader(arg);</b>
+<b class="nc">&nbsp;            ticketID = message.getMandatoryString(&quot;id&quot;);</b>
+&nbsp;
+&nbsp;            // turn on logging
+<b class="nc">&nbsp;            turnOnLogging(ticketID);</b>
+&nbsp;
+&nbsp;            // set default user
+<b class="nc">&nbsp;            Optional&lt;String&gt; optionalLogin = ConfigCore.getOptionalString(ParameterCore.ACTIVE_MQ_USER);</b>
+<b class="nc">&nbsp;            SecurityContext securityContext = SecurityContextHolder.getContext();</b>
+<b class="nc">&nbsp;            if (optionalLogin.isPresent()) {</b>
+<b class="nc">&nbsp;                if (Objects.isNull(securityContext.getAuthentication())) {</b>
+<b class="nc">&nbsp;                    setUserAuthentification(optionalLogin, securityContext);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    optionalLogin = Optional.empty();</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+&nbsp;            // process message
+<b class="nc">&nbsp;            process(message);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (optionalLogin.isPresent()) {</b>
+<b class="nc">&nbsp;                securityContext.setAuthentication(null);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // turn off logging again
+<b class="nc">&nbsp;            Helper.setActiveMQReporting(null);</b>
+&nbsp;
+&nbsp;            // if everything ‘s fine, report success
+<b class="nc">&nbsp;            new WebServiceResult(queueName, ticketID, ReportLevel.SUCCESS).send();</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+&nbsp;            // report any errors
+<b class="nc">&nbsp;            new WebServiceResult(queueName, ticketID, ReportLevel.FATAL, e.getMessage()).send();</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setUserAuthentification(Optional&lt;String&gt; optionalLogin, SecurityContext securityContext) throws DAOException {
+<b class="nc">&nbsp;        User user = ServiceManager.getUserService().getByLogin(optionalLogin.get());</b>
+<b class="nc">&nbsp;        SecurityUserDetails securityUserDetails = new SecurityUserDetails(user);</b>
+<b class="nc">&nbsp;        Authentication auth = new UsernamePasswordAuthenticationToken(securityUserDetails, null,</b>
+<b class="nc">&nbsp;                securityUserDetails.getAuthorities());</b>
+<b class="nc">&nbsp;        Client clientId = ServiceManager.getClientService().getById(user.getClients().get(0).getId());</b>
+<b class="nc">&nbsp;        securityUserDetails.setSessionClient(clientId);</b>
+<b class="nc">&nbsp;        securityContext.setAuthentication(auth);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void turnOnLogging(String ticketID) {
+<b class="nc">&nbsp;        Map&lt;String, String&gt; loggingConfig = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        loggingConfig.put(&quot;queueName&quot;, queueName);</b>
+<b class="nc">&nbsp;        loggingConfig.put(&quot;id&quot;, ticketID);</b>
+<b class="nc">&nbsp;        Helper.setActiveMQReporting(loggingConfig);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private MapMessageObjectReader getMessageFromObjectReader(Message arg) {
+&nbsp;        MapMessageObjectReader message;
+<b class="nc">&nbsp;        if (arg instanceof MapMessage) {</b>
+<b class="nc">&nbsp;            message = new MapMessageObjectReader((MapMessage) arg);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Incompatible types.&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return message;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the queue name. Maybe null if the processor is not active.
+&nbsp;     *
+&nbsp;     * @return the queue name
+&nbsp;     */
+&nbsp;    public String getQueueName() {
+<b class="nc">&nbsp;        return queueName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the message consumer to have it later for shutting down the service.
+&nbsp;     *
+&nbsp;     * @param messageConsumer
+&nbsp;     *            the MessageConsumer object responsible for checking messages
+&nbsp;     */
+&nbsp;
+&nbsp;    public void setMessageConsumer(MessageConsumer messageConsumer) {
+<b class="nc">&nbsp;        this.messageConsumer = messageConsumer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the message consumer. Maybe null. Used for shutdown.
+&nbsp;     *
+&nbsp;     * @return the message consumer
+&nbsp;     */
+&nbsp;    public MessageConsumer getMessageConsumer() {
+<b class="nc">&nbsp;        return messageConsumer;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

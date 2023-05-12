@@ -1,0 +1,525 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Ruleset</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset.xml</a>
+</div>
+
+<h1>Coverage Summary for Class: Ruleset (org.kitodo.dataeditor.ruleset.xml)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Ruleset</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,5%
+  </span>
+  <span class="absValue">
+    (21/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,4%
+  </span>
+  <span class="absValue">
+    (90/103)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset.xml;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.ListIterator;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.TreeSet;
+&nbsp;import java.util.function.Function;
+&nbsp;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;import javax.xml.bind.annotation.XmlElementWrapper;
+&nbsp;import javax.xml.bind.annotation.XmlRootElement;
+&nbsp;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.Domain;
+&nbsp;import org.kitodo.dataeditor.ruleset.DivisionDeclaration;
+&nbsp;import org.kitodo.dataeditor.ruleset.Labeled;
+&nbsp;import org.kitodo.dataeditor.ruleset.Rule;
+&nbsp;import org.kitodo.dataeditor.ruleset.Settings;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class maps the XML root element of the rule set. The ruleset is the
+&nbsp; * heart of Production. It consists of three sections: declaration, correlation
+&nbsp; * and editing.
+&nbsp; */
+&nbsp;@XmlRootElement(name = &quot;ruleset&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)
+<b class="fc">&nbsp;public class Ruleset {</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The default language of the labels without language specification in the
+&nbsp;     * rule set. Defaults to English.
+&nbsp;     */
+&nbsp;    @XmlAttribute
+&nbsp;    private String lang;
+&nbsp;
+<b class="fc">&nbsp;    @XmlElement(name = &quot;include&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)</b>
+&nbsp;    private List&lt;String&gt; includes = new ArrayList&lt;&gt;();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The declaration section defines divisions and keys.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlElement(name = &quot;declaration&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)</b>
+&nbsp;    private DeclarationElement declaration = new DeclarationElement();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The correlation section defines relationships between divisions and keys.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlElementWrapper(name = &quot;correlation&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)</b>
+&nbsp;    @XmlElement(name = &quot;restriction&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)
+&nbsp;    private List&lt;RestrictivePermit&gt; restrictions = new LinkedList&lt;&gt;();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * In the editing section settings for the editor concerning keys are
+&nbsp;     * defined.
+&nbsp;     */
+&nbsp;    @XmlElement(name = &quot;editing&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)
+&nbsp;    private EditingElement editing;
+&nbsp;
+&nbsp;    private transient List&lt;Key&gt; keys;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Inserts all information from another ruleset into this ruleset. Information
+&nbsp;     * of the same name will be overwritten.
+&nbsp;     *
+&nbsp;     * @param other ruleset to insert
+&nbsp;     */
+&nbsp;    public void addAll(Ruleset other) {
+<b class="fc">&nbsp;        if (Objects.nonNull(other.declaration)) {</b>
+<b class="fc">&nbsp;            if (Objects.isNull(declaration)) {</b>
+<b class="nc">&nbsp;                declaration = other.declaration;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                replaceOrAdd(other.declaration.getDivisions(), Division::getId, declaration.getDivisions());</b>
+<b class="fc">&nbsp;                replaceOrAdd(other.declaration.getKeys(), Key::getId, declaration.getKeys());</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.nonNull(other.restrictions)) {</b>
+<b class="fc">&nbsp;            if (Objects.isNull(restrictions)) {</b>
+<b class="nc">&nbsp;                restrictions = other.restrictions;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                replaceOrAdd(other.restrictions, RestrictivePermit::getKey, restrictions);</b>
+<b class="fc">&nbsp;                replaceOrAdd(other.restrictions, RestrictivePermit::getDivision, restrictions);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.nonNull(other.editing)) {</b>
+<b class="fc">&nbsp;            if (Objects.isNull(editing)) {</b>
+<b class="fc">&nbsp;                editing = other.editing;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                replaceOrAdd(other.editing.getSettings(), Setting::getKey, editing.getSettings());</b>
+<b class="nc">&nbsp;                replaceOrAdd(other.editing.getAcquisitionStages(), AcquisitionStage::getName, editing.getAcquisitionStages());</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static &lt;I, T&gt; void replaceOrAdd(List&lt;T&gt; data, Function&lt;T, I&gt; getId, List&lt;T&gt; collector) {
+<b class="fc">&nbsp;        for (T entry : data) {</b>
+<b class="fc">&nbsp;            I id = getId.apply(entry);</b>
+<b class="fc">&nbsp;            if (Objects.equals(id, Optional.empty())) {</b>
+<b class="fc">&nbsp;                continue;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            boolean add = true;</b>
+<b class="fc">&nbsp;            ListIterator&lt;T&gt; collectorIterator = collector.listIterator();</b>
+<b class="fc">&nbsp;            while (collectorIterator.hasNext()) {</b>
+<b class="fc">&nbsp;                if (Objects.equals(id, getId.apply(collectorIterator.next()))) {</b>
+<b class="nc">&nbsp;                    collectorIterator.set(entry);</b>
+<b class="nc">&nbsp;                    add = false;</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;            if (add) {</b>
+<b class="fc">&nbsp;                collector.add(entry);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an acquisition stage by name.
+&nbsp;     *
+&nbsp;     * @param name
+&nbsp;     *            name of the acquisition stage to be searched
+&nbsp;     * @return the acquisition stage, if there is one
+&nbsp;     */
+&nbsp;    public Optional&lt;AcquisitionStage&gt; getAcquisitionStage(String name) {
+<b class="fc">&nbsp;        if (editing == null) {</b>
+<b class="fc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return editing.getAcquisitionStage(name);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all acquisition stages defined in the rule set.
+&nbsp;     *
+&nbsp;     * @return the list of the acquisition stages
+&nbsp;     */
+&nbsp;    public List&lt;AcquisitionStage&gt; getAcquisitionStages() {
+<b class="nc">&nbsp;        if (editing == null) {</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return editing.getAcquisitionStages();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the default language of labels without a language in the ruleset.
+&nbsp;     * Defaults to English.
+&nbsp;     *
+&nbsp;     * @return the default language of labels without a language
+&nbsp;     */
+&nbsp;    public String getDefaultLang() {
+<b class="fc">&nbsp;        return lang == null ? &quot;en&quot; : lang;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a division based on its identification.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            Identification of the division to be searched
+&nbsp;     * @return the division, if there is one
+&nbsp;     */
+&nbsp;    public Optional&lt;Division&gt; getDivision(String id) {
+<b class="fc">&nbsp;        Optional&lt;Division&gt; optionalDivision = declaration.getDivisions().parallelStream()</b>
+<b class="fc">&nbsp;                .filter(division -&gt; division.getId().equals(id)).findFirst();</b>
+<b class="fc">&nbsp;        if (optionalDivision.isPresent()) {</b>
+<b class="fc">&nbsp;            return optionalDivision;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return this.getDivisions().parallelStream().flatMap(division -&gt; division.getDivisions().parallelStream())</b>
+<b class="fc">&nbsp;                    .filter(division -&gt; division.getId().equals(id)).findFirst();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a restriction rule for a division, if any.
+&nbsp;     *
+&nbsp;     * @param division
+&nbsp;     *            Division to search a restriction rule for
+&nbsp;     * @return the restriction rule if there is one
+&nbsp;     */
+&nbsp;    public Optional&lt;RestrictivePermit&gt; getDivisionRestriction(String division) {
+<b class="fc">&nbsp;        return restrictions.parallelStream()</b>
+<b class="fc">&nbsp;                .filter(restriction -&gt; division.equals(restriction.getDivision().orElse(null)))</b>
+<b class="fc">&nbsp;                .findFirst();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the total list of all divisions returned by the ruleset.
+&nbsp;     *
+&nbsp;     * @return all divisions of the rule set
+&nbsp;     */
+&nbsp;    public List&lt;Division&gt; getDivisions() {
+<b class="fc">&nbsp;        return declaration.getDivisions();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the divisions defined in this rule set.
+&nbsp;     *
+&nbsp;     * @param priorityList
+&nbsp;     *            weighted list of user-preferred display languages. Return
+&nbsp;     *            value of the function {@link LanguageRange#parse(String)}.
+&nbsp;     * @param all
+&nbsp;     *            whether to return all divisions, or only those capable to form
+&nbsp;     *            a process title
+&nbsp;     * @param subdivisionsByDate
+&nbsp;     *            whether subdivisions by date should be returned
+&nbsp;     * @return all outline elements as map from IDs to labels
+&nbsp;     */
+&nbsp;    public Map&lt;String, String&gt; getDivisions(List&lt;LanguageRange&gt; priorityList, boolean all, boolean subdivisionsByDate) {
+<b class="fc">&nbsp;        Collection&lt;DivisionDeclaration&gt; divisionDeclarations = getDivisionDeclarations(all, subdivisionsByDate);</b>
+<b class="fc">&nbsp;        return all || !divisionDeclarations.isEmpty() ? Labeled.listByTranslatedLabel(this,</b>
+&nbsp;            divisionDeclarations, DivisionDeclaration::getId, DivisionDeclaration::getLabels, priorityList)
+<b class="nc">&nbsp;                : getDivisions(priorityList, true, subdivisionsByDate);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all division declarations as a collection.
+&nbsp;     *
+&nbsp;     * @param all
+&nbsp;     *            if true, returns all division declarations; if false, only
+&nbsp;     *            returns division declarations with {@code processTitle}
+&nbsp;     *            attribute set, which indicates that they are candidates for
+&nbsp;     *            the logical root type, which typically corresponds to the
+&nbsp;     *            media format
+&nbsp;     * @param subdivisionsByDate
+&nbsp;     *            if subdivisions by date should be included
+&nbsp;     * @return a collection of division declarations
+&nbsp;     */
+&nbsp;    public Collection&lt;DivisionDeclaration&gt; getDivisionDeclarations(boolean all, boolean subdivisionsByDate) {
+<b class="fc">&nbsp;        Collection&lt;DivisionDeclaration&gt; divisionDeclarations = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Division division : declaration.getDivisions()) {</b>
+<b class="fc">&nbsp;            DivisionDeclaration divisionDeclaration = new DivisionDeclaration(this, division);</b>
+<b class="fc">&nbsp;            if (all || divisionDeclaration.getProcessTitle().isPresent()) {</b>
+<b class="fc">&nbsp;                divisionDeclarations.add(divisionDeclaration);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (subdivisionsByDate) {</b>
+<b class="fc">&nbsp;                for (DivisionDeclaration subdivision : divisionDeclaration.getAllowedDivisionDeclarations()) {</b>
+<b class="fc">&nbsp;                    if (all || subdivision.getProcessTitle().isPresent()) {</b>
+<b class="fc">&nbsp;                        divisionDeclarations.add(subdivision);</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return divisionDeclarations;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the filenames of the included rulesets.
+&nbsp;     *
+&nbsp;     * @return filenames of the included rulesets
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getIncludes() {
+<b class="fc">&nbsp;        return includes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a key from the ruleset, if defined.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            Identifier of the key
+&nbsp;     * @return a key, if any
+&nbsp;     */
+&nbsp;    public Optional&lt;Key&gt; getKey(String keyId) {
+<b class="fc">&nbsp;        return declaration.getKeys().parallelStream().filter(key -&gt; keyId.equals(key.getId())).findAny();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the restriction on a key, if there is one.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            key for which the restriction is to be given
+&nbsp;     * @return the restriction on a key, if any
+&nbsp;     */
+&nbsp;    public Optional&lt;RestrictivePermit&gt; getKeyRestriction(String keyId) {
+<b class="fc">&nbsp;        return restrictions.parallelStream().filter(restriction -&gt; keyId.equals(restriction.getKey().orElse(null)))</b>
+<b class="fc">&nbsp;                .findAny();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the complete list of all keys in this ruleset.
+&nbsp;     *
+&nbsp;     * @return all keys in this ruleset
+&nbsp;     */
+&nbsp;    public List&lt;Key&gt; getKeys() {
+<b class="fc">&nbsp;        if (Objects.isNull(keys)) {</b>
+<b class="fc">&nbsp;            keys = defineMetsDivKeys(declaration.getKeys());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return keys;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Hard define keys for METS attributes CONTENTIDS, ORDER, and ORDERLABEL.
+&nbsp;     *
+&nbsp;     * @param keys
+&nbsp;     *            keys defined in the ruleset
+&nbsp;     * @return completed definition
+&nbsp;     */
+&nbsp;    private static List&lt;Key&gt; defineMetsDivKeys(List&lt;Key&gt; keys) {
+<b class="fc">&nbsp;        defineKey(keys, &quot;CONTENTIDS&quot;, Type.ANY_URI, new Label(&quot;METS content ID&quot;), new Label(&quot;de&quot;, &quot;METS-Inhalts-ID&quot;));</b>
+<b class="fc">&nbsp;        defineKey(keys, &quot;LABEL&quot;, Type.STRING, new Label(&quot;METS label&quot;), new Label(&quot;de&quot;, &quot;METS-Beschriftung&quot;));</b>
+<b class="fc">&nbsp;        defineKey(keys, &quot;ORDERLABEL&quot;, Type.STRING, new Label(&quot;METS order label&quot;),</b>
+&nbsp;            new Label(&quot;de&quot;, &quot;METS-Anordnungsbeschriftung&quot;));
+<b class="fc">&nbsp;        return keys;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Hard defines a key which represents a METS attribute
+&nbsp;     * ({@code domain=&quot;mets:div&quot;}).
+&nbsp;     *
+&nbsp;     * @param keys
+&nbsp;     *            key definition list, may already contain the key. If so, the
+&nbsp;     *            key is updated (if necessary), else it is added.
+&nbsp;     * @param id
+&nbsp;     *            ID of the key
+&nbsp;     * @param type
+&nbsp;     *            type of the key
+&nbsp;     * @param labels
+&nbsp;     *            labels for the key if it is not defined
+&nbsp;     */
+&nbsp;    private static void defineKey(List&lt;Key&gt; keys, String id, Type type, Label... labels) {
+<b class="fc">&nbsp;        Optional&lt;Key&gt; definition = keys.parallelStream().filter(key -&gt; key.getId().equalsIgnoreCase(id)).findAny();</b>
+&nbsp;        Key key;
+<b class="fc">&nbsp;        if (definition.isPresent()) {</b>
+<b class="fc">&nbsp;            key = definition.get();</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            key = new Key();</b>
+<b class="fc">&nbsp;            Collections.addAll(key.getLabels(), labels);</b>
+<b class="fc">&nbsp;            keys.add(key);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        key.setId(id);</b>
+&nbsp;        /*
+&nbsp;         * If the key type is string (broadest type), but the required type is
+&nbsp;         * narrower, set it. Do not set it if the user explicitly defined a
+&nbsp;         * narrower type in the ruleset file.
+&nbsp;         */
+<b class="fc">&nbsp;        Type currentType = key.getType();</b>
+<b class="fc">&nbsp;        if (Objects.equals(currentType, Type.STRING) &amp;&amp; !Objects.equals(currentType, type)) {</b>
+<b class="fc">&nbsp;            key.setType(type);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        key.setDomain(Domain.METS_DIV);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the total list of all settings returned by the ruleset.
+&nbsp;     *
+&nbsp;     * @return all settings of the rule set
+&nbsp;     */
+&nbsp;    public List&lt;Setting&gt; getSettings() {
+<b class="fc">&nbsp;        if (editing == null) {</b>
+<b class="fc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return editing.getSettings();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the settings for an acquisition stage. That can be empty but it
+&nbsp;     * works.
+&nbsp;     *
+&nbsp;     * @param acquisitionStage
+&nbsp;     *            acquisition stage for which the settings is to be returned
+&nbsp;     * @return settings for acquisition stage
+&nbsp;     */
+&nbsp;    public Settings getSettings(String acquisitionStage) {
+<b class="fc">&nbsp;        Settings settings = new Settings(this.getSettings());</b>
+<b class="fc">&nbsp;        if (Objects.isNull(acquisitionStage)) {</b>
+<b class="nc">&nbsp;            return settings;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Optional&lt;AcquisitionStage&gt; optionalAcquisitionStage = this.getAcquisitionStage(acquisitionStage);</b>
+<b class="fc">&nbsp;        optionalAcquisitionStage.ifPresent(stage -&gt; settings.merge(stage.getSettings()));</b>
+<b class="fc">&nbsp;        return settings;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a fictitious metadata key for the rule set that contains all the
+&nbsp;     * keys of the rule set.
+&nbsp;     *
+&nbsp;     * @return a fictitious metadata key for the rule set
+&nbsp;     */
+&nbsp;    public Key getFictiousRulesetKey() {
+<b class="fc">&nbsp;        Key fictiousRulesetKey = new Key();</b>
+<b class="fc">&nbsp;        fictiousRulesetKey.setKeys(declaration.getKeys());</b>
+<b class="fc">&nbsp;        return fictiousRulesetKey;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a rule for a key. The rule may be empty.
+&nbsp;     *
+&nbsp;     * @param keyId
+&nbsp;     *            key for which a rule is to be returned
+&nbsp;     * @return rule for the key
+&nbsp;     */
+&nbsp;    public Rule getRuleForKey(String keyId) {
+<b class="fc">&nbsp;        return new Rule(this, this.getKeyRestriction(keyId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a rule for a division. The rule may be empty.
+&nbsp;     *
+&nbsp;     * @param division
+&nbsp;     *            division for which a rule is to be returned
+&nbsp;     * @return rule for division
+&nbsp;     */
+&nbsp;    public Rule getRuleForDivision(String division) {
+<b class="fc">&nbsp;        if (Objects.isNull(division)) {</b>
+<b class="nc">&nbsp;            return new Rule(this, this.getDivisionRestriction(&quot;&quot;));</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return new Rule(this, this.getDivisionRestriction(division));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

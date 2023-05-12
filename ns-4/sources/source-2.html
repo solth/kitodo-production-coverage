@@ -1,0 +1,178 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Domain</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataeditor.rulesetmanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: Domain (org.kitodo.api.dataeditor.rulesetmanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Domain</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataeditor.rulesetmanagement;
+&nbsp;
+&nbsp;import javax.xml.bind.annotation.XmlEnum;
+&nbsp;import javax.xml.bind.annotation.XmlEnumValue;
+&nbsp;
+&nbsp;/**
+&nbsp; * The domain determines in which of the six available containers the metadata
+&nbsp; * entry is stored. Thus, metadata can be roughly classified according to
+&nbsp; * semantic spheres.
+&nbsp; */
+<b class="fc">&nbsp;@XmlEnum(String.class)</b>
+&nbsp;public enum Domain {
+&nbsp;    /**
+&nbsp;     * Metadata in this domain is primarily descriptive of the digital
+&nbsp;     * representation of the cultural work. For obvious reasons, this is in part
+&nbsp;     * identical to the description of the physical template from which the
+&nbsp;     * digital representation was created by digital scanning techniques. But
+&nbsp;     * this is really (primarily) about the digital representation, while
+&nbsp;     * information on the actual cultural work is recorded under {@code SOURCE}.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;description&quot;)</b>
+&nbsp;    DESCRIPTION,
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata in this domain describes the history of the digital
+&nbsp;     * representation of the cultural work. Here, for example, information about
+&nbsp;     * conversion processes can be made, for example, if an originally used
+&nbsp;     * storage format was converted into another.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;digitalProvenance&quot;)</b>
+&nbsp;    DIGITAL_PROVENANCE,
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata in this domain describes permissions and legal restrictions
+&nbsp;     * regarding the use of the digital resource.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;rights&quot;)</b>
+&nbsp;    RIGHTS,
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata in this domain describes the physical, digitized cultural work.
+&nbsp;     * A whole range of information here can be identical to the description
+&nbsp;     * domain, for example the title and the creator. But it can also be
+&nbsp;     * metadata, which refers exclusively to the physical work, such as the
+&nbsp;     * exact location, materials or weight.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;source&quot;)</b>
+&nbsp;    SOURCE,
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata in this domain is for technical purposes, such as references to
+&nbsp;     * servers in the world&#39;s spider web, or billing information.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;technical&quot;)</b>
+&nbsp;    TECHNICAL,
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata in this domain is stored outside the actual metadata container
+&nbsp;     * directly in the description format. This area may only accept certain
+&nbsp;     * fields specified by the format.
+&nbsp;     */
+<b class="fc">&nbsp;    @XmlEnumValue(&quot;mets:div&quot;)</b>
+&nbsp;    METS_DIV
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

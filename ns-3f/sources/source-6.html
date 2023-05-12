@@ -1,0 +1,382 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > EditPagesDialog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: EditPagesDialog (org.kitodo.production.forms.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EditPagesDialog</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    5,6%
+  </span>
+  <span class="absValue">
+    (1/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    5,7%
+  </span>
+  <span class="absValue">
+    (4/70)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.dataeditor;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.stream.Stream;
+&nbsp;
+&nbsp;import javax.faces.model.SelectItem;
+&nbsp;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.View;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;
+&nbsp;public class EditPagesDialog {
+&nbsp;
+&nbsp;    private final DataEditorForm dataEditor;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Views on physical divisions that are not associated with this structure.
+&nbsp;     */
+&nbsp;    private List&lt;SelectItem&gt; paginationSelectionItems;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Views on physical divisions that are not associated with this structure selected
+&nbsp;     * by the user to add them.
+&nbsp;     */
+<b class="fc">&nbsp;    private List&lt;Integer&gt; paginationSelectionSelectedItems = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Views on physical divisions that are associated with this structure.
+&nbsp;     */
+&nbsp;    private List&lt;SelectItem&gt; paginationSubSelectionItems;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Views on physical divisions that are associated with this structure selected by
+&nbsp;     * the user to remove them.
+&nbsp;     */
+<b class="fc">&nbsp;    private List&lt;Integer&gt; paginationSubSelectionSelectedItems = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The first of the views to be assigned.
+&nbsp;     */
+&nbsp;    private Integer selectFirstPageSelectedItem;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The last of the views to be assigned.
+&nbsp;     */
+&nbsp;    private Integer selectLastPageSelectedItem;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The totality of views.
+&nbsp;     */
+&nbsp;    private List&lt;SelectItem&gt; selectPageItems;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     *
+&nbsp;     * @param dataEditor
+&nbsp;     *          DataEditorForm of this EditPagesDialog
+&nbsp;     */
+<b class="fc">&nbsp;    EditPagesDialog(DataEditorForm dataEditor) {</b>
+<b class="fc">&nbsp;        this.dataEditor = dataEditor;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked if the user clicks on the add page btn command
+&nbsp;     * button.
+&nbsp;     */
+&nbsp;    public void addPage() {
+<b class="nc">&nbsp;        Optional&lt;LogicalDivision&gt; selectedStructure = dataEditor.getSelectedStructure();</b>
+<b class="nc">&nbsp;        if (selectedStructure.isPresent()) {</b>
+<b class="nc">&nbsp;            for (View viewToAdd : getViewsToAdd(paginationSelectionSelectedItems)) {</b>
+<b class="nc">&nbsp;                dataEditor.assignView(selectedStructure.get(), viewToAdd, -1);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            dataEditor.refreshStructurePanel();</b>
+<b class="nc">&nbsp;            prepare();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected items of the paginationSelection select menu.
+&nbsp;     *
+&nbsp;     * @return the selected items of the paginationSelection
+&nbsp;     */
+&nbsp;    public List&lt;Integer&gt; getPaginationSelectionSelectedItems() {
+<b class="nc">&nbsp;        return paginationSelectionSelectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected items of the paginationSelection select menu.
+&nbsp;     *
+&nbsp;     * @param paginationSelectionSelectedItems
+&nbsp;     *            selected items to set
+&nbsp;     */
+&nbsp;    public void setPaginationSelectionSelectedItems(List&lt;Integer&gt; paginationSelectionSelectedItems) {
+<b class="nc">&nbsp;        this.paginationSelectionSelectedItems = paginationSelectionSelectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected items of the paginationSubSelection select menu.
+&nbsp;     *
+&nbsp;     * @return the selected items of the paginationSubSelection
+&nbsp;     */
+&nbsp;    public List&lt;Integer&gt; getPaginationSubSelectionSelectedItems() {
+<b class="nc">&nbsp;        return paginationSubSelectionSelectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected items of the paginationSubSelection select menu.
+&nbsp;     *
+&nbsp;     * @param paginationSubSelectionSelectedItems
+&nbsp;     *            selected items to set
+&nbsp;     */
+&nbsp;    public void setPaginationSubSelectionSelectedItems(List&lt;Integer&gt; paginationSubSelectionSelectedItems) {
+<b class="nc">&nbsp;        this.paginationSubSelectionSelectedItems = paginationSubSelectionSelectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the selectFirstPage drop-down menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the selectFirstPage
+&nbsp;     */
+&nbsp;    public Integer getSelectFirstPageSelectedItem() {
+<b class="nc">&nbsp;        return selectFirstPageSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the selectFirstPage drop-down menu.
+&nbsp;     *
+&nbsp;     * @param selectFirstPageSelectedItem
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setSelectFirstPageSelectedItem(Integer selectFirstPageSelectedItem) {
+<b class="nc">&nbsp;        this.selectFirstPageSelectedItem = selectFirstPageSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected item of the selectLastPage drop-down menu.
+&nbsp;     *
+&nbsp;     * @return the selected item of the selectLastPage
+&nbsp;     */
+&nbsp;    public Integer getSelectLastPageSelectedItem() {
+<b class="nc">&nbsp;        return selectLastPageSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected item of the selectLastPage drop-down menu.
+&nbsp;     *
+&nbsp;     * @param selectLastPageSelectedItem
+&nbsp;     *            selected item to set
+&nbsp;     */
+&nbsp;    public void setSelectLastPageSelectedItem(Integer selectLastPageSelectedItem) {
+<b class="nc">&nbsp;        this.selectLastPageSelectedItem = selectLastPageSelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items of the paginationSelection select menu.
+&nbsp;     *
+&nbsp;     * @return the items of the paginationSelection
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getPaginationSelectionItems() {
+<b class="nc">&nbsp;        return paginationSelectionItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items of the paginationSubSelection select menu.
+&nbsp;     *
+&nbsp;     * @return the items of the paginationSubSelection
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getPaginationSubSelectionItems() {
+<b class="nc">&nbsp;        return paginationSubSelectionItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items of the selectFirstPage and selectLastPage drop-down
+&nbsp;     * menus.
+&nbsp;     *
+&nbsp;     * @return the items of the selectFirstPage and selectLastPage
+&nbsp;     */
+&nbsp;    public List&lt;SelectItem&gt; getSelectPageItems() {
+<b class="nc">&nbsp;        return selectPageItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    List&lt;View&gt; getViewsToAdd(int firstPage, int lastPage) {
+<b class="nc">&nbsp;        boolean forward = firstPage &lt;= lastPage;</b>
+<b class="nc">&nbsp;        List&lt;Integer&gt; pages = Stream.iterate(firstPage, i -&gt; forward ? i + 1 : i - 1)</b>
+<b class="nc">&nbsp;                .limit(Math.abs(firstPage - lastPage) + 1).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        return getViewsToAdd(pages);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;View&gt; getViewsToAdd(List&lt;Integer&gt; pages) {
+<b class="nc">&nbsp;        return pages.parallelStream()</b>
+<b class="nc">&nbsp;                .map(dataEditor.getWorkpiece().getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted()::get)</b>
+<b class="nc">&nbsp;                .map(MetadataEditor::getFirstViewForPhysicalDivision)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked if the user clicks on the set page start and end
+&nbsp;     * btn command button.
+&nbsp;     */
+&nbsp;    public void setPageStartAndEnd() {
+<b class="nc">&nbsp;        Optional&lt;LogicalDivision&gt; selectedStructure = dataEditor.getSelectedStructure();</b>
+<b class="nc">&nbsp;        if (selectedStructure.isPresent()) {</b>
+<b class="nc">&nbsp;            for (View viewToAdd : getViewsToAdd(selectFirstPageSelectedItem, selectLastPageSelectedItem)) {</b>
+<b class="nc">&nbsp;                dataEditor.assignView(selectedStructure.get(), viewToAdd, -1);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            dataEditor.refreshStructurePanel();</b>
+<b class="nc">&nbsp;            prepare();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    void prepare() {
+&nbsp;        // refresh selectable items
+<b class="nc">&nbsp;        selectPageItems = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        paginationSubSelectionItems = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        paginationSelectionItems = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;PhysicalDivision&gt; physicalDivisions = dataEditor.getWorkpiece().getAllPhysicalDivisionChildrenFilteredByTypePageAndSorted();</b>
+<b class="nc">&nbsp;        int capacity = (int) Math.ceil(physicalDivisions.size() / .75);</b>
+<b class="nc">&nbsp;        Set&lt;Integer&gt; assigneds = new HashSet&lt;&gt;(capacity);</b>
+<b class="nc">&nbsp;        Set&lt;Integer&gt; unassigneds = new HashSet&lt;&gt;(capacity);</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; physicalDivisions.size(); i++) {</b>
+<b class="nc">&nbsp;            PhysicalDivision physicalDivision = physicalDivisions.get(i);</b>
+<b class="nc">&nbsp;            View view = MetadataEditor.createUnrestrictedViewOn(physicalDivision);</b>
+<b class="nc">&nbsp;            String label = Objects.isNull(physicalDivision.getOrderlabel()) ? Integer.toString(physicalDivision.getOrder())</b>
+<b class="nc">&nbsp;                    : physicalDivision.getOrder() + &quot; : &quot; + physicalDivision.getOrderlabel();</b>
+<b class="nc">&nbsp;            Integer id = i;</b>
+<b class="nc">&nbsp;            SelectItem selectItem = new SelectItem(id, label);</b>
+<b class="nc">&nbsp;            selectPageItems.add(selectItem);</b>
+<b class="nc">&nbsp;            Optional&lt;LogicalDivision&gt; selectedStructure = dataEditor.getSelectedStructure();</b>
+<b class="nc">&nbsp;            boolean assigned = selectedStructure.isPresent()</b>
+<b class="nc">&nbsp;                    &amp;&amp; selectedStructure.get().getViews().contains(view);</b>
+<b class="nc">&nbsp;            (assigned ? paginationSubSelectionItems : paginationSelectionItems).add(selectItem);</b>
+<b class="nc">&nbsp;            (assigned ? assigneds : unassigneds).add(id);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // refresh selections
+<b class="nc">&nbsp;        if (Objects.isNull(selectFirstPageSelectedItem) &amp;&amp; !selectPageItems.isEmpty()) {</b>
+<b class="nc">&nbsp;            selectFirstPageSelectedItem = (Integer) selectPageItems.get(0).getValue();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.isNull(selectFirstPageSelectedItem) &amp;&amp; !selectPageItems.isEmpty()) {</b>
+<b class="nc">&nbsp;            selectFirstPageSelectedItem = (Integer) selectPageItems.get(selectPageItems.size() - 1).getValue();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        paginationSubSelectionSelectedItems.retainAll(assigneds);</b>
+<b class="nc">&nbsp;        paginationSelectionSelectedItems.retainAll(unassigneds);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked if the user clicks on the remove page btn command
+&nbsp;     * button.
+&nbsp;     */
+&nbsp;    public void removePage() {
+<b class="nc">&nbsp;        Optional&lt;LogicalDivision&gt; selectedStructure = dataEditor.getSelectedStructure();</b>
+<b class="nc">&nbsp;        if (selectedStructure.isPresent()) {</b>
+<b class="nc">&nbsp;            for (View viewToRemove : getViewsToAdd(paginationSubSelectionSelectedItems)) {</b>
+<b class="nc">&nbsp;                dataEditor.unassignView(selectedStructure.get(), viewToRemove, false);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            dataEditor.refreshStructurePanel();</b>
+<b class="nc">&nbsp;            prepare();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

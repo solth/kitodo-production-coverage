@@ -1,0 +1,179 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileResult</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.ocr</a>
+</div>
+
+<h1>Coverage Summary for Class: FileResult (org.kitodo.api.ocr)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileResult</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.ocr;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;
+&nbsp;/**
+&nbsp; * The result of the file generation.
+&nbsp; */
+&nbsp;public class FileResult {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The state of the Result.
+&nbsp;     */
+&nbsp;    private State state;
+&nbsp;    /**
+&nbsp;     * The uri of the inputfile.
+&nbsp;     */
+&nbsp;    private URI inputFileUri;
+&nbsp;    /**
+&nbsp;     * The uri of the outputfile.
+&nbsp;     */
+&nbsp;    private URI outputFileUri;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The Constructor.
+&nbsp;     * 
+&nbsp;     * @param state
+&nbsp;     *            The given state
+&nbsp;     * @param inputFileUri
+&nbsp;     *            the given input file
+&nbsp;     * @param outputFileUri
+&nbsp;     *            the given outputfile
+&nbsp;     */
+<b class="nc">&nbsp;    public FileResult(State state, URI inputFileUri, URI outputFileUri) {</b>
+<b class="nc">&nbsp;        this.state = state;</b>
+<b class="nc">&nbsp;        this.inputFileUri = inputFileUri;</b>
+<b class="nc">&nbsp;        this.outputFileUri = outputFileUri;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the state.
+&nbsp;     * 
+&nbsp;     * @return the state
+&nbsp;     */
+&nbsp;    public State getState() {
+<b class="nc">&nbsp;        return state;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the inputFileUri.
+&nbsp;     * 
+&nbsp;     * @return the inout file uri
+&nbsp;     */
+&nbsp;    public URI getInputFileUri() {
+<b class="nc">&nbsp;        return inputFileUri;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the output file uri.
+&nbsp;     * 
+&nbsp;     * @return the output file uri.
+&nbsp;     */
+&nbsp;    public URI getOutputFileUri() {
+<b class="nc">&nbsp;        return outputFileUri;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

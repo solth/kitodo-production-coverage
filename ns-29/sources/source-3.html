@@ -1,0 +1,200 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Condition</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset.xml</a>
+</div>
+
+<h1>Coverage Summary for Class: Condition (org.kitodo.dataeditor.ruleset.xml)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Condition</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset.xml;
+&nbsp;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.xml.bind.annotation.XmlAccessType;
+&nbsp;import javax.xml.bind.annotation.XmlAccessorType;
+&nbsp;import javax.xml.bind.annotation.XmlAttribute;
+&nbsp;import javax.xml.bind.annotation.XmlElement;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@code &lt;condition&gt;}, which can be defined inside a {@code &lt;restriction&gt;}
+&nbsp; * and contains conditional {@code &lt;permit&gt;} rules, which only apply if the
+&nbsp; * condition is met.
+&nbsp; */
+&nbsp;@XmlAccessorType(XmlAccessType.FIELD)
+<b class="nc">&nbsp;public class Condition implements ConditionsMapInterface {</b>
+&nbsp;    /**
+&nbsp;     * Key to which this (restriction) rule applies, or key that is allowed (for
+&nbsp;     * permit rule inside restriction rule).
+&nbsp;     */
+&nbsp;    @XmlAttribute(required = true)
+&nbsp;    private String key;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Value that the metadata entry must have for the condition to apply.
+&nbsp;     */
+&nbsp;    @XmlAttribute(required = true)
+&nbsp;    private String equals;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * List of conditional permits.
+&nbsp;     */
+<b class="nc">&nbsp;    @XmlElement(name = &quot;permit&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)</b>
+&nbsp;    private List&lt;RestrictivePermit&gt; permits = new LinkedList&lt;&gt;();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * List of (nested) conditions.
+&nbsp;     */
+<b class="nc">&nbsp;    @XmlElement(name = &quot;condition&quot;, namespace = &quot;http://names.kitodo.org/ruleset/v2&quot;)</b>
+&nbsp;    private List&lt;Condition&gt; conditions = new LinkedList&lt;&gt;();
+&nbsp;
+&nbsp;    private transient ConditionsMap conditionsMap;
+&nbsp;
+&nbsp;    public String getKey() {
+<b class="nc">&nbsp;        return key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setKey(String key) {
+<b class="nc">&nbsp;        this.key = key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getEquals() {
+<b class="nc">&nbsp;        return equals;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setEquals(String equals) {
+<b class="nc">&nbsp;        this.equals = equals;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;RestrictivePermit&gt; getPermits() {
+<b class="nc">&nbsp;        return permits;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Condition getCondition(String key, String value) {
+<b class="nc">&nbsp;        return conditionsMap.getCondition(key, value);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Iterable&lt;String&gt; getConditionKeys() {
+<b class="nc">&nbsp;        if (Objects.isNull(conditionsMap)) {</b>
+<b class="nc">&nbsp;            conditionsMap = new ConditionsMap(conditions);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return conditionsMap.keySet();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the (modifiable) conditions list. Used in rule merges.
+&nbsp;     * @return the conditions list
+&nbsp;     */
+&nbsp;    public List&lt;Condition&gt; getConditions() {
+<b class="nc">&nbsp;        return conditions;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

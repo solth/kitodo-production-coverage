@@ -1,0 +1,384 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CourseToGerman</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model.bibliography.course</a>
+</div>
+
+<h1>Coverage Summary for Class: CourseToGerman (org.kitodo.production.model.bibliography.course)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CourseToGerman</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/116)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model.bibliography.course;
+&nbsp;
+&nbsp;import java.time.DayOfWeek;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.TreeSet;
+&nbsp;
+&nbsp;import org.kitodo.production.helper.DateUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * The static class CourseToGerman provides a toString() method to convert a
+&nbsp; * course of appearance into a verbal description in German language.
+&nbsp; */
+&nbsp;public class CourseToGerman {
+&nbsp;    /**
+&nbsp;     * Days of week’s names in German.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Joda time’s days of week are 1-based, where 1 references Monday through 7
+&nbsp;     * references Sunday. Therefore the “null” in first place.
+&nbsp;     */
+<b class="nc">&nbsp;    private static final String[] DAYS_OF_WEEK_NAMES = new String[] {null, &quot;Montag&quot;, &quot;Dienstag&quot;, &quot;Mittwoch&quot;,</b>
+&nbsp;                                                                     &quot;Donnerstag&quot;, &quot;Freitag&quot;, &quot;Samstag&quot;, &quot;Sonntag&quot; };
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Month’s names in German.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Joda time’s months are 1-based, therefore the “null” in first place.
+&nbsp;     */
+<b class="nc">&nbsp;    private static final String[] MONTH_NAMES = new String[] {null, &quot;Januar&quot;, &quot;Februar&quot;, &quot;März&quot;, &quot;April&quot;, &quot;Mai&quot;, &quot;Juni&quot;,</b>
+&nbsp;                                                              &quot;Juli&quot;, &quot;August&quot;, &quot;September&quot;, &quot;Oktober&quot;, &quot;November&quot;,
+&nbsp;                                                              &quot;Dezember&quot; };
+&nbsp;
+&nbsp;    private CourseToGerman() {
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a verbal description of the course of
+&nbsp;     * appearance in German.
+&nbsp;     *
+&nbsp;     * @return Verbal description of the course in German
+&nbsp;     */
+&nbsp;    public static List&lt;String&gt; asReadableText(Course course) {
+<b class="nc">&nbsp;        List&lt;String&gt; readableText = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (course.isEmpty()) {</b>
+<b class="nc">&nbsp;            return readableText;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Iterator&lt;Block&gt; blocks = course.iterator();</b>
+<b class="nc">&nbsp;        boolean hasPreviousBlock = false;</b>
+&nbsp;        do {
+<b class="nc">&nbsp;            Block block = blocks.next();</b>
+<b class="nc">&nbsp;            readableText.add(titleToString(block, hasPreviousBlock));</b>
+<b class="nc">&nbsp;            for (Issue issue : block.getIssues()) {</b>
+<b class="nc">&nbsp;                String irregularities = irregularitiesToString(issue);</b>
+<b class="nc">&nbsp;                if (irregularities != null) {</b>
+<b class="nc">&nbsp;                    readableText.add(irregularities);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            hasPreviousBlock = true;</b>
+<b class="nc">&nbsp;        } while (blocks.hasNext());</b>
+<b class="nc">&nbsp;        return readableText;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Formulates the regular appearance of a block
+&nbsp;     * in German language.
+&nbsp;     *
+&nbsp;     * @param block
+&nbsp;     *            Titel to formulate
+&nbsp;     * @param subsequentBlock
+&nbsp;     *            false for the first block, true otherwise
+&nbsp;     */
+&nbsp;    private static String titleToString(Block block, boolean subsequentBlock) {
+<b class="nc">&nbsp;        StringBuilder result = new StringBuilder(500);</b>
+<b class="nc">&nbsp;        if (!subsequentBlock) {</b>
+<b class="nc">&nbsp;            result.append(&quot;Die Zeitung erschien vom &quot;);</b>
+<b class="nc">&nbsp;            appendDate(result, block.getFirstAppearance());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            result.append(&quot;Ab dem &quot;);</b>
+<b class="nc">&nbsp;            appendDate(result, block.getFirstAppearance());</b>
+<b class="nc">&nbsp;            result.append(&quot; erschien die Zeitung unter dem gleichen Titel&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        result.append(&quot; bis zum &quot;);</b>
+<b class="nc">&nbsp;        appendDate(result, block.getLastAppearance());</b>
+<b class="nc">&nbsp;        result.append(&quot; regelmäßig &quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        result.append(iterateOverIssues(block, result));</b>
+<b class="nc">&nbsp;        return result.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String iterateOverIssues(Block block, StringBuilder result) {
+<b class="nc">&nbsp;        int currentIssuesSize = block.getIssues().size();</b>
+<b class="nc">&nbsp;        Iterator&lt;Issue&gt; issueIterator = block.getIssues().iterator();</b>
+<b class="nc">&nbsp;        for (int issueIndex = 0; issueIndex &lt; currentIssuesSize; issueIndex++) {</b>
+<b class="nc">&nbsp;            Issue issue = issueIterator.next();</b>
+<b class="nc">&nbsp;            result.append(&quot;an allen &quot;);</b>
+<b class="nc">&nbsp;            int daysOfWeekCount = 0;</b>
+<b class="nc">&nbsp;            for (int dayOfWeek = DayOfWeek.MONDAY.getValue(); dayOfWeek &lt;= DayOfWeek.SUNDAY.getValue(); dayOfWeek++) {</b>
+<b class="nc">&nbsp;                if (issue.isDayOfWeek(dayOfWeek)) {</b>
+<b class="nc">&nbsp;                    result.append(DAYS_OF_WEEK_NAMES[dayOfWeek]);</b>
+<b class="nc">&nbsp;                    result.append(&quot;en&quot;);</b>
+<b class="nc">&nbsp;                    daysOfWeekCount++;</b>
+<b class="nc">&nbsp;                    if (daysOfWeekCount &lt; issue.getDaysOfWeek().size() - 1) {</b>
+<b class="nc">&nbsp;                        result.append(&quot;, &quot;);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    if (daysOfWeekCount == issue.getDaysOfWeek().size() - 1) {</b>
+<b class="nc">&nbsp;                        result.append(&quot; und &quot;);</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            result.append(&quot; als &quot;);</b>
+<b class="nc">&nbsp;            result.append(issue.getHeading());</b>
+<b class="nc">&nbsp;            if (issueIndex &lt; currentIssuesSize - 2) {</b>
+<b class="nc">&nbsp;                result.append(&quot;, &quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (issueIndex == currentIssuesSize - 2) {</b>
+<b class="nc">&nbsp;                result.append(&quot; sowie &quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (issueIndex == currentIssuesSize - 1) {</b>
+<b class="nc">&nbsp;                result.append(&quot;.&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return result.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Formulates the irregularities of a
+&nbsp;     * given issue in German language.
+&nbsp;     *
+&nbsp;     * @param issue
+&nbsp;     *            issues whose irregularities shall be formulated
+&nbsp;     */
+&nbsp;    private static String irregularitiesToString(Issue issue) {
+<b class="nc">&nbsp;        int additionsSize = issue.getAdditions().size();</b>
+<b class="nc">&nbsp;        int exclusionsSize = issue.getExclusions().size();</b>
+<b class="nc">&nbsp;        StringBuilder buffer = new StringBuilder((int) (Math.ceil(10.907 * (additionsSize + exclusionsSize)) + 500));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (additionsSize == 0 &amp;&amp; exclusionsSize == 0) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        buffer.append(&quot;Die Ausgabe „&quot;);</b>
+<b class="nc">&nbsp;        buffer.append(issue.getHeading());</b>
+<b class="nc">&nbsp;        buffer.append(&quot;“ erschien &quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (exclusionsSize &gt; 0) {</b>
+<b class="nc">&nbsp;            appendManyDates(buffer, issue.getExclusions(), false);</b>
+<b class="nc">&nbsp;            if (additionsSize &gt; 0) {</b>
+<b class="nc">&nbsp;                buffer.append(&quot;, dafür jedoch &quot;);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        if (additionsSize &gt; 0) {</b>
+<b class="nc">&nbsp;            appendManyDates(buffer, issue.getAdditions(), true);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        buffer.append(&quot;.&quot;);</b>
+<b class="nc">&nbsp;        return buffer.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts a lot of date objects into readable
+&nbsp;     * text in German language.
+&nbsp;     *
+&nbsp;     * @param buffer
+&nbsp;     *            StringBuilder to write to
+&nbsp;     * @param dates
+&nbsp;     *            Set of dates to convert to text
+&nbsp;     * @param signum
+&nbsp;     *            sign, i.e. true for additions, false for exclusions
+&nbsp;     * @throws NoSuchElementException
+&nbsp;     *             if dates has no elements
+&nbsp;     * @throws NullPointerException
+&nbsp;     *             if buffer or dates is null
+&nbsp;     */
+&nbsp;    private static void appendManyDates(StringBuilder buffer, Set&lt;LocalDate&gt; dates, boolean signum) {
+<b class="nc">&nbsp;        if (signum) {</b>
+<b class="nc">&nbsp;            buffer.append(&quot;zusätzlich &quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            buffer.append(&quot;nicht &quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        TreeSet&lt;LocalDate&gt; orderedDates = dates instanceof TreeSet ? (TreeSet&lt;LocalDate&gt;) dates : new TreeSet&lt;&gt;(dates);</b>
+&nbsp;
+&nbsp;        //TODO: there is something wrong with this whole iterator - investigate it
+<b class="nc">&nbsp;        Iterator&lt;LocalDate&gt; datesIterator = orderedDates.iterator();</b>
+&nbsp;
+<b class="nc">&nbsp;        LocalDate current = datesIterator.next();</b>
+<b class="nc">&nbsp;        LocalDate next = datesIterator.hasNext() ? datesIterator.next() : null;</b>
+<b class="nc">&nbsp;        LocalDate overNext = datesIterator.hasNext() ? datesIterator.next() : null;</b>
+<b class="nc">&nbsp;        int previousYear = Integer.MIN_VALUE;</b>
+&nbsp;        boolean nextInSameMonth;
+<b class="nc">&nbsp;        boolean nextBothInSameMonth = next != null &amp;&amp; DateUtils.sameMonth(current, next);</b>
+<b class="nc">&nbsp;        int lastMonthOfYear = DateUtils.lastMonthForYear(orderedDates, current.getYear());</b>
+&nbsp;
+&nbsp;        do {
+<b class="nc">&nbsp;            nextInSameMonth = nextBothInSameMonth;</b>
+<b class="nc">&nbsp;            nextBothInSameMonth = DateUtils.sameMonth(next, overNext);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (previousYear != current.getYear()) {</b>
+<b class="nc">&nbsp;                buffer.append(&quot;am &quot;);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            buffer.append(current.getDayOfMonth());</b>
+<b class="nc">&nbsp;            buffer.append(&#39;.&#39;);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (!nextInSameMonth) {</b>
+<b class="nc">&nbsp;                buffer.append(&#39; &#39;);</b>
+<b class="nc">&nbsp;                buffer.append(MONTH_NAMES[current.getMonthValue()]);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            lastMonthOfYear = handleLastMonthOfYear(buffer, signum, orderedDates, current, next,</b>
+&nbsp;                    nextInSameMonth, nextBothInSameMonth, lastMonthOfYear);
+&nbsp;
+<b class="nc">&nbsp;            previousYear = current.getYear();</b>
+<b class="nc">&nbsp;            current = next;</b>
+<b class="nc">&nbsp;            next = overNext;</b>
+<b class="nc">&nbsp;            overNext = datesIterator.hasNext() ? datesIterator.next() : null;</b>
+<b class="nc">&nbsp;        } while (current != null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static int handleLastMonthOfYear(
+&nbsp;        StringBuilder buffer, boolean signum, TreeSet&lt;LocalDate&gt; orderedDates,
+&nbsp;        LocalDate current, LocalDate next, boolean nextInSameMonth, boolean nextBothInSameMonth, int lastMonthOfYear) {
+&nbsp;
+<b class="nc">&nbsp;        if (!DateUtils.sameYear(current, next)) {</b>
+<b class="nc">&nbsp;            buffer.append(&#39; &#39;);</b>
+<b class="nc">&nbsp;            buffer.append(current.getYear());</b>
+<b class="nc">&nbsp;            if (next != null) {</b>
+<b class="nc">&nbsp;                if (!DateUtils.sameYear(next, orderedDates.last())) {</b>
+<b class="nc">&nbsp;                    buffer.append(&quot;, &quot;);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    buffer.append(&quot; und ebenfalls &quot;);</b>
+<b class="nc">&nbsp;                    if (!signum) {</b>
+<b class="nc">&nbsp;                        buffer.append(&quot;nicht &quot;);</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="nc">&nbsp;                lastMonthOfYear = DateUtils.lastMonthForYear(orderedDates, next.getYear());</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else if (next != null) {</b>
+<b class="nc">&nbsp;            if (nextInSameMonth &amp;&amp; nextBothInSameMonth</b>
+<b class="nc">&nbsp;                    || !nextInSameMonth &amp;&amp; next.getMonthValue() != lastMonthOfYear) {</b>
+<b class="nc">&nbsp;                buffer.append(&quot;, &quot;);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                buffer.append(&quot; und &quot;);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return lastMonthOfYear;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Writes a date to the buffer.
+&nbsp;     *
+&nbsp;     * @param buffer
+&nbsp;     *            Buffer to write to
+&nbsp;     * @param date
+&nbsp;     *            Date to write
+&nbsp;     */
+&nbsp;    private static void appendDate(StringBuilder buffer, LocalDate date) {
+<b class="nc">&nbsp;        buffer.append(date.getDayOfMonth());</b>
+<b class="nc">&nbsp;        buffer.append(&quot;. &quot;);</b>
+<b class="nc">&nbsp;        buffer.append(MONTH_NAMES[date.getMonthValue()]);</b>
+<b class="nc">&nbsp;        buffer.append(&#39; &#39;);</b>
+<b class="nc">&nbsp;        buffer.append(date.getYear());</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

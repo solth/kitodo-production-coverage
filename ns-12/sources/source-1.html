@@ -1,0 +1,187 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Config</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.config</a>
+</div>
+
+<h1>Coverage Summary for Class: Config (org.kitodo.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Config</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (20/25)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.config;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.concurrent.ConcurrentHashMap;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.AbstractConfiguration;
+&nbsp;import org.apache.commons.configuration.ConfigurationException;
+&nbsp;import org.apache.commons.configuration.ConfigurationUtils;
+&nbsp;import org.apache.commons.configuration.ConversionException;
+&nbsp;import org.apache.commons.configuration.FileSystem;
+&nbsp;import org.apache.commons.configuration.PropertiesConfiguration;
+&nbsp;import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+&nbsp;import org.apache.logging.log4j.Level;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;
+<b class="nc">&nbsp;public abstract class Config {</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(Config.class);</b>
+<b class="fc">&nbsp;    private static final Map&lt;String, PropertiesConfiguration&gt; configMap = new ConcurrentHashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the configuration.
+&nbsp;     *
+&nbsp;     * @param configFile
+&nbsp;     *            file with configuration
+&nbsp;     * @return the configuration
+&nbsp;     */
+&nbsp;    static PropertiesConfiguration getConfig(String configFile) {
+<b class="fc">&nbsp;        if (!configMap.containsKey(configFile)) {</b>
+<b class="fc">&nbsp;            synchronized (Config.class) {</b>
+<b class="fc">&nbsp;                if (!configMap.containsKey(configFile)) {</b>
+&nbsp;                    PropertiesConfiguration initialized;
+<b class="fc">&nbsp;                    AbstractConfiguration.setDefaultListDelimiter(&#39;&amp;&#39;);</b>
+&nbsp;                    try {
+<b class="fc">&nbsp;                        initialized = new PropertiesConfiguration(configFile);</b>
+<b class="fc">&nbsp;                        if (logger.isDebugEnabled()) {</b>
+<b class="fc">&nbsp;                            logger.debug(&quot;Using configuration from &quot;</b>
+<b class="fc">&nbsp;                                    + ConfigurationUtils.locate(FileSystem.getDefaultFileSystem(), null, configFile));</b>
+&nbsp;                        }
+<b class="fc">&nbsp;                    } catch (ConfigurationException e) {</b>
+<b class="fc">&nbsp;                        logger.warn(&quot;Loading of {} failed. Trying to start with empty configuration.&quot;, configFile, e);</b>
+<b class="fc">&nbsp;                        initialized = new PropertiesConfiguration();</b>
+<b class="fc">&nbsp;                    }</b>
+<b class="fc">&nbsp;                    initialized.setListDelimiter(&#39;&amp;&#39;);</b>
+<b class="fc">&nbsp;                    initialized.setReloadingStrategy(new FileChangedReloadingStrategy());</b>
+<b class="fc">&nbsp;                    initialized.setThrowExceptionOnMissing(true);</b>
+<b class="fc">&nbsp;                    configMap.put(configFile, initialized);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return configMap.get(configFile);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Logs a conversion exception with a helpful error message.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            whose value could not be converted
+&nbsp;     * @param failedClass
+&nbsp;     *            class to convert the value to
+&nbsp;     * @param occurred
+&nbsp;     *            conversion exception occurred
+&nbsp;     * @param usedValue
+&nbsp;     *            default value being used
+&nbsp;     */
+&nbsp;    static &lt;T&gt; void logConversionException(String configFile, String key, Class&lt;T&gt; failedClass, ConversionException occurred,
+&nbsp;                                                   T usedValue) {
+<b class="nc">&nbsp;        logger.catching(Level.DEBUG, occurred);</b>
+<b class="nc">&nbsp;        final String message = &quot;Configuration found in {} for key {} is defined as \&quot;{}\&quot;, but &quot;</b>
+<b class="nc">&nbsp;                .concat(&quot;cannot be converted to {}! Using the default value of \&quot;{}\&quot;.&quot;);</b>
+<b class="nc">&nbsp;        logger.warn(message, configFile, key, failedClass.getSimpleName(), usedValue);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

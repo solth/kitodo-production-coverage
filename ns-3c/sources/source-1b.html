@@ -1,0 +1,723 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MigrationForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: MigrationForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MigrationForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    23,9%
+  </span>
+  <span class="absValue">
+    (11/46)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    27,6%
+  </span>
+  <span class="absValue">
+    (50/181)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.security.InvalidAlgorithmParameterException;
+&nbsp;import java.security.InvalidKeyException;
+&nbsp;import java.security.NoSuchAlgorithmException;
+&nbsp;import java.security.spec.InvalidKeySpecException;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.crypto.BadPaddingException;
+&nbsp;import javax.crypto.IllegalBlockSizeException;
+&nbsp;import javax.crypto.NoSuchPaddingException;
+&nbsp;import javax.enterprise.context.ApplicationScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Batch;
+&nbsp;import org.kitodo.data.database.beans.LdapServer;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.beans.Project;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.Template;
+&nbsp;import org.kitodo.data.database.beans.Workflow;
+&nbsp;import org.kitodo.data.database.enums.WorkflowStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.WorkflowException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.tasks.HierarchyMigrationTask;
+&nbsp;import org.kitodo.production.helper.tasks.MigrationTask;
+&nbsp;import org.kitodo.production.helper.tasks.TaskManager;
+&nbsp;import org.kitodo.production.migration.NewspaperProcessesMigrator;
+&nbsp;import org.kitodo.production.migration.TasksToWorkflowConverter;
+&nbsp;import org.kitodo.production.security.AESUtil;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.migration.MigrationService;
+&nbsp;import org.kitodo.production.workflow.model.Converter;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;
+&nbsp;@Named(&quot;MigrationForm&quot;)
+&nbsp;@ApplicationScoped
+<b class="fc">&nbsp;public class MigrationForm extends BaseForm {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(MigrationForm.class);</b>
+<b class="fc">&nbsp;    private List&lt;Project&gt; allProjects = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private List&lt;Project&gt; selectedProjects = new ArrayList&lt;&gt;();</b>
+&nbsp;    private boolean projectListRendered;
+&nbsp;    private boolean processListRendered;
+<b class="fc">&nbsp;    private final Map&lt;String, List&lt;Process&gt;&gt; aggregatedProcesses = new HashMap&lt;&gt;();</b>
+&nbsp;    private Workflow workflowToUse;
+&nbsp;    private String currentTasks;
+<b class="fc">&nbsp;    private Map&lt;Template, List&lt;Process&gt;&gt; templatesToCreate = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;    private Map&lt;Template, Template&gt; matchingTemplates = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;    private final MigrationService migrationService = ServiceManager.getMigrationService();</b>
+&nbsp;    private boolean metadataRendered;
+&nbsp;    private boolean workflowRendered;
+<b class="fc">&nbsp;    private boolean newspaperMigrationRendered = false;</b>
+<b class="fc">&nbsp;    private Collection&lt;Integer&gt; newspaperBatchesSelectedItems = new ArrayList&lt;&gt;();</b>
+&nbsp;    private List&lt;Batch&gt; newspaperBatchesItems;
+<b class="fc">&nbsp;    private boolean ldapManagerPasswordsMigrationRendered = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Migrates the meta.xml for all processes in the database (if it&#39;s in the
+&nbsp;     * old format).
+&nbsp;     *
+&nbsp;     */
+&nbsp;    public void migrateMetadata() {
+&nbsp;        try {
+<b class="nc">&nbsp;            loadProjects();</b>
+<b class="nc">&nbsp;            projectListRendered = true;</b>
+<b class="nc">&nbsp;            metadataRendered = true;</b>
+<b class="nc">&nbsp;            workflowRendered = false;</b>
+<b class="nc">&nbsp;            newspaperMigrationRendered = false;</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Error during database access&quot;, e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Shows all projects for migration.
+&nbsp;     */
+&nbsp;    public void showPossibleProjects() {
+&nbsp;        try {
+<b class="fc">&nbsp;            loadProjects();</b>
+<b class="fc">&nbsp;            projectListRendered = true;</b>
+<b class="fc">&nbsp;            workflowRendered = true;</b>
+<b class="fc">&nbsp;            metadataRendered = false;</b>
+<b class="fc">&nbsp;            newspaperMigrationRendered = false;</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;Error during database access&quot;, e.getLocalizedMessage(), logger, e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void loadProjects() throws DAOException {
+<b class="fc">&nbsp;        allProjects = ServiceManager.getProjectService().getAll()</b>
+<b class="fc">&nbsp;                .stream().sorted(Comparator.comparing(Project::getTitle)).collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Shows all processes related to the selected projects.
+&nbsp;     */
+&nbsp;    public void showAggregatedProcesses() {
+<b class="fc">&nbsp;        List&lt;Process&gt; processList = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        aggregatedProcesses.clear();</b>
+<b class="fc">&nbsp;        for (Project project : selectedProjects) {</b>
+<b class="fc">&nbsp;            logger.trace(&quot;Listing processes from project \&quot;{}\&quot;...&quot;, project.getTitle());</b>
+<b class="fc">&nbsp;            processList.addAll(project.getProcesses());</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        int numberOfProcesses = processList.size();</b>
+<b class="fc">&nbsp;        long lastSystemSecond = System.nanoTime() / 1_000_000_000;</b>
+<b class="fc">&nbsp;        for (int currentProcess = 0; currentProcess &lt; processList.size(); currentProcess++) {</b>
+<b class="fc">&nbsp;            Process process = processList.get(currentProcess);</b>
+<b class="fc">&nbsp;            if (logger.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;                long currentSystemSecond = System.nanoTime() / 1_000_000_000;</b>
+<b class="nc">&nbsp;                if (currentSystemSecond != lastSystemSecond) {</b>
+<b class="nc">&nbsp;                    lastSystemSecond = currentSystemSecond;</b>
+<b class="nc">&nbsp;                    logger.trace(&quot;Analyzing process {}/{} ({}% done)&quot;, currentProcess, numberOfProcesses,</b>
+<b class="nc">&nbsp;                        100 * currentProcess / numberOfProcesses);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;            if (Objects.isNull(process.getTemplate())) {</b>
+<b class="fc">&nbsp;                addToAggregatedProcesses(aggregatedProcesses, process);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        processListRendered = true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method for migrating hierarchical processes. This is done when the user
+&nbsp;     * clicks the button to migrate hierarchical processes under the projects
+&nbsp;     * selection.
+&nbsp;     */
+&nbsp;    public void convertHierarchys() {
+<b class="nc">&nbsp;        TaskManager.addTask(new HierarchyMigrationTask(selectedProjects));</b>
+<b class="nc">&nbsp;        projectListRendered = false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method for migrating the metadata. This is done when the user clicks the
+&nbsp;     * button to migrate metadata under the projects selection.
+&nbsp;     */
+&nbsp;    public void convertMetadata() {
+<b class="nc">&nbsp;        for (Project project : selectedProjects) {</b>
+<b class="nc">&nbsp;            TaskManager.addTask(new MigrationTask(project));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        projectListRendered = false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addToAggregatedProcesses(Map&lt;String, List&lt;Process&gt;&gt; aggregatedProcesses, Process process) {
+<b class="fc">&nbsp;        List&lt;Task&gt; processTasks = process.getTasks();</b>
+<b class="fc">&nbsp;        processTasks.sort(Comparator.comparingInt(Task::getOrdering));</b>
+<b class="fc">&nbsp;        for (String tasks : aggregatedProcesses.keySet()) {</b>
+<b class="fc">&nbsp;            List&lt;Task&gt; aggregatedTasks = aggregatedProcesses.get(tasks).get(0).getTasks();</b>
+<b class="fc">&nbsp;            aggregatedTasks.sort(Comparator.comparingInt(Task::getOrdering));</b>
+<b class="fc">&nbsp;            if (checkForTitle(tasks, processTasks) &amp;&amp; migrationService</b>
+<b class="fc">&nbsp;                    .tasksAreEqual(aggregatedTasks, processTasks)) {</b>
+<b class="fc">&nbsp;                aggregatedProcesses.get(tasks).add(process);</b>
+&nbsp;                return;
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        aggregatedProcesses.put(migrationService.createTaskString(processTasks),</b>
+<b class="fc">&nbsp;            new ArrayList&lt;&gt;(Collections.singletonList(process)));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean checkForTitle(String aggregatedTasks, List&lt;Task&gt; processTasks) {
+<b class="fc">&nbsp;        return aggregatedTasks.equals(migrationService.createTaskString(processTasks));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get allProjects.
+&nbsp;     *
+&nbsp;     * @return value of allProjects
+&nbsp;     */
+&nbsp;    public List&lt;Project&gt; getAllProjects() {
+<b class="fc">&nbsp;        return allProjects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selectedProjects.
+&nbsp;     *
+&nbsp;     * @param selectedProjects
+&nbsp;     *            as List of Project
+&nbsp;     */
+&nbsp;    public void setSelectedProjects(List&lt;Project&gt; selectedProjects) {
+<b class="fc">&nbsp;        this.selectedProjects = selectedProjects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the switch for starting the metadata migration should be
+&nbsp;     * displayed.
+&nbsp;     *
+&nbsp;     * @return whether the switch for starting the metadata migration should be
+&nbsp;     *         displayed
+&nbsp;     */
+&nbsp;    public boolean isMetadataRendered() {
+<b class="nc">&nbsp;        return metadataRendered;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get projectListRendered.
+&nbsp;     *
+&nbsp;     * @return value of projectListRendered
+&nbsp;     */
+&nbsp;    public boolean isProjectListRendered() {
+<b class="fc">&nbsp;        return projectListRendered;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the switch for creating workflows should be displayed.
+&nbsp;     *
+&nbsp;     * @return whether the switch for creating workflows should be displayed
+&nbsp;     */
+&nbsp;    public boolean isWorkflowRendered() {
+<b class="nc">&nbsp;        return workflowRendered;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selectedProjects.
+&nbsp;     *
+&nbsp;     * @return value of selectedProjects
+&nbsp;     */
+&nbsp;    public List&lt;Project&gt; getSelectedProjects() {
+<b class="nc">&nbsp;        return selectedProjects;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processListRendered.
+&nbsp;     *
+&nbsp;     * @return value of processListRendered
+&nbsp;     */
+&nbsp;    public boolean isProcessListRendered() {
+<b class="nc">&nbsp;        return processListRendered;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get aggregatedTasks. Sorts them in descending order by count,
+&nbsp;     * alphabetically for the same count.
+&nbsp;     *
+&nbsp;     * @return sorted keyset of aggregatedProcesses
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getAggregatedTasks() {
+<b class="fc">&nbsp;        ArrayList&lt;String&gt; aggregatedTasks = new ArrayList&lt;&gt;(aggregatedProcesses.keySet());</b>
+<b class="fc">&nbsp;        aggregatedTasks.sort((one, another) -&gt; {</b>
+<b class="nc">&nbsp;            int oneSize = aggregatedProcesses.get(one).size();</b>
+<b class="nc">&nbsp;            int anotherSize = aggregatedProcesses.get(another).size();</b>
+<b class="nc">&nbsp;            return oneSize == anotherSize ? one.compareTo(another) : anotherSize - oneSize;</b>
+&nbsp;        });
+<b class="fc">&nbsp;        return aggregatedTasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get tasksWithoutHashCode.
+&nbsp;     *
+&nbsp;     * @return tasks without hash code
+&nbsp;     */
+&nbsp;    public String tasksWithoutHashCode(String tasks) {
+<b class="nc">&nbsp;        return tasks.substring(0, tasks.lastIndexOf(MigrationService.SEPARATOR));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get numberOfProcesses.
+&nbsp;     *
+&nbsp;     * @return size of aggregatedProcesses
+&nbsp;     */
+&nbsp;    public int getNumberOfProcesses(String tasks) {
+<b class="nc">&nbsp;        return aggregatedProcesses.get(tasks).size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Uses the aggregated processes to create a new Workflow.
+&nbsp;     *
+&nbsp;     * @param tasks
+&nbsp;     *            the list of tasks found in the projects
+&nbsp;     */
+&nbsp;    public void convertTasksToWorkflow(String tasks) {
+<b class="nc">&nbsp;        currentTasks = tasks;</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;PF(&#39;confirmWorkflowPopup&#39;).show();&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Use an existing Workflow instead of creating a new one.
+&nbsp;     */
+&nbsp;    public void useExistingWorkflow() {
+<b class="nc">&nbsp;        setRedirectFromWorkflow(workflowToUse.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new Workflow from the aggregated processes.
+&nbsp;     *
+&nbsp;     * @return a navigation path.
+&nbsp;     */
+&nbsp;    public String createNewWorkflow() {
+&nbsp;
+<b class="nc">&nbsp;        Process blueprintProcess = aggregatedProcesses.get(currentTasks).get(0);</b>
+<b class="nc">&nbsp;        TasksToWorkflowConverter templateConverter = new TasksToWorkflowConverter();</b>
+<b class="nc">&nbsp;        List&lt;Task&gt; processTasks = blueprintProcess.getTasks();</b>
+<b class="nc">&nbsp;        processTasks.sort(Comparator.comparingInt(Task::getOrdering));</b>
+<b class="nc">&nbsp;        String workflowTitle = &quot;ChangeME_&quot; + Helper.generateRandomString(3);</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            templateConverter.convertTasksToWorkflowFile(workflowTitle, processTasks);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        workflowToUse = new Workflow(workflowTitle);</b>
+<b class="nc">&nbsp;        workflowToUse.setClient(blueprintProcess.getProject().getClient());</b>
+<b class="nc">&nbsp;        workflowToUse.setStatus(WorkflowStatus.DRAFT);</b>
+<b class="nc">&nbsp;        workflowToUse.getTemplates().add(null);</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            ServiceManager.getWorkflowService().save(workflowToUse);</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.WORKFLOW.getTranslationSingular() }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return MessageFormat.format(REDIRECT_PATH, &quot;workflowEdit&quot;) + &quot;&amp;id=&quot; + workflowToUse.getId() + &quot;&amp;migration=true&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * When the navigation to the migration form is coming from a workflow
+&nbsp;     * creation the URL contains a WorkflowId.
+&nbsp;     *
+&nbsp;     * @param workflowId
+&nbsp;     *            the id of the created Workflow
+&nbsp;     */
+&nbsp;    public void setRedirectFromWorkflow(Integer workflowId) {
+<b class="nc">&nbsp;        if (Objects.nonNull(workflowId) &amp;&amp; workflowId != 0) {</b>
+&nbsp;            // showPopup for Template
+&nbsp;            try {
+<b class="nc">&nbsp;                workflowToUse = ServiceManager.getWorkflowService().getById(workflowId);</b>
+<b class="nc">&nbsp;                createTemplates();</b>
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_READING, new Object[] {ObjectType.TEMPLATE.getTranslationSingular() },</b>
+&nbsp;                    logger, e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void createTemplates() throws DAOException {
+<b class="nc">&nbsp;        templatesToCreate = migrationService.createTemplatesForProcesses(aggregatedProcesses.get(currentTasks),</b>
+&nbsp;            workflowToUse);
+<b class="nc">&nbsp;        matchingTemplates.clear();</b>
+<b class="nc">&nbsp;        matchingTemplates = migrationService.getMatchingTemplates(templatesToCreate.keySet());</b>
+<b class="nc">&nbsp;        PrimeFaces.current().executeScript(&quot;PF(&#39;createTemplatePopup&#39;).show();&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get templatesToCreate.
+&nbsp;     *
+&nbsp;     * @return value of templatesToCreate
+&nbsp;     */
+&nbsp;    public Set&lt;Template&gt; getTemplatesToCreate() {
+<b class="nc">&nbsp;        return templatesToCreate.keySet();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets a matching template from matchingTemplates.
+&nbsp;     *
+&nbsp;     * @param template
+&nbsp;     *            the template to match.
+&nbsp;     * @return the matching template
+&nbsp;     */
+&nbsp;    public Template getMatchingTemplate(Template template) {
+<b class="nc">&nbsp;        return matchingTemplates.get(template);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Uses the existing template to add processes to.
+&nbsp;     *
+&nbsp;     * @param template
+&nbsp;     *            The template to which&#39;s matching template the processes should
+&nbsp;     *            be added
+&nbsp;     * @param existingTemplate
+&nbsp;     *            the template to add the processes to
+&nbsp;     */
+&nbsp;    public void useExistingTemplate(Template template, Template existingTemplate) {
+<b class="nc">&nbsp;        List&lt;Process&gt; processesToAddToTemplate = templatesToCreate.get(template);</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            migrationService.addProcessesToTemplate(existingTemplate, processesToAddToTemplate);</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_SAVING, new Object[] {ObjectType.PROCESS.getTranslationSingular() }, logger,</b>
+&nbsp;                e);
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        templatesToCreate.remove(template);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new template.
+&nbsp;     *
+&nbsp;     * @param template
+&nbsp;     *            The template to create.
+&nbsp;     */
+&nbsp;    public void createNewTemplate(Template template) {
+<b class="nc">&nbsp;        if (migrationService.isTitleValid(template)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                Converter converter = new Converter(template.getWorkflow().getTitle());</b>
+<b class="nc">&nbsp;                converter.convertWorkflowToTemplate(template);</b>
+<b class="nc">&nbsp;            } catch (IOException | DAOException | WorkflowException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[]{ObjectType.PROCESS.getTranslationSingular()},</b>
+&nbsp;                        logger, e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;Process&gt; processesToAddToTemplate = templatesToCreate.get(template);</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ServiceManager.getTemplateService().save(template);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[]{ObjectType.TEMPLATE.getTranslationSingular()}, logger,</b>
+&nbsp;                        e);
+<b class="nc">&nbsp;            }</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                migrationService.addProcessesToTemplate(template, processesToAddToTemplate);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(ERROR_SAVING, new Object[]{ObjectType.PROCESS.getTranslationSingular()}, logger,</b>
+&nbsp;                        e);
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            templatesToCreate.remove(template);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets all workflows, possible to use in migration.
+&nbsp;     * @return A list of workflows.
+&nbsp;     */
+&nbsp;    public List&lt;Workflow&gt; getAllWorkflows() {
+<b class="nc">&nbsp;        return ServiceManager.getWorkflowService().getAllActiveWorkflows();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get workflowToUse.
+&nbsp;     *
+&nbsp;     * @return value of workflowToUse
+&nbsp;     */
+&nbsp;    public Workflow getWorkflowToUse() {
+<b class="nc">&nbsp;        return workflowToUse;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set workflowToUse.
+&nbsp;     *
+&nbsp;     * @param workflowToUse as org.kitodo.data.database.beans.Workflow
+&nbsp;     */
+&nbsp;    public void setWorkflowToUse(Workflow workflowToUse) {
+<b class="nc">&nbsp;        this.workflowToUse = workflowToUse;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Action performed when the migrateNewspaperBatches button is clicked.
+&nbsp;     */
+&nbsp;    public void showPossibleBatches() {
+<b class="nc">&nbsp;        newspaperMigrationRendered = true;</b>
+<b class="nc">&nbsp;        projectListRendered = false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the newspaperMigration panel group is rendered.
+&nbsp;     *
+&nbsp;     * @return whether the newspaperMigration panel group is rendered
+&nbsp;     */
+&nbsp;
+&nbsp;    public boolean isNewspaperMigrationRendered() {
+<b class="nc">&nbsp;        return newspaperMigrationRendered;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the selected items of the newspaperBatches select box.
+&nbsp;     *
+&nbsp;     * @return the selected items of the newspaperBatches select box
+&nbsp;     */
+&nbsp;    public Collection&lt;Integer&gt; getNewspaperBatchesSelectedItems() {
+<b class="nc">&nbsp;        return newspaperBatchesSelectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the selected items of the newspaperBatches select box.
+&nbsp;     *
+&nbsp;     * @param selectedItems
+&nbsp;     *            elected items of the newspaperBatches select box to set
+&nbsp;     */
+&nbsp;    public void setNewspaperBatchesSelectedItems(Collection&lt;Integer&gt; selectedItems) {
+<b class="nc">&nbsp;        newspaperBatchesSelectedItems = selectedItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the items of the newspaperBatches select box.
+&nbsp;     *
+&nbsp;     * @return the items of the newspaperBatches select box
+&nbsp;     */
+&nbsp;    public List&lt;Batch&gt; getNewspaperBatchesItems() {
+<b class="nc">&nbsp;        if (Objects.isNull(newspaperBatchesItems)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                newspaperBatchesItems = NewspaperProcessesMigrator.getNewspaperBatches();</b>
+<b class="nc">&nbsp;            } catch (DAOException | IOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;                return Collections.emptyList();</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return newspaperBatchesItems;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Action performed when the startNewspaperMigration button is clicked.
+&nbsp;     */
+&nbsp;    public void startNewspaperMigration() {
+&nbsp;        try {
+<b class="nc">&nbsp;            for (Integer batchId : newspaperBatchesSelectedItems) {</b>
+<b class="nc">&nbsp;                NewspaperProcessesMigrator.initializeMigration(batchId);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            newspaperMigrationRendered = false;</b>
+<b class="nc">&nbsp;            newspaperBatchesSelectedItems = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Action performed when the cancelNewspaperMigration button is clicked.
+&nbsp;     */
+&nbsp;    public void hideNewspaperMigration() {
+<b class="nc">&nbsp;        newspaperMigrationRendered = false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Action performed when the migrateLdapManagerPasswords button is clicked.
+&nbsp;     */
+&nbsp;    public void showLdapManagerPasswordsMigration() {
+<b class="nc">&nbsp;        ldapManagerPasswordsMigrationRendered = true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the ldapManagerPasswordsMigration panel group is rendered.
+&nbsp;     *
+&nbsp;     * @return whether the ldapManagerPasswordsMigration panel group is rendered
+&nbsp;     */
+&nbsp;    public boolean isLdapManagerPasswordsMigrationRendered() {
+<b class="nc">&nbsp;        return ldapManagerPasswordsMigrationRendered;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Action performed when the startLdapManagerPasswordsMigration button is
+&nbsp;     * clicked.
+&nbsp;     */
+&nbsp;    public void startLdapManagerPasswordsMigration() {
+&nbsp;
+<b class="nc">&nbsp;        String securitySecret = ConfigCore.getParameterOrDefaultValue(ParameterCore.SECURITY_SECRET_LDAPMANAGERPASSWORD);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (StringUtils.isBlank(securitySecret)) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(</b>
+&nbsp;                &quot;The security.secret.ldapManagerPassword parameter was not configured in kitodo_config.properties file.&quot;);
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;LdapServer&gt; ldapServers = getLdapServers();</b>
+<b class="nc">&nbsp;        ldapServers.parallelStream().forEach(ldapServer -&gt; {</b>
+<b class="nc">&nbsp;            String managerPassword = ldapServer.getManagerPassword();</b>
+<b class="nc">&nbsp;            if (StringUtils.isNotBlank(managerPassword) &amp;&amp; !AESUtil.isEncrypted(managerPassword)) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    ldapServer.setManagerPassword(AESUtil.encrypt(managerPassword, securitySecret));</b>
+<b class="nc">&nbsp;                    ServiceManager.getLdapServerService().saveToDatabase(ldapServer);</b>
+<b class="nc">&nbsp;                } catch (DAOException | NoSuchPaddingException | NoSuchAlgorithmException</b>
+&nbsp;                        | InvalidAlgorithmParameterException | InvalidKeyException | BadPaddingException
+&nbsp;                        | IllegalBlockSizeException | InvalidKeySpecException e) {
+<b class="nc">&nbsp;                    Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        });
+&nbsp;
+<b class="nc">&nbsp;        Helper.setMessage(&quot;All uncrypted LDAP Manager passwords were successfully encrypted.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Action performed when the cancelLdapManagerPasswordMigration button is
+&nbsp;     * clicked.
+&nbsp;     */
+&nbsp;    public void hideLdapManagerPasswordsMigrationRendered() {
+<b class="nc">&nbsp;        ldapManagerPasswordsMigrationRendered = false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets all ldap servers.
+&nbsp;     *
+&nbsp;     * @return list of LdapServer objects.
+&nbsp;     */
+&nbsp;    public List&lt;LdapServer&gt; getLdapServers() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return ServiceManager.getLdapServerService().getAll();</b>
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_LOADING_MANY, new Object[] {Helper.getTranslation(&quot;ldapServers&quot;) }, logger, e);</b>
+<b class="nc">&nbsp;            return new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

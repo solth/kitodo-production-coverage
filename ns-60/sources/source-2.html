@@ -1,0 +1,532 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ImageGenerator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.image</a>
+</div>
+
+<h1>Coverage Summary for Class: ImageGenerator (org.kitodo.production.services.image)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImageGenerator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (21/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86%
+  </span>
+  <span class="absValue">
+    (80/93)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.image;
+&nbsp;
+&nbsp;import java.awt.Image;
+&nbsp;import java.awt.image.RenderedImage;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.lang.reflect.UndeclaredThrowableException;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.function.Consumer;
+&nbsp;import java.util.function.Predicate;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.stream.Stream;
+&nbsp;
+&nbsp;import javax.imageio.ImageIO;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.xml.fileformats.FileFormat;
+&nbsp;import org.kitodo.data.database.beans.Folder;
+&nbsp;import org.kitodo.production.enums.GenerationMode;
+&nbsp;import org.kitodo.production.enums.ImageGeneratorStep;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.tasks.EmptyTask;
+&nbsp;import org.kitodo.production.model.Subfolder;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.file.FileService;
+&nbsp;import org.kitodo.production.thread.TaskImageGeneratorThread;
+&nbsp;import org.kitodo.production.thread.TaskScriptThread;
+&nbsp;
+&nbsp;/**
+&nbsp; * A program that generates images using the image management interface. This
+&nbsp; * program is run by the {@link TaskImageGeneratorThread} when the user manually
+&nbsp; * initiates the creation of the images. If the images are generated when the
+&nbsp; * task is completed, this is done by the {@link TaskScriptThread}.
+&nbsp; */
+&nbsp;public class ImageGenerator implements Runnable {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ImageGenerator.class);</b>
+<b class="fc">&nbsp;    private final FileService fileService = ServiceManager.getFileService();</b>
+<b class="fc">&nbsp;    private final ImageService imageService = ServiceManager.getImageService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Output folders.
+&nbsp;     */
+&nbsp;    private final Collection&lt;Subfolder&gt; outputs;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Current position in list.
+&nbsp;     */
+&nbsp;    private int position;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Folder with source images.
+&nbsp;     */
+&nbsp;    private final Subfolder sourceFolder;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * List of possible source images.
+&nbsp;     */
+&nbsp;    private List&lt;Pair&lt;String, URI&gt;&gt; sources;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Current step of the generation process.
+&nbsp;     */
+&nbsp;    private ImageGeneratorStep state;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Task in the TaskManager that runs this ImageGenerator.
+&nbsp;     */
+&nbsp;    private EmptyTask supervisor;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * List of elements to be generated.
+&nbsp;     */
+&nbsp;    private final List&lt;ContentToBeGenerated&gt; contentToBeGenerated;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Variant of image generation, see there.
+&nbsp;     */
+&nbsp;    private final GenerationMode mode;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new image generator.
+&nbsp;     *
+&nbsp;     * @param sourceFolder
+&nbsp;     *            image source folder
+&nbsp;     * @param mode
+&nbsp;     *            whether all, or only a few images are to be generated
+&nbsp;     * @param outputs
+&nbsp;     *            output folders to generate to
+&nbsp;     */
+<b class="fc">&nbsp;    public ImageGenerator(Subfolder sourceFolder, GenerationMode mode, Collection&lt;Subfolder&gt; outputs) {</b>
+<b class="fc">&nbsp;        this.sourceFolder = sourceFolder;</b>
+<b class="fc">&nbsp;        this.mode = mode;</b>
+<b class="fc">&nbsp;        this.outputs = outputs;</b>
+<b class="fc">&nbsp;        this.state = ImageGeneratorStep.LIST_SOURCE_FOLDER;</b>
+<b class="fc">&nbsp;        this.sources = Collections.emptyList();</b>
+<b class="fc">&nbsp;        this.contentToBeGenerated = new LinkedList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Cleanup target folders if &lt;i&gt;all&lt;/i&gt; output is generated.
+&nbsp;     */
+&nbsp;    public void removeGeneratedContent() {
+<b class="fc">&nbsp;        for (Subfolder subfolder : outputs) {</b>
+<b class="fc">&nbsp;            for (URI uri : subfolder.listContents(true).values()) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    ServiceManager.getFileService().delete(uri);</b>
+<b class="nc">&nbsp;                } catch (IOException e) {</b>
+<b class="nc">&nbsp;                    logger.error(e);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            }</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Appends the element to the list of elements to be generated.
+&nbsp;     *
+&nbsp;     * @param canonical
+&nbsp;     *            the canonical part of the file name
+&nbsp;     * @param sourceURI
+&nbsp;     *            the source URI of the content to be generated
+&nbsp;     * @param subfoldersWhoseContentsAreToBeGenerated
+&nbsp;     *            subfolders whose contents are to be generated
+&nbsp;     */
+&nbsp;    public void addToContentToBeGenerated(String canonical, URI sourceURI,
+&nbsp;            List&lt;Subfolder&gt; subfoldersWhoseContentsAreToBeGenerated) {
+&nbsp;
+<b class="fc">&nbsp;        contentToBeGenerated</b>
+<b class="fc">&nbsp;                .add(new ContentToBeGenerated(canonical, sourceURI, subfoldersWhoseContentsAreToBeGenerated));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates a set of derivatives.
+&nbsp;     *
+&nbsp;     * @param instruction
+&nbsp;     *            Instruction, which pictures are to be generated. Left: image
+&nbsp;     *            source, right: destination folder. The image source consists
+&nbsp;     *            of the canonical part of the file name and the resolved file
+&nbsp;     *            name for the source image. The canonical part of the file name
+&nbsp;     *            is needed to calculate the corresponding file name in the
+&nbsp;     *            destination folder. The type of derivative to be generated is
+&nbsp;     *            defined in the properties of the destination folder.
+&nbsp;     */
+&nbsp;    public void createDerivatives(ContentToBeGenerated instruction) {
+&nbsp;        try {
+<b class="fc">&nbsp;            for (Subfolder destinationFolder : instruction.getSubfoldersWhoseContentsAreToBeGenerated()) {</b>
+<b class="fc">&nbsp;                generateDerivative(instruction.getSourceURI(), destinationFolder, instruction.getCanonical());</b>
+<b class="fc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            throw new UndeclaredThrowableException(e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates a derived image and saves it with the on-board tools of Java.
+&nbsp;     * The image is created by the image management interface. Which method of
+&nbsp;     * the interface is called and its parameters are determined in the
+&nbsp;     * configuration of the folder. The same is true for the file type under
+&nbsp;     * which Java stores the image.
+&nbsp;     *
+&nbsp;     * @param sourceImage
+&nbsp;     *            reference to the image that serves as a template for the
+&nbsp;     *            reproduction process
+&nbsp;     * @param imageProperties
+&nbsp;     *            folder settings define what an image is created
+&nbsp;     * @param fileFormat
+&nbsp;     *            the file format specifies how the image should be saved
+&nbsp;     * @param destinationImage
+&nbsp;     *            specifies the location where the image should be written
+&nbsp;     * @throws IOException
+&nbsp;     *             if an underlying disk operation fails
+&nbsp;     */
+&nbsp;    private void createImageWithImageIO(URI sourceImage, Folder imageProperties, FileFormat fileFormat,
+&nbsp;            URI destinationImage) throws IOException {
+&nbsp;
+<b class="fc">&nbsp;        try (OutputStream outputStream = fileService.write(destinationImage)) {</b>
+<b class="fc">&nbsp;            Image image = retrieveJavaImage(sourceImage, imageProperties);</b>
+<b class="fc">&nbsp;            Optional&lt;String&gt; optionalFormatName = fileFormat.getFormatName();</b>
+<b class="fc">&nbsp;            if (optionalFormatName.isPresent()) {</b>
+<b class="fc">&nbsp;                ImageIO.write((RenderedImage) image, optionalFormatName.get(), outputStream);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines the folders in which a derivative must be created. Because the
+&nbsp;     * ModuleLoader does not work when invoked from a parallelStream(), we use a
+&nbsp;     * classic loop here.
+&nbsp;     *
+&nbsp;     * @param canonical
+&nbsp;     *            canonical part of the file name, to determine the file names
+&nbsp;     *            in the destination folder
+&nbsp;     * @return the images to be generated
+&nbsp;     */
+&nbsp;    public List&lt;Subfolder&gt; determineFoldersThatNeedDerivatives(String canonical) {
+<b class="fc">&nbsp;        List&lt;Subfolder&gt; foldersThatNeedDerivatives = new ArrayList&lt;&gt;(outputs.size());</b>
+<b class="fc">&nbsp;        Predicate&lt;? super Subfolder&gt; requiresGeneration = mode.getFilter(canonical);</b>
+<b class="fc">&nbsp;        for (Subfolder folder : outputs) {</b>
+<b class="fc">&nbsp;            if (requiresGeneration.test(folder)) {</b>
+<b class="fc">&nbsp;                foldersThatNeedDerivatives.add(folder);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return foldersThatNeedDerivatives;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the file list from the content folder, converts it into the required
+&nbsp;     * form, and stores it in the sources field.
+&nbsp;     */
+&nbsp;    public void determineSources() {
+<b class="fc">&nbsp;        Map&lt;String, URI&gt; contents = sourceFolder.listContents();</b>
+<b class="fc">&nbsp;        Stream&lt;Entry&lt;String, URI&gt;&gt; contentsStream = contents.entrySet().stream();</b>
+<b class="fc">&nbsp;        Stream&lt;Pair&lt;String, URI&gt;&gt; sourcesStream = contentsStream.map(lambda -&gt; Pair.of(lambda.getKey(), lambda.getValue()));</b>
+<b class="fc">&nbsp;        this.sources = sourcesStream.collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates the derivative depending on the declared generator function.
+&nbsp;     *
+&nbsp;     * @param sourceImage
+&nbsp;     *            source file
+&nbsp;     * @param destinationImage
+&nbsp;     *            path to the target file to be generated
+&nbsp;     * @param canonical
+&nbsp;     *            the canonical part of the file name
+&nbsp;     * @throws IOException
+&nbsp;     *             if filesystem I/O fails
+&nbsp;     */
+&nbsp;    private void generateDerivative(URI sourceImage, Subfolder destinationImage, String canonical)
+&nbsp;            throws IOException {
+&nbsp;
+<b class="fc">&nbsp;        Folder imageProperties = destinationImage.getFolder();</b>
+<b class="fc">&nbsp;        boolean isChangingDpi = imageProperties.getDpi().isPresent();</b>
+<b class="fc">&nbsp;        boolean isGettingSizedWebImage = imageProperties.getImageSize().isPresent();</b>
+&nbsp;
+<b class="fc">&nbsp;        Optional&lt;Double&gt; optionalDerivative = imageProperties.getDerivative();</b>
+<b class="fc">&nbsp;        if (optionalDerivative.isPresent() &amp;&amp; destinationImage.getFileFormat().getImageFileFormat().isPresent()) {</b>
+<b class="fc">&nbsp;            imageService.createDerivative(sourceImage, optionalDerivative.get(), destinationImage.getUri(canonical),</b>
+<b class="fc">&nbsp;                destinationImage.getFileFormat().getImageFileFormat().orElseThrow(IllegalStateException::new));</b>
+<b class="fc">&nbsp;        } else if (isChangingDpi || isGettingSizedWebImage) {</b>
+<b class="fc">&nbsp;            createImageWithImageIO(sourceImage, imageProperties, destinationImage.getFileFormat(),</b>
+<b class="fc">&nbsp;                destinationImage.getUri(canonical));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns from contentToBeGenerated the item specified by position.
+&nbsp;     *
+&nbsp;     * @return the item specified by position
+&nbsp;     */
+&nbsp;    public ContentToBeGenerated getFromContentToBeGeneratedByPosition() {
+<b class="fc">&nbsp;        return contentToBeGenerated.get(position);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the current position in the list.
+&nbsp;     *
+&nbsp;     * @return the position
+&nbsp;     */
+&nbsp;    public int getPosition() {
+<b class="fc">&nbsp;        return position;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of source images.
+&nbsp;     *
+&nbsp;     * @return the list of source images
+&nbsp;     */
+&nbsp;    public List&lt;Pair&lt;String, URI&gt;&gt; getSources() {
+<b class="fc">&nbsp;        return sources;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of image generation task descriptions.
+&nbsp;     *
+&nbsp;     * @return the list of image generation task descriptions
+&nbsp;     */
+&nbsp;    public List&lt;ContentToBeGenerated&gt; getContentToBeGenerated() {
+<b class="fc">&nbsp;        return contentToBeGenerated;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the enum constant inicating the variant of the image generator
+&nbsp;     * task.
+&nbsp;     *
+&nbsp;     * @return the variant of the image generator task
+&nbsp;     */
+&nbsp;    public GenerationMode getMode() {
+<b class="fc">&nbsp;        return mode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If there is a supervisor, lets him take an action. Otherwise nothing
+&nbsp;     * happens.
+&nbsp;     *
+&nbsp;     * @param action
+&nbsp;     *            what the supervisor should do
+&nbsp;     */
+&nbsp;    public void letTheSupervisorDo(Consumer&lt;EmptyTask&gt; action) {
+<b class="fc">&nbsp;        if (Objects.nonNull(supervisor)) {</b>
+<b class="fc">&nbsp;            action.accept(supervisor);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes one of the three methods of the image management interface that
+&nbsp;     * return a Java image. Which method is called and its parameters are
+&nbsp;     * determined in the configuration of the folder.
+&nbsp;     *
+&nbsp;     * @param sourceImage
+&nbsp;     *            address of the source image from which the derivative is to be
+&nbsp;     *            calculated.
+&nbsp;     * @param imageProperties
+&nbsp;     *            configuration for the target image
+&nbsp;     * @return an image in memory
+&nbsp;     * @throws IOException
+&nbsp;     *             if an underlying disk operation fails
+&nbsp;     */
+&nbsp;    private Image retrieveJavaImage(URI sourceImage, Folder imageProperties) throws IOException {
+<b class="fc">&nbsp;        Optional&lt;Integer&gt; optionalDpi = imageProperties.getDpi();</b>
+<b class="fc">&nbsp;        Optional&lt;Double&gt; optionalImageScale = imageProperties.getImageScale();</b>
+<b class="fc">&nbsp;        Optional&lt;Integer&gt; optionalImageSize = imageProperties.getImageSize();</b>
+<b class="fc">&nbsp;        if (optionalDpi.isPresent()) {</b>
+<b class="nc">&nbsp;            return imageService.changeDpi(sourceImage, optionalDpi.get());</b>
+<b class="fc">&nbsp;        } else if (optionalImageScale.isPresent()) {</b>
+<b class="nc">&nbsp;            return imageService.getScaledWebImage(sourceImage, optionalImageScale.get());</b>
+<b class="fc">&nbsp;        } else if (optionalImageSize.isPresent()) {</b>
+<b class="fc">&nbsp;            return imageService.getSizedWebImage(sourceImage, optionalImageSize.get());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        throw new IllegalArgumentException(imageProperties + &quot; does not give any method to create a java image&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the task is started, it will execute this run() method which will
+&nbsp;     * start the export on the ExportDms. This task instance is passed in
+&nbsp;     * addition so that the ExportDms can update the task’s state.
+&nbsp;     *
+&nbsp;     * @see org.kitodo.production.helper.tasks.EmptyTask#run()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void run() {
+&nbsp;        do {
+<b class="fc">&nbsp;            state.accept(this);</b>
+<b class="fc">&nbsp;            if (state.equals(ImageGeneratorStep.DETERMINE_WHICH_IMAGES_NEED_TO_BE_GENERATED) &amp;&amp; position == -1</b>
+<b class="fc">&nbsp;                    &amp;&amp; sources.isEmpty()) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(supervisor)) {</b>
+<b class="nc">&nbsp;                    supervisor.setProgress(100);</b>
+<b class="nc">&nbsp;                    supervisor.setWorkDetail(Helper.getTranslation(&quot;noImagesToGenerate&quot;));</b>
+&nbsp;                }
+&nbsp;                return;
+&nbsp;            }
+<b class="fc">&nbsp;            position++;</b>
+<b class="fc">&nbsp;            setProgress();</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(supervisor) &amp;&amp; supervisor.isInterrupted()) {</b>
+&nbsp;                return;
+&nbsp;            }
+<b class="fc">&nbsp;        } while (!(state.equals(ImageGeneratorStep.GENERATE_IMAGES)</b>
+<b class="fc">&nbsp;                &amp;&amp; getPosition() == getContentToBeGenerated().size()));</b>
+<b class="fc">&nbsp;        logger.info(&quot;Completed&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the current position in the list.
+&nbsp;     *
+&nbsp;     * @param position
+&nbsp;     *            position to set
+&nbsp;     */
+&nbsp;    public void setPosition(int position) {
+<b class="fc">&nbsp;        this.position = position;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculates and reports the progress of the task.
+&nbsp;     */
+&nbsp;    private void setProgress() {
+<b class="fc">&nbsp;        if (Objects.nonNull(supervisor)) {</b>
+<b class="fc">&nbsp;            int checked = state.equals(ImageGeneratorStep.GENERATE_IMAGES)</b>
+<b class="fc">&nbsp;                    ? getMode().equals(GenerationMode.ALL) ? 1 : sources.size()</b>
+<b class="fc">&nbsp;                    : 0;</b>
+<b class="fc">&nbsp;            int generated = getMode().equals(GenerationMode.ALL)</b>
+<b class="fc">&nbsp;                    &amp;&amp; state.equals(ImageGeneratorStep.DETERMINE_WHICH_IMAGES_NEED_TO_BE_GENERATED) ? 0 : getPosition();</b>
+<b class="fc">&nbsp;            int total = sources.size() + (getMode().equals(GenerationMode.ALL) ? 1 : getContentToBeGenerated().size())</b>
+&nbsp;                    + 1;
+<b class="fc">&nbsp;            supervisor.setProgress(100d * (1 + checked + generated) / total);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the current processing state.
+&nbsp;     *
+&nbsp;     * @param state
+&nbsp;     *            state to set
+&nbsp;     */
+&nbsp;    public void setState(ImageGeneratorStep state) {
+<b class="fc">&nbsp;        this.state = state;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set a supervisor for this activity. If a supervisor is set, the progress
+&nbsp;     * is reported back to him, and he responds to his interrupt requests.
+&nbsp;     *
+&nbsp;     * @param supervisor
+&nbsp;     *            supervisor task to set
+&nbsp;     */
+&nbsp;    public void setSupervisor(EmptyTask supervisor) {
+<b class="fc">&nbsp;        this.supervisor = supervisor;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

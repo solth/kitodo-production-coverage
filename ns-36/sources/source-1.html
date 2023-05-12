@@ -1,0 +1,1187 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SecurityAccessController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: SecurityAccessController (org.kitodo.production.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SecurityAccessController</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/110)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/121)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.controller;
+&nbsp;
+&nbsp;import javax.enterprise.context.RequestScoped;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.security.SecurityAccessService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Controller for checking authorities of current user.
+&nbsp; */
+&nbsp;@Named(&quot;SecurityAccessController&quot;)
+&nbsp;@RequestScoped
+<b class="nc">&nbsp;public class SecurityAccessController {</b>
+<b class="nc">&nbsp;    private final SecurityAccessService securityAccessService = ServiceManager.getSecurityAccessService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has a specified authority globally or for a client.
+&nbsp;     *
+&nbsp;     * @param authorityTitle
+&nbsp;     *            The authority title.
+&nbsp;     * @return True if the current user has the specified authority.
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityGlobalOrForClient(String authorityTitle) {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityGlobalOrForClient(authorityTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if the current user has a specified authority globally.
+&nbsp;     *
+&nbsp;     * @param authorityTitle
+&nbsp;     *            The authority title.
+&nbsp;     * @return True if the current user has the specified authority.
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityGlobal(String authorityTitle) {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityGlobal(authorityTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has a specified authority for a client.
+&nbsp;     *
+&nbsp;     * @param authorityTitle
+&nbsp;     *            The authority title.
+&nbsp;     * @return true if the current user has the specified authority
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityForClient(String authorityTitle) {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityForClient(authorityTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if the current user has any of the specified authorities globally or
+&nbsp;     * for client.
+&nbsp;     *
+&nbsp;     * @param authorityTitles
+&nbsp;     *            the authority title
+&nbsp;     * @return True if the current user has the specified authority.
+&nbsp;     */
+&nbsp;    public boolean hasAnyAuthorityGlobalOrForClient(String authorityTitles) {
+<b class="nc">&nbsp;        return securityAccessService.hasAnyAuthorityGlobalOrForClient(authorityTitles);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has any of the specified authorities for client.
+&nbsp;     *
+&nbsp;     * @param authorityTitles
+&nbsp;     *            the authority title
+&nbsp;     * @return true if the current user has the specified authority
+&nbsp;     */
+&nbsp;    public boolean hasAnyAuthorityForClient(String authorityTitles) {
+<b class="nc">&nbsp;        return securityAccessService.hasAnyAuthorityForClient(authorityTitles);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the batch.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the batch
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddBatch() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddBatch();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the process.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the process
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddProcess() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddProcess();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the project.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the project
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddProject() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddProject();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the template.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the template
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddTemplate() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddTemplate();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the workflow.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the workflow
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddWorkflow() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddWorkflow();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if the current user has the authority to add the docket.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the docket
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddDocket() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddDocket();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the ruleset.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the ruleset
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddRuleset() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddRuleset();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add new import configuration.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add new import configuration
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddImportConfiguration() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddImportConfiguration();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add new mapping file.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add new mapping file.
+&nbsp;     */
+&nbsp;
+&nbsp;    public boolean hasAuthorityToAddMappingFile() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddMappingFile();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the user.
+&nbsp;     *
+&nbsp;     * @return True if the current user has the authority to add the user
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddUser() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddUser();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the role.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the role
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddRole() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddRole();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the client.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddClient() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to add the authority.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to add the authority
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddAuthority() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddAuthority();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to add anything on user page. It returns
+&nbsp;     * true if user has at least one of below given authorities.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;addUser&#39; or &#39;addRole&#39; or &#39;addClient&#39; or
+&nbsp;     *         &#39;addLdapGroup&#39; or &#39;addLdapServer&#39; globally or for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddOnUserPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddOnUserPage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to add anything on project page. It
+&nbsp;     * returns true if user has at least one of below given authorities.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;addProject&#39; or &#39;addTemplate&#39; or
+&nbsp;     *         &#39;addWorkflow&#39; or &#39;addDocket&#39; or &#39;addRuleset&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToAddOnProjectPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToAddOnProjectPage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the batch.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the batch
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteBatch() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteBatch();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the process.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the process
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteProcess() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteProcess();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the tak.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the task
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteTask() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteTask();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the project.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the project
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteProject() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteProject();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the template.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the template
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteTemplate() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteTemplate();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the workflow.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the workflow
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteWorkflow() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteWorkflow();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the docket.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the docket
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteDocket() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteDocket();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the ruleset.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the ruleset
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteRuleset() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteRuleset();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete import configuration.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete import configuration
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteImportConfiguration() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteImportConfiguration();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete mapping file object.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete mapping file object
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteMappingFile() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteMappingFile();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the user.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the user
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteUser() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteUser();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the role.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the role
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteRole() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteRole();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the client.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteClient() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete the authority.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to delete the authority
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteAuthority() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteAuthority();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the task.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the task
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditTask() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditTask();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the task.
+&nbsp;     *
+&nbsp;     * @param taskId the specific taskId
+&nbsp;     * @return true if the current user has the authority to edit the task
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditTask(int taskId) throws DataException {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditTask(taskId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the batch.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the batch
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditBatch() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditBatch();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the process.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the process
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditProcess() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditProcess();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the process.
+&nbsp;     *
+&nbsp;     * @param processId the specific processId
+&nbsp;     * @return true if the current user has the authority to edit the process
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditProcess(int processId) throws DataException {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditProcess(processId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the project.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the project
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditProject() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditProject();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the project.
+&nbsp;     *
+&nbsp;     * @param projectId the specific projectId
+&nbsp;     * @return true if the current user has the authority to edit the project
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditProject(int projectId) {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditProject(projectId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the template.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the template
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditTemplate() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditTemplate();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the workflow.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the workflow
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditWorkflow() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditWorkflow();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the docket.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the docket
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditDocket() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditDocket();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the ruleset.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the ruleset
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditRuleset() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditRuleset();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the user.
+&nbsp;     *
+&nbsp;     * @return True if the current user has the authority to edit the user
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditUser() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditUser();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit import configuration.
+&nbsp;     *
+&nbsp;     * @return True if the current user has the authority to edit import configuration
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditImportConfiguration() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditImportConfiguration();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit mapping file.
+&nbsp;     *
+&nbsp;     * @return True if the current user has the authority to edit mapping file
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditMappingFile() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditMappingFile();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to unassign all tasks in progress of a user.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to unassign all tasks in progress of a user
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToUnassignTasks() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToUnassignTasks();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to upload media in metadataeditor.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to to upload media in metadataeditor
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToUploadMedia() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToUploadMedia();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the role.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the role
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditRole() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditRole();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the client.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditClient() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the authority.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the authority
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditAuthority() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditAuthority();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the index.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the index
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditIndex() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditIndex();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to export process.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to export process
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToExportProcess() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToExportProcess();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the process.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the process
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProcess() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProcess();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the process.
+&nbsp;     *
+&nbsp;     * @param processId the specific processId
+&nbsp;     * @return true if the current user has the authority to view the process
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProcess(int processId) throws DataException {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProcess(processId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the project.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the project
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProject() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProject();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the project.
+&nbsp;     *
+&nbsp;     * @param projectId the specific projectId
+&nbsp;     * @return true if the current user has the authority to view the project
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProject(int projectId) {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProject(projectId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the template.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the template
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewTemplate() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewTemplate();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the workflow.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the workflow
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewWorkflow() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewWorkflow();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the docket.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the docket
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewDocket() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewDocket();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the ruleset.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the ruleset
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewRuleset() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewRuleset();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view import configuration.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view import configuration
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewImportConfiguration() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewImportConfiguration();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view mapping file.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view mapping file
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewMappingFile() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewMappingFile();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the user.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the user
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewUser() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewUser();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to change the user config.
+&nbsp;     *
+&nbsp;     * @param userId
+&nbsp;     *            id of the viewed user
+&nbsp;     * @return true if the current user has the authority to change the user config
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToConfigUser(int userId) {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToConfigUser(userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the role.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the role
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewRole() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewRole();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the client.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewClient() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the authority.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the authority
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewAuthority() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewAuthority();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view process page. It returns true if
+&nbsp;     * user has at least one of below given authorities.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllProcesses&#39; or &#39;viewAllBatches&#39; for
+&nbsp;     *         client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProcessPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAnyAuthorityForClient(&quot;viewAllProcesses, viewAllBatches&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view project page. It returns true if
+&nbsp;     * user has at least one of below given authorities.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllProjects&#39; or &#39;viewAllTemplates&#39; or
+&nbsp;     *         &#39;viewAllWorkflows&#39; or &#39;viewAllDockets&#39; or &#39;viewAllRulesets&#39; for
+&nbsp;     *         client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProjectPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAnyAuthorityForClient(</b>
+&nbsp;            &quot;viewAllProjects, viewAllTemplates, viewAllWorkflows, viewAllDockets, viewAllRulesets&quot;);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view system page. It returns true if
+&nbsp;     * user has at least one of below given authorities.
+&nbsp;     *
+&nbsp;     * @return true if user has authority to &#39;viewIndex&#39;, &#39;viewTaskManager&#39;, &#39;viewTerms&#39; or &#39;viewMigration&#39;.
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewSystemPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewIndexPage()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToViewTaskManagerPage()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToViewTermsPage()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToViewMigrationPage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view index page.
+&nbsp;     *
+&nbsp;     * @return true if user has authority to &#39;viewIndex&#39; page.
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewIndexPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewIndexPage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view task manager page.
+&nbsp;     *
+&nbsp;     * @return true if user has authority to &#39;viewTaskManager&#39; page.
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewTaskManagerPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewTaskManagerPage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view terms page.
+&nbsp;     *
+&nbsp;     * @return true if user has authority to &#39;viewTerms&#39; page.
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewTermsPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewTermsPage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view migration page.
+&nbsp;     *
+&nbsp;     * @return true if user has authority to &#39;viewMigration&#39; page.
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewMigrationPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewMigrationPage();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view task page. It returns true if
+&nbsp;     * user has &quot;viewAllTasks&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllTasks&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewTaskPage() {
+<b class="nc">&nbsp;        return hasAuthorityToViewTaskList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view user page. It returns true if
+&nbsp;     * user has at least one of below given authorities.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllUsers&#39; or &#39;viewAllRoles&#39; or
+&nbsp;     *         &#39;viewAllClients&#39; or &#39;viewAllLdapGroups&#39; or &#39;viewAllLdapServers&#39;
+&nbsp;     *         globally or for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewUserPage() {
+<b class="nc">&nbsp;        return securityAccessService.hasAnyAuthorityGlobalOrForClient(</b>
+&nbsp;            &quot;viewAllUsers, viewAllRoles, viewAllClients, viewAllLdapGroups, viewAllLdapServers&quot;);
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view task list. It returns true if
+&nbsp;     * user has &quot;viewAllTasks&quot; authority for client. It is exactly the same
+&nbsp;     * authority as task page so it uses the same method.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllTasks&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewTaskList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewTaskList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view batch list. It returns true if
+&nbsp;     * user has &quot;viewAllBatches&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllBatches&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewBatchList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewBatchList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view process list. It returns true if
+&nbsp;     * user has &quot;viewAllProcesses&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllProcesses&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProcessList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProcessList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view project list. It returns true if
+&nbsp;     * user has &quot;viewAllProjects&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllProjects&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProjectList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProjectList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view template list. It returns true if
+&nbsp;     * user has &quot;viewAllTemplates&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllTemplates&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewTemplateList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewTemplateList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view workflow list. It returns true if
+&nbsp;     * user has &quot;viewAllWorkflows&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllWorkflows&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewWorkflowList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewWorkflowList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view docket list. It returns true if
+&nbsp;     * user has &quot;viewAllDockets&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllDockets&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewDocketList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewDocketList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view ruleset list. It returns true if
+&nbsp;     * user has &quot;viewAllRulesets&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllRulesets&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewRulesetList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewRulesetList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view import configuration list. It returns true if
+&nbsp;     * user has &quot;viewAllImportConfigurations&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllImportConfigurations&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewImportConfigurationList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewImportConfigurationList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view mapping file list. It returns true if
+&nbsp;     * user has &quot;viewAllMappingFiles&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllMappingFiles&#39; for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewMappingFileList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewMappingFileList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view user list. It returns true if
+&nbsp;     * user has &quot;viewAllUsers&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllUsers&#39; globally or for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewUserList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewUserList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view role list. It returns true if
+&nbsp;     * user has &quot;viewAllRoles&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllRoles&#39; globally or for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewRoleList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewRoleList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view client list. It returns true if
+&nbsp;     * user has &quot;viewAllClients&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllClients&#39; globally or for client
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewClientList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewClientList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has global authority to view authority list. It returns
+&nbsp;     * true if user has &quot;viewAllAuthorities&quot; authority globally.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllAuthorities&#39; globally
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewAuthorityList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewAuthorityList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view LDAP group list. It returns true
+&nbsp;     * if user has &quot;viewAllLdapGroups&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllLdapGroups&#39; globally
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewLdapGroupList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewLdapGroupList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if current user has authority to view LDAP server list. It returns true
+&nbsp;     * if user has &quot;viewAllLdapServers&quot; authority for client.
+&nbsp;     *
+&nbsp;     * @return true if user has authority &#39;viewAllLdapServers&#39; globally
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewLdapServerList() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewLdapServerList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if current user has global authority for add or edit role. If yes,
+&nbsp;     * current client is not assigned to created or edited role.
+&nbsp;     *
+&nbsp;     * @return true if current user has global authority for add or edit role
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityGlobalToAddOrEditRole() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityGlobalToAddOrEditRole();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if current user has authority to configure displayed columns in list
+&nbsp;     * views.
+&nbsp;     *
+&nbsp;     * @return true if current user has authority to configure columns
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToConfigureColumns() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToConfigureColumns();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the process metadata.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the process
+&nbsp;     *         metadata
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditProcessMetaData() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditProcessMetaData();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the process metadata.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the process
+&nbsp;     *         metadata
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProcessMetaData() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProcessMetaData();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the process structure
+&nbsp;     * data.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the process
+&nbsp;     *         structure data
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditProcessStructureData() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditProcessStructureData();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the process structure
+&nbsp;     * data.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the process
+&nbsp;     *         structure data
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProcessStructureData() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProcessStructureData();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the process images.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the process images
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditProcessImages() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditProcessImages();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the process images.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the process images
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProcessImages() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProcessImages();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to edit the process pagination.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to edit the process pagination
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToEditProcessPagination() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToEditProcessPagination();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the process pagination.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view the process pagination
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewProcessPagination() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProcessPagination();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to open the metadata editor.
+&nbsp;     * Access to the metadata editor is granted if the user has the authority to
+&nbsp;     * view or edit data in any part of the editor.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view or edit any part
+&nbsp;     *         of the data in the metadata editor
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToOpenMetadataEditor() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewProcessMetaData()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToEditProcessMetaData()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToViewProcessStructureData()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToEditProcessStructureData()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToViewProcessImages()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToEditProcessImages()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToViewProcessPagination()</b>
+<b class="nc">&nbsp;                || securityAccessService.hasAuthorityToEditProcessPagination();</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to delete media in metadata editor.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to to delete media in metadata editor
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToDeleteMedia() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToDeleteMedia();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to view the database statistics.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to view database statistics
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToViewDatabaseStatistics() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToViewDatabaseStatistic();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has the authority to run Kitodo scripts.
+&nbsp;     *
+&nbsp;     * @return true if the current user has the authority to run Kitodo scripts.
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityToRunKitodoScripts() {
+<b class="nc">&nbsp;        return securityAccessService.hasAuthorityToRunKitodoScripts();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

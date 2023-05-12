@@ -1,0 +1,360 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Reader</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.workflow.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Reader (org.kitodo.production.workflow.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Reader</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (12/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (50/60)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.workflow.model;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.camunda.bpm.model.bpmn.Bpmn;
+&nbsp;import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+&nbsp;import org.camunda.bpm.model.bpmn.Query;
+&nbsp;import org.camunda.bpm.model.bpmn.instance.EndEvent;
+&nbsp;import org.camunda.bpm.model.bpmn.instance.FlowNode;
+&nbsp;import org.camunda.bpm.model.bpmn.instance.Gateway;
+&nbsp;import org.camunda.bpm.model.bpmn.instance.Process;
+&nbsp;import org.camunda.bpm.model.bpmn.instance.StartEvent;
+&nbsp;import org.camunda.bpm.model.bpmn.instance.Task;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.exceptions.WorkflowException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.workflow.model.beans.TaskInfo;
+&nbsp;
+&nbsp;public class Reader {
+&nbsp;
+&nbsp;    private BpmnModelInstance modelInstance;
+&nbsp;    private Map&lt;Task, TaskInfo&gt; tasks;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor with diagram name as parameter. It loads modelInstance from file
+&nbsp;     * for given name.
+&nbsp;     *
+&nbsp;     * @param diagramName
+&nbsp;     *            as String
+&nbsp;     * @throws IOException
+&nbsp;     *             in case if file for given name doesn&#39;t exist
+&nbsp;     */
+<b class="fc">&nbsp;    public Reader(String diagramName) throws IOException {</b>
+<b class="fc">&nbsp;        String diagramPath = ConfigCore.getKitodoDiagramDirectory() + diagramName + &quot;.bpmn20.xml&quot;;</b>
+<b class="fc">&nbsp;        loadProcess(ServiceManager.getFileService().read(Paths.get(diagramPath).toUri()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor with diagram name as parameter. It loads modelInstance for xml
+&nbsp;     * with given content.
+&nbsp;     *
+&nbsp;     * @param diagramXmlContent
+&nbsp;     *            as InputStream
+&nbsp;     * @throws IOException
+&nbsp;     *             in case if input stream contains incorrect data
+&nbsp;     */
+<b class="nc">&nbsp;    public Reader(InputStream diagramXmlContent) throws IOException {</b>
+<b class="nc">&nbsp;        loadProcess(diagramXmlContent);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method reads workflow tasks, in case reading fails it throws
+&nbsp;     * WorkflowException.
+&nbsp;     *
+&nbsp;     * @throws WorkflowException
+&nbsp;     *             is thrown when reading of the tasks fail, exception message
+&nbsp;     *             explains what caused problem
+&nbsp;     */
+&nbsp;    public void validateWorkflowTasks() throws WorkflowException {
+<b class="nc">&nbsp;        readWorkflowTasks();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get tasks.
+&nbsp;     *
+&nbsp;     * @return value of tasks
+&nbsp;     */
+&nbsp;    public Map&lt;Task, TaskInfo&gt; getTasks() {
+<b class="fc">&nbsp;        return tasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set tasks as map of BPMN Task objects. Key is BPMN Task and value is
+&nbsp;     * TaskInfo.
+&nbsp;     *
+&nbsp;     * @param tasks
+&nbsp;     *            as map of BPMN Task objects
+&nbsp;     */
+&nbsp;    public void setTasks(Map&lt;Task, TaskInfo&gt; tasks) {
+<b class="nc">&nbsp;        this.tasks = tasks;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void readWorkflowTasks() throws WorkflowException {
+<b class="fc">&nbsp;        tasks = new LinkedHashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        StartEvent startEvent = modelInstance.getModelElementsByType(StartEvent.class).iterator().next();</b>
+<b class="fc">&nbsp;        if (startEvent.getOutgoing().iterator().hasNext()) {</b>
+<b class="fc">&nbsp;            iterateOverNodes(startEvent.getOutgoing().iterator().next().getTarget());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Read the workflow from diagram.
+&nbsp;     *
+&nbsp;     * @param diagramXmlContent
+&nbsp;     *            as InputStream
+&nbsp;     */
+&nbsp;    private void loadProcess(InputStream diagramXmlContent) throws IOException {
+<b class="fc">&nbsp;        modelInstance = Bpmn.readModelFromStream(diagramXmlContent);</b>
+<b class="fc">&nbsp;        getWorkflowFromProcess();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get workflow from process inside the given file.
+&nbsp;     */
+&nbsp;    private void getWorkflowFromProcess() throws IOException {
+<b class="fc">&nbsp;        Process process = modelInstance.getModelElementsByType(Process.class).iterator().next();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.isNull(process)) {</b>
+<b class="nc">&nbsp;            throw new IOException(&quot;It looks that given file or input stream contains invalid BPMN diagram!&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Iterate over diagram nodes.
+&nbsp;     *
+&nbsp;     * @param node
+&nbsp;     *            for current iteration call
+&nbsp;     */
+&nbsp;    private void iterateOverNodes(FlowNode node) throws WorkflowException {
+<b class="fc">&nbsp;        iterateOverNodes(node, 1);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Iterate over diagram nodes.
+&nbsp;     *
+&nbsp;     * @param node
+&nbsp;     *            for current iteration call
+&nbsp;     * @param ordering
+&nbsp;     *            of task
+&nbsp;     */
+&nbsp;    private void iterateOverNodes(FlowNode node, int ordering) throws WorkflowException {
+<b class="fc">&nbsp;        if (node instanceof Task) {</b>
+<b class="fc">&nbsp;            addTask((Task) node, ordering);</b>
+<b class="fc">&nbsp;        } else if (node instanceof Gateway) {</b>
+<b class="fc">&nbsp;            Query&lt;FlowNode&gt; nextNodes = node.getSucceedingNodes();</b>
+<b class="fc">&nbsp;            if (nextNodes.count() == 1) {</b>
+<b class="fc">&nbsp;                if (node.getPreviousNodes().count() &gt; 1) {</b>
+<b class="fc">&nbsp;                    iterateOverNodes(nextNodes.singleResult(), ordering);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    throw new WorkflowException(Helper.getTranslation(&quot;workflowExceptionParallelGatewayOneTask&quot;));</b>
+&nbsp;                }
+<b class="fc">&nbsp;            } else if (nextNodes.count() &gt; 1) {</b>
+<b class="fc">&nbsp;                addParallelTasksBranch(nextNodes.list(), ordering);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                throw new WorkflowException(Helper.getTranslation(&quot;workflowExceptionParallelGatewayNoTask&quot;));</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add all tasks for parallel execution - following given parallel gateway until
+&nbsp;     * ending parallel gateway.
+&nbsp;     *
+&nbsp;     * @param nodes
+&nbsp;     *            nodes of parallel gateway
+&nbsp;     * @param ordering
+&nbsp;     *            of task
+&nbsp;     */
+&nbsp;    private void addParallelTasksBranch(List&lt;FlowNode&gt; nodes, int ordering) throws WorkflowException {
+<b class="fc">&nbsp;        for (FlowNode node : nodes) {</b>
+<b class="fc">&nbsp;            if (isBranchInvalid(node)) {</b>
+<b class="fc">&nbsp;                throw new WorkflowException(Helper.getTranslation(&quot;workflowExceptionParallelBranch&quot;,</b>
+<b class="fc">&nbsp;                    node.getName()));</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            iterateOverNodes(node, ordering);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isBranchInvalid(FlowNode node) {
+<b class="fc">&nbsp;        List&lt;FlowNode&gt; nextNodes = node.getSucceedingNodes().list();</b>
+<b class="fc">&nbsp;        for (FlowNode nextNode : nextNodes) {</b>
+<b class="fc">&nbsp;            if (nextNode instanceof Task) {</b>
+<b class="fc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add task to tasks list. If task has 0 following nodes, it makes assumption
+&nbsp;     * that it is the last task in the workflow.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            for task
+&nbsp;     * @param ordering
+&nbsp;     *            for task
+&nbsp;     */
+&nbsp;    private void addTask(Task task, int ordering) throws WorkflowException {
+<b class="fc">&nbsp;        Query&lt;FlowNode&gt; nextNodes = task.getSucceedingNodes();</b>
+<b class="fc">&nbsp;        int nextNodesSize = nextNodes.count();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (nextNodesSize == 1) {</b>
+<b class="fc">&nbsp;            FlowNode nextNode = nextNodes.singleResult();</b>
+&nbsp;
+<b class="fc">&nbsp;            if (nextNode instanceof EndEvent) {</b>
+<b class="fc">&nbsp;                addTaskIfThereIsNoLoop(task, new TaskInfo(ordering, true));</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                addTaskIfThereIsNoLoop(task, new TaskInfo(ordering, false));</b>
+<b class="fc">&nbsp;                ordering++;</b>
+<b class="fc">&nbsp;                iterateOverNodes(nextNode, ordering);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } else if (nextNodesSize == 0) {</b>
+<b class="nc">&nbsp;            addTaskIfThereIsNoLoop(task, new TaskInfo(ordering, true));</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new WorkflowException(Helper.getTranslation(&quot;workflowExceptionMissingGateway&quot;,</b>
+<b class="nc">&nbsp;                task.getName()));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If there are more than one incoming node - it can mean that loop has appeared
+&nbsp;     * (more incoming nodes than outgoing).
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            for verification if there is no loop
+&nbsp;     * @param taskInfo
+&nbsp;     *            additional information needed for add task
+&nbsp;     */
+&nbsp;    private void addTaskIfThereIsNoLoop(Task task, TaskInfo taskInfo) throws WorkflowException {
+<b class="fc">&nbsp;        Query&lt;FlowNode&gt; previousNodes = task.getPreviousNodes();</b>
+<b class="fc">&nbsp;        if (previousNodes.count() == 1) {</b>
+<b class="fc">&nbsp;            tasks.put(task, taskInfo);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            throw new WorkflowException(</b>
+<b class="fc">&nbsp;                    Helper.getTranslation(&quot;workflowExceptionLoop&quot;, task.getName()));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get modelInstance.
+&nbsp;     *
+&nbsp;     * @return value of modelInstance
+&nbsp;     */
+&nbsp;    BpmnModelInstance getModelInstance() {
+<b class="fc">&nbsp;        return modelInstance;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

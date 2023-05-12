@@ -1,0 +1,399 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SchemaService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.schema</a>
+</div>
+
+<h1>Coverage Summary for Class: SchemaService (org.kitodo.production.services.schema)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SchemaService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (9/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37,2%
+  </span>
+  <span class="absValue">
+    (45/121)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.schema;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import org.apache.commons.io.FilenameUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.kitodo.api.MdSec;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.api.dataformat.MediaVariant;
+&nbsp;import org.kitodo.api.dataformat.PhysicalDivision;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.dataformat.mets.LinkedMetsResource;
+&nbsp;import org.kitodo.data.database.beans.Folder;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.enums.LinkingMode;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.helper.VariableReplacer;
+&nbsp;import org.kitodo.production.metadata.MetadataEditor;
+&nbsp;import org.kitodo.production.model.Subfolder;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.dataformat.MetsService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Service for schema manipulations.
+&nbsp; */
+<b class="fc">&nbsp;public class SchemaService {</b>
+&nbsp;    /**
+&nbsp;     * A service that can read METS files.
+&nbsp;     */
+<b class="fc">&nbsp;    private final MetsService metsService = ServiceManager.getMetsService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A service that can access processes.
+&nbsp;     */
+<b class="fc">&nbsp;    private final ProcessService processService = ServiceManager.getProcessService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Temporal method for separate file conversion from ExportMets class
+&nbsp;     * (method writeMetsFile).
+&nbsp;     *
+&nbsp;     * @param workpiece
+&nbsp;     *            class inside method is used
+&nbsp;     * @param process
+&nbsp;     *            object
+&nbsp;     */
+&nbsp;    public void tempConvert(Workpiece workpiece, Process process) throws IOException, DAOException, URISyntaxException {
+&nbsp;        /*
+&nbsp;         * wenn Filegroups definiert wurden, werden diese jetzt in die
+&nbsp;         * Metsstruktur übernommen
+&nbsp;         */
+&nbsp;        // Replace all paths with the given VariableReplacer, also the file
+&nbsp;        // group paths!
+<b class="fc">&nbsp;        VariableReplacer vp = new VariableReplacer(workpiece, process, null);</b>
+&nbsp;
+<b class="fc">&nbsp;        addVirtualFileGroupsToMetsMods(workpiece.getPhysicalStructure(), process);</b>
+<b class="fc">&nbsp;        replaceFLocatForExport(workpiece, process);</b>
+&nbsp;
+&nbsp;        // Replace rights and digiprov entries.
+<b class="fc">&nbsp;        set(workpiece, MdSec.RIGHTS_MD, &quot;owner&quot;, vp.replace(process.getProject().getMetsRightsOwner()));</b>
+<b class="fc">&nbsp;        set(workpiece, MdSec.RIGHTS_MD, &quot;ownerLogo&quot;, vp.replace(process.getProject().getMetsRightsOwnerLogo()));</b>
+<b class="fc">&nbsp;        set(workpiece, MdSec.RIGHTS_MD, &quot;ownerSiteURL&quot;, vp.replace(process.getProject().getMetsRightsOwnerSite()));</b>
+<b class="fc">&nbsp;        set(workpiece, MdSec.RIGHTS_MD, &quot;ownerContact&quot;, vp.replace(process.getProject().getMetsRightsOwnerMail()));</b>
+<b class="fc">&nbsp;        set(workpiece, MdSec.DIGIPROV_MD, &quot;presentation&quot;,</b>
+<b class="fc">&nbsp;            vp.replace(process.getProject().getMetsDigiprovPresentation()));</b>
+<b class="fc">&nbsp;        set(workpiece, MdSec.DIGIPROV_MD, &quot;reference&quot;, vp.replace(process.getProject().getMetsDigiprovReference()));</b>
+&nbsp;
+<b class="fc">&nbsp;        set(workpiece, MdSec.TECH_MD, &quot;purlUrl&quot;, vp.replace(process.getProject().getMetsPurl()));</b>
+<b class="fc">&nbsp;        set(workpiece, MdSec.TECH_MD, &quot;contentIDs&quot;, vp.replace(process.getProject().getMetsContentIDs()));</b>
+&nbsp;
+<b class="fc">&nbsp;        convertChildrenLinksForExportRecursive(workpiece.getLogicalStructure());</b>
+<b class="fc">&nbsp;        assignViewsFromChildrenRecursive(workpiece.getLogicalStructure());</b>
+<b class="fc">&nbsp;        enumerateLogicalDivisions(workpiece.getLogicalStructure(), 0, 1, false);</b>
+<b class="fc">&nbsp;        addLinksToParents(process, workpiece);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * At all levels, assigns the views of the children to the included
+&nbsp;     * structural elements.
+&nbsp;     *
+&nbsp;     * @param logicalDivision
+&nbsp;     *            logical division on which the recursion is
+&nbsp;     *            performed
+&nbsp;     */
+&nbsp;    private void assignViewsFromChildrenRecursive(LogicalDivision logicalDivision) {
+<b class="fc">&nbsp;        List&lt;LogicalDivision&gt; children = logicalDivision.getChildren();</b>
+<b class="fc">&nbsp;        if (!children.isEmpty()) {</b>
+<b class="nc">&nbsp;            for (LogicalDivision child : children) {</b>
+<b class="nc">&nbsp;                assignViewsFromChildrenRecursive(child);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(logicalDivision.getType())) {</b>
+<b class="nc">&nbsp;                MetadataEditor.assignViewsFromChildren(logicalDivision);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void set(Workpiece workpiece, MdSec domain, String key, String value) {
+<b class="fc">&nbsp;        if (StringUtils.isNotEmpty(value)) {</b>
+<b class="fc">&nbsp;            MetadataEntry entry = new MetadataEntry();</b>
+<b class="fc">&nbsp;            entry.setKey(key);</b>
+<b class="fc">&nbsp;            entry.setDomain(domain);</b>
+<b class="fc">&nbsp;            entry.setValue(value);</b>
+<b class="fc">&nbsp;            workpiece.getLogicalStructure().getMetadata().add(entry);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addVirtualFileGroupsToMetsMods(PhysicalDivision physicalDivision, Process process) {
+<b class="fc">&nbsp;        String canonical = ServiceManager.getFolderService().getCanonical(process, physicalDivision);</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(canonical)) {</b>
+<b class="nc">&nbsp;            removeFLocatsForUnwantedUses(process, physicalDivision, canonical);</b>
+<b class="nc">&nbsp;            addMissingUses(process, physicalDivision, canonical);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (PhysicalDivision child : physicalDivision.getChildren()) {</b>
+<b class="nc">&nbsp;            addVirtualFileGroupsToMetsMods(child, process);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void replaceFLocatForExport(Workpiece workpiece, Process process)
+&nbsp;            throws URISyntaxException {
+<b class="fc">&nbsp;        List&lt;Folder&gt; folders = process.getProject().getFolders();</b>
+<b class="fc">&nbsp;        VariableReplacer variableReplacer = new VariableReplacer(workpiece, process, null);</b>
+<b class="fc">&nbsp;        for (PhysicalDivision physicalDivision : workpiece.getAllPhysicalDivisions()) {</b>
+<b class="fc">&nbsp;            for (Entry&lt;MediaVariant, URI&gt; mediaFileForMediaVariant : physicalDivision.getMediaFiles().entrySet()) {</b>
+<b class="nc">&nbsp;                for (Folder folder : folders) {</b>
+<b class="nc">&nbsp;                    if (folder.getFileGroup().equals(mediaFileForMediaVariant.getKey().getUse())) {</b>
+<b class="nc">&nbsp;                        String mediaFileWithPath = mediaFileForMediaVariant.getValue().toString(); </b>
+<b class="nc">&nbsp;                        String mediaFilename = FilenameUtils.getName(mediaFileWithPath);</b>
+<b class="nc">&nbsp;                        String mediaFile = variableReplacer.containsFiles(folder.getUrlStructure())</b>
+<b class="nc">&nbsp;                                ? variableReplacer.replaceWithFilename(folder.getUrlStructure(), mediaFileWithPath)</b>
+<b class="nc">&nbsp;                                : variableReplacer.replace(folder.getUrlStructure() + mediaFilename);</b>
+<b class="nc">&nbsp;                        mediaFileForMediaVariant.setValue(new URI(mediaFile));</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            }</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the physical division contains a media variant that is unknown, has linking
+&nbsp;     * mode NO or has linking mode EXISTING but the file does not exist, remove
+&nbsp;     * it.
+&nbsp;     */
+&nbsp;    private void removeFLocatsForUnwantedUses(Process process,
+&nbsp;            PhysicalDivision physicalDivision,
+&nbsp;            String canonical) {
+<b class="nc">&nbsp;        for (Iterator&lt;Entry&lt;MediaVariant, URI&gt;&gt; mediaFilesForMediaVariants = physicalDivision.getMediaFiles().entrySet()</b>
+<b class="nc">&nbsp;                .iterator(); mediaFilesForMediaVariants.hasNext();) {</b>
+<b class="nc">&nbsp;            Entry&lt;MediaVariant, URI&gt; mediaFileForMediaVariant = mediaFilesForMediaVariants.next();</b>
+<b class="nc">&nbsp;            String use = mediaFileForMediaVariant.getKey().getUse();</b>
+<b class="nc">&nbsp;            Optional&lt;Folder&gt; optionalFolderForUse = process.getProject().getFolders().parallelStream()</b>
+<b class="nc">&nbsp;                    .filter(folder -&gt; use.equals(folder.getFileGroup())).findAny();</b>
+<b class="nc">&nbsp;            if (optionalFolderForUse.isEmpty()</b>
+<b class="nc">&nbsp;                    || optionalFolderForUse.get().getLinkingMode().equals(LinkingMode.NO)</b>
+<b class="nc">&nbsp;                    || (optionalFolderForUse.get().getLinkingMode().equals(LinkingMode.EXISTING)</b>
+<b class="nc">&nbsp;                            &amp;&amp; new Subfolder(process, optionalFolderForUse.get()).getURIIfExists(canonical)</b>
+<b class="nc">&nbsp;                                    .isPresent())) {</b>
+<b class="nc">&nbsp;                mediaFilesForMediaVariants.remove();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the physical division is missing a variant that has linking mode ALL or has
+&nbsp;     * linking mode EXISTING and the file does exist, add it.
+&nbsp;     */
+&nbsp;    private void addMissingUses(Process process, PhysicalDivision physicalDivision,
+&nbsp;            String canonical) {
+<b class="nc">&nbsp;        for (Folder folder : process.getProject().getFolders()) {</b>
+<b class="nc">&nbsp;            Subfolder useFolder = new Subfolder(process, folder);</b>
+<b class="nc">&nbsp;            if (physicalDivision.getMediaFiles().entrySet().parallelStream().map(Entry::getKey).map(MediaVariant::getUse)</b>
+<b class="nc">&nbsp;                    .noneMatch(use -&gt; use.equals(folder.getFileGroup())) &amp;&amp; (folder.getLinkingMode().equals(LinkingMode.ALL)</b>
+<b class="nc">&nbsp;                        || (folder.getLinkingMode().equals(LinkingMode.EXISTING) &amp;&amp; useFolder.getURIIfExists(canonical).isPresent()))) {</b>
+<b class="nc">&nbsp;                addUse(useFolder, canonical, physicalDivision);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a use to a physical division.
+&nbsp;     *
+&nbsp;     * @param subfolder
+&nbsp;     *            subfolder for the use
+&nbsp;     * @param canonical
+&nbsp;     *            the canonical part of the file name of the media file
+&nbsp;     * @param physicalDivision
+&nbsp;     *            physical division to add to
+&nbsp;     */
+&nbsp;    private void addUse(Subfolder subfolder, String canonical, PhysicalDivision physicalDivision) {
+<b class="nc">&nbsp;        MediaVariant mediaVariant = new MediaVariant();</b>
+<b class="nc">&nbsp;        mediaVariant.setUse(subfolder.getFolder().getFileGroup());</b>
+<b class="nc">&nbsp;        mediaVariant.setMimeType(subfolder.getFolder().getMimeType());</b>
+<b class="nc">&nbsp;        URI mediaFile = subfolder.getRelativeFilePath(canonical);</b>
+<b class="nc">&nbsp;        physicalDivision.getMediaFiles().put(mediaVariant, mediaFile);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Replaces internal links in child structure elements with a publicly
+&nbsp;     * resolvable link. Checks whether the linked process has not yet been
+&nbsp;     * exported, in which case the link from the parental list will be deleted.
+&nbsp;     *
+&nbsp;     * @param structure
+&nbsp;     *            current structure
+&nbsp;     * @return whether the current structure shall be deleted
+&nbsp;     */
+&nbsp;    private boolean convertChildrenLinksForExportRecursive(LogicalDivision structure) throws DAOException, IOException {
+&nbsp;
+<b class="fc">&nbsp;        LinkedMetsResource link = structure.getLink();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(link)) {</b>
+<b class="nc">&nbsp;            int linkedProcessId = processService.processIdFromUri(link.getUri());</b>
+<b class="nc">&nbsp;            Process process = processService.getById(linkedProcessId);</b>
+<b class="nc">&nbsp;            if (!process.isExported()) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            setLinkForExport(structure, process);</b>
+<b class="nc">&nbsp;            copyLabelAndOrderlabel(process, structure);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (Iterator&lt;LogicalDivision&gt; iterator = structure.getChildren().iterator(); iterator.hasNext();) {</b>
+<b class="nc">&nbsp;            if (convertChildrenLinksForExportRecursive(iterator.next())) {</b>
+<b class="nc">&nbsp;                iterator.remove();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private int enumerateLogicalDivisions(LogicalDivision logicalDivision, int elementCount,
+&nbsp;            int journalIssueCount, boolean journalIssue) {
+&nbsp;
+<b class="fc">&nbsp;        boolean untyped = Objects.isNull(logicalDivision.getType());</b>
+<b class="fc">&nbsp;        logicalDivision.setOrder(untyped ? 0 : (journalIssue ? journalIssueCount++ : elementCount));</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; logicalDivision.getChildren().size(); i++) {</b>
+<b class="nc">&nbsp;            journalIssueCount = enumerateLogicalDivisions(logicalDivision.getChildren().get(i), i + 1,</b>
+&nbsp;                journalIssueCount, untyped);
+&nbsp;        }
+<b class="fc">&nbsp;        return journalIssueCount;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addLinksToParents(Process process, Workpiece workpiece) throws IOException {
+<b class="fc">&nbsp;        Process parentProcess = process.getParent();</b>
+<b class="fc">&nbsp;        while (Objects.nonNull(parentProcess)) {</b>
+<b class="nc">&nbsp;            addParentLinkForExport(workpiece, parentProcess);</b>
+<b class="nc">&nbsp;            parentProcess = parentProcess.getParent();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addParentLinkForExport(Workpiece workpiece, Process parent) throws IOException {
+<b class="nc">&nbsp;        LogicalDivision linkHolder = new LogicalDivision();</b>
+<b class="nc">&nbsp;        linkHolder.setLink(new LinkedMetsResource());</b>
+<b class="nc">&nbsp;        setLinkForExport(linkHolder, parent);</b>
+<b class="nc">&nbsp;        linkHolder.getChildren().add(workpiece.getLogicalStructure());</b>
+<b class="nc">&nbsp;        copyLabelAndOrderlabel(parent, linkHolder);</b>
+<b class="nc">&nbsp;        workpiece.setLogicalStructure(linkHolder);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setLinkForExport(LogicalDivision structure, Process process) throws IOException {
+&nbsp;
+<b class="nc">&nbsp;        LinkedMetsResource link = structure.getLink();</b>
+<b class="nc">&nbsp;        link.setLoctype(&quot;URL&quot;);</b>
+<b class="nc">&nbsp;        String uriWithVariables = process.getProject().getMetsPointerPath();</b>
+<b class="nc">&nbsp;        Workpiece workpiece = uriWithVariables.contains(&quot;$(meta.&quot;) ? ServiceManager.getMetsService()</b>
+<b class="nc">&nbsp;                .loadWorkpiece(ServiceManager.getProcessService().getMetadataFileUri(process)) : null;</b>
+<b class="nc">&nbsp;        VariableReplacer variableReplacer = new VariableReplacer(workpiece, process, null);</b>
+<b class="nc">&nbsp;        String linkUri = variableReplacer.replace(uriWithVariables);</b>
+<b class="nc">&nbsp;        link.setUri(URI.create(linkUri));</b>
+<b class="nc">&nbsp;        structure.setType(ServiceManager.getProcessService().getBaseType(process));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void copyLabelAndOrderlabel(Process source, LogicalDivision destination) throws IOException {
+<b class="nc">&nbsp;        URI sourceMetadataUri = processService.getMetadataFileUri(source);</b>
+<b class="nc">&nbsp;        LogicalDivision sourceRoot = metsService.loadWorkpiece(sourceMetadataUri).getLogicalStructure();</b>
+<b class="nc">&nbsp;        if (Objects.isNull(destination.getLabel())) {</b>
+<b class="nc">&nbsp;            destination.setLabel(sourceRoot.getLabel());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.isNull(destination.getOrderlabel())) {</b>
+<b class="nc">&nbsp;            destination.setOrderlabel(sourceRoot.getOrderlabel());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

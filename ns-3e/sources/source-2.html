@@ -1,0 +1,466 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CatalogImportDialog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: CatalogImportDialog (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CatalogImportDialog</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    13%
+  </span>
+  <span class="absValue">
+    (3/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7,8%
+  </span>
+  <span class="absValue">
+    (9/116)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;import javax.xml.transform.TransformerException;
+&nbsp;import javax.xml.xpath.XPathExpressionException;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.FunctionalMetadata;
+&nbsp;import org.kitodo.api.externaldatamanagement.SingleHit;
+&nbsp;import org.kitodo.api.schemaconverter.ExemplarRecord;
+&nbsp;import org.kitodo.data.database.beans.ImportConfiguration;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.exceptions.CatalogException;
+&nbsp;import org.kitodo.exceptions.ConfigException;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoRecordFoundException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.exceptions.ParameterNotFoundException;
+&nbsp;import org.kitodo.exceptions.ProcessGenerationException;
+&nbsp;import org.kitodo.exceptions.UnsupportedFormatException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.TempProcess;
+&nbsp;import org.kitodo.production.model.LazyHitModel;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;import org.omnifaces.util.Ajax;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;import org.primefaces.component.datatable.DataTable;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;import org.xml.sax.SAXException;
+&nbsp;
+&nbsp;public class CatalogImportDialog  extends MetadataImportDialog implements Serializable {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(CatalogImportDialog.class);</b>
+<b class="fc">&nbsp;    private final LazyHitModel hitModel = new LazyHitModel();</b>
+&nbsp;
+&nbsp;    private static final String ID_PARAMETER_NAME = &quot;ID&quot;;
+&nbsp;    private static final String HITSTABLE_NAME = &quot;hitlistDialogForm:hitlistDialogTable&quot;;
+&nbsp;    private static final int NUMBER_OF_CHILDREN_WARNING_THRESHOLD = 5;
+&nbsp;
+<b class="fc">&nbsp;    private String currentRecordId = &quot;&quot;;</b>
+<b class="fc">&nbsp;    private boolean importChildren = false;</b>
+<b class="fc">&nbsp;    private int numberOfChildren = 0;</b>
+<b class="fc">&nbsp;    private String opacErrorMessage = &quot;&quot;;</b>
+<b class="fc">&nbsp;    private boolean additionalImport = false;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Standard constructor.
+&nbsp;     *
+&nbsp;     * @param createProcessForm CreateProcessForm instance to which this ImportTab is assigned.
+&nbsp;     */
+&nbsp;    CatalogImportDialog(CreateProcessForm createProcessForm) {
+<b class="fc">&nbsp;        super(createProcessForm);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the full record with the given ID from the catalog.
+&nbsp;     */
+&nbsp;    public void getSelectedRecord() {
+<b class="nc">&nbsp;        getRecordById(Helper.getRequestParameter(ID_PARAMETER_NAME));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of search fields.
+&nbsp;     *
+&nbsp;     * @return list of search fields
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getSearchFields() {
+<b class="nc">&nbsp;        if (Objects.isNull(hitModel.getImportConfiguration())) {</b>
+<b class="nc">&nbsp;            return new LinkedList&lt;&gt;();</b>
+&nbsp;        } else {
+&nbsp;            try {
+<b class="nc">&nbsp;                return ServiceManager.getImportService().getAvailableSearchFields(hitModel.getImportConfiguration());</b>
+<b class="nc">&nbsp;            } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;                return new LinkedList&lt;&gt;();</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Call search method of ImportService.
+&nbsp;     */
+&nbsp;    public void search() {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (skipHitList(hitModel.getImportConfiguration(), hitModel.getSelectedField())) {</b>
+<b class="nc">&nbsp;                getRecordById(hitModel.getSearchTerm());</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                List&lt;?&gt; hits = hitModel.load(0, 10, null, SortOrder.ASCENDING, Collections.EMPTY_MAP);</b>
+<b class="nc">&nbsp;                if (hits.size() == 1) {</b>
+<b class="nc">&nbsp;                    getRecordById(((SingleHit) hits.get(0)).getIdentifier());</b>
+&nbsp;                } else {
+&nbsp;                    try {
+<b class="nc">&nbsp;                        ((DataTable) FacesContext.getCurrentInstance().getViewRoot().findComponent(HITSTABLE_NAME)).reset();</b>
+<b class="nc">&nbsp;                        PrimeFaces.current().executeScript(&quot;PF(&#39;hitlistDialog&#39;).show()&quot;);</b>
+<b class="nc">&nbsp;                    } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;                        Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;                    }</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (CatalogException e) {</b>
+<b class="nc">&nbsp;            this.opacErrorMessage = e.getMessage();</b>
+<b class="nc">&nbsp;            PrimeFaces.current().ajax().update(&quot;opacErrorDialog&quot;);</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;opacErrorDialog&#39;).show();&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean skipHitList(ImportConfiguration importConfiguration, String searchField) {
+<b class="nc">&nbsp;        return ImportService.skipHitlist(importConfiguration, searchField);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get retrieved hits. Returns empty list if LazyHitModel instance is null.
+&nbsp;     *
+&nbsp;     * @return hits
+&nbsp;     */
+&nbsp;    public List&lt;SingleHit&gt; getHits() {
+<b class="nc">&nbsp;        return this.hitModel.getHits();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void showExemplarRecord() {
+<b class="nc">&nbsp;        Ajax.update(FORM_CLIENTID);</b>
+&nbsp;        // if more than one exemplar record was found, display a selection dialog to the user
+<b class="nc">&nbsp;        LinkedList&lt;ExemplarRecord&gt; exemplarRecords = ServiceManager.getImportService().getExemplarRecords();</b>
+<b class="nc">&nbsp;        if (exemplarRecords.size() == 1) {</b>
+<b class="nc">&nbsp;            this.setSelectedExemplarRecord(exemplarRecords.get(0));</b>
+<b class="nc">&nbsp;        } else if (exemplarRecords.size() &gt; 1) {</b>
+<b class="nc">&nbsp;            PrimeFaces.current().executeScript(&quot;PF(&#39;exemplarRecordsDialog&#39;).show();&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;ImportConfiguration&gt; getImportConfigurations() {
+<b class="nc">&nbsp;        if (Objects.isNull(importConfigurations)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                importConfigurations = ServiceManager.getImportConfigurationService().getAllOpacSearchConfigurations();</b>
+<b class="nc">&nbsp;            } catch (IllegalArgumentException | DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;                importConfigurations = new LinkedList&lt;&gt;();</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return importConfigurations;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve complete record hierarchy of record from currently selected catalog, including
+&nbsp;     * potential child records and ancestor records.
+&nbsp;     */
+&nbsp;    public void getRecordHierarchy() {
+<b class="nc">&nbsp;        if (StringUtils.isBlank(this.currentRecordId)) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;No record selected!&quot;);</b>
+&nbsp;        } else {
+&nbsp;            try {
+<b class="nc">&nbsp;                createProcessForm.setChildProcesses(new LinkedList&lt;&gt;());</b>
+<b class="nc">&nbsp;                int projectId = this.createProcessForm.getProject().getId();</b>
+<b class="nc">&nbsp;                int templateId = this.createProcessForm.getTemplate().getId();</b>
+<b class="nc">&nbsp;                ImportConfiguration importConfiguration = this.hitModel.getImportConfiguration();</b>
+&nbsp;
+&nbsp;                // import current and ancestors
+<b class="nc">&nbsp;                LinkedList&lt;TempProcess&gt; processes = ServiceManager.getImportService().importProcessHierarchy(</b>
+<b class="nc">&nbsp;                        currentRecordId, importConfiguration, projectId, templateId, hitModel.getImportDepth(),</b>
+<b class="nc">&nbsp;                        createProcessForm.getRulesetManagement().getFunctionalKeys(</b>
+&nbsp;                                FunctionalMetadata.HIGHERLEVEL_IDENTIFIER));
+&nbsp;                // import children
+<b class="nc">&nbsp;                if (this.importChildren) {</b>
+<b class="nc">&nbsp;                    importChildren(projectId, templateId, importConfiguration, processes);</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                if (createProcessForm.getProcesses().size() &gt; 0 &amp;&amp; additionalImport) {</b>
+<b class="nc">&nbsp;                    extendsMetadataTableOfMetadataTab(processes);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    createProcessForm.setProcesses(processes);</b>
+<b class="nc">&nbsp;                    TempProcess currentTempProcess = processes.getFirst();</b>
+<b class="nc">&nbsp;                    attachToExistingParentAndGenerateAtstslIfNotExist(currentTempProcess);</b>
+<b class="nc">&nbsp;                    createProcessForm.fillCreateProcessForm(currentTempProcess);</b>
+<b class="nc">&nbsp;                    showMessageAndRecord(importConfiguration, processes);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (IOException | ProcessGenerationException | XPathExpressionException | URISyntaxException</b>
+&nbsp;                    | ParserConfigurationException | UnsupportedFormatException | SAXException | DAOException
+&nbsp;                    | ConfigException | TransformerException | NoRecordFoundException | InvalidMetadataValueException
+&nbsp;                    | NoSuchMetadataFieldException e) {
+<b class="nc">&nbsp;                throw new CatalogException(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void showMessageAndRecord(ImportConfiguration importConfiguration, LinkedList&lt;TempProcess&gt; processes) {
+<b class="nc">&nbsp;        String summary = Helper.getTranslation(&quot;newProcess.catalogueSearch.importSuccessfulSummary&quot;);</b>
+<b class="nc">&nbsp;        String detail = Helper.getTranslation(&quot;newProcess.catalogueSearch.importSuccessfulDetail&quot;,</b>
+<b class="nc">&nbsp;                String.valueOf(processes.size()), importConfiguration.getTitle());</b>
+<b class="nc">&nbsp;        showGrowlMessage(summary, detail);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (this.importChildren) {</b>
+<b class="nc">&nbsp;            summary = Helper.getTranslation(&quot;newProcess.catalogueSearch.loadingChildrenSuccessfulSummary&quot;);</b>
+<b class="nc">&nbsp;            detail = Helper.getTranslation(&quot;newProcess.catalogueSearch.loadingChildrenSuccessfulDetail&quot;,</b>
+<b class="nc">&nbsp;                    String.valueOf(this.createProcessForm.getChildProcesses().size()));</b>
+<b class="nc">&nbsp;            showGrowlMessage(summary, detail);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        showExemplarRecord();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void importChildren(int projectId, int templateId, ImportConfiguration importConfiguration, List&lt;TempProcess&gt; parentProcesses)
+&nbsp;            throws SAXException, UnsupportedFormatException, URISyntaxException, ParserConfigurationException,
+&nbsp;            IOException, ProcessGenerationException, TransformerException, InvalidMetadataValueException,
+&nbsp;            NoSuchMetadataFieldException {
+&nbsp;        try {
+<b class="nc">&nbsp;            this.createProcessForm.setChildProcesses(ServiceManager.getImportService().getChildProcesses(</b>
+&nbsp;                    importConfiguration, this.currentRecordId, projectId, templateId, numberOfChildren, parentProcesses));
+<b class="nc">&nbsp;        } catch (NoRecordFoundException e) {</b>
+<b class="nc">&nbsp;            this.createProcessForm.setChildProcesses(new LinkedList&lt;&gt;());</b>
+<b class="nc">&nbsp;            showGrowlMessage(&quot;Import error&quot;, e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void getRecordById(String recordId) {
+<b class="nc">&nbsp;        this.currentRecordId = recordId;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (this.importChildren) {</b>
+<b class="nc">&nbsp;                this.numberOfChildren = ServiceManager.getImportService().getNumberOfChildren(</b>
+<b class="nc">&nbsp;                        this.hitModel.getImportConfiguration(), this.currentRecordId);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (this.importChildren &amp;&amp; this.numberOfChildren &gt; NUMBER_OF_CHILDREN_WARNING_THRESHOLD) {</b>
+<b class="nc">&nbsp;                Ajax.update(&quot;manyChildrenWarningDialog&quot;);</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;manyChildrenWarningDialog&#39;).show();&quot;);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                getRecordHierarchy();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (ConfigException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get LazyHitModel.
+&nbsp;     *
+&nbsp;     * @return LazyHitModel of this ImportTab
+&nbsp;     */
+&nbsp;    public LazyHitModel getHitModel() {
+<b class="nc">&nbsp;        return this.hitModel;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get import children.
+&nbsp;     *
+&nbsp;     * @return import children
+&nbsp;     */
+&nbsp;    public boolean isImportChildren() {
+<b class="fc">&nbsp;        return importChildren;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set import children.
+&nbsp;     *
+&nbsp;     * @param childImport import children
+&nbsp;     */
+&nbsp;    public void setImportChildren(boolean childImport) {
+<b class="nc">&nbsp;        this.importChildren = childImport;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get exemplarRecords.
+&nbsp;     *
+&nbsp;     * @return value of exemplarRecords
+&nbsp;     */
+&nbsp;    public LinkedList&lt;ExemplarRecord&gt; getExemplarRecords() {
+<b class="nc">&nbsp;        return ServiceManager.getImportService().getExemplarRecords();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selectedExemplarRecord.
+&nbsp;     *
+&nbsp;     * @param selectedExemplarRecord as org.kitodo.api.schemaconverter.ExemplarRecord
+&nbsp;     */
+&nbsp;    public void setSelectedExemplarRecord(ExemplarRecord selectedExemplarRecord) {
+&nbsp;        try {
+<b class="nc">&nbsp;            ImportService.setSelectedExemplarRecord(selectedExemplarRecord, this.hitModel.getImportConfiguration(),</b>
+<b class="nc">&nbsp;                    this.createProcessForm.getProcessMetadata().getProcessDetailsElements());</b>
+<b class="nc">&nbsp;            String summary = Helper.getTranslation(&quot;newProcess.catalogueSearch.exemplarRecordSelectedSummary&quot;);</b>
+<b class="nc">&nbsp;            String detail = Helper.getTranslation(&quot;newProcess.catalogueSearch.exemplarRecordSelectedDetail&quot;,</b>
+<b class="nc">&nbsp;                selectedExemplarRecord.getOwner(), selectedExemplarRecord.getSignature());</b>
+<b class="nc">&nbsp;            showGrowlMessage(summary, detail);</b>
+<b class="nc">&nbsp;            Ajax.update(FORM_CLIENTID);</b>
+<b class="nc">&nbsp;        } catch (ParameterNotFoundException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;newProcess.catalogueSearch.exemplarRecordParameterNotFoundError&quot;,</b>
+<b class="nc">&nbsp;                    new Object[] {e.getMessage(), this.hitModel.getImportConfiguration().getTitle() });</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check and return whether the &quot;parentIdSearchField&quot; is configured in the current ImportConfiguration.
+&nbsp;     *
+&nbsp;     * @return whether &quot;parentIdSearchField&quot; is configured for current ImportConfiguration
+&nbsp;     */
+&nbsp;    public boolean isParentIdSearchFieldConfigured() {
+&nbsp;        try {
+<b class="nc">&nbsp;            return Objects.nonNull(this.hitModel.getImportConfiguration()) &amp;&amp; ServiceManager.getImportService()</b>
+<b class="nc">&nbsp;                    .isParentIdSearchFieldConfigured(this.hitModel.getImportConfiguration());</b>
+<b class="nc">&nbsp;        } catch (ConfigException e) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get OPAC error message.
+&nbsp;     *
+&nbsp;     * @return OPAC error message
+&nbsp;     */
+&nbsp;    public String getOpacErrorMessage() {
+<b class="nc">&nbsp;        return this.opacErrorMessage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return String containing warning about high number of child processes that are going to be imported.
+&nbsp;     *
+&nbsp;     * @return warning about high number of child processes to be imported
+&nbsp;     */
+&nbsp;    public String getNumberOfChildProcessesWarning() {
+<b class="nc">&nbsp;        return Helper.getTranslation(&quot;newProcess.catalogueSearch.manyChildrenWarning&quot;,</b>
+<b class="nc">&nbsp;            String.valueOf(this.numberOfChildren));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks the additional import.
+&nbsp;     *
+&nbsp;     * @return true if is additional import
+&nbsp;     */
+&nbsp;    public boolean isAdditionalImport() {
+<b class="nc">&nbsp;        return additionalImport;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set additional import.
+&nbsp;     *
+&nbsp;     * @param additionalImport
+&nbsp;     *            the value if is additional import
+&nbsp;     */
+&nbsp;    public void setAdditionalImport(boolean additionalImport) {
+<b class="nc">&nbsp;        this.additionalImport = additionalImport;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

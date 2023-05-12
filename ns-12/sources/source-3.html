@@ -1,0 +1,238 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ConfigMain</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.config</a>
+</div>
+
+<h1>Coverage Summary for Class: ConfigMain (org.kitodo.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConfigMain</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (18/27)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.config;
+&nbsp;
+&nbsp;import java.util.NoSuchElementException;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.ConfigurationException;
+&nbsp;import org.apache.commons.configuration.ConversionException;
+&nbsp;import org.apache.commons.configuration.PropertiesConfiguration;
+&nbsp;import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;
+&nbsp;public class ConfigMain {
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ConfigMain.class);</b>
+&nbsp;    private static volatile PropertiesConfiguration config;
+&nbsp;    private static final String CONFIG_FILE = &quot;kitodo_config.properties&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private ConfigMain() {
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get properties from configuration file.
+&nbsp;     *
+&nbsp;     * @return PropertiesConfiguration object
+&nbsp;     */
+&nbsp;    private static PropertiesConfiguration getConfig() {
+<b class="fc">&nbsp;        if (config == null) {</b>
+<b class="fc">&nbsp;            synchronized (ConfigMain.class) {</b>
+<b class="fc">&nbsp;                PropertiesConfiguration initialized = config;</b>
+<b class="fc">&nbsp;                if (initialized == null) {</b>
+<b class="fc">&nbsp;                    PropertiesConfiguration.setDefaultListDelimiter(&#39;&amp;&#39;);</b>
+&nbsp;                    try {
+<b class="fc">&nbsp;                        initialized = new PropertiesConfiguration(CONFIG_FILE);</b>
+<b class="nc">&nbsp;                    } catch (ConfigurationException e) {</b>
+<b class="nc">&nbsp;                        logger.warn(&quot;Loading of {} failed. Trying to start with empty configuration. Exception: {}&quot;,</b>
+&nbsp;                            CONFIG_FILE, e);
+<b class="nc">&nbsp;                        initialized = new PropertiesConfiguration();</b>
+<b class="fc">&nbsp;                    }</b>
+<b class="fc">&nbsp;                    initialized.setListDelimiter(&#39;&amp;&#39;);</b>
+<b class="fc">&nbsp;                    initialized.setReloadingStrategy(new FileChangedReloadingStrategy());</b>
+<b class="fc">&nbsp;                    config = initialized;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return config;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request selected parameter with given default value from configuration.
+&nbsp;     *
+&nbsp;     * @param inParameter
+&nbsp;     *            name of parameter in config file
+&nbsp;     * @param inDefaultIfNull
+&nbsp;     *            default value in case parameter taken from config file is null or
+&nbsp;     *            exception occurred
+&nbsp;     * @return Parameter as String
+&nbsp;     */
+&nbsp;    public static String getParameter(String inParameter, String inDefaultIfNull) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return getConfig().getString(inParameter, inDefaultIfNull);</b>
+<b class="nc">&nbsp;        } catch (ConversionException e) {</b>
+<b class="nc">&nbsp;            return inDefaultIfNull;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request boolean parameter from configuration, default if missing: false.
+&nbsp;     *
+&nbsp;     * @return Parameter as String
+&nbsp;     */
+&nbsp;    public static boolean getBooleanParameter(String inParameter) {
+<b class="fc">&nbsp;        return getBooleanParameter(inParameter, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request boolean parameter from configuration.
+&nbsp;     *
+&nbsp;     * @param inParameter
+&nbsp;     *            name of parameter in config file
+&nbsp;     * @param inDefault
+&nbsp;     *            default value in case parameter taken from config file is null or
+&nbsp;     *            exception occurred
+&nbsp;     * @return Parameter as boolean
+&nbsp;     */
+&nbsp;    public static boolean getBooleanParameter(String inParameter, boolean inDefault) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return getConfig().getBoolean(inParameter, inDefault);</b>
+<b class="nc">&nbsp;        } catch (ConversionException e) {</b>
+<b class="nc">&nbsp;            return inDefault;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request int-parameter from Configuration with default-value.
+&nbsp;     *
+&nbsp;     * @param inParameter
+&nbsp;     *            name of parameter in config file
+&nbsp;     * @param inDefault
+&nbsp;     *            default value in case parameter taken from config file is null or
+&nbsp;     *            exception occurred
+&nbsp;     * @return Parameter as int
+&nbsp;     */
+&nbsp;    public static int getIntParameter(String inParameter, int inDefault) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return getConfig().getInt(inParameter, inDefault);</b>
+<b class="nc">&nbsp;        } catch (NoSuchElementException e) {</b>
+<b class="nc">&nbsp;            return inDefault;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Request String[]-parameter from Configuration.
+&nbsp;     *
+&nbsp;     * @param inParameter
+&nbsp;     *            as Parameter whose value is to be returned
+&nbsp;     * @return Parameter as String[]
+&nbsp;     */
+&nbsp;    public static String[] getStringArrayParameter(String inParameter) {
+<b class="fc">&nbsp;        return getConfig().getStringArray(inParameter);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

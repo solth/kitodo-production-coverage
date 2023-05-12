@@ -1,0 +1,200 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TaskScriptThread</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.thread</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskScriptThread (org.kitodo.production.thread)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskScriptThread</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.thread;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.tasks.EmptyTask;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.TaskService;
+&nbsp;
+&nbsp;public class TaskScriptThread extends EmptyTask {
+&nbsp;
+&nbsp;    private final Task task;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(TaskScriptThread.class);</b>
+<b class="nc">&nbsp;    private final TaskService taskService = ServiceManager.getTaskService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor to set up task for script execution.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            for script execution
+&nbsp;     */
+&nbsp;    public TaskScriptThread(Task task) {
+<b class="nc">&nbsp;        super(task.getTitle() + &quot;, &quot; + Helper.getTranslation(&quot;process&quot;) + &quot;: &quot; + task.getProcess().getTitle() + &quot; (&quot;</b>
+<b class="nc">&nbsp;                + task.getProcess().getId() + &quot;)&quot;);</b>
+<b class="nc">&nbsp;        this.task = task;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The clone constructor creates a new instance of this object. This is
+&nbsp;     * necessary for Threads that have terminated in order to render to run them
+&nbsp;     * again possible.
+&nbsp;     *
+&nbsp;     * @param origin
+&nbsp;     *            copy master to create a clone of
+&nbsp;     */
+&nbsp;    private TaskScriptThread(TaskScriptThread origin) {
+<b class="nc">&nbsp;        super(origin);</b>
+<b class="nc">&nbsp;        this.task = origin.task;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void run() {
+<b class="nc">&nbsp;        boolean automatic = this.task.isTypeAutomatic();</b>
+<b class="nc">&nbsp;        logger.debug(&quot;task is automatic: {}&quot;, automatic);</b>
+<b class="nc">&nbsp;        String scriptPath = taskService.getScriptPath(this.task);</b>
+<b class="nc">&nbsp;        if (!scriptPath.isEmpty()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                this.taskService.executeScript(this.task, automatic);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;Data Error occurred&quot;, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (task.isTypeGenerateImages() &amp;&amp; !task.getContentFolders().isEmpty()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                taskService.generateImages(this, task, automatic);</b>
+<b class="nc">&nbsp;            } catch (DataException e) {</b>
+<b class="nc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (task.isTypeExportDMS()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                taskService.executeDmsExport(this.task);</b>
+<b class="nc">&nbsp;            } catch (DataException | IOException | DAOException e) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;Data Exception occurred&quot;, e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calls the clone constructor to create a not yet executed instance of this
+&nbsp;     * thread object. This is necessary for threads that have terminated in
+&nbsp;     * order to render possible to restart them.
+&nbsp;     *
+&nbsp;     * @return a not-yet-executed replacement of this thread
+&nbsp;     * @see org.kitodo.production.helper.tasks.EmptyTask#replace()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public TaskScriptThread replace() {
+<b class="nc">&nbsp;        return new TaskScriptThread(this);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

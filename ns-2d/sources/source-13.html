@@ -1,0 +1,153 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > NoSuchMetadataFieldException</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.exceptions</a>
+</div>
+
+<h1>Coverage Summary for Class: NoSuchMetadataFieldException (org.kitodo.exceptions)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NoSuchMetadataFieldException</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.exceptions;
+&nbsp;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;
+&nbsp;public class NoSuchMetadataFieldException extends NoSuchFieldException {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The ID string on the non-existing field.
+&nbsp;     */
+&nbsp;    private final String key;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The human-readable label of the non-existing field.
+&nbsp;     */
+&nbsp;    private final String label;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new no such metadata field exception.
+&nbsp;     *
+&nbsp;     * @param key
+&nbsp;     *            the ID string on the non-existing field
+&nbsp;     * @param label
+&nbsp;     *            the human-readable label of the non-existing field
+&nbsp;     */
+<b class="nc">&nbsp;    public NoSuchMetadataFieldException(String key, String label) {</b>
+<b class="nc">&nbsp;        this.key = key;</b>
+<b class="nc">&nbsp;        this.label = label;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getLocalizedMessage() {
+<b class="nc">&nbsp;        return Helper.getTranslation(&quot;dataEditor.invalidStructureField&quot;, label, key);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getMessage() {
+<b class="nc">&nbsp;        return &quot;Cannot save \&quot;&quot; + label + &quot;\&quot;: There is no such field (&quot; + key + &quot;).&quot;;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

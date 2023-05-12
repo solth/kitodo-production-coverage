@@ -1,0 +1,272 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RomanNumeral</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.metadata.pagination</a>
+</div>
+
+<h1>Coverage Summary for Class: RomanNumeral (org.kitodo.production.helper.metadata.pagination)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RomanNumeral</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97,7%
+  </span>
+  <span class="absValue">
+    (42/43)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.metadata.pagination;
+&nbsp;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;/**
+&nbsp; * A roman numeral as part of a pagination sequence.
+&nbsp; */
+&nbsp;public class RomanNumeral implements Fragment {
+&nbsp;    /**
+&nbsp;     * These are the string constants that represent the hundreds of the roman
+&nbsp;     * numeral.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final String[] HUNDREDS = {&quot;&quot;, &quot;c&quot;, &quot;cc&quot;, &quot;ccc&quot;, &quot;cd&quot;, &quot;d&quot;, &quot;dc&quot;, &quot;dcc&quot;, &quot;dccc&quot;, &quot;cm&quot; };</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * These are the numerical values of the letters used for roman numerals.
+&nbsp;     */
+&nbsp;    private static final int NUMERAL_I = 1;
+&nbsp;    private static final int NUMERAL_V = 5;
+&nbsp;    private static final int NUMERAL_X = 10;
+&nbsp;    private static final int NUMERAL_L = 50;
+&nbsp;    private static final int NUMERAL_C = 100;
+&nbsp;    private static final int NUMERAL_D = 500;
+&nbsp;    private static final int NUMERAL_M = 1000;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * These are the string constants that represent the ones of the roman numeral.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final String[] ONES = {&quot;&quot;, &quot;i&quot;, &quot;ii&quot;, &quot;iii&quot;, &quot;iv&quot;, &quot;v&quot;, &quot;vi&quot;, &quot;vii&quot;, &quot;viii&quot;, &quot;ix&quot; };</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * These are the string constants that represent the tens of the roman numeral.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final String[] TENS = {&quot;&quot;, &quot;x&quot;, &quot;xx&quot;, &quot;xxx&quot;, &quot;xl&quot;, &quot;l&quot;, &quot;lx&quot;, &quot;lxx&quot;, &quot;lxxx&quot;, &quot;xc&quot; };</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the Roman numeral for the value as string.
+&nbsp;     *
+&nbsp;     * @param inputValue
+&nbsp;     *            value to format
+&nbsp;     * @param uppercase
+&nbsp;     *            if true, the Roman numeral is upper case, otherwise lower case
+&nbsp;     * @return Roman numeral for the value
+&nbsp;     */
+&nbsp;    public static String format(int inputValue, boolean uppercase) {
+<b class="fc">&nbsp;        int value = inputValue;</b>
+<b class="fc">&nbsp;        StringBuilder result = new StringBuilder();</b>
+<b class="fc">&nbsp;        while (value &gt;= 1000) {</b>
+<b class="fc">&nbsp;            result.append(uppercase ? &#39;M&#39; : &#39;m&#39;);</b>
+<b class="fc">&nbsp;            value -= NUMERAL_M;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        result.append(HUNDREDS[value / 100]);</b>
+<b class="fc">&nbsp;        value %= 100;</b>
+<b class="fc">&nbsp;        result.append(TENS[value / 10]);</b>
+<b class="fc">&nbsp;        result.append(ONES[value % 10]);</b>
+<b class="fc">&nbsp;        return uppercase ? result.toString().toUpperCase() : result.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String format(HalfInteger value) {
+<b class="fc">&nbsp;        return format(value.intValue(), uppercase);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an int value for a roman number.
+&nbsp;     *
+&nbsp;     * @param value
+&nbsp;     *            the string to be parsed
+&nbsp;     * @return an Integer object holding the value represented by the string
+&nbsp;     *         argument
+&nbsp;     * @throws NumberFormatException
+&nbsp;     *             if the string cannot be parsed as an integer
+&nbsp;     */
+&nbsp;    public static int parseInt(String value) {
+<b class="fc">&nbsp;        int parseInt = 0;</b>
+<b class="fc">&nbsp;        for (int i = value.length() - 1; i &gt;= 0; i--) {</b>
+<b class="fc">&nbsp;            switch (value.charAt(i) | 32) {</b>
+&nbsp;                case &#39;c&#39;:
+<b class="fc">&nbsp;                    parseInt += updateResult(parseInt, NUMERAL_D, NUMERAL_C);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case &#39;d&#39;:
+<b class="fc">&nbsp;                    parseInt += updateResult(parseInt, NUMERAL_M, NUMERAL_D);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case &#39;i&#39;:
+<b class="fc">&nbsp;                    parseInt += updateResult(parseInt, NUMERAL_V, NUMERAL_I);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case &#39;l&#39;:
+<b class="fc">&nbsp;                    parseInt += updateResult(parseInt, NUMERAL_C, NUMERAL_L);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case &#39;m&#39;:
+<b class="fc">&nbsp;                    parseInt += NUMERAL_M;</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case &#39;v&#39;:
+<b class="fc">&nbsp;                    parseInt += updateResult(parseInt, NUMERAL_X, NUMERAL_V);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case &#39;x&#39;:
+<b class="fc">&nbsp;                    parseInt += updateResult(parseInt, NUMERAL_L, NUMERAL_X);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                default:
+<b class="fc">&nbsp;                    throw new NumberFormatException(&quot;For string: &quot; + value);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return parseInt;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static int updateResult(int result, int threshold, int difference) {
+<b class="fc">&nbsp;        if (result &gt;= threshold) {</b>
+<b class="fc">&nbsp;            return -difference;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return difference;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The increment associated with this numeral.
+&nbsp;     */
+&nbsp;    private HalfInteger increment;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If true, produces upper case roman numerals, else lower case.
+&nbsp;     */
+&nbsp;    private final boolean uppercase;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initial value where pagination is started.
+&nbsp;     */
+&nbsp;    private final int value;
+&nbsp;
+<b class="fc">&nbsp;    RomanNumeral(String value, boolean uppercase) {</b>
+<b class="fc">&nbsp;        this.value = parseInt(value);</b>
+<b class="fc">&nbsp;        this.uppercase = uppercase;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public HalfInteger getIncrement() {
+<b class="fc">&nbsp;        return increment;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Integer getInitialValue() {
+<b class="fc">&nbsp;        return value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void setIncrement(HalfInteger increment) {
+<b class="fc">&nbsp;        this.increment = increment;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a concise string representation of this instance.
+&nbsp;     *
+&nbsp;     * @return a string representing this instance
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return format(value, uppercase) + (Objects.nonNull(increment) ? &quot; (&quot; + increment + &quot;)&quot; : &quot; (default)&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

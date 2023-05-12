@@ -1,0 +1,233 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TypeInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.elasticsearch.index.type.enums</a>
+</div>
+
+<h1>Coverage Summary for Class: TypeInterface (org.kitodo.data.elasticsearch.index.type.enums)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TypeInterface</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    29,6%
+  </span>
+  <span class="absValue">
+    (8/27)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.elasticsearch.index.type.enums;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;
+&nbsp;interface TypeInterface {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get key for type.
+&nbsp;     *
+&nbsp;     * @return value of key - actually toString()
+&nbsp;     */
+&nbsp;    default String getKey() {
+<b class="fc">&nbsp;        return this.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get boolean value from given json object.
+&nbsp;     * 
+&nbsp;     * @param jsonObject
+&nbsp;     *            returned from ElasticSearch index
+&nbsp;     * @return boolean value for given json
+&nbsp;     */
+&nbsp;    default boolean getBooleanValue(Map&lt;String, Object&gt; jsonObject) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return (Boolean) jsonObject.get(this.toString());</b>
+<b class="nc">&nbsp;        } catch (ClassCastException | NullPointerException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(&quot;Not possible to retrieve boolean value for key &quot; + this.toString()</b>
+<b class="nc">&nbsp;                    + &quot;. Exception: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get int value from given json object.
+&nbsp;     * 
+&nbsp;     * @param jsonObject
+&nbsp;     *            returned from ElasticSearch index
+&nbsp;     * @return int value for given json
+&nbsp;     */
+&nbsp;    default int getIntValue(Map&lt;String, Object&gt; jsonObject) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return (Integer) jsonObject.get(this.toString());</b>
+<b class="nc">&nbsp;        } catch (ClassCastException | NullPointerException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(&quot;Not possible to retrieve int value for key &quot; + this.toString()</b>
+<b class="nc">&nbsp;                    + &quot;. Exception: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get double value from given json object.
+&nbsp;     * 
+&nbsp;     * @param jsonObject
+&nbsp;     *            returned from ElasticSearch index
+&nbsp;     * @return double value for given json
+&nbsp;     */
+&nbsp;    default double getDoubleValue(Map&lt;String, Object&gt; jsonObject) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return (double) jsonObject.get(this.toString());</b>
+<b class="nc">&nbsp;        } catch (ClassCastException | NullPointerException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(&quot;Not possible to retrieve double value for key &quot; + this.toString()</b>
+<b class="nc">&nbsp;                    + &quot;. Exception: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get String value from given json object.
+&nbsp;     * 
+&nbsp;     * @param jsonObject
+&nbsp;     *            returned from ElasticSearch index
+&nbsp;     * @return String value for given json
+&nbsp;     */
+&nbsp;    default String getStringValue(Map&lt;String, Object&gt; jsonObject) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return (String) jsonObject.get(this.toString());</b>
+<b class="nc">&nbsp;        } catch (ClassCastException | NullPointerException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(&quot;Not possible to retrieve String value for key &quot; + this.toString()</b>
+<b class="nc">&nbsp;                    + &quot;. Exception: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get json array value from given json object.
+&nbsp;     *
+&nbsp;     * @param jsonObject
+&nbsp;     *            returned from ElasticSearch index
+&nbsp;     * @return json array for given json
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    default List&lt;Map&lt;String, Object&gt;&gt; getJsonArray(Map&lt;String, Object&gt; jsonObject) throws DataException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return (List&lt;Map&lt;String, Object&gt;&gt;) jsonObject.get(this.toString());</b>
+<b class="nc">&nbsp;        } catch (ClassCastException | NullPointerException e) {</b>
+<b class="nc">&nbsp;            throw new DataException(&quot;Not possible to retrieve JsonArray value for key &quot; + this.toString()</b>
+<b class="nc">&nbsp;                    + &quot;. Exception: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get size of related objects returned from ElasticSearch index.
+&nbsp;     *
+&nbsp;     * @param object
+&nbsp;     *            JSONObject
+&nbsp;     * @return size of array with related objects
+&nbsp;     */
+&nbsp;    default int getSizeOfProperty(Map&lt;String, Object&gt; object) throws DataException {
+<b class="fc">&nbsp;        if (Objects.nonNull(object)) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                return ((List) object.get(this.toString())).size();</b>
+<b class="nc">&nbsp;            } catch (ClassCastException | NullPointerException e) {</b>
+<b class="nc">&nbsp;                throw new DataException(&quot;Not possible to retrieve size of array for key &quot; + this.toString()</b>
+<b class="nc">&nbsp;                        + &quot;. Exception: &quot; + e.getMessage());</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return 0;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

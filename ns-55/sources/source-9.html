@@ -1,0 +1,208 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SecurityObjectAccessFilter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.security</a>
+</div>
+
+<h1>Coverage Summary for Class: SecurityObjectAccessFilter (org.kitodo.production.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SecurityObjectAccessFilter</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/38)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.security;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.servlet.FilterChain;
+&nbsp;import javax.servlet.ServletException;
+&nbsp;import javax.servlet.ServletRequest;
+&nbsp;import javax.servlet.ServletResponse;
+&nbsp;import javax.servlet.http.HttpServletRequest;
+&nbsp;import javax.servlet.http.HttpServletResponse;
+&nbsp;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.security.SecurityAccessService;
+&nbsp;import org.omnifaces.cdi.viewscope.ViewScopeManager;
+&nbsp;import org.springframework.security.access.AccessDeniedException;
+&nbsp;import org.springframework.security.web.access.AccessDeniedHandler;
+&nbsp;import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+&nbsp;import org.springframework.web.filter.GenericFilterBean;
+&nbsp;
+&nbsp;/**
+&nbsp; * This filter handles the accessibility of urls which contains the parameter
+&nbsp; * &quot;id&quot;. The access is denied if the user does not have the corresponding
+&nbsp; * authority for the current id.
+&nbsp; */
+<b class="nc">&nbsp;public class SecurityObjectAccessFilter extends GenericFilterBean {</b>
+<b class="nc">&nbsp;    private final AccessDeniedHandler accessDeniedHandler = new AccessDeniedHandlerImpl();</b>
+<b class="nc">&nbsp;    private final SecurityAccessService securityAccessService = ServiceManager.getSecurityAccessService();</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+&nbsp;            throws IOException, ServletException {
+<b class="nc">&nbsp;        HttpServletResponse httpServletResponse = (HttpServletResponse) response;</b>
+<b class="nc">&nbsp;        HttpServletRequest httpServletRequest = (HttpServletRequest) request;</b>
+&nbsp;
+<b class="nc">&nbsp;        String id = httpServletRequest.getParameter(&quot;id&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (Objects.nonNull(id)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                Integer.parseInt(id);</b>
+<b class="nc">&nbsp;            } catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;                if (httpServletRequest.getRequestURI().contains(&quot;pages/workflowEdit&quot;)</b>
+<b class="nc">&nbsp;                        &amp;&amp; securityAccessService.hasAuthorityToViewWorkflow()) {</b>
+<b class="nc">&nbsp;                    chain.doFilter(request, response);</b>
+<b class="nc">&nbsp;                } else if (ViewScopeManager.isUnloadRequest(httpServletRequest)) {</b>
+<b class="nc">&nbsp;                    chain.doFilter(request, response);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    denyAccess(httpServletRequest, httpServletResponse);</b>
+&nbsp;                }
+&nbsp;                return;
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;String, Boolean&gt; requested = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            requested.put(&quot;processEdit&quot;, securityAccessService.hasAuthorityToViewProcess());</b>
+<b class="nc">&nbsp;            requested.put(&quot;projectEdit&quot;, securityAccessService.hasAuthorityToViewProject());</b>
+<b class="nc">&nbsp;            requested.put(&quot;templateEdit&quot;, securityAccessService.hasAuthorityToViewTemplate());</b>
+<b class="nc">&nbsp;            requested.put(&quot;workflowEdit&quot;, securityAccessService.hasAuthorityToViewWorkflow());</b>
+<b class="nc">&nbsp;            requested.put(&quot;docketEdit&quot;, securityAccessService.hasAuthorityToViewDocket());</b>
+<b class="nc">&nbsp;            requested.put(&quot;rulesetEdit&quot;, securityAccessService.hasAuthorityToViewRuleset());</b>
+<b class="nc">&nbsp;            requested.put(&quot;roleEdit&quot;, securityAccessService.hasAuthorityToViewRole());</b>
+<b class="nc">&nbsp;            requested.put(&quot;clientEdit&quot;, securityAccessService.hasAuthorityToViewClient());</b>
+&nbsp;
+<b class="nc">&nbsp;            for (Map.Entry&lt;String, Boolean&gt; entry : requested.entrySet()) {</b>
+<b class="nc">&nbsp;                if (isAccessDenied(httpServletRequest, httpServletResponse, entry.getKey(), entry.getValue())) {</b>
+&nbsp;                    return;
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            if (httpServletRequest.getRequestURI().contains(&quot;pages/userEdit&quot;)</b>
+<b class="nc">&nbsp;                    &amp;&amp; !securityAccessService.hasAuthorityToViewUser()</b>
+<b class="nc">&nbsp;                    &amp;&amp; !securityAccessService.hasAuthorityToConfigUser(Integer.parseInt(id))) {</b>
+<b class="nc">&nbsp;                denyAccess(httpServletRequest, httpServletResponse);</b>
+&nbsp;                return;
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        chain.doFilter(request, response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isAccessDenied(HttpServletRequest request, HttpServletResponse response, String page,
+&nbsp;            boolean hasAuthority) throws IOException, ServletException {
+<b class="nc">&nbsp;        if (request.getRequestURI().contains(&quot;pages/&quot; + page) &amp;&amp; !hasAuthority) {</b>
+<b class="nc">&nbsp;            denyAccess(request, response);</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void denyAccess(HttpServletRequest request, HttpServletResponse response)
+&nbsp;            throws IOException, ServletException {
+<b class="nc">&nbsp;        accessDeniedHandler.handle(request, response, new AccessDeniedException(&quot;Access is denied&quot;));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

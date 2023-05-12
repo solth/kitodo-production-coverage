@@ -1,0 +1,564 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ExportXmlLog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.docket</a>
+</div>
+
+<h1>Coverage Summary for Class: ExportXmlLog (org.kitodo.docket)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ExportXmlLog</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (21/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91%
+  </span>
+  <span class="absValue">
+    (191/210)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.docket;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.io.UncheckedIOException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.function.Consumer;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.stream.StreamSupport;
+&nbsp;
+&nbsp;import org.apache.commons.configuration.ConfigurationException;
+&nbsp;import org.apache.commons.configuration.XMLConfiguration;
+&nbsp;import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+&nbsp;import org.jdom2.Attribute;
+&nbsp;import org.jdom2.Document;
+&nbsp;import org.jdom2.Element;
+&nbsp;import org.jdom2.JDOMException;
+&nbsp;import org.jdom2.Namespace;
+&nbsp;import org.jdom2.filter.Filters;
+&nbsp;import org.jdom2.input.SAXBuilder;
+&nbsp;import org.jdom2.output.Format;
+&nbsp;import org.jdom2.output.XMLOutputter;
+&nbsp;import org.jdom2.xpath.XPathExpression;
+&nbsp;import org.jdom2.xpath.XPathFactory;
+&nbsp;import org.kitodo.api.docket.DocketData;
+&nbsp;import org.kitodo.api.docket.Property;
+&nbsp;import org.kitodo.config.KitodoConfig;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class provides xml logfile generation. After the generation the file
+&nbsp; * will be written to user home directory
+&nbsp; *
+&nbsp; * @author Robert Sehr
+&nbsp; * @author Steffen Hankiewicz
+&nbsp; *
+&nbsp; */
+&nbsp;public class ExportXmlLog implements Consumer&lt;OutputStream&gt; {
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(ExportXmlLog.class);</b>
+&nbsp;    private static final String LABEL = &quot;label&quot;;
+&nbsp;    private static final String NAMESPACE = &quot;http://www.kitodo.org/logfile&quot;;
+&nbsp;    private static final String PROPERTIES = &quot;properties&quot;;
+&nbsp;    private static final String PROPERTY = &quot;property&quot;;
+&nbsp;    private static final String PROPERTY_IDENTIFIER = &quot;propertyIdentifier&quot;;
+&nbsp;    private static final String VALUE = &quot;value&quot;;
+&nbsp;
+&nbsp;    List&lt;DocketData&gt; docketData;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Makes the class polymorphic.
+&nbsp;     *
+&nbsp;     * @param docketData
+&nbsp;     *            docket data
+&nbsp;     */
+<b class="fc">&nbsp;    ExportXmlLog(Iterable&lt;DocketData&gt; docketData) {</b>
+<b class="fc">&nbsp;        this.docketData = docketData instanceof List ? (List&lt;DocketData&gt;) docketData</b>
+<b class="nc">&nbsp;                : StreamSupport.stream(docketData.spliterator(), false).collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Makes the class polymorphic.
+&nbsp;     *
+&nbsp;     * @param docketData
+&nbsp;     *            docket data
+&nbsp;     */
+<b class="fc">&nbsp;    ExportXmlLog(DocketData docketData) {</b>
+<b class="fc">&nbsp;        this.docketData = Arrays.asList(docketData);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void accept(OutputStream outputStream) {
+&nbsp;        try {
+<b class="fc">&nbsp;            if (docketData.size() == 1) {</b>
+<b class="fc">&nbsp;                startExport(outputStream);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                startMultipleExport(outputStream);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IOException ioFailed) {</b>
+<b class="nc">&nbsp;            throw new UncheckedIOException(ioFailed);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method exports the production metadata as XML to a given stream.
+&nbsp;     *
+&nbsp;     * @param os
+&nbsp;     *            the OutputStream to write the contents to
+&nbsp;     * @throws IOException
+&nbsp;     *             Throws IOException, when document creation fails.
+&nbsp;     */
+&nbsp;    void startExport(OutputStream os) throws IOException {
+&nbsp;        try {
+<b class="fc">&nbsp;            Document doc = createDocument(docketData.get(0), true);</b>
+&nbsp;
+<b class="fc">&nbsp;            XMLOutputter outp = new XMLOutputter();</b>
+<b class="fc">&nbsp;            outp.setFormat(Format.getPrettyFormat());</b>
+&nbsp;
+<b class="fc">&nbsp;            outp.output(doc, os);</b>
+<b class="fc">&nbsp;            os.close();</b>
+&nbsp;
+<b class="nc">&nbsp;        } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Document creation failed.&quot;);</b>
+<b class="nc">&nbsp;            throw new IOException(e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method exports the production metadata for al list of processes as a
+&nbsp;     * single file to a given stream.
+&nbsp;     *
+&nbsp;     * @param outputStream
+&nbsp;     *            The output stream, to write the docket to.
+&nbsp;     */
+&nbsp;
+&nbsp;    void startMultipleExport(OutputStream outputStream) {
+<b class="fc">&nbsp;        Document answer = new Document();</b>
+<b class="fc">&nbsp;        Element root = new Element(&quot;processes&quot;);</b>
+<b class="fc">&nbsp;        answer.setRootElement(root);</b>
+<b class="fc">&nbsp;        Namespace xmlns = Namespace.getNamespace(NAMESPACE);</b>
+&nbsp;
+<b class="fc">&nbsp;        Namespace xsi = Namespace.getNamespace(&quot;xsi&quot;, &quot;http://www.w3.org/2001/XMLSchema-instance&quot;);</b>
+<b class="fc">&nbsp;        root.addNamespaceDeclaration(xsi);</b>
+<b class="fc">&nbsp;        root.setNamespace(xmlns);</b>
+<b class="fc">&nbsp;        Attribute attSchema = new Attribute(&quot;schemaLocation&quot;, NAMESPACE + &quot; XML-logfile.xsd&quot;,</b>
+&nbsp;                xsi);
+<b class="fc">&nbsp;        root.setAttribute(attSchema);</b>
+<b class="fc">&nbsp;        for (DocketData docketData : this.docketData) {</b>
+<b class="fc">&nbsp;            Document doc = createDocument(docketData, false);</b>
+<b class="fc">&nbsp;            Element processRoot = doc.getRootElement();</b>
+<b class="fc">&nbsp;            processRoot.detach();</b>
+<b class="fc">&nbsp;            root.addContent(processRoot);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        XMLOutputter outp = new XMLOutputter(Format.getPrettyFormat());</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            outp.output(answer, outputStream);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Generating XML Output failed.&quot;, e);</b>
+&nbsp;        } finally {
+<b class="fc">&nbsp;            if (outputStream != null) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    outputStream.close();</b>
+<b class="nc">&nbsp;                } catch (IOException e) {</b>
+<b class="nc">&nbsp;                    logger.error(&quot;Closing the output stream failed.&quot;, e);</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method creates a new xml document with process metadata.
+&nbsp;     *
+&nbsp;     * @param docketData
+&nbsp;     *            the docketData to export
+&nbsp;     * @return a new xml document
+&nbsp;     */
+&nbsp;    private Document createDocument(DocketData docketData, boolean addNamespace) {
+&nbsp;
+<b class="fc">&nbsp;        Element processElm = new Element(&quot;process&quot;);</b>
+<b class="fc">&nbsp;        final Document doc = new Document(processElm);</b>
+&nbsp;
+<b class="fc">&nbsp;        processElm.setAttribute(&quot;processID&quot;, String.valueOf(docketData.getProcessId()));</b>
+&nbsp;
+<b class="fc">&nbsp;        Namespace xmlns = Namespace.getNamespace(NAMESPACE);</b>
+<b class="fc">&nbsp;        processElm.setNamespace(xmlns);</b>
+&nbsp;
+&nbsp;        // namespace declaration
+<b class="fc">&nbsp;        processNamespaceDeclaration(addNamespace, processElm);</b>
+&nbsp;
+&nbsp;        // process information
+<b class="fc">&nbsp;        ArrayList&lt;Element&gt; processElements = processProcessInformation(docketData, xmlns);</b>
+&nbsp;
+&nbsp;        // template information
+<b class="fc">&nbsp;        processTemplateInformation(docketData, xmlns, processElements);</b>
+&nbsp;
+&nbsp;        // digital document information
+<b class="fc">&nbsp;        processDigitalDocumentInformation(docketData, xmlns, processElements);</b>
+&nbsp;
+&nbsp;        // METS information
+<b class="fc">&nbsp;        Element metsElement = new Element(&quot;metsInformation&quot;, xmlns);</b>
+<b class="fc">&nbsp;        List&lt;Element&gt; metadataElements = createMetadataElements(xmlns, docketData);</b>
+<b class="fc">&nbsp;        metsElement.addContent(metadataElements);</b>
+<b class="fc">&nbsp;        processElements.add(metsElement);</b>
+&nbsp;
+<b class="fc">&nbsp;        processElm.setContent(processElements);</b>
+<b class="fc">&nbsp;        return doc;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processDigitalDocumentInformation(DocketData docketData, Namespace xmlns,
+&nbsp;            ArrayList&lt;Element&gt; processElements) {
+<b class="fc">&nbsp;        ArrayList&lt;Element&gt; docElements = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        Element dd = new Element(&quot;digitalDocument&quot;, xmlns);</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Element&gt; docProperties = prepareProperties(docketData.getWorkpieceProperties(), xmlns);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!docProperties.isEmpty()) {</b>
+<b class="fc">&nbsp;            Element properties = new Element(PROPERTIES, xmlns);</b>
+<b class="fc">&nbsp;            properties.addContent(docProperties);</b>
+<b class="fc">&nbsp;            dd.addContent(properties);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        docElements.add(dd);</b>
+&nbsp;
+<b class="fc">&nbsp;        Element digdoc = new Element(&quot;digitalDocuments&quot;, xmlns);</b>
+<b class="fc">&nbsp;        digdoc.addContent(docElements);</b>
+<b class="fc">&nbsp;        processElements.add(digdoc);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processTemplateInformation(DocketData docketData, Namespace xmlns,
+&nbsp;            ArrayList&lt;Element&gt; processElements) {
+<b class="fc">&nbsp;        ArrayList&lt;Element&gt; templateElements = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        Element template = new Element(&quot;original&quot;, xmlns);</b>
+&nbsp;
+<b class="fc">&nbsp;        ArrayList&lt;Element&gt; templateProperties = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (docketData.getTemplateProperties() != null) {</b>
+<b class="fc">&nbsp;            processTemplateProperties(docketData, xmlns, templateProperties);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!templateProperties.isEmpty()) {</b>
+<b class="fc">&nbsp;            Element properties = new Element(PROPERTIES, xmlns);</b>
+<b class="fc">&nbsp;            properties.addContent(templateProperties);</b>
+<b class="fc">&nbsp;            template.addContent(properties);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        templateElements.add(template);</b>
+&nbsp;
+<b class="fc">&nbsp;        Element templates = new Element(&quot;originals&quot;, xmlns);</b>
+<b class="fc">&nbsp;        templates.addContent(templateElements);</b>
+<b class="fc">&nbsp;        processElements.add(templates);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processTemplateProperties(DocketData docketData, Namespace xmlns,
+&nbsp;            ArrayList&lt;Element&gt; templateProperties) {
+<b class="fc">&nbsp;        for (Property prop : docketData.getTemplateProperties()) {</b>
+<b class="fc">&nbsp;            Element property = new Element(PROPERTY, xmlns);</b>
+<b class="fc">&nbsp;            property.setAttribute(PROPERTY_IDENTIFIER, prop.getTitle());</b>
+<b class="fc">&nbsp;            if (prop.getValue() != null) {</b>
+<b class="fc">&nbsp;                property.setAttribute(VALUE, replacer(prop.getValue()));</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                property.setAttribute(VALUE, &quot;&quot;);</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            Element label = new Element(LABEL, xmlns);</b>
+&nbsp;
+<b class="fc">&nbsp;            label.setText(prop.getTitle());</b>
+<b class="fc">&nbsp;            property.addContent(label);</b>
+&nbsp;
+<b class="fc">&nbsp;            templateProperties.add(property);</b>
+<b class="fc">&nbsp;            if (prop.getTitle().equals(&quot;Signatur&quot;)) {</b>
+<b class="fc">&nbsp;                Element secondProperty = new Element(PROPERTY, xmlns);</b>
+<b class="fc">&nbsp;                secondProperty.setAttribute(PROPERTY_IDENTIFIER, prop.getTitle() + &quot;Encoded&quot;);</b>
+<b class="fc">&nbsp;                if (prop.getValue() != null) {</b>
+<b class="fc">&nbsp;                    secondProperty.setAttribute(VALUE, &quot;vorl:&quot; + replacer(prop.getValue()));</b>
+<b class="fc">&nbsp;                    Element secondLabel = new Element(LABEL, xmlns);</b>
+<b class="fc">&nbsp;                    secondLabel.setText(prop.getTitle());</b>
+<b class="fc">&nbsp;                    secondProperty.addContent(secondLabel);</b>
+<b class="fc">&nbsp;                    templateProperties.add(secondProperty);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ArrayList&lt;Element&gt; processProcessInformation(DocketData docketData, Namespace xmlns) {
+<b class="fc">&nbsp;        ArrayList&lt;Element&gt; processElements = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        Element processTitle = new Element(&quot;title&quot;, xmlns);</b>
+<b class="fc">&nbsp;        processTitle.setText(docketData.getProcessName());</b>
+<b class="fc">&nbsp;        processElements.add(processTitle);</b>
+&nbsp;
+<b class="fc">&nbsp;        Element project = new Element(&quot;project&quot;, xmlns);</b>
+<b class="fc">&nbsp;        project.setText(docketData.getProjectName());</b>
+<b class="fc">&nbsp;        processElements.add(project);</b>
+&nbsp;
+<b class="fc">&nbsp;        Element date = new Element(&quot;time&quot;, xmlns);</b>
+<b class="fc">&nbsp;        date.setAttribute(&quot;type&quot;, &quot;creation date&quot;);</b>
+<b class="fc">&nbsp;        date.setText(String.valueOf(docketData.getCreationDate()));</b>
+<b class="fc">&nbsp;        processElements.add(date);</b>
+&nbsp;
+<b class="fc">&nbsp;        Element ruleset = new Element(&quot;ruleset&quot;, xmlns);</b>
+<b class="fc">&nbsp;        ruleset.setText(docketData.getRulesetName());</b>
+<b class="fc">&nbsp;        processElements.add(ruleset);</b>
+&nbsp;
+<b class="fc">&nbsp;        Element comment = new Element(&quot;comment&quot;, xmlns);</b>
+<b class="fc">&nbsp;        comment.setText(docketData.getComment());</b>
+<b class="fc">&nbsp;        processElements.add(comment);</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Element&gt; processProperties = prepareProperties(docketData.getProcessProperties(), xmlns);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!processProperties.isEmpty()) {</b>
+<b class="fc">&nbsp;            Element properties = new Element(PROPERTIES, xmlns);</b>
+<b class="fc">&nbsp;            properties.addContent(processProperties);</b>
+<b class="fc">&nbsp;            processElements.add(properties);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return processElements;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void processNamespaceDeclaration(boolean addNamespace, Element processElm) {
+<b class="fc">&nbsp;        if (addNamespace) {</b>
+&nbsp;
+<b class="fc">&nbsp;            Namespace xsi = Namespace.getNamespace(&quot;xsi&quot;, &quot;http://www.w3.org/2001/XMLSchema-instance&quot;);</b>
+<b class="fc">&nbsp;            processElm.addNamespaceDeclaration(xsi);</b>
+<b class="fc">&nbsp;            Attribute attSchema = new Attribute(&quot;schemaLocation&quot;, NAMESPACE + &quot; XML-logfile.xsd&quot;,</b>
+&nbsp;                    xsi);
+<b class="fc">&nbsp;            processElm.setAttribute(attSchema);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Element&gt; prepareProperties(List&lt;Property&gt; properties, Namespace xmlns) {
+<b class="fc">&nbsp;        ArrayList&lt;Element&gt; preparedProperties = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Property property : properties) {</b>
+<b class="fc">&nbsp;            Element propertyElement = new Element(PROPERTY, xmlns);</b>
+<b class="fc">&nbsp;            propertyElement.setAttribute(PROPERTY_IDENTIFIER, property.getTitle());</b>
+<b class="fc">&nbsp;            if (property.getValue() != null) {</b>
+<b class="fc">&nbsp;                propertyElement.setAttribute(VALUE, replacer(property.getValue()));</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                propertyElement.setAttribute(VALUE, &quot;&quot;);</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            Element label = new Element(LABEL, xmlns);</b>
+&nbsp;
+<b class="fc">&nbsp;            label.setText(property.getTitle());</b>
+<b class="fc">&nbsp;            propertyElement.addContent(label);</b>
+<b class="fc">&nbsp;            preparedProperties.add(propertyElement);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return preparedProperties;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Element&gt; createMetadataElements(Namespace xmlns, DocketData docketData) {
+<b class="fc">&nbsp;        List&lt;Element&gt; metadataElements = new ArrayList&lt;&gt;();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            HashMap&lt;String, String&gt; names = getNamespacesFromConfig();</b>
+<b class="fc">&nbsp;            Namespace[] namespaces = new Namespace[names.size()];</b>
+<b class="fc">&nbsp;            int index = 0;</b>
+<b class="fc">&nbsp;            for (var entries = names.entrySet().iterator(); entries.hasNext(); index++) {</b>
+<b class="fc">&nbsp;                Entry&lt;String, String&gt; entry = entries.next();</b>
+<b class="fc">&nbsp;                namespaces[index] = Namespace.getNamespace(entry.getKey(), entry.getValue());</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            prepareMetadataElements(metadataElements, false, docketData, namespaces, xmlns);</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(docketData.getParent())) {</b>
+<b class="nc">&nbsp;                prepareMetadataElements(metadataElements, true, docketData.getParent(), namespaces, xmlns);</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;        } catch (IOException | JDOMException | IllegalArgumentException e) {</b>
+<b class="fc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return metadataElements;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private HashMap&lt;String, String&gt; getNamespacesFromConfig() {
+<b class="fc">&nbsp;        return getXmlPathFromConfig(&quot;namespace&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private HashMap&lt;String, String&gt; getXmlPathFromConfig(String xmlPath) {
+<b class="fc">&nbsp;        HashMap&lt;String, String&gt; fields = new HashMap&lt;&gt;();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            File file = new File(KitodoConfig.getKitodoConfigDirectory() + &quot;kitodo_exportXml.xml&quot;);</b>
+<b class="fc">&nbsp;            if (file.exists() &amp;&amp; file.canRead()) {</b>
+<b class="fc">&nbsp;                XMLConfiguration config = new XMLConfiguration(file);</b>
+<b class="fc">&nbsp;                config.setListDelimiter(&#39;&amp;&#39;);</b>
+<b class="fc">&nbsp;                config.setReloadingStrategy(new FileChangedReloadingStrategy());</b>
+&nbsp;
+<b class="fc">&nbsp;                int count = config.getMaxIndex(xmlPath);</b>
+<b class="fc">&nbsp;                for (int i = 0; i &lt;= count; i++) {</b>
+<b class="fc">&nbsp;                    String name = config.getString(xmlPath + &quot;(&quot; + i + &quot;)[@name]&quot;);</b>
+<b class="fc">&nbsp;                    String value = config.getString(xmlPath + &quot;(&quot; + i + &quot;)[@value]&quot;);</b>
+<b class="fc">&nbsp;                    fields.put(name, value);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (ConfigurationException | RuntimeException e) {</b>
+<b class="nc">&nbsp;            logger.debug(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            fields = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return fields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareMetadataElements(List&lt;Element&gt; metadataElements, boolean useAnchor, DocketData docketData,
+&nbsp;            Namespace[] namespaces, Namespace xmlns)
+&nbsp;            throws IOException, JDOMException {
+<b class="fc">&nbsp;        HashMap&lt;String, String&gt; fields = getMetsFieldsFromConfig(useAnchor);</b>
+<b class="fc">&nbsp;        try (InputStream in = docketData.metadataFile().toURL().openStream()) {</b>
+<b class="fc">&nbsp;            Document metsDoc = new SAXBuilder().build(in);</b>
+<b class="fc">&nbsp;            prepareMetadataElements(metadataElements, fields, metsDoc, namespaces, xmlns);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void prepareMetadataElements(List&lt;Element&gt; metadataElements, Map&lt;String, String&gt; fields, Document document,
+&nbsp;            Namespace[] namespaces, Namespace xmlns) {
+<b class="fc">&nbsp;        for (Map.Entry&lt;String, String&gt; entry : fields.entrySet()) {</b>
+<b class="fc">&nbsp;            String key = entry.getKey();</b>
+<b class="fc">&nbsp;            List&lt;Object&gt; metsValues = getMetsValues(entry.getValue(), document, namespaces);</b>
+<b class="fc">&nbsp;            for (Object object : metsValues) {</b>
+<b class="fc">&nbsp;                boolean isElement = Filters.element().matches(object);</b>
+<b class="fc">&nbsp;                if (isElement || Filters.attribute().matches(object)) {</b>
+<b class="fc">&nbsp;                    Element ele = new Element(PROPERTY, xmlns);</b>
+<b class="fc">&nbsp;                    ele.setAttribute(&quot;name&quot;, key);</b>
+<b class="fc">&nbsp;                    ele.addContent(isElement</b>
+<b class="fc">&nbsp;                            ? ((Element) object).getTextTrim()</b>
+<b class="nc">&nbsp;                            : ((Attribute) object).getValue());</b>
+<b class="fc">&nbsp;                    metadataElements.add(ele);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private HashMap&lt;String, String&gt; getMetsFieldsFromConfig(boolean useAnchor) {
+<b class="fc">&nbsp;        String xmlpath = &quot;mets.&quot; + PROPERTY;</b>
+<b class="fc">&nbsp;        if (useAnchor) {</b>
+<b class="nc">&nbsp;            xmlpath = &quot;anchor.&quot; + PROPERTY;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        HashMap&lt;String, String&gt; fields = getXmlPathFromConfig(xmlpath);</b>
+<b class="fc">&nbsp;        return fields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get METS values.
+&nbsp;     *
+&nbsp;     * @param expr
+&nbsp;     *            String
+&nbsp;     * @param element
+&nbsp;     *            Object
+&nbsp;     * @param namespaces
+&nbsp;     *            HashMap
+&nbsp;     * @return list of elements
+&nbsp;     */
+&nbsp;    private List&lt;Object&gt; getMetsValues(String expr, Document document, Namespace[] namespaces) {
+<b class="fc">&nbsp;        XPathExpression&lt;Object&gt; xpath = XPathFactory.instance().compile(expr.trim().replace(&quot;\n&quot;, &quot;&quot;),</b>
+<b class="fc">&nbsp;            Filters.fpassthrough(), Collections.emptyMap(), namespaces);</b>
+<b class="fc">&nbsp;        return xpath.evaluate(document);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String replacer(String in) {
+<b class="fc">&nbsp;        in = in.replace(&quot;°&quot;, &quot;?&quot;);</b>
+<b class="fc">&nbsp;        in = in.replace(&quot;^&quot;, &quot;?&quot;);</b>
+<b class="fc">&nbsp;        in = in.replace(&quot;|&quot;, &quot;?&quot;);</b>
+<b class="fc">&nbsp;        in = in.replace(&quot;&gt;&quot;, &quot;?&quot;);</b>
+<b class="fc">&nbsp;        in = in.replace(&quot;&lt;&quot;, &quot;?&quot;);</b>
+<b class="fc">&nbsp;        return in;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SearchResult</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.externaldatamanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: SearchResult (org.kitodo.api.externaldatamanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SearchResult</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.externaldatamanagement;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class represents the result of a search query performed against a
+&nbsp; * remote catalog interface.
+&nbsp; */
+<b class="nc">&nbsp;public class SearchResult {</b>
+&nbsp;
+&nbsp;    private List&lt;SingleHit&gt; hits;
+&nbsp;
+&nbsp;    private int numberOfHits;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get number of hits.
+&nbsp;     *
+&nbsp;     * @return number of hits
+&nbsp;     */
+&nbsp;    public int getNumberOfHits() {
+<b class="nc">&nbsp;        return numberOfHits;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set number of hits.
+&nbsp;     *
+&nbsp;     * @param numberOfHits
+&nbsp;     *            number of hits
+&nbsp;     */
+&nbsp;    public void setNumberOfHits(int numberOfHits) {
+<b class="nc">&nbsp;        this.numberOfHits = numberOfHits;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of hists.
+&nbsp;     *
+&nbsp;     * @return list of hits.
+&nbsp;     */
+&nbsp;    public List&lt;SingleHit&gt; getHits() {
+<b class="nc">&nbsp;        return hits;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set list of hits.
+&nbsp;     *
+&nbsp;     * @param hits
+&nbsp;     *            list of hits.
+&nbsp;     */
+&nbsp;    public void setHits(List&lt;SingleHit&gt; hits) {
+<b class="nc">&nbsp;        this.hits = hits;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

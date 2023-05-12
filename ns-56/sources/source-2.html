@@ -1,0 +1,202 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CustomLoginSuccessHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.security</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomLoginSuccessHandler (org.kitodo.production.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomLoginSuccessHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/25)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.security;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.servlet.http.HttpServletRequest;
+&nbsp;import javax.servlet.http.HttpServletResponse;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.controller.SessionClientController;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.security.web.DefaultRedirectStrategy;
+&nbsp;import org.springframework.security.web.RedirectStrategy;
+&nbsp;import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+&nbsp;import org.springframework.security.web.savedrequest.DefaultSavedRequest;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;@Component
+<b class="nc">&nbsp;public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {</b>
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(CustomLoginSuccessHandler.class);</b>
+&nbsp;    private static final String DESKTOP_LANDING_PAGE = &quot;/pages/desktop.jsf&quot;;
+&nbsp;    private static final String EMPTY_LANDING_PAGE = &quot;/pages/checks.jsf&quot;;
+&nbsp;    private static final String SAVED_REQUEST = &quot;SPRING_SECURITY_SAVED_REQUEST&quot;;
+&nbsp;    private static final String OMNIFACES_EVENT = &quot;omnifaces.event&quot;;
+<b class="nc">&nbsp;    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+&nbsp;                                        Authentication authentication) throws IOException {
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            SessionClientController controller = new SessionClientController();</b>
+<b class="nc">&nbsp;            if (ServiceManager.getIndexingService().isIndexCorrupted()</b>
+<b class="nc">&nbsp;                    || controller.getAvailableClientsOfCurrentUser().size() &gt; 1) {</b>
+&nbsp;                // redirect to empty landing page, where dialogs are displayed depending on both checks!
+<b class="nc">&nbsp;                redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, EMPTY_LANDING_PAGE);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                if (Objects.nonNull(httpServletRequest.getSession())) {</b>
+&nbsp;                    // calling showClientSelectDialog automatically sets the only one available client here
+<b class="nc">&nbsp;                    controller.showClientSelectDialog();</b>
+<b class="nc">&nbsp;                    redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,</b>
+<b class="nc">&nbsp;                            getOriginalRequest(httpServletRequest.getSession().getAttribute(SAVED_REQUEST)));</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DataException | DAOException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determine the original request URI from a given &#39;savedRequest&#39; object and return it. If the object is null or
+&nbsp;     * does not contain a saved request URI, return a default landing page URI instead.
+&nbsp;     *
+&nbsp;     * @param savedRequest object containing the previous request object
+&nbsp;     *
+&nbsp;     * @return the URI of the previous request or a default URI as String
+&nbsp;     */
+&nbsp;    public static String getOriginalRequest(Object savedRequest) {
+<b class="nc">&nbsp;        String redirect = DESKTOP_LANDING_PAGE;</b>
+<b class="nc">&nbsp;        if (savedRequest instanceof DefaultSavedRequest) {</b>
+<b class="nc">&nbsp;            DefaultSavedRequest request = (DefaultSavedRequest) savedRequest;</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(request.getServletPath()) &amp;&amp; !request.getServletPath().isEmpty()</b>
+<b class="nc">&nbsp;                    &amp;&amp; (!request.getParameterMap().containsKey(OMNIFACES_EVENT)</b>
+<b class="nc">&nbsp;                    || Arrays.stream(request.getParameterMap().get(OMNIFACES_EVENT)).noneMatch(&quot;unload&quot;::equals))) {</b>
+<b class="nc">&nbsp;                redirect = request.getServletPath();</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(request.getQueryString()) &amp;&amp; !request.getQueryString().isEmpty()) {</b>
+<b class="nc">&nbsp;                    redirect = redirect + &quot;?&quot; + request.getQueryString();</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return redirect;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return String constant containing the session attribute parameter name for saved requests.
+&nbsp;     *
+&nbsp;     * @return saved requests session attribute parameter string constant
+&nbsp;     */
+&nbsp;    public static String getSavedRequestString() {
+<b class="nc">&nbsp;        return SAVED_REQUEST;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

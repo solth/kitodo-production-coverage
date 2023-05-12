@@ -1,0 +1,100 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileStructureValidationInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.validation.filestructure</a>
+</div>
+
+<h1>Coverage Summary for Class: FileStructureValidationInterface (org.kitodo.api.validation.filestructure)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">FileStructureValidationInterface</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.validation.filestructure;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;
+&nbsp;import org.kitodo.api.validation.ValidationInterface;
+&nbsp;import org.kitodo.api.validation.ValidationResult;
+&nbsp;
+&nbsp;/** Validates a given xml file against a given xsd schema. */
+&nbsp;public interface FileStructureValidationInterface extends ValidationInterface {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * validates a xml file at a given uri against a xsd at a given location.
+&nbsp;     * 
+&nbsp;     * @param xmlFileUri
+&nbsp;     *            The file to validate.
+&nbsp;     * @param xsdFileUri
+&nbsp;     *            The location of the schema to validate against.
+&nbsp;     * @return A ValidationResult, with result boolean and resultMessages.
+&nbsp;     */
+&nbsp;    ValidationResult validate(URI xmlFileUri, URI xsdFileUri);
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

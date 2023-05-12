@@ -1,0 +1,293 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetsKitodoObjectFactory</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: MetsKitodoObjectFactory (org.kitodo.dataeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetsKitodoObjectFactory</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (47/47)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;
+&nbsp;import javax.xml.datatype.DatatypeConfigurationException;
+&nbsp;
+&nbsp;import org.kitodo.dataeditor.entities.DmdSec;
+&nbsp;import org.kitodo.dataeditor.entities.FileSec;
+&nbsp;import org.kitodo.dataeditor.entities.LogicalStructMapType;
+&nbsp;import org.kitodo.dataeditor.entities.PhysicalStructMapType;
+&nbsp;import org.kitodo.dataeditor.entities.StructLink;
+&nbsp;import org.kitodo.dataformat.metskitodo.DivType;
+&nbsp;import org.kitodo.dataformat.metskitodo.KitodoType;
+&nbsp;import org.kitodo.dataformat.metskitodo.MdSecType;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType;
+&nbsp;import org.kitodo.dataformat.metskitodo.ObjectFactory;
+&nbsp;import org.kitodo.dataformat.metskitodo.StructMapType;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class is extending the jaxb generated object factory for creating
+&nbsp; * mets-kitodo objects by population some objects with application specific
+&nbsp; * values.
+&nbsp; */
+<b class="fc">&nbsp;public class MetsKitodoObjectFactory extends ObjectFactory {</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates KitodoType object which version indication of used kitodo format.
+&nbsp;     *
+&nbsp;     * @return The KitodoType object.
+&nbsp;     */
+&nbsp;    public KitodoType createKitodoType() {
+<b class="fc">&nbsp;        KitodoType kitodoType = super.createKitodoType();</b>
+<b class="fc">&nbsp;        kitodoType.setVersion(VersionProvider.getDataFormatVersion());</b>
+<b class="fc">&nbsp;        return kitodoType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a kitodo data editor specific MetsHdr.Agent object.
+&nbsp;     *
+&nbsp;     * @return The MetsHdr.Agent object.
+&nbsp;     */
+&nbsp;    public MetsType.MetsHdr.Agent createKitodoMetsAgent() throws IOException {
+<b class="fc">&nbsp;        MetsType.MetsHdr.Agent metsAgent = super.createMetsTypeMetsHdrAgent();</b>
+<b class="fc">&nbsp;        metsAgent.setOTHERTYPE(&quot;SOFTWARE&quot;);</b>
+<b class="fc">&nbsp;        metsAgent.setROLE(&quot;CREATOR&quot;);</b>
+<b class="fc">&nbsp;        metsAgent.setTYPE(&quot;OTHER&quot;);</b>
+<b class="fc">&nbsp;        metsAgent.setName(VersionProvider.getModuleVersionInfo());</b>
+<b class="fc">&nbsp;        return metsAgent;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a kitodo data editor specific MetsHdr object, which sets CREATEDATE
+&nbsp;     * and agent.
+&nbsp;     *
+&nbsp;     * @return The MetsHdr object.
+&nbsp;     */
+&nbsp;    public MetsType.MetsHdr createKitodoMetsHeader() throws DatatypeConfigurationException, IOException {
+<b class="fc">&nbsp;        MetsType.MetsHdr metsTypeMetsHdr = super.createMetsTypeMetsHdr();</b>
+<b class="fc">&nbsp;        metsTypeMetsHdr.setCREATEDATE(JaxbXmlUtils.getXmlTime());</b>
+<b class="fc">&nbsp;        MetsType.MetsHdr.Agent metsAgent = createKitodoMetsAgent();</b>
+<b class="fc">&nbsp;        metsTypeMetsHdr.getAgent().add(metsAgent);</b>
+<b class="fc">&nbsp;        return metsTypeMetsHdr;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a PhysicalStructMapType object.
+&nbsp;     *
+&nbsp;     * @return The PhysicalStructMapType object.
+&nbsp;     */
+&nbsp;    public PhysicalStructMapType createPhysicalStructMapType() {
+<b class="fc">&nbsp;        return new PhysicalStructMapType(createStructMapTypeOfType(&quot;PHYSICAL&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a LogicalStructMapType object.
+&nbsp;     *
+&nbsp;     * @return The LogicalStructMapType object.
+&nbsp;     */
+&nbsp;    public LogicalStructMapType createLogicalStructMapType() {
+<b class="fc">&nbsp;        return new LogicalStructMapType(createStructMapTypeOfType(&quot;LOGICAL&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private StructMapType createStructMapTypeOfType(String type) {
+<b class="fc">&nbsp;        StructMapType structMapType = super.createStructMapType();</b>
+<b class="fc">&nbsp;        structMapType.setTYPE(type);</b>
+<b class="fc">&nbsp;        return structMapType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a Mets FileGrp object where the attribute USE is set to LOCAL.
+&nbsp;     *
+&nbsp;     * @return The FileGrp object.
+&nbsp;     */
+&nbsp;    public MetsType.FileSec.FileGrp createMetsTypeFileSecFileGrpLocal() {
+<b class="fc">&nbsp;        MetsType.FileSec.FileGrp metsTypeFileSecFileGrp = super.createMetsTypeFileSecFileGrp();</b>
+<b class="fc">&nbsp;        metsTypeFileSecFileGrp.setUSE(&quot;LOCAL&quot;);</b>
+<b class="fc">&nbsp;        return metsTypeFileSecFileGrp;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a DivType object for using as root div in mets physical sruct map.
+&nbsp;     *
+&nbsp;     * @return The DivType object.
+&nbsp;     */
+&nbsp;    public DivType createRootDivTypeForPhysicalStructMap() {
+<b class="fc">&nbsp;        DivType divType = super.createDivType();</b>
+<b class="fc">&nbsp;        divType.setID(&quot;PHYS_ROOT&quot;);</b>
+<b class="fc">&nbsp;        divType.setTYPE(&quot;physSequence&quot;);</b>
+<b class="fc">&nbsp;        return divType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a DivType object for using as root div in mets logical sruct map.
+&nbsp;     *
+&nbsp;     * @return The DivType object.
+&nbsp;     */
+&nbsp;    public DivType createRootDivTypeForLogicalStructMap(String type, MdSecType dmdSecOfLogicalRootDiv) {
+<b class="fc">&nbsp;        DivType divType = super.createDivType();</b>
+<b class="fc">&nbsp;        divType.setID(&quot;LOG_ROOT&quot;);</b>
+<b class="fc">&nbsp;        divType.setTYPE(type);</b>
+<b class="fc">&nbsp;        divType.getDMDID().add(dmdSecOfLogicalRootDiv);</b>
+<b class="fc">&nbsp;        return divType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a StructLink object.
+&nbsp;     * 
+&nbsp;     * @return The StructLink object.
+&nbsp;     */
+&nbsp;    public StructLink createStructLink() {
+<b class="fc">&nbsp;        return new StructLink(super.createMetsTypeStructLink());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a FileSec object.
+&nbsp;     * 
+&nbsp;     * @return The FileSec object.
+&nbsp;     */
+&nbsp;    public FileSec createFileSec() {
+<b class="fc">&nbsp;        return new FileSec(super.createMetsTypeFileSec());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a DmdSec object which wraps a KitodoType object.
+&nbsp;     *
+&nbsp;     * @param kitodoMetadata
+&nbsp;     *            The KitodoType object which is holding the metadata.
+&nbsp;     * @param id
+&nbsp;     *            The id of this DmdSec element.
+&nbsp;     * @return The MdSecType object.
+&nbsp;     */
+&nbsp;    public DmdSec createDmdSecByKitodoMetadata(KitodoType kitodoMetadata, String id) {
+<b class="fc">&nbsp;        MdSecType mdSec = super.createMdSecType();</b>
+<b class="fc">&nbsp;        mdSec.setMdWrap(wrapKitodoTypeIntoMdWrap(kitodoMetadata));</b>
+<b class="fc">&nbsp;        mdSec.setID(id);</b>
+<b class="fc">&nbsp;        return new DmdSec(mdSec);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Created a MdWrap object for kitodo metadata by setting MDTYPE and
+&nbsp;     * OTHERMDTYPE.
+&nbsp;     *
+&nbsp;     * @return The MdWrap object.
+&nbsp;     */
+&nbsp;    private MdSecType.MdWrap createKitodoMdSecTypeMdWrap() {
+<b class="fc">&nbsp;        MdSecType.MdWrap mdWrap = super.createMdSecTypeMdWrap();</b>
+<b class="fc">&nbsp;        mdWrap.setMDTYPE(&quot;OTHER&quot;);</b>
+<b class="fc">&nbsp;        mdWrap.setOTHERMDTYPE(&quot;KITODO&quot;);</b>
+<b class="fc">&nbsp;        return mdWrap;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private MdSecType.MdWrap wrapKitodoTypeIntoMdWrap(KitodoType kitodoMetadata) {
+<b class="fc">&nbsp;        MdSecType.MdWrap mdWrap = createKitodoMdSecTypeMdWrap();</b>
+<b class="fc">&nbsp;        MdSecType.MdWrap.XmlData xmlData = super.createMdSecTypeMdWrapXmlData();</b>
+<b class="fc">&nbsp;        xmlData.getAny().add(super.createKitodo(kitodoMetadata));</b>
+<b class="fc">&nbsp;        mdWrap.setXmlData(xmlData);</b>
+<b class="fc">&nbsp;        return mdWrap;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

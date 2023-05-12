@@ -1,0 +1,249 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ProcessMetadata</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.createprocess</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessMetadata (org.kitodo.production.forms.createprocess)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessMetadata</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    38,5%
+  </span>
+  <span class="absValue">
+    (5/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    27,6%
+  </span>
+  <span class="absValue">
+    (8/29)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.createprocess;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.api.dataformat.LogicalDivision;
+&nbsp;import org.kitodo.exceptions.InvalidMetadataValueException;
+&nbsp;import org.kitodo.exceptions.NoSuchMetadataFieldException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.ProcessHelper;
+&nbsp;import org.primefaces.model.TreeNode;
+&nbsp;
+<b class="fc">&nbsp;public class ProcessMetadata {</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(ProcessMetadata.class);</b>
+&nbsp;
+<b class="fc">&nbsp;    private ProcessFieldedMetadata processDetails = ProcessFieldedMetadata.EMPTY;</b>
+&nbsp;
+&nbsp;    private TreeNode selectedMetadataTreeNode;
+&nbsp;
+<b class="fc">&nbsp;    private String addMetadataKeySelectedItem = &quot;&quot;;</b>
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * initialize process details table.
+&nbsp;     * @param structure
+&nbsp;     *          which its Metadata are wanted to be shown
+&nbsp;     */
+&nbsp;    public void initializeProcessDetails(LogicalDivision structure, CreateProcessForm form) {
+<b class="nc">&nbsp;        processDetails = ProcessHelper.initializeProcessDetails(structure, form.getRulesetManagement(),</b>
+<b class="nc">&nbsp;                form.getAcquisitionStage(), form.getPriorityList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the logical metadata tree.
+&nbsp;     *
+&nbsp;     * @return the logical metadata tree
+&nbsp;     */
+&nbsp;    public TreeNode getLogicalMetadataTree() {
+<b class="nc">&nbsp;        return processDetails.getTreeNode();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get processDetails.
+&nbsp;     *
+&nbsp;     * @return value of processDetails
+&nbsp;     */
+&nbsp;    ProcessFieldedMetadata getProcessDetails() {
+<b class="nc">&nbsp;        return processDetails;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set processDetails.
+&nbsp;     */
+&nbsp;    public void setProcessDetails(ProcessFieldedMetadata processDetails) {
+<b class="fc">&nbsp;        this.processDetails = processDetails;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all details in the processDetails as a list.
+&nbsp;     *
+&nbsp;     * @return the list of details of the processDetails
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDetail&gt; getProcessDetailsElements() {
+<b class="fc">&nbsp;        return processDetails.getRows();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get selectedMetadataTreeNode.
+&nbsp;     *
+&nbsp;     * @return value of selectedMetadataTreeNode
+&nbsp;     */
+&nbsp;    public TreeNode getSelectedMetadataTreeNode() {
+<b class="nc">&nbsp;        return selectedMetadataTreeNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set selectedMetadataTreeNode.
+&nbsp;     *
+&nbsp;     * @param selectedMetadataTreeNode as org.primefaces.model.TreeNode
+&nbsp;     */
+&nbsp;    public void setSelectedMetadataTreeNode(TreeNode selectedMetadataTreeNode) {
+<b class="nc">&nbsp;        this.selectedMetadataTreeNode = selectedMetadataTreeNode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set addMetadataKeySelectedItem.
+&nbsp;     *
+&nbsp;     * @param addMetadataKeySelectedItem as java.lang.String
+&nbsp;     */
+&nbsp;    public void setAddMetadataKeySelectedItem(String addMetadataKeySelectedItem) {
+<b class="nc">&nbsp;        this.addMetadataKeySelectedItem = addMetadataKeySelectedItem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * preserve all the metadata in the processDetails.
+&nbsp;     */
+&nbsp;    public void preserve() {
+&nbsp;        try {
+<b class="fc">&nbsp;            processDetails.preserve();</b>
+<b class="nc">&nbsp;        } catch (NoSuchMetadataFieldException | InvalidMetadataValueException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getLocalizedMessage());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds an empty table line with &#39;addMetadataKeySelectedItem&#39; type.
+&nbsp;     */
+&nbsp;    public void addMetadataEntry() {
+&nbsp;        try {
+<b class="nc">&nbsp;            if (Objects.nonNull(selectedMetadataTreeNode) &amp;&amp; Objects.nonNull(selectedMetadataTreeNode.getData())) {</b>
+<b class="nc">&nbsp;                ((ProcessFieldedMetadata) selectedMetadataTreeNode.getData()).getAdditionallySelectedFields().clear();</b>
+<b class="nc">&nbsp;                ((ProcessFieldedMetadata) selectedMetadataTreeNode.getData()).addAdditionallySelectedField(addMetadataKeySelectedItem);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                getProcessDetails().getAdditionallySelectedFields().clear();</b>
+<b class="nc">&nbsp;                getProcessDetails().addAdditionallySelectedField(addMetadataKeySelectedItem);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (NoSuchMetadataFieldException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates the logical division of the process details.
+&nbsp;     */
+&nbsp;    public void update(CreateProcessForm form) throws InvalidMetadataValueException, NoSuchMetadataFieldException {
+<b class="nc">&nbsp;        LogicalDivision logicalDivision = (LogicalDivision) processDetails.getDivision();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(logicalDivision)) {</b>
+<b class="nc">&nbsp;            processDetails.preserve();</b>
+<b class="nc">&nbsp;            initializeProcessDetails(logicalDivision, form);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

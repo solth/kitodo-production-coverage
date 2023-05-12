@@ -1,0 +1,587 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > BaseDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.data.database.persistence</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseDAO (org.kitodo.data.database.persistence)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,1%
+  </span>
+  <span class="absValue">
+    (19/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,8%
+  </span>
+  <span class="absValue">
+    (96/125)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.data.database.persistence;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.persistence.PersistenceException;
+&nbsp;
+&nbsp;import org.hibernate.Hibernate;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.Transaction;
+&nbsp;import org.hibernate.exception.SQLGrammarException;
+&nbsp;import org.hibernate.query.Query;
+&nbsp;import org.kitodo.config.ConfigMain;
+&nbsp;import org.kitodo.data.database.beans.BaseBean;
+&nbsp;import org.kitodo.data.database.beans.BaseIndexedBean;
+&nbsp;import org.kitodo.data.database.enums.IndexAction;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Base class for DAOs.
+&nbsp; */
+<b class="fc">&nbsp;public abstract class BaseDAO&lt;T extends BaseBean&gt; implements Serializable {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Object lockObject = new Object();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a BaseBean identified by the given id from the database.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of bean to load
+&nbsp;     * @return persisted bean
+&nbsp;     * @throws DAOException
+&nbsp;     *             if a HibernateException is thrown
+&nbsp;     */
+&nbsp;    public abstract T getById(Integer id) throws DAOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all BaseBean objects from the database.
+&nbsp;     *
+&nbsp;     * @return all persisted beans
+&nbsp;     */
+&nbsp;    public abstract List&lt;T&gt; getAll() throws DAOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all BaseBean objects in given range.
+&nbsp;     *
+&nbsp;     * @param offset
+&nbsp;     *            result
+&nbsp;     * @param size
+&nbsp;     *            amount of results
+&nbsp;     * @return constrained list of persisted beans
+&nbsp;     */
+&nbsp;    public abstract List&lt;T&gt; getAll(int offset, int size) throws DAOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all not indexed BaseBean objects in given range.
+&nbsp;     *
+&nbsp;     * @param offset
+&nbsp;     *            result
+&nbsp;     * @param size
+&nbsp;     *            amount of results
+&nbsp;     * @return constrained list of persisted beans
+&nbsp;     */
+&nbsp;    public abstract List&lt;T&gt; getAllNotIndexed(int offset, int size) throws DAOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Saves a BaseBean object to the database.
+&nbsp;     *
+&nbsp;     * @param baseBean
+&nbsp;     *            object to persist
+&nbsp;     * @throws DAOException
+&nbsp;     *             if the current session can&#39;t be retrieved or an exception is
+&nbsp;     *             thrown while performing the rollback
+&nbsp;     */
+&nbsp;    public void save(T baseBean) throws DAOException {
+<b class="fc">&nbsp;        storeObject(baseBean);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Saves base bean objects as indexed.
+&nbsp;     *
+&nbsp;     * @param baseBeans
+&nbsp;     *            list of base beans
+&nbsp;     * @throws DAOException
+&nbsp;     *             if the current session can&#39;t be retrieved or an exception is
+&nbsp;     *             thrown while performing the rollback
+&nbsp;     */
+&nbsp;    public void saveAsIndexed(List&lt;T&gt; baseBeans) throws DAOException {
+<b class="nc">&nbsp;        storeAsIndexed(baseBeans);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes BaseBean object specified by the given id from the database.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of bean to delete
+&nbsp;     * @throws DAOException
+&nbsp;     *             if the current session can&#39;t be retrieved or an exception is
+&nbsp;     *             thrown while performing the rollback
+&nbsp;     */
+&nbsp;    public abstract void remove(Integer id) throws DAOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes given BaseBean object from the database.
+&nbsp;     *
+&nbsp;     * @param baseBean
+&nbsp;     *            bean to delete
+&nbsp;     * @throws DAOException
+&nbsp;     *             if the current session can&#39;t be retrieved or an exception is
+&nbsp;     *             thrown while performing the rollback
+&nbsp;     */
+&nbsp;    public void remove(T baseBean) throws DAOException {
+<b class="fc">&nbsp;        if (baseBean.getId() != null) {</b>
+<b class="fc">&nbsp;            try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;                Transaction transaction = session.beginTransaction();</b>
+<b class="fc">&nbsp;                synchronized (lockObject) {</b>
+<b class="fc">&nbsp;                    Object merged = session.merge(baseBean);</b>
+<b class="fc">&nbsp;                    session.delete(merged);</b>
+<b class="fc">&nbsp;                    session.flush();</b>
+<b class="fc">&nbsp;                    transaction.commit();</b>
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;            } catch (PersistenceException e) {</b>
+<b class="nc">&nbsp;                throw new DAOException(e);</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Refresh given bean object.
+&nbsp;     *
+&nbsp;     * @param baseBean
+&nbsp;     *            bean to refresh
+&nbsp;     */
+&nbsp;    public void refresh(T baseBean) {
+<b class="nc">&nbsp;        refreshObject(baseBean);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Evict given bean object.
+&nbsp;     *
+&nbsp;     * @param baseBean
+&nbsp;     *            bean to evict
+&nbsp;     */
+&nbsp;    public void evict(T baseBean) {
+<b class="nc">&nbsp;        evictObject(baseBean);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves BaseBean objects from database by given query.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            as String
+&nbsp;     * @param parameters
+&nbsp;     *            for query
+&nbsp;     * @param first
+&nbsp;     *            result
+&nbsp;     * @param max
+&nbsp;     *            amount of results
+&nbsp;     * @return list of beans objects
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public List&lt;T&gt; getByQuery(String query, Map&lt;String, Object&gt; parameters, int first, int max) {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            Query&lt;T&gt; q = session.createQuery(query);</b>
+<b class="fc">&nbsp;            q.setFirstResult(first);</b>
+<b class="fc">&nbsp;            q.setMaxResults(max);</b>
+<b class="fc">&nbsp;            addParameters(q, parameters);</b>
+<b class="fc">&nbsp;            return q.list();</b>
+<b class="fc">&nbsp;        } catch (SQLGrammarException e) {</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves BaseBean objects from database by given query.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            as String
+&nbsp;     * @param parameters
+&nbsp;     *            for query
+&nbsp;     * @return list of beans objects
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public List&lt;T&gt; getByQuery(String query, Map&lt;String, Object&gt; parameters) {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            Query&lt;T&gt; q = session.createQuery(query);</b>
+<b class="fc">&nbsp;            addParameters(q, parameters);</b>
+<b class="fc">&nbsp;            return q.list();</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves BaseBean objects from database by given query.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            as String
+&nbsp;     * @return list of beans objects
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public List&lt;T&gt; getByQuery(String query) {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            List&lt;T&gt; baseBeanObjects = session.createQuery(query).list();</b>
+<b class="fc">&nbsp;            if (Objects.isNull(baseBeanObjects)) {</b>
+<b class="nc">&nbsp;                baseBeanObjects = new ArrayList&lt;&gt;();</b>
+&nbsp;            }
+<b class="fc">&nbsp;            return baseBeanObjects;</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count all rows in database.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            for counting objects
+&nbsp;     * @param parameters
+&nbsp;     *            for query
+&nbsp;     * @return amount of rows in database according to given query
+&nbsp;     */
+&nbsp;    public Long count(String query, Map&lt;String, Object&gt; parameters) throws DAOException {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            Query&lt;?&gt; q = session.createQuery(query);</b>
+<b class="fc">&nbsp;            addParameters(q, parameters);</b>
+<b class="fc">&nbsp;            return (Long) q.uniqueResult();</b>
+<b class="fc">&nbsp;        } catch (PersistenceException e) {</b>
+<b class="nc">&nbsp;            throw new DAOException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count all rows in database.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            for counting objects
+&nbsp;     * @return amount of rows in database according to given query
+&nbsp;     */
+&nbsp;    public Long count(String query) throws DAOException {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            return (Long) session.createQuery(query).uniqueResult();</b>
+<b class="fc">&nbsp;        } catch (PersistenceException e) {</b>
+<b class="nc">&nbsp;            throw new DAOException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes the object from the database with with specified class type and
+&nbsp;     * {@code id}.
+&nbsp;     *
+&nbsp;     * @param cls
+&nbsp;     *            the class type to remove
+&nbsp;     * @param objectId
+&nbsp;     *            the id of the class type
+&nbsp;     * @throws DAOException
+&nbsp;     *             if a HibernateException is thrown
+&nbsp;     */
+&nbsp;    static void removeObject(Class&lt;?&gt; cls, Integer objectId) throws DAOException {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            Transaction transaction = session.beginTransaction();</b>
+<b class="fc">&nbsp;            synchronized (lockObject) {</b>
+<b class="fc">&nbsp;                Object object = session.load(cls, objectId);</b>
+<b class="fc">&nbsp;                session.delete(object);</b>
+<b class="fc">&nbsp;                session.flush();</b>
+<b class="fc">&nbsp;                transaction.commit();</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;        } catch (PersistenceException e) {</b>
+<b class="nc">&nbsp;            throw new DAOException(e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize child list of objects for given base bean.
+&nbsp;     *
+&nbsp;     * @param object
+&nbsp;     *            for update
+&nbsp;     * @param list
+&nbsp;     *            child list for initialize
+&nbsp;     */
+&nbsp;    public void initialize(T object, List&lt;? extends BaseBean&gt; list) {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            session.update(object);</b>
+<b class="fc">&nbsp;            Hibernate.initialize(list);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves an object of the class type specified by {@code cls}, and
+&nbsp;     * having the given {@code id}.
+&nbsp;     *
+&nbsp;     * @param cls
+&nbsp;     *            the class to load
+&nbsp;     * @param id
+&nbsp;     *            object id
+&nbsp;     * @return Object may be null if object with ID doesn&#39;t exist
+&nbsp;     */
+&nbsp;    T retrieveObject(Class&lt;T&gt; cls, Integer id) throws DAOException {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            return session.get(cls, id);</b>
+<b class="fc">&nbsp;        } catch (PersistenceException e) {</b>
+<b class="nc">&nbsp;            throw new DAOException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve objects by given query for maximum number of objects.
+&nbsp;     *
+&nbsp;     * @param query
+&nbsp;     *            string
+&nbsp;     * @param first
+&nbsp;     *            result
+&nbsp;     * @param max
+&nbsp;     *            amount of results
+&nbsp;     * @return constrained list of results
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    List&lt;T&gt; retrieveObjects(String query, int first, int max) throws DAOException {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            Query&lt;T&gt; sessionQuery = session.createQuery(query);</b>
+<b class="fc">&nbsp;            sessionQuery.setFirstResult(first);</b>
+<b class="fc">&nbsp;            sessionQuery.setMaxResults(max);</b>
+<b class="fc">&nbsp;            return sessionQuery.list();</b>
+<b class="fc">&nbsp;        } catch (PersistenceException e) {</b>
+<b class="nc">&nbsp;            throw new DAOException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve all objects fro given class.
+&nbsp;     *
+&nbsp;     * @param cls
+&nbsp;     *            class
+&nbsp;     * @return List of all objects
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    List&lt;T&gt; retrieveAllObjects(Class&lt;T&gt; cls) throws DAOException {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            Query&lt;T&gt; query = session.createQuery(String.format(&quot;FROM %s ORDER BY id ASC&quot;, cls.getSimpleName()));</b>
+<b class="fc">&nbsp;            return query.list();</b>
+<b class="fc">&nbsp;        } catch (PersistenceException e) {</b>
+<b class="nc">&nbsp;            throw new DAOException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Store given object.
+&nbsp;     *
+&nbsp;     * @param object
+&nbsp;     *            to persist
+&nbsp;     */
+&nbsp;    void storeObject(T object) throws DAOException {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            Transaction transaction = session.beginTransaction();</b>
+<b class="fc">&nbsp;            session.saveOrUpdate(object);</b>
+<b class="fc">&nbsp;            session.flush();</b>
+<b class="fc">&nbsp;            transaction.commit();</b>
+<b class="fc">&nbsp;        } catch (PersistenceException e) {</b>
+<b class="fc">&nbsp;            throw new DAOException(e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void storeAsIndexed(List&lt;T&gt; baseBeans) throws DAOException {
+<b class="nc">&nbsp;        for (BaseBean baseBean : baseBeans) {</b>
+<b class="nc">&nbsp;            BaseIndexedBean entity = (BaseIndexedBean) getById(baseBean.getId());</b>
+<b class="nc">&nbsp;            entity.setIndexAction(IndexAction.DONE);</b>
+<b class="nc">&nbsp;            storeObject((T) entity);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Store given list of objects.
+&nbsp;     *
+&nbsp;     * @param list
+&nbsp;     *            of objects
+&nbsp;     */
+&nbsp;    void storeList(List&lt;T&gt; list) throws DAOException {
+<b class="fc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="fc">&nbsp;            Transaction transaction = session.beginTransaction();</b>
+<b class="fc">&nbsp;            for (Object obj : list) {</b>
+<b class="fc">&nbsp;                session.saveOrUpdate(obj);</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            session.flush();</b>
+<b class="fc">&nbsp;            transaction.commit();</b>
+<b class="fc">&nbsp;        } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;            throw new DAOException(e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Evict object associated with the session.
+&nbsp;     *
+&nbsp;     * @param object
+&nbsp;     *            associated with the session
+&nbsp;     */
+&nbsp;    private void evictObject(T object) {
+<b class="nc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="nc">&nbsp;            session.evict(object);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Refresh object associated with the session.
+&nbsp;     *
+&nbsp;     * @param object
+&nbsp;     *            associated with the session
+&nbsp;     */
+&nbsp;    private void refreshObject(T object) {
+<b class="nc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="nc">&nbsp;            session.refresh(object);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update of the object.
+&nbsp;     *
+&nbsp;     * @param object
+&nbsp;     *            to update
+&nbsp;     */
+&nbsp;    void updateObject(T object) {
+<b class="nc">&nbsp;        try (Session session = HibernateUtil.getSession()) {</b>
+<b class="nc">&nbsp;            session.update(object);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void addParameters(Query&lt;?&gt; query, Map&lt;String, Object&gt; parameters) {
+<b class="fc">&nbsp;        if (Objects.nonNull(parameters)) {</b>
+<b class="fc">&nbsp;            for (Map.Entry&lt;String, Object&gt; parameter : parameters.entrySet()) {</b>
+<b class="fc">&nbsp;                if (parameter.getValue() instanceof List) {</b>
+<b class="fc">&nbsp;                    query.setParameterList(parameter.getKey(), (List&lt;?&gt;) parameter.getValue());</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    query.setParameter(parameter.getKey(), parameter.getValue());</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Query part of date filter. Filter is configured by &quot;database.subset.dates&quot;
+&nbsp;     * parameter in kitodo_config.properties.
+&nbsp;     *
+&nbsp;     * @param column
+&nbsp;     *            The column to filter.
+&nbsp;     * @return The query part to filter for dates.
+&nbsp;     */
+&nbsp;    public static String getDateFilter(String column) {
+<b class="fc">&nbsp;        List&lt;String&gt; dates = getDatesFromConfig();</b>
+<b class="fc">&nbsp;        if (!dates.isEmpty()) {</b>
+<b class="nc">&nbsp;            return &quot; ( &quot;</b>
+<b class="nc">&nbsp;                    + dates.stream().map(date -&gt; column + &quot; LIKE &#39;&quot; + date + &quot;%&#39; &quot;).collect(Collectors.joining(&quot; OR &quot;))</b>
+&nbsp;                    + &quot; )&quot;;
+&nbsp;        }
+<b class="fc">&nbsp;        return &quot; 1=1 &quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /*
+&nbsp;     * Parameter &quot;database.subset.dates&quot; filters the database to a subset. Atm, only
+&nbsp;     * the largest data tables of tasks by processingBegin and process by creation
+&nbsp;     * date are considered. The dates can be defined &amp; separated in the format YYYY,
+&nbsp;     * YYYY-MM or YYYY-MM-DD e.g. 2017-05-10,2018-06,2022
+&nbsp;     */
+&nbsp;    private static List&lt;String&gt; getDatesFromConfig() {
+<b class="fc">&nbsp;        final String[] databaseSubsetDates = ConfigMain.getStringArrayParameter(&quot;database.subset.dates&quot;);</b>
+&nbsp;        // sanitize entries of parameter
+<b class="fc">&nbsp;        return Arrays.stream(databaseSubsetDates)</b>
+<b class="fc">&nbsp;                .filter(Pattern.compile(&quot;\\d{4}|\\d{4}-\\d{2}|\\d{4}-\\d{2}-\\d{2}&quot;).asMatchPredicate())</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

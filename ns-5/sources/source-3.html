@@ -1,0 +1,206 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MediaVariant</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataformat</a>
+</div>
+
+<h1>Coverage Summary for Class: MediaVariant (org.kitodo.api.dataformat)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MediaVariant</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    64,7%
+  </span>
+  <span class="absValue">
+    (11/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataformat;
+&nbsp;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;/**
+&nbsp; * A variant of the {@code PhysicalDivision}s for a particular use. By use is meant a
+&nbsp; * technical form of use. Therefore, the variant has as technical property the
+&nbsp; * Internet MIME type. Examples of variants include thumbnails, full resolution
+&nbsp; * images, file ready to print, OCR results, etc. For Production, a variant is
+&nbsp; * always linked to a MIME type, it is not possible to have mixed MIME types in
+&nbsp; * the same usage variant.
+&nbsp; */
+<b class="fc">&nbsp;public class MediaVariant {</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Specifying the Internet MIME type for this type of use.
+&nbsp;     */
+&nbsp;    private String mimeType;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Identifier of use. In terms of METS, this is a string, but if the
+&nbsp;     * generated METS file is to be used with the DFG Viewer this string must be
+&nbsp;     * a prescribed value, depending on its intended use.
+&nbsp;     *
+&nbsp;     * @see &quot;https://www.zvdd.de/fileadmin/AGSDD-Redaktion/METS_Anwendungsprofil_2.0.pdf#page=12&quot;
+&nbsp;     */
+&nbsp;    private String use;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the MIME type of the media variant.
+&nbsp;     *
+&nbsp;     * @return the MIME type
+&nbsp;     */
+&nbsp;    public String getMimeType() {
+<b class="fc">&nbsp;        return mimeType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the MIME type of the media variant.
+&nbsp;     *
+&nbsp;     * @param mimeType
+&nbsp;     *            MIME type to set
+&nbsp;     */
+&nbsp;    public void setMimeType(String mimeType) {
+<b class="fc">&nbsp;        this.mimeType = mimeType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the use of the media variant.
+&nbsp;     *
+&nbsp;     * @return the use
+&nbsp;     */
+&nbsp;    public String getUse() {
+<b class="fc">&nbsp;        return use;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the use of the media variant.
+&nbsp;     *
+&nbsp;     * @param use
+&nbsp;     *            use type to set
+&nbsp;     */
+&nbsp;    public void setUse(String use) {
+<b class="fc">&nbsp;        this.use = use;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        final int prime = 31;</b>
+<b class="fc">&nbsp;        int hashCode = 1;</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((use == null) ? 0 : use.hashCode());</b>
+<b class="fc">&nbsp;        return hashCode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object obj) {
+<b class="fc">&nbsp;        if (this == obj) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (obj instanceof MediaVariant) {</b>
+<b class="nc">&nbsp;            MediaVariant other = (MediaVariant) obj;</b>
+&nbsp;
+<b class="nc">&nbsp;            if (Objects.isNull(use)) {</b>
+<b class="nc">&nbsp;                return Objects.isNull(other.use);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return use.equals(other.use);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

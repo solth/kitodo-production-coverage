@@ -1,0 +1,157 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetsKitodoHeaderHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.handlers</a>
+</div>
+
+<h1>Coverage Summary for Class: MetsKitodoHeaderHandler (org.kitodo.dataeditor.handlers)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MetsKitodoHeaderHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.handlers;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.dataformat.metskitodo.Mets;
+&nbsp;import org.kitodo.dataformat.metskitodo.MetsType;
+&nbsp;
+&nbsp;/**
+&nbsp; * General utilities for handling of generated mets-kitodo class content.
+&nbsp; */
+&nbsp;public class MetsKitodoHeaderHandler {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private MetsKitodoHeaderHandler() {
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a note to the first {@code agent} element in mets header. Does nothing
+&nbsp;     * if no {@code agent} element exists.
+&nbsp;     *
+&nbsp;     * @param noteMessage
+&nbsp;     *            The note message.
+&nbsp;     * @param mets
+&nbsp;     *            The Mets object.
+&nbsp;     * @return The Mets object with added note.
+&nbsp;     */
+&nbsp;    public static Mets addNoteToMetsHeader(String noteMessage, Mets mets) {
+<b class="fc">&nbsp;        MetsType.MetsHdr metsHdr = mets.getMetsHdr();</b>
+<b class="fc">&nbsp;        if (Objects.isNull(metsHdr)) {</b>
+<b class="fc">&nbsp;            return mets;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        List&lt;MetsType.MetsHdr.Agent&gt; agents = metsHdr.getAgent();</b>
+<b class="fc">&nbsp;        if (!agents.isEmpty()) {</b>
+<b class="fc">&nbsp;            agents.get(0).getNote().add(noteMessage);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return mets;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TaskComparer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.migration</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskComparer (org.kitodo.production.migration)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskComparer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,9%
+  </span>
+  <span class="absValue">
+    (29/33)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.migration;
+&nbsp;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;
+<b class="fc">&nbsp;public class TaskComparer {</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Compares two tasks, if they are equal for migration purposes.
+&nbsp;     * @return true, if they are equal, false if not
+&nbsp;     */
+&nbsp;    public boolean isEqual(Task firstTask, Task secondTask) {
+<b class="fc">&nbsp;        if (Objects.isNull(firstTask) || Objects.isNull(secondTask)) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.isNull(firstTask.getTitle()) ? Objects.nonNull(secondTask.getTitle())</b>
+<b class="fc">&nbsp;                : !firstTask.getTitle().equals(secondTask.getTitle())) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.isNull(firstTask.getOrdering()) ? Objects.nonNull(secondTask.getOrdering())</b>
+<b class="fc">&nbsp;                : !firstTask.getOrdering().equals(secondTask.getOrdering())) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (firstTask.isTypeAutomatic() != secondTask.isTypeAutomatic()) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (firstTask.isTypeMetadata() != secondTask.isTypeMetadata()) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (firstTask.isTypeImagesRead() != secondTask.isTypeImagesRead()) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (firstTask.isTypeImagesWrite() != secondTask.isTypeImagesWrite()) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (firstTask.isTypeExportDMS() != secondTask.isTypeExportDMS()) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (firstTask.isTypeAcceptClose() != secondTask.isTypeAcceptClose()) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (firstTask.isTypeCloseVerify() != secondTask.isTypeCloseVerify()) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Objects.isNull(firstTask.getScriptPath()) ? Objects.nonNull(secondTask.getScriptPath())</b>
+<b class="fc">&nbsp;                : !firstTask.getScriptPath().equals(secondTask.getScriptPath())) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return firstTask.isBatchStep() == secondTask.isBatchStep();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a hash value for which holds that is the same for two tasks if
+&nbsp;     * the above comparator returns 0, otherwise different.
+&nbsp;     *
+&nbsp;     * @param task
+&nbsp;     *            task to return hash value for
+&nbsp;     * @return hash value
+&nbsp;     */
+&nbsp;    public static int hashCode(Task task) {
+<b class="fc">&nbsp;        if (Objects.isNull(task)) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        int hashCode = Objects.hash(task.getTitle(), task.getOrdering(), task.isTypeAutomatic(), task.isTypeMetadata(),</b>
+<b class="fc">&nbsp;            task.isTypeImagesRead(), task.isTypeImagesWrite(), task.isTypeExportDMS(), task.isTypeAcceptClose(),</b>
+<b class="fc">&nbsp;            task.isTypeCloseVerify(), task.getScriptPath(), task.isBatchStep());</b>
+<b class="fc">&nbsp;        return hashCode;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

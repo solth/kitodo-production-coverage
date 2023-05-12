@@ -1,0 +1,391 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > KeyView</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.dataeditor.ruleset</a>
+</div>
+
+<h1>Coverage Summary for Class: KeyView (org.kitodo.dataeditor.ruleset)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KeyView</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,3%
+  </span>
+  <span class="absValue">
+    (12/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,9%
+  </span>
+  <span class="absValue">
+    (56/59)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">KeyView$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    92,9%
+  </span>
+  <span class="absValue">
+    (13/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95%
+  </span>
+  <span class="absValue">
+    (57/60)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.dataeditor.ruleset;
+&nbsp;
+&nbsp;import java.math.BigInteger;
+&nbsp;import java.net.URI;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.time.MonthDay;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.time.format.DateTimeParseException;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import org.kitodo.api.MetadataEntry;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.DatesSimpleMetadataViewInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.Domain;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.InputType;
+&nbsp;
+&nbsp;/**
+&nbsp; * A view on a key.
+&nbsp; */
+&nbsp;class KeyView extends AbstractKeyView&lt;KeyDeclaration&gt; implements DatesSimpleMetadataViewInterface {
+&nbsp;    /**
+&nbsp;     * The schema in which the part of the date relevant to this division is
+&nbsp;     * stored. Apart from the dates built into Java and interpreted by the
+&nbsp;     * runtime, there is still the special string “{@code yyyy/yyyy}”, which
+&nbsp;     * stands for a double year, eg. an operation year that starts on a day
+&nbsp;     * other than January 1. This works in conjunction with {@link #yearBegin}.
+&nbsp;     */
+&nbsp;    private String scheme;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The settings for this key.
+&nbsp;     */
+&nbsp;    private Settings settings;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Annual start of operation year.
+&nbsp;     */
+&nbsp;    private MonthDay yearBegin;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A new key view is created.
+&nbsp;     *
+&nbsp;     * @param keyDeclaration
+&nbsp;     *            the key declaration
+&nbsp;     * @param rule
+&nbsp;     *            the rule
+&nbsp;     * @param settings
+&nbsp;     *            the settings
+&nbsp;     * @param priorityList
+&nbsp;     *            the user’s wish list for the preferred human language
+&nbsp;     */
+&nbsp;    KeyView(KeyDeclaration keyDeclaration, Rule rule, Settings settings,
+&nbsp;            List&lt;LanguageRange&gt; priorityList) {
+&nbsp;
+<b class="fc">&nbsp;        super(keyDeclaration, rule, priorityList);</b>
+<b class="fc">&nbsp;        this.settings = settings;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the predefined values for a new key.
+&nbsp;     *
+&nbsp;     * @return the predefined values
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Collection&lt;String&gt; getDefaultItems() {
+<b class="fc">&nbsp;        return declaration.getDefaultItems();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the input field type for the input field for this metadata key.
+&nbsp;     *
+&nbsp;     * @return the input type
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public InputType getInputType() {
+&nbsp;        /*
+&nbsp;         * If the metadata key has a type that requires a special input field,
+&nbsp;         * return the corresponding field type.
+&nbsp;         */
+<b class="fc">&nbsp;        switch (declaration.getType()) {</b>
+&nbsp;            case ANY_URI:
+<b class="fc">&nbsp;                return InputType.ONE_LINE_TEXT;</b>
+&nbsp;            case BOOLEAN:
+<b class="fc">&nbsp;                return InputType.BOOLEAN;</b>
+&nbsp;            case DATE:
+<b class="fc">&nbsp;                return InputType.DATE;</b>
+&nbsp;            case INTEGER:
+<b class="fc">&nbsp;                return InputType.INTEGER;</b>
+&nbsp;            default:
+&nbsp;                // do nothing
+&nbsp;        }
+&nbsp;
+&nbsp;        /*
+&nbsp;         * If the metadata key defines options, return the corresponding
+&nbsp;         * selection type.
+&nbsp;         */
+<b class="fc">&nbsp;        if (declaration.isWithOptions()) {</b>
+<b class="fc">&nbsp;            if (rule.isRepeatable()) {</b>
+<b class="fc">&nbsp;                return InputType.MULTIPLE_SELECTION;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            if (settings.isMultiline(declaration.getId())) {</b>
+<b class="fc">&nbsp;                return InputType.MULTI_LINE_SINGLE_SELECTION;</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return InputType.ONE_LINE_SINGLE_SELECTION;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        // otherwise, check if the key is required to have an enlarged text box
+<b class="fc">&nbsp;        if (settings.isMultiline(declaration.getId())) {</b>
+<b class="fc">&nbsp;            return InputType.MULTI_LINE_TEXT;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return InputType.ONE_LINE_TEXT;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getScheme() {
+<b class="fc">&nbsp;        return scheme;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int getMinDigits() {
+<b class="nc">&nbsp;        return declaration.getMinDigits();</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Override
+&nbsp;    public Map&lt;String, String&gt; getSelectItems(List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; metadata) {
+<b class="fc">&nbsp;        return rule.getSelectItems(declaration.getSelectItems(priorityList), metadata);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public MonthDay getYearBegin() {
+<b class="fc">&nbsp;        return yearBegin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isEditable() {
+<b class="fc">&nbsp;        return settings.isEditable(declaration.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if a URI is in the configured namespace, if one has been
+&nbsp;     * specified. Typically, a namespace is used as a URL prefix. For namespaces
+&nbsp;     * on the WWW ending in {@code /}, the {@code /} required. For the other
+&nbsp;     * namespaces on the WWW ending in {@code #}, the {@code #} is optional.
+&nbsp;     * Both spellings are equivalent. Then there is the spelling with braces.
+&nbsp;     * This is no longer a valid URL, but is also allowed here. If the name
+&nbsp;     * space is not on the WWW (i.e. does not start with {@code http}), the
+&nbsp;     * variant is also allowed to be a simple prefix. However, this only needs
+&nbsp;     * to be checked if the namespace has not ended with a {@code /}, otherwise
+&nbsp;     * the test is equivalent.
+&nbsp;     *
+&nbsp;     * @param uri
+&nbsp;     *            URI for which you want to check if it is in the specified
+&nbsp;     *            namespace.
+&nbsp;     * @return true, if the URI is in the specified namespace or no namespace is
+&nbsp;     *         specified
+&nbsp;     */
+&nbsp;    private boolean isLocatedInTheNamespace(String uri) {
+<b class="fc">&nbsp;        Optional&lt;String&gt; optionalNamespace = declaration.getNamespace();</b>
+<b class="fc">&nbsp;        if (optionalNamespace.isPresent()) {</b>
+<b class="fc">&nbsp;            String namespaceAsStated = optionalNamespace.get();</b>
+<b class="fc">&nbsp;            boolean endsWithSlash = namespaceAsStated.endsWith(&quot;/&quot;);</b>
+<b class="fc">&nbsp;            String wwwNamespacePrefix = endsWithSlash || namespaceAsStated.endsWith(&quot;#&quot;) ? namespaceAsStated</b>
+<b class="fc">&nbsp;                    : namespaceAsStated.concat(&quot;#&quot;);</b>
+<b class="fc">&nbsp;            if (uri.startsWith(wwwNamespacePrefix) || uri.startsWith(&#39;{&#39; + namespaceAsStated + &#39;}&#39;)) {</b>
+<b class="fc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            return !endsWithSlash &amp;&amp; !namespaceAsStated.toLowerCase().startsWith(&quot;http&quot;)</b>
+<b class="nc">&nbsp;                    &amp;&amp; uri.startsWith(namespaceAsStated);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if a value for a key is valid. This means a basic check, if the
+&nbsp;     * value fits the key at all and can be saved. If this check fails, the
+&nbsp;     * interface should reject the input.
+&nbsp;     *
+&nbsp;     * @return whether a value is valid
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean isValid(String value, List&lt;Map&lt;MetadataEntry, Boolean&gt;&gt; metadata) {
+&nbsp;        /*
+&nbsp;         * Some data types are easily validated by Java built-in functions. We
+&nbsp;         * will not implement it here again but try to create a corresponding
+&nbsp;         * object. So it’s just about whether the constructor throws no mistake.
+&nbsp;         * This simplifies the examination considerably.
+&nbsp;         */
+&nbsp;        try {
+<b class="fc">&nbsp;            if (Objects.isNull(declaration) || Objects.isNull(value)) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            switch (declaration.getType()) {</b>
+&nbsp;                case ANY_URI:
+<b class="fc">&nbsp;                    if (!isLocatedInTheNamespace(value)) {</b>
+<b class="fc">&nbsp;                        return false;</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                    new URI(value);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case DATE:
+<b class="fc">&nbsp;                    DateTimeFormatter.ISO_LOCAL_DATE.parse(value);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                case INTEGER:
+<b class="fc">&nbsp;                    new BigInteger(value);</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                default:
+<b class="fc">&nbsp;                    if (!isLocatedInTheNamespace(value)) {</b>
+<b class="fc">&nbsp;                        return false;</b>
+&nbsp;                    }
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (URISyntaxException | DateTimeParseException | NumberFormatException e) {</b>
+<b class="fc">&nbsp;            return false;</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // If the key has options, then the value must be in it.
+<b class="fc">&nbsp;        if (declaration.isWithOptions()</b>
+<b class="fc">&nbsp;                &amp;&amp; !rule.getSelectItems(declaration.getSelectItems(priorityList), metadata).containsKey(value)) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /*
+&nbsp;         * Then we check against the regular expression, if there is one. The
+&nbsp;         * tests can be combined with each other, then all conditions must
+&nbsp;         * apply.
+&nbsp;         */
+<b class="fc">&nbsp;        Optional&lt;Pattern&gt; optionalPattern = declaration.getPattern();</b>
+<b class="fc">&nbsp;        if (!optionalPattern.isPresent()) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return optionalPattern.get().matcher(value).matches();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void setScheme(String scheme) {
+<b class="fc">&nbsp;        this.scheme = scheme;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void setYearBegin(MonthDay yearBegin) {
+<b class="fc">&nbsp;        this.yearBegin = yearBegin;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Optional&lt;Domain&gt; getDomain() {
+<b class="fc">&nbsp;        return declaration.getDomain();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,611 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > UserService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data</a>
+</div>
+
+<h1>Coverage Summary for Class: UserService (org.kitodo.production.services.data)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,1%
+  </span>
+  <span class="absValue">
+    (20/35)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,3%
+  </span>
+  <span class="absValue">
+    (63/136)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data;
+&nbsp;
+&nbsp;import java.io.BufferedReader;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.InputStreamReader;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.KitodoConfigFile;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.Client;
+&nbsp;import org.kitodo.data.database.beans.Filter;
+&nbsp;import org.kitodo.data.database.beans.Task;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.database.persistence.UserDAO;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.exceptions.FilterException;
+&nbsp;import org.kitodo.production.dto.UserDTO;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.security.SecurityUserDetails;
+&nbsp;import org.kitodo.production.security.password.SecurityPasswordEncoder;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.base.ClientSearchDatabaseService;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;import org.springframework.security.core.userdetails.UserDetails;
+&nbsp;import org.springframework.security.core.userdetails.UserDetailsService;
+&nbsp;import org.springframework.security.core.userdetails.UsernameNotFoundException;
+&nbsp;
+&nbsp;public class UserService extends ClientSearchDatabaseService&lt;User, UserDAO&gt; implements UserDetailsService {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(UserService.class);</b>
+<b class="fc">&nbsp;    private static volatile UserService instance = null;</b>
+&nbsp;    private static final String CLIENT_ID = &quot;clientId&quot;;
+<b class="fc">&nbsp;    private final SecurityPasswordEncoder passwordEncoder = new SecurityPasswordEncoder();</b>
+<b class="fc">&nbsp;    private static final int DEFAULT_CLIENT_ID =</b>
+<b class="fc">&nbsp;            ConfigCore.getIntParameterOrDefaultValue(ParameterCore.DEFAULT_CLIENT_ID);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor.
+&nbsp;     */
+&nbsp;    private UserService() {
+<b class="fc">&nbsp;        super(new UserDAO());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return singleton variable of type UserService.
+&nbsp;     *
+&nbsp;     * @return unique instance of UserService
+&nbsp;     */
+&nbsp;    public static UserService getInstance() {
+<b class="fc">&nbsp;        UserService localReference = instance;</b>
+<b class="fc">&nbsp;        if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;            synchronized (UserService.class) {</b>
+<b class="fc">&nbsp;                localReference = instance;</b>
+<b class="fc">&nbsp;                if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;                    localReference = new UserService();</b>
+<b class="fc">&nbsp;                    instance = localReference;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return localReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countDatabaseRows() throws DAOException {
+<b class="fc">&nbsp;        return countDatabaseRows(&quot;SELECT COUNT(*) FROM User WHERE deleted = 0&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countResults(Map filters) throws DAOException {
+&nbsp;        HashMap&lt;String, Object&gt; filterMap;
+&nbsp;        try {
+<b class="nc">&nbsp;            filterMap = ServiceManager.getFilterService().getSQLFilterMap(filters, User.class);</b>
+<b class="nc">&nbsp;        } catch (NoSuchFieldException | NumberFormatException e) {</b>
+<b class="nc">&nbsp;            throw new FilterException(e.getClass().getSimpleName() + &quot;: &quot; + e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        String sqlFilterString = ServiceManager.getFilterService().mapToSQLFilterString(filterMap.keySet());</b>
+<b class="nc">&nbsp;        if (ServiceManager.getSecurityAccessService().hasAuthorityGlobalToViewUserList()) {</b>
+<b class="nc">&nbsp;            return countDatabaseRows(&quot;SELECT COUNT(*) FROM User WHERE deleted = 0&quot; + sqlFilterString, filterMap);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (ServiceManager.getSecurityAccessService().hasAuthorityToViewUserList()) {</b>
+<b class="nc">&nbsp;            filterMap.put(CLIENT_ID, getSessionClientId());</b>
+<b class="nc">&nbsp;            return countDatabaseRows(</b>
+&nbsp;                &quot;SELECT COUNT(*) FROM User u INNER JOIN u.clients AS c WITH c.id = :clientId WHERE deleted = 0&quot;
+&nbsp;                        + sqlFilterString, filterMap);
+&nbsp;        }
+<b class="nc">&nbsp;        return 0L;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;User&gt; getAllForSelectedClient() {
+<b class="nc">&nbsp;        return getByQuery(</b>
+&nbsp;            &quot;SELECT u FROM User AS u INNER JOIN u.clients AS c WITH c.id = :clientId WHERE deleted = 0&quot;,
+<b class="nc">&nbsp;            Collections.singletonMap(CLIENT_ID, getSessionClientId()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public UserDetails loadUserByUsername(String username) {
+<b class="nc">&nbsp;        return new SecurityUserDetails(getByLdapLoginOrLogin(username));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;User&gt; loadData(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
+&nbsp;        HashMap&lt;String, Object&gt; filterMap;
+&nbsp;        try {
+<b class="nc">&nbsp;            filterMap = ServiceManager.getFilterService().getSQLFilterMap(filters, User.class);</b>
+<b class="nc">&nbsp;        } catch (NoSuchFieldException | NumberFormatException e) {</b>
+<b class="nc">&nbsp;            throw new FilterException(e.getClass().getSimpleName() + &quot;: &quot; + e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        String sqlFilterString = ServiceManager.getFilterService().mapToSQLFilterString(filterMap.keySet());</b>
+<b class="nc">&nbsp;        if (ServiceManager.getSecurityAccessService().hasAuthorityGlobalToViewUserList()) {</b>
+<b class="nc">&nbsp;            return dao.getByQuery(&quot;FROM User WHERE deleted = 0&quot; + sqlFilterString + getSort(sortField, sortOrder),</b>
+&nbsp;                    filterMap, first, pageSize);
+&nbsp;        }
+<b class="nc">&nbsp;        if (ServiceManager.getSecurityAccessService().hasAuthorityToViewUserList()) {</b>
+<b class="nc">&nbsp;            filterMap.put(CLIENT_ID, getSessionClientId());</b>
+<b class="nc">&nbsp;            return dao.getByQuery(</b>
+&nbsp;                &quot;SELECT u FROM User AS u INNER JOIN u.clients AS c WITH c.id = :clientId WHERE deleted = 0&quot;
+<b class="nc">&nbsp;                        + sqlFilterString + getSort(sortField, sortOrder),</b>
+&nbsp;                filterMap, first, pageSize);
+&nbsp;        }
+<b class="nc">&nbsp;        return new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a user by his or her LDAP login or common login.
+&nbsp;     *
+&nbsp;     * @param login
+&nbsp;     *            the login of the user to look for
+&nbsp;     * @return the user, if one is found
+&nbsp;     * @throws UsernameNotFoundException
+&nbsp;     *             if no unique user can be found
+&nbsp;     */
+&nbsp;    public User getByLdapLoginOrLogin(String login) {
+<b class="fc">&nbsp;        List&lt;User&gt; users = getByLoginQuery(login, &quot;from User where ldapLogin = :login&quot;);</b>
+<b class="fc">&nbsp;        users.addAll(getByLoginQuery(login, &quot;from User where login = :login&quot;));</b>
+<b class="fc">&nbsp;        return uniqueResult(users, login);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets user by login.
+&nbsp;     *
+&nbsp;     * @param login
+&nbsp;     *            The login.
+&nbsp;     * @return The user.
+&nbsp;     */
+&nbsp;    public User getByLogin(String login) {
+<b class="fc">&nbsp;        List&lt;User&gt; users = getByLoginQuery(login, &quot;from User where login = :login&quot;);</b>
+<b class="fc">&nbsp;        return uniqueResult(users, login);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;User&gt; getByLoginQuery(String login, String query) {
+<b class="fc">&nbsp;        return getByQuery(query, Collections.singletonMap(&quot;login&quot;, login));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private User uniqueResult(List&lt;User&gt; users, String login) {
+<b class="fc">&nbsp;        if (users.size() == 1) {</b>
+<b class="fc">&nbsp;            return users.get(0);</b>
+<b class="nc">&nbsp;        } else if (users.isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new UsernameNotFoundException(&quot;Login &#39;&quot; + login + &quot;&#39; not found!&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            logger.error(&quot;Login &#39;{}&#39; was found more than once! Affected IDs: {}&quot;, login,</b>
+<b class="nc">&nbsp;                    users.stream().map(user -&gt; Objects.toString(user.getId())).collect(Collectors.joining(&quot;, &quot;)));</b>
+<b class="nc">&nbsp;            throw new UsernameNotFoundException(&quot;Login &#39;&quot; + login + &quot;&#39; was found more than once!&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the current authenticated user of current threads security context.
+&nbsp;     *
+&nbsp;     * @return The SecurityUserDetails object or null if no user is authenticated.
+&nbsp;     */
+&nbsp;    public SecurityUserDetails getAuthenticatedUser() {
+<b class="fc">&nbsp;        return ServiceManager.getSecurityAccessService().getAuthenticatedSecurityUserDetails();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the current authenticated user as User bean.
+&nbsp;     *
+&nbsp;     * @return the User object
+&nbsp;     */
+&nbsp;    public User getCurrentUser() {
+<b class="fc">&nbsp;        return new User(getAuthenticatedUser());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the session client of the current authenticated user.
+&nbsp;     *
+&nbsp;     * @return The client object or null if no session client is set or no user is
+&nbsp;     *         authenticated.
+&nbsp;     */
+&nbsp;    public Client getSessionClientOfAuthenticatedUser() {
+<b class="fc">&nbsp;        if (Objects.nonNull(getAuthenticatedUser())) {</b>
+<b class="fc">&nbsp;            return getAuthenticatedUser().getSessionClient();</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the selected session client id of the current authenticated user.
+&nbsp;     *
+&nbsp;     * @return session client id
+&nbsp;     */
+&nbsp;    public int getSessionClientId() {
+<b class="fc">&nbsp;        if (Objects.nonNull(getSessionClientOfAuthenticatedUser())) {</b>
+<b class="fc">&nbsp;            return getSessionClientOfAuthenticatedUser().getId();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return DEFAULT_CLIENT_ID;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get amount of users with exactly the same login like given but different id.
+&nbsp;     *
+&nbsp;     * @param id
+&nbsp;     *            of user
+&nbsp;     * @param login
+&nbsp;     *            of user
+&nbsp;     * @return amount of users with exactly the same login like given but different
+&nbsp;     *         id
+&nbsp;     */
+&nbsp;    public Long getAmountOfUsersWithExactlyTheSameLogin(Integer id, String login) throws DAOException {
+<b class="nc">&nbsp;        return dao.countUsersWithExactlyTheSameLogin(id, login);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all active users sorted by surname and name.
+&nbsp;     *
+&nbsp;     * @return sorted list of all active users as User objects
+&nbsp;     */
+&nbsp;    public List&lt;User&gt; getAllActiveUsersSortedByNameAndSurname() {
+<b class="nc">&nbsp;        return dao.getAllActiveUsersSortedByNameAndSurname();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check validity of given login.
+&nbsp;     *
+&nbsp;     * @param login
+&nbsp;     *            to validation
+&nbsp;     * @return true or false
+&nbsp;     */
+&nbsp;    public boolean isLoginValid(String login) {
+<b class="fc">&nbsp;        String patternString = &quot;[A-Za-z0-9@_\\-.]*&quot;;</b>
+<b class="fc">&nbsp;        Pattern pattern = Pattern.compile(patternString);</b>
+<b class="fc">&nbsp;        Matcher matcher = pattern.matcher(login);</b>
+<b class="fc">&nbsp;        if (!matcher.matches()) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return isLoginAllowed(login);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isLoginAllowed(String login) {
+<b class="fc">&nbsp;        KitodoConfigFile blacklist = KitodoConfigFile.LOGIN_BLACKLIST;</b>
+&nbsp;        // If user defined blacklist doesn&#39;t exists, use default one
+<b class="fc">&nbsp;        try (InputStream inputStream = blacklist.exists() ? Files.newInputStream(blacklist.getFile().toPath())</b>
+<b class="nc">&nbsp;                : Thread.currentThread().getContextClassLoader().getResourceAsStream(blacklist.getName());</b>
+<b class="fc">&nbsp;                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);</b>
+<b class="fc">&nbsp;                BufferedReader reader = new BufferedReader(inputStreamReader)) {</b>
+<b class="fc">&nbsp;            if (isLoginFoundOnBlackList(reader, login)) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;            return false;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Go through the user defined blacklist file line by line and compare with
+&nbsp;     * login.
+&nbsp;     */
+&nbsp;    private boolean isLoginFoundOnBlackList(BufferedReader reader, String login) throws IOException {
+&nbsp;        String notAllowedLogin;
+<b class="fc">&nbsp;        while ((notAllowedLogin = reader.readLine()) != null) {</b>
+<b class="fc">&nbsp;            if (notAllowedLogin.length() &gt; 0 &amp;&amp; login.equalsIgnoreCase(notAllowedLogin)) {</b>
+<b class="fc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getFullName(User user) {
+<b class="fc">&nbsp;        return user.getSurname() + &quot;, &quot; + user.getName();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * At that moment only add this method.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            object as UserDTo
+&nbsp;     * @return full name of the user as String
+&nbsp;     */
+&nbsp;    public String getFullName(UserDTO user) {
+<b class="nc">&nbsp;        return user.getSurname() + &quot;, &quot; + user.getName();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get user home directory (either from the LDAP or directly from the
+&nbsp;     * configuration). If LDAP is used, find home directory there, otherwise in
+&nbsp;     * configuration.
+&nbsp;     *
+&nbsp;     * @return path as String
+&nbsp;     * @throws IOException
+&nbsp;     *             add description
+&nbsp;     */
+&nbsp;    public URI getHomeDirectory(User user) throws IOException {
+&nbsp;        URI homeDirectory;
+<b class="fc">&nbsp;        if (Objects.nonNull(user)) {</b>
+<b class="fc">&nbsp;            if (ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.LDAP_USE)) {</b>
+<b class="fc">&nbsp;                homeDirectory = Paths.get(ServiceManager.getLdapServerService().getUserHomeDirectory(user)).toUri();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                homeDirectory = Paths.get(ConfigCore.getParameter(ParameterCore.DIR_USERS), user.getLogin()).toUri();</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            if (!new File(homeDirectory).exists()) {</b>
+<b class="fc">&nbsp;                ServiceManager.getFileService().createDirectoryForUser(homeDirectory, user.getLogin());</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new IOException(&quot;No user for home directory!&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return homeDirectory;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a new filter to list.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            object
+&nbsp;     * @param filter
+&nbsp;     *            the filter to add
+&nbsp;     */
+&nbsp;    public void addFilter(User user, String filter) {
+<b class="nc">&nbsp;        if (getFilters(user).contains(filter)) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            addFilterToUser(user, filter);</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Cannot not add filter to user with id {}&quot;, user.getId(), e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes filter from list.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            object
+&nbsp;     * @param filter
+&nbsp;     *            the filter to remove
+&nbsp;     */
+&nbsp;    public void removeFilter(User user, String filter) {
+<b class="nc">&nbsp;        if (!getFilters(user).contains(filter)) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;        try {
+<b class="nc">&nbsp;            removeFilterFromUser(user, filter);</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Cannot not remove filter from user with id {}&quot;, user.getId(), e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get list of filters.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            object
+&nbsp;     * @return List of filters as strings
+&nbsp;     */
+&nbsp;    public List&lt;String&gt; getFilters(User user) {
+<b class="nc">&nbsp;        return getFiltersForUser(user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add filter to user.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            object
+&nbsp;     * @param userFilter
+&nbsp;     *            String
+&nbsp;     */
+&nbsp;    private void addFilterToUser(User user, String userFilter) throws DataException {
+<b class="nc">&nbsp;        Filter filter = new Filter();</b>
+<b class="nc">&nbsp;        filter.setValue(userFilter);</b>
+<b class="nc">&nbsp;        filter.setCreationDate(new Date());</b>
+<b class="nc">&nbsp;        filter.setUser(user);</b>
+<b class="nc">&nbsp;        ServiceManager.getFilterService().save(filter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get filters for user.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            object
+&nbsp;     * @return list of filters
+&nbsp;     */
+&nbsp;    private List&lt;String&gt; getFiltersForUser(User user) {
+<b class="nc">&nbsp;        List&lt;String&gt; userFilters = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;Filter&gt; filters = user.getFilters();</b>
+<b class="nc">&nbsp;        for (Filter filter : filters) {</b>
+<b class="nc">&nbsp;            userFilters.add(filter.getValue());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return userFilters;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Remove filter from user.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            object
+&nbsp;     * @param userFilter
+&nbsp;     *            String
+&nbsp;     */
+&nbsp;    private void removeFilterFromUser(User user, String userFilter) throws DataException {
+<b class="nc">&nbsp;        List&lt;Filter&gt; filters = user.getFilters();</b>
+<b class="nc">&nbsp;        for (Filter filter : filters) {</b>
+<b class="nc">&nbsp;            if (filter.getValue().equals(userFilter)) {</b>
+<b class="nc">&nbsp;                ServiceManager.getFilterService().remove(filter);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve and return the list of tasks that are assigned to the user and
+&nbsp;     * that are &quot;INWORK&quot; and belong to process, not template.
+&nbsp;     *
+&nbsp;     * @return list of tasks that are currently assigned to the user and that
+&nbsp;     *         are &quot;INWORK&quot; and belong to process, not template
+&nbsp;     */
+&nbsp;    public List&lt;Task&gt; getTasksInProgress(User user) {
+<b class="fc">&nbsp;        return user.getProcessingTasks().stream()</b>
+<b class="fc">&nbsp;                .filter(</b>
+<b class="fc">&nbsp;                    task -&gt; task.getProcessingStatus().equals(TaskStatus.INWORK) &amp;&amp; Objects.nonNull(task.getProcess()))</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Changes the password for given User object.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            The User object.
+&nbsp;     * @param newPassword
+&nbsp;     *            The new password.
+&nbsp;     */
+&nbsp;    public void changeUserPassword(User user, String newPassword) throws DAOException {
+&nbsp;        User userWithNewPassword;
+<b class="nc">&nbsp;        if (user instanceof SecurityUserDetails) {</b>
+<b class="nc">&nbsp;            userWithNewPassword = new User(user);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            userWithNewPassword = user;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        userWithNewPassword.setPassword(passwordEncoder.encrypt(newPassword));</b>
+<b class="nc">&nbsp;        saveToDatabase(userWithNewPassword);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the configured metadatalanguage from the User.
+&nbsp;     * @return a List of LanguageRange
+&nbsp;     */
+&nbsp;    public List&lt;Locale.LanguageRange&gt; getCurrentMetadataLanguage() {
+<b class="fc">&nbsp;        String metadataLanguage = getCurrentUser().getMetadataLanguage();</b>
+<b class="fc">&nbsp;        return Locale.LanguageRange.parse(metadataLanguage.isEmpty() ? &quot;en&quot; : metadataLanguage);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the keyboard shortcuts for the specified user.
+&nbsp;     *
+&nbsp;     * @param userId specifying the user
+&nbsp;     * @return JSON object containing the user&#39;s shortcuts as java.lang.String
+&nbsp;     * @throws DAOException when user object could not be loaded from database
+&nbsp;     */
+&nbsp;    public String getShortcuts(int userId) throws DAOException {
+<b class="nc">&nbsp;        return getById(userId).getShortcuts();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

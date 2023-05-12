@@ -1,0 +1,255 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SecurityAccess</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.security</a>
+</div>
+
+<h1>Coverage Summary for Class: SecurityAccess (org.kitodo.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SecurityAccess</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    54,5%
+  </span>
+  <span class="absValue">
+    (6/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    44%
+  </span>
+  <span class="absValue">
+    (11/25)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.security;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.security.core.GrantedAuthority;
+&nbsp;import org.springframework.security.core.authority.SimpleGrantedAuthority;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;
+&nbsp;/**
+&nbsp; * If module wants to use own roles, it needs to extend this class. Currently it
+&nbsp; * is usable only for global roles as client id is not available to modules.
+&nbsp; */
+<b class="fc">&nbsp;public abstract class SecurityAccess {</b>
+&nbsp;
+&nbsp;    private static final String GLOBAL_IDENTIFIER = &quot;GLOBAL&quot;;
+&nbsp;    private static final String CLIENT_IDENTIFIER = &quot;CLIENT&quot;;
+&nbsp;
+&nbsp;    private Collection&lt;? extends GrantedAuthority&gt; getAuthoritiesOfCurrentAuthentication() {
+<b class="fc">&nbsp;        Authentication authentication = getCurrentAuthentication();</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(authentication)) {</b>
+<b class="fc">&nbsp;            return authentication.getAuthorities();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return new ArrayList&lt;&gt;();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get client id for current session.
+&nbsp;     *
+&nbsp;     * @return value of client id for current session
+&nbsp;     */
+&nbsp;    // TODO: find a way for modules to get information about current client id
+&nbsp;    public abstract int getClientId();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has a specified authority globally.
+&nbsp;     *
+&nbsp;     * @param authorityTitle
+&nbsp;     *            the authority title
+&nbsp;     * @return true if the current user has the specified authority
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityGlobal(String authorityTitle) {
+<b class="fc">&nbsp;        return hasAuthority(authorityTitle + &quot;_&quot; + GLOBAL_IDENTIFIER);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has a specified authority for a client.
+&nbsp;     *
+&nbsp;     * @param authorityTitle
+&nbsp;     *            the authority title
+&nbsp;     * @return true if the current user has the specified authority
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityForClient(String authorityTitle) {
+<b class="fc">&nbsp;        String clientAuthority = authorityTitle + &quot;_&quot; + CLIENT_IDENTIFIER + &quot;_&quot; + getClientId();</b>
+<b class="fc">&nbsp;        return hasAuthority(clientAuthority);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has a specified authority globally or for a client.
+&nbsp;     *
+&nbsp;     * @param authorityTitle
+&nbsp;     *            the authority title
+&nbsp;     * @return true if the current user has the specified authority
+&nbsp;     */
+&nbsp;    public boolean hasAuthorityGlobalOrForClient(String authorityTitle) {
+<b class="nc">&nbsp;        return hasAuthorityGlobal(authorityTitle) || hasAuthorityForClient(authorityTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has any of the specified authorities globally.
+&nbsp;     *
+&nbsp;     * @param authorityTitles
+&nbsp;     *            the authority titles separated with commas e.g. &quot;authority1,
+&nbsp;     *            authority2, authority3&quot;
+&nbsp;     * @return true if the current user has any of the specified authorities
+&nbsp;     *         globally
+&nbsp;     */
+&nbsp;    public boolean hasAnyAuthorityGlobal(String authorityTitles) {
+<b class="nc">&nbsp;        String[] authorityTitlesArray = getStringArray(authorityTitles);</b>
+<b class="nc">&nbsp;        for (String authorityTitle : authorityTitlesArray) {</b>
+<b class="nc">&nbsp;            if (hasAuthorityGlobal(authorityTitle)) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has a specified authority for a client.
+&nbsp;     *
+&nbsp;     * @param authorityTitles
+&nbsp;     *            the authority title
+&nbsp;     * @return true if the current user has the specified authority
+&nbsp;     */
+&nbsp;    public boolean hasAnyAuthorityForClient(String authorityTitles) {
+<b class="nc">&nbsp;        String[] authorityTitlesArray = getStringArray(authorityTitles);</b>
+<b class="nc">&nbsp;        for (String authorityTitle : authorityTitlesArray) {</b>
+<b class="nc">&nbsp;            if (hasAuthorityForClient(authorityTitle)) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if the current user has any of the specified authorities globally or
+&nbsp;     * for client.
+&nbsp;     *
+&nbsp;     * @param authorityTitles
+&nbsp;     *            the authority titles separated with commas e.g. &quot;authority1,
+&nbsp;     *            authority2, authority3&quot;
+&nbsp;     * @return true if the current user has any of the specified authorities
+&nbsp;     *         globally or for client
+&nbsp;     */
+&nbsp;    public boolean hasAnyAuthorityGlobalOrForClient(String authorityTitles) {
+<b class="nc">&nbsp;        return hasAnyAuthorityGlobal(authorityTitles) || hasAnyAuthorityForClient(authorityTitles);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get Authentication object of current threads security context.
+&nbsp;     *
+&nbsp;     * @return authentication object
+&nbsp;     */
+&nbsp;    protected Authentication getCurrentAuthentication() {
+<b class="fc">&nbsp;        return SecurityContextHolder.getContext().getAuthentication();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean hasAuthority(String authorityTitle) {
+<b class="fc">&nbsp;        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(authorityTitle);</b>
+<b class="fc">&nbsp;        Collection&lt;? extends GrantedAuthority&gt; authorities = getAuthoritiesOfCurrentAuthentication();</b>
+<b class="fc">&nbsp;        return authorities.contains(authority);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String[] getStringArray(String values) {
+&nbsp;        // remove white spaces and split values
+<b class="nc">&nbsp;        return values.replaceAll(&quot;\\s+&quot;, &quot;&quot;).split(&quot;,&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

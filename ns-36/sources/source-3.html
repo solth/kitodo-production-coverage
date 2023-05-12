@@ -1,0 +1,183 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > BeanConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.converter</a>
+</div>
+
+<h1>Coverage Summary for Class: BeanConverter (org.kitodo.production.converter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BeanConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,5%
+  </span>
+  <span class="absValue">
+    (17/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.converter;
+&nbsp;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.faces.convert.ConverterException;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.BaseBean;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.data.base.SearchDatabaseService;
+&nbsp;
+<b class="fc">&nbsp;public abstract class BeanConverter {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(BeanConverter.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get as object for bean convert.
+&nbsp;     *
+&nbsp;     * @param searchDatabaseService
+&nbsp;     *            service used for query the object
+&nbsp;     * @param value
+&nbsp;     *            id of object as String
+&nbsp;     * @return null if value is null, bean object if id is correct and exists in
+&nbsp;     *         database, &quot;0&quot; when id is incorrect or object with this id doesn&#39;t
+&nbsp;     *         exist in database
+&nbsp;     */
+&nbsp;    protected Object getAsObject(SearchDatabaseService searchDatabaseService, String value) {
+<b class="fc">&nbsp;        if (StringUtils.isEmpty(value)) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        } else {
+&nbsp;            try {
+<b class="fc">&nbsp;                return searchDatabaseService.getById(Integer.parseInt(value));</b>
+<b class="fc">&nbsp;            } catch (DAOException | NumberFormatException e) {</b>
+<b class="fc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="fc">&nbsp;                return &quot;0&quot;;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get as string for bean convert.
+&nbsp;     *
+&nbsp;     * @param value
+&nbsp;     *            bean to be converted
+&nbsp;     * @param translationKey
+&nbsp;     *            for possible error message
+&nbsp;     * @return null when bean is null, otherwise string id or string representation
+&nbsp;     *         of value
+&nbsp;     */
+&nbsp;    protected String getAsString(Object value, String translationKey) {
+<b class="fc">&nbsp;        if (Objects.isNull(value)) {</b>
+<b class="fc">&nbsp;            return null;</b>
+<b class="fc">&nbsp;        } else if (value instanceof BaseBean) {</b>
+<b class="fc">&nbsp;            Integer beanId = ((BaseBean) value).getId();</b>
+<b class="fc">&nbsp;            if (Objects.nonNull(beanId)) {</b>
+<b class="fc">&nbsp;                return String.valueOf(beanId);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            return &quot;0&quot;;</b>
+<b class="fc">&nbsp;        } else if (value instanceof String) {</b>
+<b class="fc">&nbsp;            return (String) value;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new ConverterException(Helper.getTranslation(&quot;errorConvert&quot;,</b>
+<b class="nc">&nbsp;                value.getClass().getCanonicalName(), translationKey));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

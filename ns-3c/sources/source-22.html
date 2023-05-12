@@ -1,0 +1,429 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SearchResultForm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms</a>
+</div>
+
+<h1>Coverage Summary for Class: SearchResultForm (org.kitodo.production.forms)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SearchResultForm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (15/25)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,3%
+  </span>
+  <span class="absValue">
+    (47/85)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.text.MessageFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.enterprise.context.SessionScoped;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.inject.Named;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.Process;
+&nbsp;import org.kitodo.data.database.enums.TaskStatus;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.dto.ProcessDTO;
+&nbsp;import org.kitodo.production.dto.ProjectDTO;
+&nbsp;import org.kitodo.production.dto.TaskDTO;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ProcessService;
+&nbsp;import org.kitodo.production.services.workflow.WorkflowControllerService;
+&nbsp;import org.primefaces.PrimeFaces;
+&nbsp;
+&nbsp;@Named(&quot;SearchResultForm&quot;)
+&nbsp;@SessionScoped
+<b class="fc">&nbsp;public class SearchResultForm extends ProcessListBaseView {</b>
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(SearchResultForm.class);</b>
+&nbsp;
+&nbsp;    private static final String SEARCH_RESULT_VIEW_ID = &quot;/pages/searchResult.xhtml&quot;;
+&nbsp;    private static final String SEARCH_RESULT_TABLE_ID = &quot;searchResultTabView:searchResultForm:searchResultTable&quot;;
+&nbsp;
+<b class="fc">&nbsp;    private List&lt;ProcessDTO&gt; filteredList = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    private List&lt;ProcessDTO&gt; resultList = new ArrayList&lt;&gt;();</b>
+&nbsp;    private String searchQuery;
+&nbsp;    private String currentTaskFilter;
+&nbsp;    private Integer currentProjectFilter;
+&nbsp;    private Integer currentTaskStatusFilter;
+<b class="fc">&nbsp;    private final String searchResultListPath = MessageFormat.format(REDIRECT_PATH, &quot;searchResult&quot;);</b>
+<b class="fc">&nbsp;    private final WorkflowControllerService workflowControllerService = new WorkflowControllerService();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Searches for processes with the entered searchQuery.
+&nbsp;     *
+&nbsp;     * @return The searchResultPage
+&nbsp;     */
+&nbsp;    public String searchForProcessesBySearchQuery() {
+<b class="fc">&nbsp;        ProcessService processService = ServiceManager.getProcessService();</b>
+<b class="fc">&nbsp;        HashMap&lt;Integer, ProcessDTO&gt; resultHash = new HashMap&lt;&gt;();</b>
+&nbsp;        List&lt;ProcessDTO&gt; results;
+&nbsp;        try {
+<b class="fc">&nbsp;            results = processService.findByAnything(searchQuery);</b>
+<b class="fc">&nbsp;            for (ProcessDTO processDTO : results) {</b>
+<b class="fc">&nbsp;                resultHash.put(processDTO.getId(), processDTO);</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            this.resultList = new ArrayList&lt;&gt;(resultHash.values());</b>
+<b class="fc">&nbsp;            refreshFilteredList();</b>
+<b class="nc">&nbsp;        } catch (DataException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(&quot;errorOnSearch&quot;, searchQuery);</b>
+<b class="nc">&nbsp;            return this.stayOnCurrentPage;</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        setCurrentTaskStatusFilter(null);</b>
+<b class="fc">&nbsp;        setCurrentProjectFilter(null);</b>
+<b class="fc">&nbsp;        setCurrentTaskFilter(null);</b>
+<b class="fc">&nbsp;        resetSearchResultTableViewState();</b>
+<b class="fc">&nbsp;        return searchResultListPath;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filters the searchResults by project.
+&nbsp;     */
+&nbsp;    void filterListByProject() {
+<b class="fc">&nbsp;        if (Objects.nonNull(currentProjectFilter)) {</b>
+<b class="fc">&nbsp;            this.filteredList.removeIf(result -&gt; !result.getProject().getId()</b>
+<b class="fc">&nbsp;                    .equals(currentProjectFilter));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filters the searchResults by task and status.
+&nbsp;     */
+&nbsp;    void filterListByTaskAndStatus() {
+<b class="fc">&nbsp;        if (Objects.nonNull(currentTaskFilter) &amp;&amp; Objects.nonNull(currentTaskStatusFilter)) {</b>
+<b class="fc">&nbsp;            for (ProcessDTO processDTO : new ArrayList&lt;&gt;(this.filteredList)) {</b>
+<b class="fc">&nbsp;                boolean remove = true;</b>
+<b class="fc">&nbsp;                for (TaskDTO task : processDTO.getTasks()) {</b>
+<b class="fc">&nbsp;                    if (task.getTitle().equalsIgnoreCase(currentTaskFilter)</b>
+<b class="fc">&nbsp;                            &amp;&amp; task.getProcessingStatus().getValue().equals(currentTaskStatusFilter)) {</b>
+<b class="fc">&nbsp;                        remove = false;</b>
+<b class="fc">&nbsp;                        break;</b>
+&nbsp;                    }
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;                if (remove) {</b>
+<b class="fc">&nbsp;                    this.filteredList.remove(processDTO);</b>
+&nbsp;                }
+&nbsp;
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Filters the searchResultList by the selected filters.
+&nbsp;     */
+&nbsp;    public void filterList() {
+<b class="fc">&nbsp;        refreshFilteredList();</b>
+&nbsp;
+<b class="fc">&nbsp;        filterListByProject();</b>
+<b class="fc">&nbsp;        filterListByTaskAndStatus();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all Projects assigned to the search results.
+&nbsp;     *
+&nbsp;     * @return A list of projects for filter list
+&nbsp;     */
+&nbsp;    public Collection&lt;ProjectDTO&gt; getProjectsForFiltering() {
+<b class="nc">&nbsp;        HashMap&lt;Integer, ProjectDTO&gt; projectsForFiltering = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (ProcessDTO process : this.resultList) {</b>
+<b class="nc">&nbsp;            projectsForFiltering.put(process.getProject().getId(), process.getProject());</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return projectsForFiltering.values();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all current Tasks from to the search results.
+&nbsp;     *
+&nbsp;     * @return A list of tasks for filter list
+&nbsp;     */
+&nbsp;    public Collection&lt;TaskDTO&gt; getTasksForFiltering() {
+<b class="nc">&nbsp;        HashMap&lt;String, TaskDTO&gt; tasksForFiltering = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (ProcessDTO processDTO : this.resultList) {</b>
+<b class="nc">&nbsp;            for (TaskDTO currentTask : processDTO.getTasks()) {</b>
+<b class="nc">&nbsp;                tasksForFiltering.put(currentTask.getTitle(), currentTask);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return tasksForFiltering.values();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the values of taskStatus.
+&nbsp;     * @return a list of status
+&nbsp;     */
+&nbsp;    public Collection&lt;TaskStatus&gt; getTaskStatusForFiltering() {
+<b class="nc">&nbsp;        return Arrays.asList(TaskStatus.values());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void refreshFilteredList() {
+<b class="fc">&nbsp;        this.filteredList.clear();</b>
+<b class="fc">&nbsp;        this.filteredList.addAll(this.resultList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Delete Process.
+&nbsp;     *
+&nbsp;     * @param processDTO
+&nbsp;     *            process to delete.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void delete(ProcessDTO processDTO) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Process process = ServiceManager.getProcessService().getById(processDTO.getId());</b>
+<b class="nc">&nbsp;            if (process.getChildren().isEmpty()) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    ProcessService.deleteProcess(process);</b>
+<b class="nc">&nbsp;                    this.filteredList.remove(processDTO);</b>
+<b class="nc">&nbsp;                } catch (DataException | IOException e) {</b>
+<b class="nc">&nbsp;                    Helper.setErrorMessage(ERROR_DELETING, new Object[] {ObjectType.PROCESS.getTranslationSingular() },</b>
+&nbsp;                            logger, e);
+<b class="nc">&nbsp;                }</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                this.deleteProcessDialog = new DeleteProcessDialog();</b>
+<b class="nc">&nbsp;                this.deleteProcessDialog.setProcess(process);</b>
+<b class="nc">&nbsp;                PrimeFaces.current().executeScript(&quot;PF(&#39;deleteChildrenDialog&#39;).show();&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (DAOException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(ERROR_DELETING, new Object[] {ObjectType.PROCESS.getTranslationSingular() }, logger,</b>
+&nbsp;                    e);
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set up processing status selection.
+&nbsp;     */
+&nbsp;    public void setTaskStatusUpForSelection() {
+<b class="nc">&nbsp;        this.workflowControllerService.setTaskStatusUpForProcesses(this.getSelectedProcesses());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set down processing status selection.
+&nbsp;     */
+&nbsp;    public void setTaskStatusDownForSelection() {
+<b class="nc">&nbsp;        this.workflowControllerService.setTaskStatusDownForProcesses(this.getSelectedProcesses());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the filtered list.
+&nbsp;     *
+&nbsp;     * @return a list of ProcessDTO
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDTO&gt; getFilteredList() {
+<b class="fc">&nbsp;        return this.filteredList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the filtered list.
+&nbsp;     *
+&nbsp;     * @param filteredList
+&nbsp;     *            a list of ProcessDTO
+&nbsp;     */
+&nbsp;    public void setFilteredList(List&lt;ProcessDTO&gt; filteredList) {
+<b class="nc">&nbsp;        this.filteredList = filteredList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get currentTaskStatusFilter.
+&nbsp;     *
+&nbsp;     * @return value of currentTaskStatusFilter
+&nbsp;     */
+&nbsp;    public Integer getCurrentTaskStatusFilter() {
+<b class="nc">&nbsp;        return currentTaskStatusFilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set currentTaskStatusFilter.
+&nbsp;     *
+&nbsp;     * @param currentTaskStatusFilter as java.lang.Integer
+&nbsp;     */
+&nbsp;    public void setCurrentTaskStatusFilter(Integer currentTaskStatusFilter) {
+<b class="fc">&nbsp;        this.currentTaskStatusFilter = currentTaskStatusFilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the search query.
+&nbsp;     *
+&nbsp;     * @return the search query
+&nbsp;     */
+&nbsp;    public String getSearchQuery() {
+<b class="nc">&nbsp;        return searchQuery;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the searchQuery.
+&nbsp;     *
+&nbsp;     * @param searchQuery
+&nbsp;     *            the query to search for
+&nbsp;     */
+&nbsp;    public void setSearchQuery(String searchQuery) {
+<b class="fc">&nbsp;        this.searchQuery = searchQuery;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the current task filter.
+&nbsp;     *
+&nbsp;     * @return a List of Task title to filter
+&nbsp;     */
+&nbsp;    public String getCurrentTaskFilter() {
+<b class="nc">&nbsp;        return currentTaskFilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the current task filter.
+&nbsp;     *
+&nbsp;     * @param currentTaskFilter
+&nbsp;     *            the task title to filter
+&nbsp;     */
+&nbsp;    public void setCurrentTaskFilter(String currentTaskFilter) {
+<b class="fc">&nbsp;        this.currentTaskFilter = currentTaskFilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets the current project filter.
+&nbsp;     *
+&nbsp;     * @return a List of project id to filter
+&nbsp;     */
+&nbsp;    public Integer getCurrentProjectFilter() {
+<b class="fc">&nbsp;        return currentProjectFilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the current project filter.
+&nbsp;     *
+&nbsp;     * @param currentProjectFilter
+&nbsp;     *            the project id to filter
+&nbsp;     */
+&nbsp;    public void setCurrentProjectFilter(Integer currentProjectFilter) {
+<b class="fc">&nbsp;        this.currentProjectFilter = currentProjectFilter;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method resets the view state of the search result table, which was
+&nbsp;     * enabled by adding &quot;multiViewState=true&quot; to the DataTable component.
+&nbsp;     * 
+&nbsp;     * &lt;p&gt;This affects both the pagination state and the sort order of 
+&nbsp;     * the table. It should be called whenever a new search is triggered such 
+&nbsp;     * that the user is presented with the most relevant results (page 1) 
+&nbsp;     * in the default order.&lt;/p&gt;
+&nbsp;     */
+&nbsp;    public void resetSearchResultTableViewState() {
+<b class="fc">&nbsp;        if (!Objects.isNull(FacesContext.getCurrentInstance())) {</b>
+&nbsp;            // clear multi view state only if there is a state available
+<b class="nc">&nbsp;            Object mvs = PrimeFaces.current().multiViewState().get(SEARCH_RESULT_VIEW_ID, SEARCH_RESULT_TABLE_ID, false, null);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(mvs)) {</b>
+<b class="nc">&nbsp;                PrimeFaces.current().multiViewState().clear(SEARCH_RESULT_VIEW_ID, SEARCH_RESULT_TABLE_ID);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

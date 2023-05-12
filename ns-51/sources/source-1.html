@@ -1,0 +1,853 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Block</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.model.bibliography.course</a>
+</div>
+
+<h1>Coverage Summary for Class: Block (org.kitodo.production.model.bibliography.course)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Block</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37,8%
+  </span>
+  <span class="absValue">
+    (14/37)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,6%
+  </span>
+  <span class="absValue">
+    (72/214)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.model.bibliography.course;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.ZoneId;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.tuple.Pair;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.model.bibliography.course.metadata.CountableMetadata;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class Block is a bean class that represents an interval of time in the
+&nbsp; * course of appearance of a newspaper within which it wasn’t suspended. A Block
+&nbsp; * instance handles one or more Issue objects.
+&nbsp; */
+&nbsp;public class Block {
+&nbsp;    /**
+&nbsp;     * The field course holds a reference to the course this block is in.
+&nbsp;     */
+&nbsp;    private final Course course;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field variant may hold a variant identifier that can be used to
+&nbsp;     * distinguish different blocks during the buildup of a course of appearance
+&nbsp;     * from individual issues.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Given a newspaper appeared three times a week for a period of time, and
+&nbsp;     * then changed to being published six times a week without changing its
+&nbsp;     * heading, and this change shall be represented by different blocks, the
+&nbsp;     * variant identifier can be used to distinguish the blocks. Otherwise, both
+&nbsp;     * time ranges would be represented in one combined block, what would be
+&nbsp;     * factual correct but would result in a multitude of exceptions, which
+&nbsp;     * could be undesired.
+&nbsp;     */
+&nbsp;    private final String variant;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field firstAppearance holds the date representing the first day of
+&nbsp;     * the period of time represented by this block. The date is treated as
+&nbsp;     * inclusive.
+&nbsp;     */
+&nbsp;    private LocalDate firstAppearance;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field lastAppearance holds the date representing the last day of the
+&nbsp;     * period of time represented by this block. The date is treated as
+&nbsp;     * inclusive.
+&nbsp;     */
+&nbsp;    private LocalDate lastAppearance;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field issues holds the issues that have appeared during the period of
+&nbsp;     * time represented by this block.
+&nbsp;     */
+&nbsp;    private List&lt;Issue&gt; issues;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Metadata associated with this block.
+&nbsp;     */
+<b class="fc">&nbsp;    private final List&lt;CountableMetadata&gt; metadata = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Default constructor. Creates a Block object without any data.
+&nbsp;     *
+&nbsp;     * @param course
+&nbsp;     *            course this block is in
+&nbsp;     */
+<b class="fc">&nbsp;    public Block(Course course) {</b>
+<b class="fc">&nbsp;        this.course = course;</b>
+<b class="fc">&nbsp;        this.variant = null;</b>
+<b class="fc">&nbsp;        this.firstAppearance = null;</b>
+<b class="fc">&nbsp;        this.lastAppearance = null;</b>
+<b class="fc">&nbsp;        this.issues = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor for a block with a given variant identifier.
+&nbsp;     *
+&nbsp;     * @param course
+&nbsp;     *            course this block is in
+&nbsp;     * @param variant
+&nbsp;     *            a variant identifier (may be null)
+&nbsp;     */
+<b class="nc">&nbsp;    public Block(Course course, String variant) {</b>
+<b class="nc">&nbsp;        this.course = course;</b>
+<b class="nc">&nbsp;        this.variant = variant;</b>
+<b class="nc">&nbsp;        this.firstAppearance = null;</b>
+<b class="nc">&nbsp;        this.lastAppearance = null;</b>
+<b class="nc">&nbsp;        this.issues = new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds an Issue to this block if it is not already
+&nbsp;     * present.
+&nbsp;     *
+&nbsp;     * @param issue
+&nbsp;     *            Issue to add
+&nbsp;     * @return true if the set was changed
+&nbsp;     */
+&nbsp;    public boolean addIssue(Issue issue) {
+<b class="fc">&nbsp;        clearProcessesIfNecessary(issue);</b>
+<b class="fc">&nbsp;        return issues.add(issue);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add a new issue to this block.
+&nbsp;     */
+&nbsp;    public Issue addIssue() {
+<b class="nc">&nbsp;        Issue issue = new Issue(course);</b>
+<b class="nc">&nbsp;        addIssue(issue);</b>
+<b class="nc">&nbsp;        return issue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a metadata entry to this block.
+&nbsp;     *
+&nbsp;     * @param countableMetadata
+&nbsp;     *            metadata to add
+&nbsp;     */
+&nbsp;    public void addMetadata(CountableMetadata countableMetadata) {
+<b class="nc">&nbsp;        metadata.add(0, countableMetadata);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a metadata entry to this block.
+&nbsp;     *
+&nbsp;     * @param index
+&nbsp;     *            insert position
+&nbsp;     * @param countableMetadata
+&nbsp;     *            metadata to add
+&nbsp;     */
+&nbsp;    public void addMetadata(CountableMetadata index, CountableMetadata countableMetadata) {
+<b class="nc">&nbsp;        metadata.add(metadata.indexOf(index) + 1, countableMetadata);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * When a course of appearance has been loaded from a file or the processes
+&nbsp;     * list has already been generated, it already contains issues which must be
+&nbsp;     * deleted in the case that an issue is added to or removed from the course
+&nbsp;     * of appearance which is producing issues in the selected time range. If
+&nbsp;     * the time range cannot be evaluated because either of the variables is
+&nbsp;     * null, we go the safe way and delete, too.
+&nbsp;     *
+&nbsp;     * @param issue
+&nbsp;     *            issue to add or delete
+&nbsp;     */
+&nbsp;    private void clearProcessesIfNecessary(Issue issue) {
+&nbsp;        try {
+<b class="fc">&nbsp;            if (issue.countIndividualIssues(firstAppearance, lastAppearance) &gt; 0) {</b>
+<b class="fc">&nbsp;                course.clearProcesses();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (RuntimeException e) {</b>
+&nbsp;            // if firstAppearance or lastAppearance is null
+<b class="nc">&nbsp;            course.clearProcesses();</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates and returns a copy of this Block.
+&nbsp;     *
+&nbsp;     * @param course
+&nbsp;     *            Course this block belongs to
+&nbsp;     * @return a copy of this
+&nbsp;     */
+&nbsp;    public Block clone(Course course) {
+<b class="nc">&nbsp;        Block copy = new Block(course);</b>
+<b class="nc">&nbsp;        copy.firstAppearance = firstAppearance;</b>
+<b class="nc">&nbsp;        copy.lastAppearance = lastAppearance;</b>
+<b class="nc">&nbsp;        ArrayList&lt;Issue&gt; copiedIssues = new ArrayList&lt;&gt;(Math.max(issues.size(), 10));</b>
+<b class="nc">&nbsp;        for (Issue issue : issues) {</b>
+<b class="nc">&nbsp;            copiedIssues.add(issue.clone(course));</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        copy.issues = copiedIssues;</b>
+<b class="nc">&nbsp;        return copy;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determines how many stampings of issues physically appeared without
+&nbsp;     * generating a list of IndividualIssue objects.
+&nbsp;     *
+&nbsp;     * @return the count of issues
+&nbsp;     */
+&nbsp;    public long countIndividualIssues() {
+<b class="fc">&nbsp;        if (Objects.isNull(firstAppearance) || Objects.isNull(lastAppearance)) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        long numberOfIndividualIssues = 0;</b>
+<b class="fc">&nbsp;        for (LocalDate day = firstAppearance; !day.isAfter(lastAppearance); day = day.plusDays(1)) {</b>
+<b class="fc">&nbsp;            for (Issue issue : getIssues()) {</b>
+<b class="fc">&nbsp;                if (issue.isMatch(day)) {</b>
+<b class="fc">&nbsp;                    numberOfIndividualIssues += 1;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return numberOfIndividualIssues;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes a metadata entry from this block.
+&nbsp;     *
+&nbsp;     * @param metadata
+&nbsp;     *            entry to remove
+&nbsp;     */
+&nbsp;    public void deleteMetadata(CountableMetadata metadata) {
+<b class="nc">&nbsp;        this.metadata.remove(metadata);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of issues contained in this block.
+&nbsp;     *
+&nbsp;     * @return the list of issues from this Block
+&nbsp;     */
+&nbsp;    public List&lt;Issue&gt; getIssues() {
+<b class="fc">&nbsp;        return new ArrayList&lt;&gt;(issues);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generates a list of {@code IndividualIssue} objects for a given day, each
+&nbsp;     * of them representing a stamping of one physically appeared issue.
+&nbsp;     *
+&nbsp;     * @param date
+&nbsp;     *            date to generate issues for
+&nbsp;     * @return a List of IndividualIssue objects, each of them representing one
+&nbsp;     *         physically appeared issue
+&nbsp;     */
+&nbsp;    public List&lt;IndividualIssue&gt; getIndividualIssues(LocalDate date) {
+<b class="fc">&nbsp;        if (!isMatch(date)) {</b>
+<b class="fc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        ArrayList&lt;IndividualIssue&gt; result = new ArrayList&lt;&gt;(issues.size());</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Issue&gt; issues = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Issue issue : getIssues()) {</b>
+<b class="fc">&nbsp;            if (issue.isMatch(date)) {</b>
+<b class="fc">&nbsp;                issues.add(issue);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        Integer sorting = issues.size() &gt; 1 ? 1 : null;</b>
+<b class="fc">&nbsp;        for (Issue issue : issues) {</b>
+<b class="fc">&nbsp;            result.add(new IndividualIssue(this, issue, date, Objects.isNull(sorting) ? null : sorting++));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an issue from the Block by the issue’s
+&nbsp;     * heading, or null if the block doesn’t contain an issue with that heading.
+&nbsp;     *
+&nbsp;     * @param heading
+&nbsp;     *            Heading of the issue to look for
+&nbsp;     * @return Issue with that heading
+&nbsp;     */
+&nbsp;    public Issue getIssue(String heading) {
+<b class="nc">&nbsp;        for (Issue issue : issues) {</b>
+<b class="nc">&nbsp;            if (heading.equals(issue.getHeading())) {</b>
+<b class="nc">&nbsp;                return issue;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the date the regularity of this
+&nbsp;     * block begins with.
+&nbsp;     *
+&nbsp;     * @return the date of first appearance
+&nbsp;     */
+&nbsp;    public LocalDate getFirstAppearance() {
+<b class="fc">&nbsp;        return firstAppearance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the date where this block first appeared.
+&nbsp;     * PrimeFaces 7 requires a java.util.Date object for the datePicker components.
+&nbsp;     *
+&nbsp;     * @return date of first appearance as java.util.Date
+&nbsp;     */
+&nbsp;    public Date getFirstAppearanceDate() {
+<b class="nc">&nbsp;        if (Objects.nonNull(firstAppearance)) {</b>
+<b class="nc">&nbsp;            return Date.from(firstAppearance.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the index of the issue.
+&nbsp;     *
+&nbsp;     * @param issue
+&nbsp;     *            issue whose index is to be returned
+&nbsp;     * @return the index of the issue
+&nbsp;     */
+&nbsp;    public int getIssueIndex(Issue issue) {
+<b class="nc">&nbsp;        return issues.indexOf(issue);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the date the regularity of this block ends with.
+&nbsp;     *
+&nbsp;     * @return the date of last appearance
+&nbsp;     */
+&nbsp;    public LocalDate getLastAppearance() {
+<b class="fc">&nbsp;        return lastAppearance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the date where this block last appeared.
+&nbsp;     * PrimeFaces 7 requires a java.util.Date object for the datePicker components.
+&nbsp;     *
+&nbsp;     * @return date of last appearance as java.util.Date
+&nbsp;     */
+&nbsp;
+&nbsp;    public Date getLastAppearanceDate() {
+<b class="nc">&nbsp;        if (Objects.nonNull(lastAppearance)) {</b>
+<b class="nc">&nbsp;            return Date.from(lastAppearance.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the metadata assigned to this block.
+&nbsp;     *
+&nbsp;     * @return the metadata
+&nbsp;     */
+&nbsp;    public Collection&lt;CountableMetadata&gt; getMetadata() {
+<b class="nc">&nbsp;        return metadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns all metadata counters from this block for the given metadataType
+&nbsp;     * that starts on the given day.
+&nbsp;     *
+&nbsp;     * @param metadataType
+&nbsp;     *            metadataType to compare
+&nbsp;     * @param issue
+&nbsp;     *            creation point to compare
+&nbsp;     * @param create
+&nbsp;     *            if the metadata was created (else deleted)
+&nbsp;     * @return true, if there is such a counter
+&nbsp;     */
+&nbsp;    public CountableMetadata getMetadata(String metadataType, Pair&lt;LocalDate, Issue&gt; issue, boolean create) {
+<b class="nc">&nbsp;        for (CountableMetadata metaDatum : metadata) {</b>
+<b class="nc">&nbsp;            if (metaDatum.matches(metadataType, issue, create)) {</b>
+<b class="nc">&nbsp;                return metaDatum;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns true, if there is a counter in this block for the given
+&nbsp;     * metadataType that starts on the given day.
+&nbsp;     *
+&nbsp;     * @param issue
+&nbsp;     *            creation point to compare
+&nbsp;     * @param create
+&nbsp;     *            if the metadata was created (else deleted)
+&nbsp;     * @return true, if there is such a counter
+&nbsp;     */
+&nbsp;    public Iterable&lt;CountableMetadata&gt; getMetadata(Pair&lt;LocalDate, Issue&gt; issue, Boolean create) {
+<b class="fc">&nbsp;        List&lt;CountableMetadata&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (CountableMetadata metaDatum : metadata) {</b>
+<b class="nc">&nbsp;            if (metaDatum.matches(null, issue, create)) {</b>
+<b class="nc">&nbsp;                result.add(metaDatum);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the block is in an empty state or not.
+&nbsp;     *
+&nbsp;     * @return whether the block is dataless
+&nbsp;     */
+&nbsp;    public boolean isEmpty() {
+<b class="nc">&nbsp;        return Objects.isNull(firstAppearance) &amp;&amp; Objects.isNull(lastAppearance) &amp;&amp; (Objects.isNull(issues) || issues.isEmpty());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Can be used to find out whether the given variant string equals the
+&nbsp;     * variant assigned to this block in a NullPointerException-safe way.
+&nbsp;     *
+&nbsp;     * @param variant
+&nbsp;     *            variant to compare against
+&nbsp;     * @return whether the given string is equals to the assigned variant
+&nbsp;     */
+&nbsp;    public boolean isIdentifiedBy(String variant) {
+<b class="nc">&nbsp;        return Objects.isNull(variant) &amp;&amp; Objects.isNull(this.variant)</b>
+<b class="nc">&nbsp;                || Objects.nonNull(this.variant) &amp;&amp; this.variant.equals(variant);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether a given LocalDate comes within the
+&nbsp;     * limits of this block. Defaults to false if either the argument or one of
+&nbsp;     * the fields to compare against is null.
+&nbsp;     *
+&nbsp;     * @param date
+&nbsp;     *            a LocalDate to examine
+&nbsp;     * @return whether the date is within the limits of this block
+&nbsp;     */
+&nbsp;    public boolean isMatch(LocalDate date) {
+<b class="fc">&nbsp;        if (Objects.isNull(firstAppearance) || Objects.isNull(lastAppearance)) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;        try {
+<b class="fc">&nbsp;            return !date.isBefore(firstAppearance) &amp;&amp; !date.isAfter(lastAppearance);</b>
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Recalculates for each Issue
+&nbsp;     * the daysOfWeek of its regular appearance within the interval of time of
+&nbsp;     * the Block. This is especially sensible to detect the underlying
+&nbsp;     * regularity after lots of issues whose existence is known have been added
+&nbsp;     * one by one as additions to the underlying issue(s).
+&nbsp;     */
+&nbsp;    public void recalculateRegularityOfIssues() {
+<b class="nc">&nbsp;        for (Issue issue : issues) {</b>
+<b class="nc">&nbsp;            issue.recalculateRegularity(firstAppearance, lastAppearance);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Removes the specified Issue from this Block if
+&nbsp;     * it is present.
+&nbsp;     *
+&nbsp;     * @param issue
+&nbsp;     *            Issue to be removed from the set
+&nbsp;     */
+&nbsp;    public void removeIssue(Issue issue) {
+<b class="nc">&nbsp;        clearProcessesIfNecessary(issue);</b>
+<b class="nc">&nbsp;        issues.remove(issue);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if block has issues with same heading.
+&nbsp;     * @return &#39;true&#39; if duplicates are found anf &#39;false&#39; if not.
+&nbsp;     */
+&nbsp;    public boolean checkIssuesWithSameHeading() {
+<b class="nc">&nbsp;        List&lt;String&gt; issuesTitles = issues.stream().map(Issue::getHeading).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        List&lt;String&gt; titles = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (String title : issuesTitles) {</b>
+<b class="nc">&nbsp;            if (titles.contains(title)) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;duplicatedTitles&quot;, &quot; (Block &quot; + (course.indexOf(this) + 1) + &quot;)&quot; );</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                titles.add(title);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets a LocalDate as day of first
+&nbsp;     * appearance for this Block.
+&nbsp;     *
+&nbsp;     * @param firstAppearance
+&nbsp;     *            date of first appearance
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the date would overlap with another block
+&nbsp;     */
+&nbsp;    public void setFirstAppearance(LocalDate firstAppearance) {
+&nbsp;        try {
+<b class="nc">&nbsp;            prohibitOverlaps(firstAppearance, Objects.nonNull(lastAppearance) ? lastAppearance : firstAppearance);</b>
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!this.firstAppearance.equals(firstAppearance)) {</b>
+<b class="nc">&nbsp;                course.clearProcesses();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (NullPointerException e) {</b>
+<b class="nc">&nbsp;            if (this.firstAppearance == null ^ firstAppearance == null) {</b>
+<b class="nc">&nbsp;                course.clearProcesses();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        this.firstAppearance = firstAppearance;</b>
+<b class="nc">&nbsp;        if (Objects.isNull(lastAppearance)) {</b>
+<b class="nc">&nbsp;            lastAppearance = firstAppearance;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set the date where this block first appeared.
+&nbsp;     * PrimeFaces 7 passes a java.util.Date object from the datePicker components.
+&nbsp;     *
+&nbsp;     * @param firstAppearance the first date of appearance as java.util.Date
+&nbsp;     */
+&nbsp;    public void setFirstAppearanceDate(Date firstAppearance) {
+<b class="nc">&nbsp;        if (Objects.nonNull(firstAppearance)) {</b>
+<b class="nc">&nbsp;            firstAppearance.setHours(5);</b>
+<b class="nc">&nbsp;            setFirstAppearance(firstAppearance.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets a LocalDate as day of last appearance
+&nbsp;     * for this Block.
+&nbsp;     *
+&nbsp;     * @param lastAppearance
+&nbsp;     *            date of last appearance
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the date would overlap with another block
+&nbsp;     */
+&nbsp;    public void setLastAppearance(LocalDate lastAppearance) {
+&nbsp;        try {
+<b class="nc">&nbsp;            prohibitOverlaps(Objects.nonNull(firstAppearance) ? firstAppearance : lastAppearance, lastAppearance);</b>
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getMessage());</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            if (!this.lastAppearance.equals(lastAppearance)) {</b>
+<b class="nc">&nbsp;                course.clearProcesses();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (NullPointerException e) {</b>
+<b class="nc">&nbsp;            if (this.lastAppearance == null ^ lastAppearance == null) {</b>
+<b class="nc">&nbsp;                course.clearProcesses();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        this.lastAppearance = lastAppearance;</b>
+<b class="nc">&nbsp;        if (Objects.isNull(firstAppearance)) {</b>
+<b class="nc">&nbsp;            firstAppearance = lastAppearance;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set the date where this block last appeared.
+&nbsp;     * PrimeFaces 7 passes a java.util.Date object from the datePicker components.
+&nbsp;     *
+&nbsp;     * @param lastAppearance the last date of appearance as java.util.Date
+&nbsp;     */
+&nbsp;    public void setLastAppearanceDate(Date lastAppearance) {
+<b class="nc">&nbsp;        if (Objects.nonNull(lastAppearance)) {</b>
+<b class="nc">&nbsp;            lastAppearance.setHours(5);</b>
+<b class="nc">&nbsp;            setLastAppearance(lastAppearance.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets two LocalDate instances as days of
+&nbsp;     * first and last appearance for this Block.
+&nbsp;     *
+&nbsp;     * @param firstAppearance
+&nbsp;     *            date of first appearance
+&nbsp;     * @param lastAppearance
+&nbsp;     *            date of last appearance
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the date would overlap with another block
+&nbsp;     */
+&nbsp;    public void setPublicationPeriod(LocalDate firstAppearance, LocalDate lastAppearance) {
+<b class="fc">&nbsp;        prohibitOverlaps(firstAppearance, lastAppearance);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            if (!this.firstAppearance.equals(firstAppearance)) {</b>
+<b class="nc">&nbsp;                course.clearProcesses();</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (NullPointerException e) {</b>
+<b class="fc">&nbsp;            if (this.firstAppearance == null ^ firstAppearance == null) {</b>
+<b class="fc">&nbsp;                course.clearProcesses();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            if (!this.lastAppearance.equals(lastAppearance)) {</b>
+<b class="nc">&nbsp;                course.clearProcesses();</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (NullPointerException e) {</b>
+<b class="fc">&nbsp;            if (this.lastAppearance == null ^ lastAppearance == null) {</b>
+<b class="fc">&nbsp;                course.clearProcesses();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="fc">&nbsp;        this.firstAppearance = firstAppearance;</b>
+<b class="fc">&nbsp;        this.lastAppearance = lastAppearance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Tests an not yet set time range for this
+&nbsp;     * block whether it doesn’t overlap with other titles in this course and can
+&nbsp;     * be set. (Because this method is called prior to setting a new value as a
+&nbsp;     * field value, it doesn’t take the values from the classes’ fields even
+&nbsp;     * though it isn’t static.) If the given dates would cause an overlapping,
+&nbsp;     * an IllegalArgumentException will be thrown.
+&nbsp;     *
+&nbsp;     * @param from
+&nbsp;     *            date of first appearance to check
+&nbsp;     * @param until
+&nbsp;     *            date of last appearance to check
+&nbsp;     * @throws IllegalArgumentException
+&nbsp;     *             if the check fails
+&nbsp;     */
+&nbsp;    private void prohibitOverlaps(LocalDate from, LocalDate until) {
+<b class="fc">&nbsp;        for (Block block : course) {</b>
+<b class="fc">&nbsp;            if (!block.equals(this)</b>
+<b class="fc">&nbsp;                    &amp;&amp; (Objects.nonNull(from) &amp;&amp; Objects.nonNull(until))</b>
+<b class="fc">&nbsp;                    &amp;&amp; (Objects.nonNull(block.getFirstAppearance()) &amp;&amp; Objects.nonNull(block.getLastAppearance()))</b>
+<b class="fc">&nbsp;                    &amp;&amp; (block.getFirstAppearance().isBefore(until) &amp;&amp; !block.getLastAppearance().isBefore(from)</b>
+<b class="fc">&nbsp;                    || (block.getLastAppearance().isAfter(from) &amp;&amp; !block.getFirstAppearance().isAfter(until)))) {</b>
+<b class="nc">&nbsp;                throw new IllegalArgumentException(</b>
+&nbsp;                        &#39;(&#39; + block.variant + &quot;) &quot; + block.firstAppearance + &quot; - &quot; + block.lastAppearance);
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Provides returns a string that contains a concise
+&nbsp;     * but informative representation of this block that is easy for a person to
+&nbsp;     * read.
+&nbsp;     *
+&nbsp;     * @return a string representation of the block
+&nbsp;     * @see java.lang.Object#toString()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        StringBuilder result = new StringBuilder();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(firstAppearance)) {</b>
+<b class="nc">&nbsp;            result.append(firstAppearance.toString());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        result.append(&quot; - &quot;);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(lastAppearance)) {</b>
+<b class="nc">&nbsp;            result.append(lastAppearance.toString());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        result.append(&quot; [&quot;);</b>
+<b class="nc">&nbsp;        boolean first = true;</b>
+<b class="nc">&nbsp;        for (Issue issue : issues) {</b>
+<b class="nc">&nbsp;            if (!first) {</b>
+<b class="nc">&nbsp;                result.append(&quot;, &quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            result.append(issue.toString());</b>
+<b class="nc">&nbsp;            first = false;</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        result.append(&quot;]&quot;);</b>
+<b class="nc">&nbsp;        return result.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Provides returns a string that contains a textual
+&nbsp;     * representation of this block that is easy for a person to read.
+&nbsp;     *
+&nbsp;     * @param dateConverter
+&nbsp;     *            a DateTimeFormatter for formatting the local dates
+&nbsp;     * @return a string to identify the block
+&nbsp;     */
+&nbsp;    public String toString(DateTimeFormatter dateConverter) {
+<b class="nc">&nbsp;        StringBuilder result = new StringBuilder();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(firstAppearance)) {</b>
+<b class="nc">&nbsp;            result.append(dateConverter.format(firstAppearance));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        result.append(&quot; − &quot;);</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(lastAppearance)) {</b>
+<b class="nc">&nbsp;            result.append(dateConverter.format(lastAppearance));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return result.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a hash code for the object which depends on the content of its
+&nbsp;     * variables. Whenever Block objects are held in HashSet objects, a
+&nbsp;     * hashCode() is essentially necessary.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The method was generated by Eclipse using right-click → Source → Generate
+&nbsp;     * hashCode() and equals()…. If you will ever change the classes’ fields,
+&nbsp;     * just re-generate it.
+&nbsp;     *
+&nbsp;     * @see java.lang.Object#hashCode()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        final int prime = 31;</b>
+<b class="fc">&nbsp;        int hashCode = 1;</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((firstAppearance == null) ? 0 : firstAppearance.hashCode());</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((issues == null) ? 0 : issues.hashCode());</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((lastAppearance == null) ? 0 : lastAppearance.hashCode());</b>
+<b class="fc">&nbsp;        hashCode = prime * hashCode + ((variant == null) ? 0 : variant.hashCode());</b>
+<b class="fc">&nbsp;        return hashCode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether two individual issues are equal; the decision depends on
+&nbsp;     * the content of its variables.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The method was generated by Eclipse using right-click → Source → Generate
+&nbsp;     * hashCode() and equals()…. If you will ever change the classes’ fields,
+&nbsp;     * just re-generate it.
+&nbsp;     *
+&nbsp;     * @see java.lang.Object#equals(java.lang.Object)
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object obj) {
+<b class="fc">&nbsp;        if (this == obj) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (obj instanceof Block) {</b>
+<b class="fc">&nbsp;            Block other = (Block) obj;</b>
+&nbsp;
+<b class="fc">&nbsp;            if (Objects.isNull(firstAppearance)) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(other.firstAppearance)) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            } else if (!firstAppearance.equals(other.firstAppearance)) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (Objects.isNull(issues)) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(other.issues)) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } else if (!issues.equals(other.issues)) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (Objects.isNull(lastAppearance)) {</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(other.lastAppearance)) {</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } else if (!lastAppearance.equals(other.lastAppearance)) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (Objects.isNull(variant)) {</b>
+<b class="nc">&nbsp;                return Objects.isNull(other.variant);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return variant.equals(other.variant);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

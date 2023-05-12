@@ -1,0 +1,224 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > AddMetadataDialog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.forms.massimport</a>
+</div>
+
+<h1>Coverage Summary for Class: AddMetadataDialog (org.kitodo.production.forms.massimport)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AddMetadataDialog</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/29)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.forms.massimport;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.kitodo.api.Metadata;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.StructuralElementViewInterface;
+&nbsp;import org.kitodo.production.forms.CsvCell;
+&nbsp;import org.kitodo.production.forms.createprocess.ProcessDetail;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.ImportService;
+&nbsp;
+&nbsp;public class AddMetadataDialog {
+&nbsp;
+&nbsp;    private final MassImportForm massImportForm;
+&nbsp;    private ProcessDetail metadataDetail;
+&nbsp;    private List&lt;ProcessDetail&gt; metadataTypes;
+&nbsp;    private RulesetManagementInterface rulesetManagement;
+<b class="nc">&nbsp;    private final List&lt;Locale.LanguageRange&gt; priorityList = ServiceManager.getUserService()</b>
+<b class="nc">&nbsp;            .getCurrentMetadataLanguage();</b>
+<b class="nc">&nbsp;    private final String acquisitionStage = &quot;create&quot;;</b>
+<b class="nc">&nbsp;    private List&lt;StructuralElementViewInterface&gt; allRulesetDivisions = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;    AddMetadataDialog(MassImportForm massImportForm) {</b>
+<b class="nc">&nbsp;        this.massImportForm = massImportForm;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gets metadataDetail.
+&nbsp;     *
+&nbsp;     * @return value of metadataDetail
+&nbsp;     */
+&nbsp;    public ProcessDetail getMetadataDetail() {
+<b class="nc">&nbsp;        return metadataDetail;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets metadataDetail.
+&nbsp;     *
+&nbsp;     * @param metadataDetail value of metadataDetail
+&nbsp;     */
+&nbsp;    public void setMetadataDetail(ProcessDetail metadataDetail) {
+<b class="nc">&nbsp;        this.metadataDetail = metadataDetail;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets rulesetManagement.
+&nbsp;     *
+&nbsp;     * @param rulesetManagement value of rulesetManagement
+&nbsp;     */
+&nbsp;    public void setRulesetManagement(RulesetManagementInterface rulesetManagement) {
+<b class="nc">&nbsp;        this.rulesetManagement = rulesetManagement;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the list of selectable metadata types.
+&nbsp;     *
+&nbsp;     * @return the map of metadata types
+&nbsp;     */
+&nbsp;    public List&lt;ProcessDetail&gt; getAllMetadataTypes() {
+<b class="nc">&nbsp;        if (Objects.isNull(metadataTypes)) {</b>
+<b class="nc">&nbsp;            prepareMetadataTypes();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return metadataTypes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * prepare the list of metadata types.
+&nbsp;     */
+&nbsp;    public void prepareMetadataTypes() {
+<b class="nc">&nbsp;        if (allRulesetDivisions.isEmpty()) {</b>
+<b class="nc">&nbsp;            allRulesetDivisions = getDivisions();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        metadataTypes = ServiceManager.getMassImportService().getAddableMetadataTable(allRulesetDivisions, getPresetMetadata());</b>
+<b class="nc">&nbsp;        if (!metadataTypes.isEmpty()) {</b>
+<b class="nc">&nbsp;            metadataDetail = metadataTypes.get(0);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;StructuralElementViewInterface&gt; getDivisions() {
+<b class="nc">&nbsp;        return rulesetManagement.getStructuralElements(priorityList).keySet().stream()</b>
+<b class="nc">&nbsp;                .map(key -&gt; rulesetManagement.getStructuralElementView(key, acquisitionStage, priorityList))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Collection&lt;Metadata&gt; getPresetMetadata() {
+<b class="nc">&nbsp;        Collection&lt;Metadata&gt; presetMetadata = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        for (int i = 1; i &lt; massImportForm.getMetadataKeys().size(); i++) {</b>
+<b class="nc">&nbsp;            Metadata metadata = new Metadata();</b>
+<b class="nc">&nbsp;            metadata.setKey(massImportForm.getMetadataKeys().get(i));</b>
+<b class="nc">&nbsp;            presetMetadata.add(metadata);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return presetMetadata;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Add metadata column.
+&nbsp;     */
+&nbsp;    public void addMetadata() {
+<b class="nc">&nbsp;        massImportForm.getMetadataKeys().add(metadataDetail.getMetadataID());</b>
+<b class="nc">&nbsp;        massImportForm.getRecords()</b>
+<b class="nc">&nbsp;                .forEach(csvRecord -&gt; csvRecord.getCsvCells().add(new CsvCell(ImportService.getProcessDetailValue(metadataDetail))));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

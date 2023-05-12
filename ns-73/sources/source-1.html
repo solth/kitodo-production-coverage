@@ -1,0 +1,231 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > XMLSchemaConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.xmlschemaconverter</a>
+</div>
+
+<h1>Coverage Summary for Class: XMLSchemaConverter (org.kitodo.xmlschemaconverter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">XMLSchemaConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,4%
+  </span>
+  <span class="absValue">
+    (35/43)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.xmlschemaconverter;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.InvalidClassException;
+&nbsp;import java.io.StringReader;
+&nbsp;import java.io.StringWriter;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.util.List;
+&nbsp;import java.util.UnknownFormatConversionException;
+&nbsp;
+&nbsp;import javax.xml.XMLConstants;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;import javax.xml.transform.Result;
+&nbsp;import javax.xml.transform.Transformer;
+&nbsp;import javax.xml.transform.TransformerException;
+&nbsp;import javax.xml.transform.TransformerFactory;
+&nbsp;import javax.xml.transform.sax.SAXResult;
+&nbsp;import javax.xml.transform.sax.SAXSource;
+&nbsp;import javax.xml.transform.sax.SAXTransformerFactory;
+&nbsp;import javax.xml.transform.sax.TransformerHandler;
+&nbsp;import javax.xml.transform.stream.StreamResult;
+&nbsp;import javax.xml.transform.stream.StreamSource;
+&nbsp;
+&nbsp;import net.sf.saxon.TransformerFactoryImpl;
+&nbsp;
+&nbsp;import org.kitodo.api.schemaconverter.DataRecord;
+&nbsp;import org.kitodo.api.schemaconverter.FileFormat;
+&nbsp;import org.kitodo.api.schemaconverter.MetadataFormat;
+&nbsp;import org.kitodo.api.schemaconverter.SchemaConverterInterface;
+&nbsp;import org.kitodo.exceptions.ConfigException;
+&nbsp;import org.xml.sax.InputSource;
+&nbsp;
+<b class="fc">&nbsp;public class XMLSchemaConverter implements SchemaConverterInterface {</b>
+<b class="fc">&nbsp;    private static final FileFormat supportedSourceFileFormat = FileFormat.XML;</b>
+<b class="fc">&nbsp;    private static final FileFormat supportedTargetFileFormat = FileFormat.XML;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts a given DataRecord to the given MetadataFormat &#39;targetMetadataFormat&#39; and FileFormat &#39;targetFileFormat&#39;.
+&nbsp;     *
+&nbsp;     * @param record DataRecord to be converted
+&nbsp;     * @param targetFileFormat FileFormat to which the given DataRecord is converted
+&nbsp;     * @param mappingFiles list of mapping files; if empty, the schema converter module uses a default mapping
+&nbsp;     * @return The result of the conversion as a DataRecord.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public DataRecord convert(DataRecord record, MetadataFormat targetMetadataFormat, FileFormat targetFileFormat,
+&nbsp;                              List&lt;File&gt; mappingFiles) throws IOException {
+<b class="fc">&nbsp;        if (!(supportsSourceFileFormat(record.getFileFormat()) &amp;&amp; supportsTargetFileFormat(targetFileFormat))) {</b>
+<b class="nc">&nbsp;            throw new UnknownFormatConversionException(&quot;Unable to convert from &quot; + record.getFileFormat()</b>
+&nbsp;                    + &quot; to &quot; + targetFileFormat + &quot;!&quot;);
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (record.getOriginalData() instanceof String) {</b>
+<b class="fc">&nbsp;            String xmlString = (String)record.getOriginalData();</b>
+&nbsp;            String conversionResult;
+&nbsp;
+<b class="fc">&nbsp;            if (mappingFiles.isEmpty()) {</b>
+<b class="nc">&nbsp;                throw new ConfigException(&quot;No mapping files found!&quot;);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                for (File mappingFile : mappingFiles) {</b>
+<b class="fc">&nbsp;                    try (InputStream fileStream = Files.newInputStream(mappingFile.toPath())) {</b>
+<b class="fc">&nbsp;                        xmlString = transformXmlByXslt(xmlString, fileStream);</b>
+<b class="fc">&nbsp;                    }</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+<b class="fc">&nbsp;            conversionResult = xmlString;</b>
+&nbsp;
+<b class="fc">&nbsp;            DataRecord resultRecord = new DataRecord();</b>
+<b class="fc">&nbsp;            resultRecord.setOriginalData(conversionResult);</b>
+<b class="fc">&nbsp;            resultRecord.setFileFormat(targetFileFormat);</b>
+<b class="fc">&nbsp;            resultRecord.setMetadataFormat(targetMetadataFormat);</b>
+<b class="fc">&nbsp;            return resultRecord;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new InvalidClassException(&quot;OriginalData of DataRecord should be instance of class &#39;String&#39;, is &#39;&quot;</b>
+<b class="nc">&nbsp;                    + record.getOriginalData().getClass().getName() + &quot;&#39; instead!&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean supportsTargetFileFormat(FileFormat format) {
+<b class="fc">&nbsp;        return supportedTargetFileFormat.equals(format);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean supportsSourceFileFormat(FileFormat format) {
+<b class="fc">&nbsp;        return supportedSourceFileFormat.equals(format);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String transformXmlByXslt(String xmlString, InputStream stylesheetFile) {
+<b class="fc">&nbsp;        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);</b>
+<b class="nc">&nbsp;        } catch (ParserConfigurationException e) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(e.getMessage(), e);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        factory.setNamespaceAware(true);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            StringWriter stringWriter = new StringWriter();</b>
+<b class="fc">&nbsp;            TransformerFactory transformerFactory = new TransformerFactoryImpl();</b>
+<b class="fc">&nbsp;            transformerFactory.setURIResolver((href, base) -&gt; new StreamSource(href.replace(&quot;http:&quot;, &quot;https:&quot;)));</b>
+<b class="fc">&nbsp;            System.setProperty(&quot;http.agent&quot;, &quot;Chrome&quot;);</b>
+<b class="fc">&nbsp;            Transformer xsltTransformer = transformerFactory.newTransformer(new StreamSource(stylesheetFile));</b>
+&nbsp;            TransformerHandler handler
+<b class="fc">&nbsp;                    = ((SAXTransformerFactory) SAXTransformerFactory.newInstance()).newTransformerHandler();</b>
+<b class="fc">&nbsp;            handler.setResult(new StreamResult(stringWriter));</b>
+<b class="fc">&nbsp;            Result saxResult = new SAXResult(handler);</b>
+<b class="fc">&nbsp;            SAXSource saxSource = new SAXSource(new InputSource(new StringReader(xmlString)));</b>
+<b class="fc">&nbsp;            xsltTransformer.transform(saxSource, saxResult);</b>
+<b class="fc">&nbsp;            return stringWriter.toString();</b>
+<b class="nc">&nbsp;        } catch (TransformerException e) {</b>
+<b class="nc">&nbsp;            throw new ConfigException(&quot;Error in transforming the response to internal format: &quot; + e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MetadataValidationInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.validation.metadata</a>
+</div>
+
+<h1>Coverage Summary for Class: MetadataValidationInterface (org.kitodo.api.validation.metadata)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">MetadataValidationInterface</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.validation.metadata;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale.LanguageRange;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.kitodo.api.dataeditor.rulesetmanagement.RulesetManagementInterface;
+&nbsp;import org.kitodo.api.dataformat.Workpiece;
+&nbsp;import org.kitodo.api.validation.ValidationInterface;
+&nbsp;import org.kitodo.api.validation.ValidationResult;
+&nbsp;
+&nbsp;/** Validates a metadata file against a given ruleset. */
+&nbsp;public interface MetadataValidationInterface extends ValidationInterface {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Validates if a mets file is confirm to a rulesetFile.
+&nbsp;     *
+&nbsp;     * @param metsFileUri
+&nbsp;     *            The uri to the mets file which should be validated.
+&nbsp;     * @param rulesetFileUri
+&nbsp;     *            The uri to the ruleset file to validate against.
+&nbsp;     * @param metadataLanguage
+&nbsp;     *            The list of languages preferred by the requesting user to
+&nbsp;     *            display the metadata labels
+&nbsp;     * @param translations
+&nbsp;     *            A map containing the validation error messages translated into
+&nbsp;     *            the requesting user’s language. The map must contain the
+&nbsp;     *            following entries: {@code metadataInvalidData},
+&nbsp;     *            {@code metadataMandatoryElement}, {@code metadataMediaError},
+&nbsp;     *            {@code metadataMediaUnassigned},
+&nbsp;     *            {@code metadataNotEnoughElements},
+&nbsp;     *            {@code metadataNotOneElement}, and
+&nbsp;     *            {@code metadataStructureWithoutMedia}.
+&nbsp;     * @return A validation result.
+&nbsp;     */
+&nbsp;    ValidationResult validate(URI metsFileUri, URI rulesetFileUri, List&lt;LanguageRange&gt; metadataLanguage,
+&nbsp;            Map&lt;String, String&gt; translations);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Validates if a workpiece is confirm to a ruleset.
+&nbsp;     *
+&nbsp;     * @param workpiece
+&nbsp;     *            The workpiece which should be validated.
+&nbsp;     * @param ruleset
+&nbsp;     *            The ruleset to validate against.
+&nbsp;     * @param metadataLanguage
+&nbsp;     *            The list of languages preferred by the requesting user to
+&nbsp;     *            display the metadata labels
+&nbsp;     * @param translations
+&nbsp;     *            A map containing the validation error messages translated into
+&nbsp;     *            the requesting user’s language. The map must contain the
+&nbsp;     *            following entries: {@code metadataInvalidData},
+&nbsp;     *            {@code metadataMandatoryElement}, {@code metadataMediaError},
+&nbsp;     *            {@code metadataMediaUnassigned},
+&nbsp;     *            {@code metadataNotEnoughElements},
+&nbsp;     *            {@code metadataNotOneElement}, and
+&nbsp;     *            {@code metadataStructureWithoutMedia}.
+&nbsp;     * @return A validation result.
+&nbsp;     */
+&nbsp;    ValidationResult validate(Workpiece workpiece, RulesetManagementInterface ruleset,
+&nbsp;            List&lt;LanguageRange&gt; metadataLanguage, Map&lt;String, String&gt; translations);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

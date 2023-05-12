@@ -1,0 +1,125 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Fragment</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.metadata.pagination</a>
+</div>
+
+<h1>Coverage Summary for Class: Fragment (org.kitodo.production.helper.metadata.pagination)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Fragment</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.metadata.pagination;
+&nbsp;
+&nbsp;/**
+&nbsp; * A fragment of a pagination sequence. Paginations can be freely combined out
+&nbsp; * of fragments that can be a {@link DecimalNumeral}, a {@link RomanNumeral} or
+&nbsp; * {@link StaticText}.
+&nbsp; */
+&nbsp;interface Fragment {
+&nbsp;    /**
+&nbsp;     * Returns the value formatted according to the type and configuration of the
+&nbsp;     * fragment. For example, a value of 3.5 may be formatted as &quot;3&quot; (decimal),
+&nbsp;     * &quot;III&quot; (roman), or &quot;v&quot; (text, for ‘verso’, the back of a sheet).
+&nbsp;     * {@code DecimalNumeral} and {@code RomanNumeral} will ignore the half part of
+&nbsp;     * the integer, where {@code StaticText} may return text or an empty string for
+&nbsp;     * full and half values.
+&nbsp;     *
+&nbsp;     * @param value
+&nbsp;     *            value to format
+&nbsp;     * @return the formatted value
+&nbsp;     */
+&nbsp;    String format(HalfInteger value);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the increment associated with the fragment. For example, to get a
+&nbsp;     * pagination with an interval of two (like 1, 3, 5, 7, 9, …), the
+&nbsp;     * {@code DecimalNumeral} has to be configured with an interval value of 2.0.
+&nbsp;     *
+&nbsp;     * @return the increment of fragment
+&nbsp;     */
+&nbsp;    HalfInteger getIncrement();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the initial value of the fragment. This is where pagination will be
+&nbsp;     * started.
+&nbsp;     *
+&nbsp;     * @return the pagination start value
+&nbsp;     */
+&nbsp;    Integer getInitialValue();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the increment of the fragment.
+&nbsp;     *
+&nbsp;     * @param increment
+&nbsp;     *            increment value the fragment will cause
+&nbsp;     */
+&nbsp;    void setIncrement(HalfInteger increment);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

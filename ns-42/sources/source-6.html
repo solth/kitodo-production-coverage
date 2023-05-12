@@ -1,0 +1,203 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > IndexWorker</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: IndexWorker (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IndexWorker</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.services.data.base.SearchService;
+&nbsp;
+&nbsp;public class IndexWorker implements Runnable {
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(IndexWorker.class);</b>
+&nbsp;    
+&nbsp;    private final boolean indexAllObjects;
+&nbsp;    private final ObjectType objectType;
+&nbsp;    private final SearchService searchService;
+&nbsp;    private final IndexWorkerStatus indexWorkerStatus;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor initializing an IndexWorker object with the given SearchService
+&nbsp;     * and list of objects that will be indexed.
+&nbsp;     *
+&nbsp;     * @param searchService
+&nbsp;     *            SearchService instance used for indexing
+&nbsp;     */
+<b class="nc">&nbsp;    public IndexWorker(SearchService searchService, ObjectType objectType, IndexWorkerStatus indexWorkerStatus, boolean indexAllObjects) {</b>
+<b class="nc">&nbsp;        this.searchService = searchService;</b>
+<b class="nc">&nbsp;        this.indexWorkerStatus = indexWorkerStatus;</b>
+<b class="nc">&nbsp;        this.indexAllObjects = indexAllObjects;</b>
+<b class="nc">&nbsp;        this.objectType = objectType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public void run() {
+<b class="nc">&nbsp;        int maxAttempts = ConfigCore.getIntParameterOrDefaultValue(ParameterCore.ELASTICSEARCH_ATTEMPTS);</b>
+<b class="nc">&nbsp;        int batchSize = ConfigCore.getIntParameterOrDefaultValue(ParameterCore.ELASTICSEARCH_BATCH);</b>
+<b class="nc">&nbsp;        int timeBetweenAttempts = ConfigCore.getIntParameterOrDefaultValue(ParameterCore.ELASTICSEARCH_TIME_BETWEEN_ATTEMPTS);</b>
+<b class="nc">&nbsp;        int maxBatch = indexWorkerStatus.getMaxBatch();</b>
+&nbsp;
+<b class="nc">&nbsp;        int nextBatch = indexWorkerStatus.getAndIncrementNextBatch();</b>
+<b class="nc">&nbsp;        while (!indexWorkerStatus.hasFailed() &amp;&amp; !indexWorkerStatus.isCanceled() &amp;&amp; nextBatch &lt; maxBatch) {</b>
+&nbsp;            // nextBatch is a valid batch that needs to be processed
+&nbsp;
+<b class="nc">&nbsp;            int attempt = 1;</b>
+<b class="nc">&nbsp;            while (attempt &lt; maxAttempts) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    int offset = nextBatch * batchSize;</b>
+<b class="nc">&nbsp;                    logger.info(&quot;index &quot; + objectType.toString() + &quot; with offset &quot; + offset + &quot; and attempt &quot; </b>
+&nbsp;                        + attempt + &quot;/&quot; + maxAttempts);
+&nbsp;
+<b class="nc">&nbsp;                    if (indexAllObjects) {</b>
+<b class="nc">&nbsp;                        indexObjects(searchService.getAll(offset, batchSize));</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        indexObjects(searchService.getAllNotIndexed(offset, batchSize));</b>
+&nbsp;                    }
+&nbsp;
+<b class="nc">&nbsp;                    break;</b>
+<b class="nc">&nbsp;                } catch (Exception e) {</b>
+<b class="nc">&nbsp;                    logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;                    attempt += 1;</b>
+&nbsp;                    try {
+<b class="nc">&nbsp;                        Thread.sleep(timeBetweenAttempts);</b>
+<b class="nc">&nbsp;                    } catch (InterruptedException e2) {</b>
+<b class="nc">&nbsp;                        logger.trace(&quot;Index worker sleep is interrupted while waiting for next indexing attempt&quot;);</b>
+<b class="nc">&nbsp;                    }</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (attempt &gt;= maxAttempts) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;stop indexing after maximum amount of attempts&quot;);</b>
+<b class="nc">&nbsp;                this.indexWorkerStatus.markAsFailed();</b>
+&nbsp;            } else {
+&nbsp;                // find next batch that can be indexed
+<b class="nc">&nbsp;                nextBatch = indexWorkerStatus.getAndIncrementNextBatch();</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    private void indexObjects(List&lt;Object&gt; objectsToIndex) throws CustomResponseException, DAOException, IOException {
+<b class="nc">&nbsp;        this.searchService.addAllObjectsToIndex(objectsToIndex);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:36</div>
+</div>
+</body>
+</html>

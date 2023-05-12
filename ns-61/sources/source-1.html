@@ -1,0 +1,183 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > IndexManagmentThread</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.index</a>
+</div>
+
+<h1>Coverage Summary for Class: IndexManagmentThread (org.kitodo.production.services.index)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IndexManagmentThread</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/25)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.index;
+&nbsp;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.faces.push.PushContext;
+&nbsp;
+&nbsp;import org.apache.log4j.LogManager;
+&nbsp;import org.apache.log4j.Logger;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.elasticsearch.exceptions.CustomResponseException;
+&nbsp;import org.kitodo.data.exceptions.DataException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.helper.IndexWorkerStatus;
+&nbsp;
+&nbsp;public class IndexManagmentThread extends Thread {
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(IndexManagmentThread.class);</b>
+&nbsp;
+&nbsp;    private final PushContext context;
+&nbsp;    private final IndexingService indexingService;
+&nbsp;    private final boolean indexAllObjects;
+&nbsp;    private final ObjectType objectType;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initialize indexing managment thread.
+&nbsp;     * @param pushContext the UI channel used to trigger refresh
+&nbsp;     * @param service the service class for indexing
+&nbsp;     * @param objectType optional objectType (if null, all types are indexed, otherwise only that one)
+&nbsp;     * @param indexAllObjects whether all objects are indexed or only remaining ones
+&nbsp;     */
+<b class="nc">&nbsp;    IndexManagmentThread(PushContext pushContext, IndexingService service, ObjectType objectType, boolean indexAllObjects) {</b>
+<b class="nc">&nbsp;        context = pushContext;</b>
+<b class="nc">&nbsp;        indexingService = service;</b>
+<b class="nc">&nbsp;        this.indexAllObjects = indexAllObjects;</b>
+<b class="nc">&nbsp;        this.objectType = objectType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void run() {
+&nbsp;        try {
+<b class="nc">&nbsp;            indexingService.setIndexingAll(true);</b>
+&nbsp;
+<b class="nc">&nbsp;            for (ObjectType currentType : ObjectType.getIndexableObjectTypes()) {</b>
+<b class="nc">&nbsp;                if (Objects.isNull(this.objectType) || currentType.equals(objectType)) {</b>
+&nbsp;                    try {
+<b class="nc">&nbsp;                        IndexWorkerStatus status = indexingService.runIndexing(currentType, context, indexAllObjects);</b>
+<b class="nc">&nbsp;                        if (Objects.nonNull(status) &amp;&amp; (status.isCanceled() || status.hasFailed())) {</b>
+&nbsp;                            // stop indexing due to failure or cancel
+<b class="nc">&nbsp;                            break;</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                    } catch (DataException | CustomResponseException | DAOException | RuntimeException e) {</b>
+<b class="nc">&nbsp;                        logger.error(e);</b>
+<b class="nc">&nbsp;                        Helper.setErrorMessage(e.getLocalizedMessage(), IndexingService.getLogger(), e);</b>
+<b class="nc">&nbsp;                    }</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                sleep(IndexingService.PAUSE);</b>
+<b class="nc">&nbsp;            } catch (InterruptedException e) {</b>
+<b class="nc">&nbsp;                logger.trace(&quot;Index management sleep interrupted while waiting to finish indexing&quot;);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        } finally {
+<b class="nc">&nbsp;            indexingService.resetCurrentIndexState();</b>
+<b class="nc">&nbsp;            indexingService.setIndexingAll(false);</b>
+<b class="nc">&nbsp;            context.send(IndexingService.INDEXING_FINISHED_MESSAGE);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

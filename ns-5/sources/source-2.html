@@ -1,0 +1,219 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LogicalDivision</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.dataformat</a>
+</div>
+
+<h1>Coverage Summary for Class: LogicalDivision (org.kitodo.api.dataformat)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LogicalDivision</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (6/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    43,5%
+  </span>
+  <span class="absValue">
+    (10/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.dataformat;
+&nbsp;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.kitodo.api.dataformat.mets.LinkedMetsResource;
+&nbsp;
+&nbsp;/**
+&nbsp; * A tree-shaped description of the logical division of the digital
+&nbsp; * representation of a digital medium. The logical division can be
+&nbsp; * imagined as a table of contents and is used to display the table of contents
+&nbsp; * in the viewer. It uses {@link View}s to refer to elements of the
+&nbsp; * {@link PhysicalDivision} of the digital medium, or can {@link #link} to other
+&nbsp; * processes.
+&nbsp; */
+&nbsp;public class LogicalDivision extends Division&lt;LogicalDivision&gt; {
+&nbsp;    /**
+&nbsp;     * Specifies the link if there is one.
+&nbsp;     */
+&nbsp;    private LinkedMetsResource link;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The views on {@link PhysicalDivision}s that this logical division
+&nbsp;     * level comprises.
+&nbsp;     */
+&nbsp;    private final LinkedList&lt;View&gt; views;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new logical division.
+&nbsp;     */
+<b class="fc">&nbsp;    public LogicalDivision() {</b>
+<b class="fc">&nbsp;        views = new LinkedList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new subclass of logical division from an existing
+&nbsp;     * logical division.
+&nbsp;     *
+&nbsp;     * @param source
+&nbsp;     *            logical division that serves as data source
+&nbsp;     */
+&nbsp;    protected LogicalDivision(LogicalDivision source) {
+<b class="fc">&nbsp;        super(source);</b>
+<b class="fc">&nbsp;        link = source.link;</b>
+<b class="fc">&nbsp;        views = source.views;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the link of this logical division.
+&nbsp;     *
+&nbsp;     * @return the link
+&nbsp;     */
+&nbsp;    public LinkedMetsResource getLink() {
+<b class="fc">&nbsp;        return link;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the link of this logical division.
+&nbsp;     *
+&nbsp;     * @param link
+&nbsp;     *            link to set
+&nbsp;     */
+&nbsp;    public void setLink(LinkedMetsResource link) {
+<b class="fc">&nbsp;        this.link = link;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the views associated with this logical division.
+&nbsp;     *
+&nbsp;     * @return the views
+&nbsp;     */
+&nbsp;    public LinkedList&lt;View&gt; getViews() {
+<b class="fc">&nbsp;        return views;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return getType() + &quot; \&quot;&quot; + getLabel() + &quot;\&quot;&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object o) {
+<b class="fc">&nbsp;        if (this == o) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!super.equals(o)) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!(o instanceof LogicalDivision)) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        LogicalDivision other = (LogicalDivision) o;</b>
+<b class="nc">&nbsp;        return Objects.equals(link, other.link)</b>
+<b class="nc">&nbsp;                &amp;&amp; Objects.equals(views, other.views);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="nc">&nbsp;        final int prime = 31;</b>
+<b class="nc">&nbsp;        int result = super.hashCode();</b>
+<b class="nc">&nbsp;        result = prime * result + ((link == null) ? 0 : link.hashCode());</b>
+<b class="nc">&nbsp;        result = prime * result + ((views == null) ? 0 : views.hashCode());</b>
+<b class="nc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

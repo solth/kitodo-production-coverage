@@ -1,0 +1,250 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LocaleHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper</a>
+</div>
+
+<h1>Coverage Summary for Class: LocaleHelper (org.kitodo.production.helper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LocaleHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper;
+&nbsp;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.faces.context.FacesContext;
+&nbsp;import javax.servlet.http.Cookie;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.production.enums.ObjectType;
+&nbsp;import org.kitodo.production.helper.cache.RequestScopeCacheHelper;
+&nbsp;import org.kitodo.production.security.SecurityUserDetails;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.springframework.context.i18n.LocaleContextHolder;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class LocaleHelper contains static functions for handling locales.
+&nbsp; */
+&nbsp;public class LocaleHelper {
+&nbsp;
+<b class="nc">&nbsp;    private static final Logger logger = LogManager.getLogger(LocaleHelper.class);</b>
+&nbsp;
+&nbsp;    public static final String COOKIE_LANG_NAME = &quot;kitodo_lang&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Private constructor to hide the implicit public one.
+&nbsp;     */
+&nbsp;    private LocaleHelper() {
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the current locale from a request scoped cache to avoid repeated 
+&nbsp;     * queries to the database required to retrieve the current user&#39;s language 
+&nbsp;     * setting. 
+&nbsp;     *
+&nbsp;     * @return the current locale
+&nbsp;     */
+&nbsp;    public static Locale getCurrentLocale() {
+<b class="nc">&nbsp;        return RequestScopeCacheHelper.getFromCache(</b>
+&nbsp;            &quot;current_locale&quot;,
+<b class="nc">&nbsp;            () -&gt; calculateCurrentLocale(),</b>
+&nbsp;            Locale.class
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the current locale. If user is authenticated the locale is generated
+&nbsp;     * based on the selected user language. If there is not an authenticated user,
+&nbsp;     * Locale is generated based on the faces context of prime face. For this
+&nbsp;     * purpose, it is checked whether a cookie is available, the browser or the
+&nbsp;     * application locale is set. Otherwise, if there is no faces context the locale
+&nbsp;     * of spring is used and thus the system default too. Update locale in spring
+&nbsp;     * locale context holder.
+&nbsp;     *
+&nbsp;     * @return the current locale
+&nbsp;     */
+&nbsp;    private static Locale calculateCurrentLocale() {        
+<b class="nc">&nbsp;        Locale locale = getAuthenticatedUserLocale();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(locale)) {</b>
+<b class="nc">&nbsp;            LocaleContextHolder.setLocale(locale);</b>
+<b class="nc">&nbsp;            return locale;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        FacesContext facesContext = FacesContext.getCurrentInstance();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(facesContext)) {</b>
+<b class="nc">&nbsp;            locale = getLocaleOfFacesContext(facesContext);</b>
+<b class="nc">&nbsp;            if (Objects.nonNull(locale)) {</b>
+<b class="nc">&nbsp;                LocaleContextHolder.setLocale(locale); // set faces context locale as spring locale</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return LocaleContextHolder.getLocale(); // spring locale with system default     </b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the authenticated user locale.
+&nbsp;     *
+&nbsp;     * @return the locale of the authenticated user.
+&nbsp;     */
+&nbsp;    public static Locale getAuthenticatedUserLocale() {
+<b class="nc">&nbsp;        SecurityUserDetails securityUserDetails = ServiceManager.getUserService().getAuthenticatedUser();</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(securityUserDetails)) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                User user = ServiceManager.getUserService().getById(securityUserDetails.getId());</b>
+<b class="nc">&nbsp;                return new Locale.Builder().setLanguageTag(user.getLanguage()).build();</b>
+<b class="nc">&nbsp;            } catch (DAOException e) {</b>
+<b class="nc">&nbsp;                Helper.setErrorMessage(&quot;errorLoadingOne&quot;,</b>
+<b class="nc">&nbsp;                    new Object[] {ObjectType.USER.getTranslationSingular(), securityUserDetails.getId() }, logger, e);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if locale is supported.
+&nbsp;     *
+&nbsp;     * @param locale
+&nbsp;     *            the locale to check
+&nbsp;     * @return True or false if locale is supported
+&nbsp;     */
+&nbsp;    public static boolean isSupportedLocale(Locale locale) {
+<b class="nc">&nbsp;        Iterator&lt;Locale&gt; supportedLocales = FacesContext.getCurrentInstance().getApplication()</b>
+<b class="nc">&nbsp;                .getSupportedLocales();</b>
+<b class="nc">&nbsp;        while (supportedLocales.hasNext()) {</b>
+<b class="nc">&nbsp;            Locale supportedLocale = supportedLocales.next();</b>
+<b class="nc">&nbsp;            if (supportedLocale.getLanguage().equals(locale.getLanguage())) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Locale getLocaleOfFacesContext(FacesContext facesContext) {
+&nbsp;        Locale locale;
+<b class="nc">&nbsp;        if (facesContext.getExternalContext().getRequestCookieMap().containsKey(COOKIE_LANG_NAME)) {</b>
+&nbsp;            // locale from cookie
+<b class="nc">&nbsp;            Cookie cookie = (Cookie) facesContext.getExternalContext().getRequestCookieMap().get(COOKIE_LANG_NAME);</b>
+<b class="nc">&nbsp;            locale = new Locale.Builder().setLanguageTag(cookie.getValue()).build();</b>
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            locale = facesContext.getExternalContext().getRequestLocale(); // browser locale</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (isSupportedLocale(locale)) {</b>
+<b class="nc">&nbsp;            return locale;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return facesContext.getApplication().getDefaultLocale(); // application locale</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

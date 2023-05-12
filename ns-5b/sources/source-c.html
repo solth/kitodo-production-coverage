@@ -1,0 +1,714 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LdapServerService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.services.data</a>
+</div>
+
+<h1>Coverage Summary for Class: LdapServerService (org.kitodo.production.services.data)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LdapServerService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    18,2%
+  </span>
+  <span class="absValue">
+    (4/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    5,3%
+  </span>
+  <span class="absValue">
+    (15/281)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.services.data;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FileInputStream;
+&nbsp;import java.io.FileOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.security.InvalidAlgorithmParameterException;
+&nbsp;import java.security.InvalidKeyException;
+&nbsp;import java.security.KeyStore;
+&nbsp;import java.security.KeyStoreException;
+&nbsp;import java.security.MessageDigest;
+&nbsp;import java.security.NoSuchAlgorithmException;
+&nbsp;import java.security.cert.CertificateException;
+&nbsp;import java.security.cert.CertificateFactory;
+&nbsp;import java.security.cert.X509Certificate;
+&nbsp;import java.security.spec.InvalidKeySpecException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Hashtable;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import javax.crypto.BadPaddingException;
+&nbsp;import javax.crypto.IllegalBlockSizeException;
+&nbsp;import javax.crypto.NoSuchPaddingException;
+&nbsp;import javax.naming.Context;
+&nbsp;import javax.naming.NamingEnumeration;
+&nbsp;import javax.naming.NamingException;
+&nbsp;import javax.naming.directory.Attribute;
+&nbsp;import javax.naming.directory.Attributes;
+&nbsp;import javax.naming.directory.BasicAttribute;
+&nbsp;import javax.naming.directory.BasicAttributes;
+&nbsp;import javax.naming.directory.DirContext;
+&nbsp;import javax.naming.directory.InitialDirContext;
+&nbsp;import javax.naming.directory.ModificationItem;
+&nbsp;import javax.naming.directory.SearchResult;
+&nbsp;import javax.naming.ldap.InitialLdapContext;
+&nbsp;import javax.naming.ldap.LdapContext;
+&nbsp;import javax.naming.ldap.StartTlsRequest;
+&nbsp;import javax.naming.ldap.StartTlsResponse;
+&nbsp;
+&nbsp;import org.apache.commons.codec.binary.Base64;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.bouncycastle.crypto.digests.MD4Digest;
+&nbsp;import org.kitodo.config.ConfigCore;
+&nbsp;import org.kitodo.config.enums.ParameterCore;
+&nbsp;import org.kitodo.data.database.beans.LdapServer;
+&nbsp;import org.kitodo.data.database.beans.User;
+&nbsp;import org.kitodo.data.database.enums.PasswordEncryption;
+&nbsp;import org.kitodo.data.database.exceptions.DAOException;
+&nbsp;import org.kitodo.data.database.persistence.LdapServerDAO;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;import org.kitodo.production.ldap.LdapUser;
+&nbsp;import org.kitodo.production.security.AESUtil;
+&nbsp;import org.kitodo.production.services.ServiceManager;
+&nbsp;import org.kitodo.production.services.data.base.SearchDatabaseService;
+&nbsp;import org.primefaces.model.SortOrder;
+&nbsp;
+&nbsp;public class LdapServerService extends SearchDatabaseService&lt;LdapServer, LdapServerDAO&gt; {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(LdapServerService.class);</b>
+<b class="fc">&nbsp;    private static volatile LdapServerService instance = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return singleton variable of type LdapServerService.
+&nbsp;     *
+&nbsp;     * @return unique instance of LdapServerService
+&nbsp;     */
+&nbsp;    public static LdapServerService getInstance() {
+<b class="fc">&nbsp;        LdapServerService localReference = instance;</b>
+<b class="fc">&nbsp;        if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;            synchronized (LdapServerService.class) {</b>
+<b class="fc">&nbsp;                localReference = instance;</b>
+<b class="fc">&nbsp;                if (Objects.isNull(localReference)) {</b>
+<b class="fc">&nbsp;                    localReference = new LdapServerService();</b>
+<b class="fc">&nbsp;                    instance = localReference;</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return localReference;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private LdapServerService() {
+<b class="fc">&nbsp;        super(new LdapServerDAO());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countDatabaseRows() throws DAOException {
+<b class="nc">&nbsp;        return countDatabaseRows(&quot;SELECT COUNT(*) FROM LdapServer&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countResults(Map filters) throws DAOException {
+<b class="nc">&nbsp;        return countDatabaseRows();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;LdapServer&gt; loadData(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
+<b class="nc">&nbsp;        return new ArrayList&lt;&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String buildUserDN(User inUser) {
+<b class="nc">&nbsp;        String userDN = inUser.getLdapGroup().getUserDN();</b>
+<b class="nc">&nbsp;        userDN = userDN.replaceAll(&quot;\\{login\\}&quot;, inUser.getLogin());</b>
+<b class="nc">&nbsp;        if (Objects.nonNull(inUser.getLdapLogin())) {</b>
+<b class="nc">&nbsp;            userDN = userDN.replaceAll(&quot;\\{ldaplogin\\}&quot;, inUser.getLdapLogin());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        userDN = userDN.replaceAll(&quot;\\{firstname\\}&quot;, inUser.getName());</b>
+<b class="nc">&nbsp;        userDN = userDN.replaceAll(&quot;\\{lastname\\}&quot;, inUser.getSurname());</b>
+<b class="nc">&nbsp;        return userDN;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Hashtable&lt;String, String&gt; initializeWithLdapConnectionSettings(LdapServer ldapServer) {
+<b class="nc">&nbsp;        Hashtable&lt;String, String&gt; env = new Hashtable&lt;&gt;(11);</b>
+<b class="nc">&nbsp;        env.put(Context.INITIAL_CONTEXT_FACTORY, &quot;com.sun.jndi.ldap.LdapCtxFactory&quot;);</b>
+<b class="nc">&nbsp;        env.put(Context.PROVIDER_URL, ldapServer.getUrl());</b>
+<b class="nc">&nbsp;        env.put(Context.SECURITY_AUTHENTICATION, &quot;simple&quot;);</b>
+<b class="nc">&nbsp;        env.put(Context.SECURITY_PRINCIPAL, ldapServer.getManagerLogin());</b>
+&nbsp;
+<b class="nc">&nbsp;        String managerPassword = ldapServer.getManagerPassword();</b>
+<b class="nc">&nbsp;        if (AESUtil.isEncrypted(managerPassword)) {</b>
+<b class="nc">&nbsp;            String securitySecret = ConfigCore.getParameterOrDefaultValue(ParameterCore.SECURITY_SECRET_LDAPMANAGERPASSWORD);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (StringUtils.isBlank(securitySecret)) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;The security.secret.ldapManagerPassword parameter was not configured in kitodo_config.properties file.&quot;);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            try {
+<b class="nc">&nbsp;                managerPassword = AESUtil.decrypt(managerPassword, securitySecret);</b>
+<b class="nc">&nbsp;            } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException</b>
+&nbsp;                    | InvalidKeyException | BadPaddingException | IllegalBlockSizeException
+&nbsp;                    | InvalidKeySpecException e) {
+<b class="nc">&nbsp;                logger.error(e.getLocalizedMessage(), e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        env.put(Context.SECURITY_CREDENTIALS, managerPassword);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (ldapServer.isUseSsl()) {</b>
+<b class="nc">&nbsp;            String keystorepath = ldapServer.getKeystore();</b>
+<b class="nc">&nbsp;            String keystorepasswd = ldapServer.getKeystorePassword();</b>
+&nbsp;
+&nbsp;            // add all necessary certificates first
+<b class="nc">&nbsp;            loadCertificates(keystorepath, keystorepasswd, ldapServer);</b>
+&nbsp;
+&nbsp;            // set properties, so that the current keystore is used for SSL
+<b class="nc">&nbsp;            System.setProperty(&quot;javax.net.ssl.keyStore&quot;, keystorepath);</b>
+<b class="nc">&nbsp;            System.setProperty(&quot;javax.net.ssl.trustStore&quot;, keystorepath);</b>
+<b class="nc">&nbsp;            System.setProperty(&quot;javax.net.ssl.keyStorePassword&quot;, keystorepasswd);</b>
+<b class="nc">&nbsp;            env.put(Context.SECURITY_PROTOCOL, &quot;ssl&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return env;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * create new user in LDAP-directory.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            User object
+&nbsp;     * @param password
+&nbsp;     *            String
+&nbsp;     */
+&nbsp;    public void createNewUser(User user, String password)
+&nbsp;            throws NamingException, NoSuchAlgorithmException, IOException {
+&nbsp;
+<b class="nc">&nbsp;        if (Objects.isNull(user.getLdapGroup())) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(Helper.getTranslation(&quot;noLdapGroupAssignedToUser&quot;));</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (Objects.isNull(user.getLdapGroup().getLdapServer())) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(Helper.getTranslation(&quot;noLdapServerAssignedToLdapGroup&quot;));</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (!user.getLdapGroup().getLdapServer().isReadOnly()) {</b>
+<b class="nc">&nbsp;            Hashtable&lt;String, String&gt; ldapEnvironment = initializeWithLdapConnectionSettings(</b>
+<b class="nc">&nbsp;                user.getLdapGroup().getLdapServer());</b>
+&nbsp;
+<b class="nc">&nbsp;            LdapUser ldapUser = new LdapUser();</b>
+<b class="nc">&nbsp;            ldapUser.configure(user, password, getNextUidNumber(user.getLdapGroup().getLdapServer()));</b>
+<b class="nc">&nbsp;            DirContext ctx = new InitialDirContext(ldapEnvironment);</b>
+<b class="nc">&nbsp;            ctx.bind(buildUserDN(user), ldapUser);</b>
+<b class="nc">&nbsp;            ctx.close();</b>
+<b class="nc">&nbsp;            setNextUidNumber(user.getLdapGroup().getLdapServer());</b>
+<b class="nc">&nbsp;            Helper.setMessage(</b>
+<b class="nc">&nbsp;                Helper.getTranslation(&quot;ldapWritten&quot;) + &quot; &quot; + ServiceManager.getUserService().getFullName(user));</b>
+&nbsp;            /*
+&nbsp;             * check if HomeDir exists, else create it
+&nbsp;             */
+<b class="nc">&nbsp;            logger.debug(&quot;HomeVerzeichnis pruefen&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            URI homePath = getUserHomeDirectory(user);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (!new File(homePath).exists()) {</b>
+<b class="nc">&nbsp;                logger.debug(&quot;HomeVerzeichnis existiert noch nicht&quot;);</b>
+<b class="nc">&nbsp;                ServiceManager.getFileService().createDirectoryForUser(homePath, user.getLogin());</b>
+<b class="nc">&nbsp;                logger.debug(&quot;HomeVerzeichnis angelegt&quot;);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                logger.debug(&quot;HomeVerzeichnis existiert schon&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } else {</b>
+<b class="nc">&nbsp;            Helper.setMessage(&quot;ldapIsReadOnly&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if connection with login and password possible.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            User object
+&nbsp;     * @param password
+&nbsp;     *            String
+&nbsp;     * @return Login correct or not
+&nbsp;     */
+&nbsp;    public boolean isUserPasswordCorrect(User user, String password) {
+<b class="nc">&nbsp;        logger.debug(&quot;start login session with ldap&quot;);</b>
+<b class="nc">&nbsp;        Hashtable&lt;String, String&gt; env = initializeWithLdapConnectionSettings(user.getLdapGroup().getLdapServer());</b>
+&nbsp;
+&nbsp;        // Start TLS
+<b class="nc">&nbsp;        if (ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.LDAP_USE_TLS)) {</b>
+<b class="nc">&nbsp;            logger.debug(&quot;use TLS for auth&quot;);</b>
+<b class="nc">&nbsp;            return isPasswordCorrectForAuthWithTLS(env, user, password);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            logger.debug(&quot;don&#39;t use TLS for auth&quot;);</b>
+<b class="nc">&nbsp;            return isPasswordCorrectForAuthWithoutTLS(env, user, password);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieve home directory of given user.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            User object
+&nbsp;     * @return path as URI
+&nbsp;     */
+&nbsp;    public URI getUserHomeDirectory(User user) {
+<b class="fc">&nbsp;        String userFolderBasePath = ConfigCore.getParameter(ParameterCore.DIR_USERS);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.LDAP_USE_LOCAL_DIRECTORY)) {</b>
+<b class="fc">&nbsp;            return Paths.get(userFolderBasePath, user.getLogin()).toUri();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Hashtable&lt;String, String&gt; env = initializeWithLdapConnectionSettings(user.getLdapGroup().getLdapServer());</b>
+<b class="nc">&nbsp;        if (ConfigCore.getBooleanParameterOrDefaultValue(ParameterCore.LDAP_USE_TLS)) {</b>
+<b class="nc">&nbsp;            return getUserHomeDirectoryWithTLS(env, userFolderBasePath, user);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (ConfigCore.getBooleanParameter(ParameterCore.LDAP_USE_SIMPLE_AUTH, false)) {</b>
+<b class="nc">&nbsp;            env.put(Context.SECURITY_AUTHENTICATION, &quot;none&quot;);</b>
+&nbsp;        }
+&nbsp;        DirContext ctx;
+<b class="nc">&nbsp;        URI userFolderPath = null;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            ctx = new InitialDirContext(env);</b>
+<b class="nc">&nbsp;            Attributes attrs = ctx.getAttributes(buildUserDN(user));</b>
+<b class="nc">&nbsp;            Attribute ldapAttribute = attrs.get(&quot;homeDirectory&quot;);</b>
+<b class="nc">&nbsp;            userFolderPath = URI.create((String) ldapAttribute.get(0));</b>
+<b class="nc">&nbsp;            ctx.close();</b>
+<b class="nc">&nbsp;        } catch (NamingException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        if (Objects.nonNull(userFolderPath) &amp;&amp; !userFolderPath.isAbsolute()) {</b>
+<b class="nc">&nbsp;            if (userFolderPath.getPath().startsWith(&quot;/&quot;)) {</b>
+<b class="nc">&nbsp;                userFolderPath = ServiceManager.getFileService().deleteFirstSlashFromPath(userFolderPath);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return Paths.get(userFolderBasePath, userFolderPath.getRawPath()).toUri();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return userFolderPath;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if User already exists on system.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            The User.
+&nbsp;     * @return whether the user already exists
+&nbsp;     */
+&nbsp;    public boolean isUserAlreadyExists(User user) {
+<b class="nc">&nbsp;        Hashtable&lt;String, String&gt; ldapEnvironment = initializeWithLdapConnectionSettings(</b>
+<b class="nc">&nbsp;            user.getLdapGroup().getLdapServer());</b>
+&nbsp;        DirContext ctx;
+<b class="nc">&nbsp;        boolean userAlreadyExisting = false;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            ctx = new InitialDirContext(ldapEnvironment);</b>
+<b class="nc">&nbsp;            Attributes matchAttrs = new BasicAttributes(true);</b>
+<b class="nc">&nbsp;            NamingEnumeration&lt;SearchResult&gt; answer = ctx.search(buildUserDN(user), matchAttrs);</b>
+<b class="nc">&nbsp;            userAlreadyExisting = answer.hasMoreElements();</b>
+&nbsp;
+<b class="nc">&nbsp;            while (answer.hasMore()) {</b>
+<b class="nc">&nbsp;                SearchResult sr = answer.next();</b>
+<b class="nc">&nbsp;                logger.debug(&quot;&gt;&gt;&gt;{}&quot;, sr.getName());</b>
+<b class="nc">&nbsp;                Attributes attrs = sr.getAttributes();</b>
+<b class="nc">&nbsp;                String givenName = getStringForAttribute(attrs, &quot;givenName&quot;);</b>
+<b class="nc">&nbsp;                String surName = getStringForAttribute(attrs, &quot;sn&quot;);</b>
+<b class="nc">&nbsp;                String mail = getStringForAttribute(attrs, &quot;mail&quot;);</b>
+<b class="nc">&nbsp;                String cn = getStringForAttribute(attrs, &quot;cn&quot;);</b>
+<b class="nc">&nbsp;                String homeDirectory = getStringForAttribute(attrs, &quot;homeDirectory&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;                logger.debug(givenName);</b>
+<b class="nc">&nbsp;                logger.debug(surName);</b>
+<b class="nc">&nbsp;                logger.debug(mail);</b>
+<b class="nc">&nbsp;                logger.debug(cn);</b>
+<b class="nc">&nbsp;                logger.debug(homeDirectory);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            ctx.close();</b>
+<b class="nc">&nbsp;        } catch (NamingException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return userAlreadyExisting;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String getStringForAttribute(Attributes attrs, String identifier) {
+&nbsp;        try {
+<b class="nc">&nbsp;            return attrs.get(identifier).toString();</b>
+<b class="nc">&nbsp;        } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;            return &quot; &quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get next free uidNumber.
+&nbsp;     *
+&nbsp;     * @return next free uidNumber
+&nbsp;     */
+&nbsp;    private String getNextUidNumber(LdapServer ldapServer) {
+<b class="nc">&nbsp;        Hashtable&lt;String, String&gt; ldapEnvironment = initializeWithLdapConnectionSettings(ldapServer);</b>
+&nbsp;        DirContext ctx;
+<b class="nc">&nbsp;        String rueckgabe = &quot;&quot;;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            ctx = new InitialDirContext(ldapEnvironment);</b>
+<b class="nc">&nbsp;            Attributes attrs = ctx.getAttributes(ldapServer.getNextFreeUnixIdPattern());</b>
+<b class="nc">&nbsp;            Attribute la = attrs.get(&quot;uidNumber&quot;);</b>
+<b class="nc">&nbsp;            rueckgabe = (String) la.get(0);</b>
+<b class="nc">&nbsp;            ctx.close();</b>
+<b class="nc">&nbsp;        } catch (NamingException e) {</b>
+<b class="nc">&nbsp;            Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return rueckgabe;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Set next free uidNumber.
+&nbsp;     */
+&nbsp;    private void setNextUidNumber(LdapServer ldapServer) {
+<b class="nc">&nbsp;        Hashtable&lt;String, String&gt; ldapEnvironment = initializeWithLdapConnectionSettings(ldapServer);</b>
+&nbsp;        DirContext ctx;
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            ctx = new InitialDirContext(ldapEnvironment);</b>
+<b class="nc">&nbsp;            Attributes attrs = ctx.getAttributes(ldapServer.getNextFreeUnixIdPattern());</b>
+<b class="nc">&nbsp;            Attribute la = attrs.get(&quot;uidNumber&quot;);</b>
+<b class="nc">&nbsp;            String oldValue = (String) la.get(0);</b>
+<b class="nc">&nbsp;            int bla = Integer.parseInt(oldValue) + 1;</b>
+&nbsp;
+<b class="nc">&nbsp;            BasicAttribute attrNeu = new BasicAttribute(&quot;uidNumber&quot;, String.valueOf(bla));</b>
+<b class="nc">&nbsp;            ModificationItem[] mods = new ModificationItem[1];</b>
+<b class="nc">&nbsp;            mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, attrNeu);</b>
+<b class="nc">&nbsp;            ctx.modifyAttributes(ldapServer.getNextFreeUnixIdPattern(), mods);</b>
+&nbsp;
+<b class="nc">&nbsp;            ctx.close();</b>
+<b class="nc">&nbsp;        } catch (NamingException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * change password of given user, needs old password for authentication.
+&nbsp;     *
+&nbsp;     * @param user
+&nbsp;     *            User object
+&nbsp;     * @param inNewPassword
+&nbsp;     *            String
+&nbsp;     * @return boolean about result of change
+&nbsp;     */
+&nbsp;    public boolean changeUserPassword(User user, String inNewPassword) throws NoSuchAlgorithmException {
+<b class="nc">&nbsp;        MD4Digest digester = new MD4Digest();</b>
+<b class="nc">&nbsp;        PasswordEncryption passwordEncryption = user.getLdapGroup().getLdapServer().getPasswordEncryption();</b>
+<b class="nc">&nbsp;        Hashtable&lt;String, String&gt; env = initializeWithLdapConnectionSettings(user.getLdapGroup().getLdapServer());</b>
+<b class="nc">&nbsp;        if (!user.getLdapGroup().getLdapServer().isReadOnly()) {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                ModificationItem[] mods = new ModificationItem[4];</b>
+&nbsp;
+&nbsp;                // encryption of password and Base64-Encoding
+<b class="nc">&nbsp;                MessageDigest md = MessageDigest.getInstance(passwordEncryption.getTitle());</b>
+<b class="nc">&nbsp;                md.update(inNewPassword.getBytes(StandardCharsets.UTF_8));</b>
+<b class="nc">&nbsp;                String encryptedPassword = new String(Base64.encodeBase64(md.digest()), StandardCharsets.UTF_8);</b>
+&nbsp;
+&nbsp;                // change attribute userPassword
+<b class="nc">&nbsp;                BasicAttribute userPassword = new BasicAttribute(&quot;userPassword&quot;,</b>
+&nbsp;                        &quot;{&quot; + passwordEncryption + &quot;}&quot; + encryptedPassword);
+<b class="nc">&nbsp;                mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, userPassword);</b>
+&nbsp;
+&nbsp;                // change attribute lanmgrPassword
+<b class="nc">&nbsp;                BasicAttribute lanmgrPassword = proceedPassword(&quot;sambaLMPassword&quot;, inNewPassword, null);</b>
+<b class="nc">&nbsp;                mods[1] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, lanmgrPassword);</b>
+&nbsp;
+&nbsp;                // change attribute ntlmPassword
+<b class="nc">&nbsp;                BasicAttribute ntlmPassword = proceedPassword(&quot;sambaNTPassword&quot;, inNewPassword, digester);</b>
+<b class="nc">&nbsp;                mods[2] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, ntlmPassword);</b>
+&nbsp;
+<b class="nc">&nbsp;                BasicAttribute sambaPwdLastSet = new BasicAttribute(&quot;sambaPwdLastSet&quot;,</b>
+<b class="nc">&nbsp;                        String.valueOf(System.currentTimeMillis() / 1000L));</b>
+<b class="nc">&nbsp;                mods[3] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, sambaPwdLastSet);</b>
+&nbsp;
+<b class="nc">&nbsp;                DirContext ctx = new InitialDirContext(env);</b>
+<b class="nc">&nbsp;                ctx.modifyAttributes(buildUserDN(user), mods);</b>
+&nbsp;
+&nbsp;                // Close the context when we&#39;re done
+<b class="nc">&nbsp;                ctx.close();</b>
+<b class="nc">&nbsp;                return true;</b>
+<b class="nc">&nbsp;            } catch (NamingException e) {</b>
+<b class="nc">&nbsp;                logger.debug(&quot;Benutzeranmeldung nicht korrekt oder Passwortänderung nicht möglich&quot;, e);</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private URI getUserHomeDirectoryWithTLS(Hashtable&lt;String, String&gt; env, String userFolderBasePath, User user) {
+<b class="nc">&nbsp;        env.put(&quot;java.naming.ldap.version&quot;, &quot;3&quot;);</b>
+<b class="nc">&nbsp;        LdapContext ctx = null;</b>
+<b class="nc">&nbsp;        StartTlsResponse tls = null;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            ctx = new InitialLdapContext(env, null);</b>
+&nbsp;
+&nbsp;            // Authentication must be performed over a secure channel
+<b class="nc">&nbsp;            tls = (StartTlsResponse) ctx.extendedOperation(new StartTlsRequest());</b>
+<b class="nc">&nbsp;            tls.negotiate();</b>
+&nbsp;
+<b class="nc">&nbsp;            ctx.reconnect(null);</b>
+&nbsp;
+<b class="nc">&nbsp;            Attributes attrs = ctx.getAttributes(buildUserDN(user));</b>
+<b class="nc">&nbsp;            Attribute la = attrs.get(&quot;homeDirectory&quot;);</b>
+<b class="nc">&nbsp;            return URI.create((String) la.get(0));</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;TLS negotiation error:&quot;, e);</b>
+<b class="nc">&nbsp;            return Paths.get(userFolderBasePath, user.getLogin()).toUri();</b>
+<b class="nc">&nbsp;        } catch (NamingException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;JNDI error:&quot;, e);</b>
+<b class="nc">&nbsp;            return Paths.get(userFolderBasePath, user.getLogin()).toUri();</b>
+&nbsp;        } finally {
+<b class="nc">&nbsp;            closeConnections(ctx, tls);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isPasswordCorrectForAuthWithTLS(Hashtable&lt;String, String&gt; env, User user, String password) {
+<b class="nc">&nbsp;        env.put(&quot;java.naming.ldap.version&quot;, &quot;3&quot;);</b>
+<b class="nc">&nbsp;        LdapContext ctx = null;</b>
+<b class="nc">&nbsp;        StartTlsResponse tls = null;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            ctx = new InitialLdapContext(env, null);</b>
+&nbsp;
+&nbsp;            // Authentication must be performed over a secure channel
+<b class="nc">&nbsp;            tls = (StartTlsResponse) ctx.extendedOperation(new StartTlsRequest());</b>
+<b class="nc">&nbsp;            tls.negotiate();</b>
+&nbsp;
+&nbsp;            // Authenticate via SASL EXTERNAL mechanism using client X.509
+&nbsp;            // certificate contained in JVM keystore
+<b class="nc">&nbsp;            ctx.addToEnvironment(Context.SECURITY_AUTHENTICATION, &quot;simple&quot;);</b>
+<b class="nc">&nbsp;            ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, buildUserDN(user));</b>
+<b class="nc">&nbsp;            ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, password);</b>
+<b class="nc">&nbsp;            ctx.reconnect(null);</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;            // perform search for privileged attributes under authenticated context
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;TLS negotiation error:&quot;, e);</b>
+<b class="nc">&nbsp;            return false;</b>
+<b class="nc">&nbsp;        } catch (NamingException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;JNDI error:&quot;, e);</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        } finally {
+<b class="nc">&nbsp;            closeConnections(ctx, tls);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isPasswordCorrectForAuthWithoutTLS(Hashtable&lt;String, String&gt; env, User user, String password) {
+<b class="nc">&nbsp;        if (ConfigCore.getBooleanParameter(ParameterCore.LDAP_USE_SIMPLE_AUTH, false)) {</b>
+<b class="nc">&nbsp;            env.put(Context.SECURITY_AUTHENTICATION, &quot;none&quot;);</b>
+&nbsp;            // TODO: test for password
+&nbsp;        } else {
+<b class="nc">&nbsp;            env.put(Context.SECURITY_PRINCIPAL, buildUserDN(user));</b>
+<b class="nc">&nbsp;            env.put(Context.SECURITY_CREDENTIALS, password);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        logger.debug(&quot;ldap environment set&quot;);</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            logger.debug(&quot;start classic ldap authentication&quot;);</b>
+<b class="nc">&nbsp;            logger.debug(&quot;user DN is {}&quot;, buildUserDN(user));</b>
+&nbsp;
+<b class="nc">&nbsp;            if (Objects.isNull(ConfigCore.getParameter(ParameterCore.LDAP_ATTRIBUTE_TO_TEST))) {</b>
+<b class="nc">&nbsp;                logger.debug(&quot;ldap attribute to test is null&quot;);</b>
+<b class="nc">&nbsp;                DirContext ctx = new InitialDirContext(env);</b>
+<b class="nc">&nbsp;                ctx.close();</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                logger.debug(&quot;ldap attribute to test is not null&quot;);</b>
+<b class="nc">&nbsp;                DirContext ctx = new InitialDirContext(env);</b>
+&nbsp;
+<b class="nc">&nbsp;                Attributes attrs = ctx.getAttributes(buildUserDN(user));</b>
+<b class="nc">&nbsp;                Attribute la = attrs.get(ConfigCore.getParameter(ParameterCore.LDAP_ATTRIBUTE_TO_TEST));</b>
+<b class="nc">&nbsp;                logger.debug(&quot;ldap attributes set&quot;);</b>
+<b class="nc">&nbsp;                String test = (String) la.get(0);</b>
+<b class="nc">&nbsp;                if (test.equals(ConfigCore.getParameter(ParameterCore.LDAP_VALUE_OF_ATTRIBUTE))) {</b>
+<b class="nc">&nbsp;                    logger.debug(&quot;ldap ok&quot;);</b>
+<b class="nc">&nbsp;                    ctx.close();</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    logger.debug(&quot;ldap not ok&quot;);</b>
+<b class="nc">&nbsp;                    ctx.close();</b>
+<b class="nc">&nbsp;                    return false;</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (NamingException e) {</b>
+<b class="nc">&nbsp;            logger.debug(&quot;login not allowed for {}. Exception: {}&quot;, user.getLogin(), e);</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void closeConnections(LdapContext ctx, StartTlsResponse tls) {
+<b class="nc">&nbsp;        if (Objects.nonNull(tls)) {</b>
+&nbsp;            try {
+&nbsp;                // Tear down TLS connection
+<b class="nc">&nbsp;                tls.close();</b>
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (Objects.nonNull(ctx)) {</b>
+&nbsp;            try {
+&nbsp;                // Close LDAP connection
+<b class="nc">&nbsp;                ctx.close();</b>
+<b class="nc">&nbsp;            } catch (NamingException e) {</b>
+<b class="nc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private BasicAttribute proceedPassword(String identifier, String newPassword, MD4Digest digester) {
+&nbsp;        try {
+&nbsp;            byte[] hash;
+<b class="nc">&nbsp;            if (Objects.isNull(digester)) {</b>
+<b class="nc">&nbsp;                hash = LdapUser.lmHash(newPassword);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                byte[] unicodePassword = newPassword.getBytes(StandardCharsets.UTF_16LE);</b>
+<b class="nc">&nbsp;                hash = new byte[digester.getDigestSize()];</b>
+<b class="nc">&nbsp;                digester.update(unicodePassword, 0, unicodePassword.length);</b>
+<b class="nc">&nbsp;                digester.doFinal(hash, 0);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return new BasicAttribute(identifier, LdapUser.toHexString(hash));</b>
+&nbsp;            // TODO: Don&#39;t catch super class exception, make sure that
+&nbsp;            // the password isn&#39;t logged here
+<b class="nc">&nbsp;        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException</b>
+&nbsp;                | BadPaddingException | RuntimeException e) {
+<b class="nc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // TODO test if this methods works
+&nbsp;    private void loadCertificates(String path, String passwd, LdapServer ldapServer) {
+&nbsp;        /* wenn die Zertifikate noch nicht im Keystore sind, jetzt einlesen */
+<b class="nc">&nbsp;        File myPfad = new File(path);</b>
+<b class="nc">&nbsp;        if (!myPfad.exists()) {</b>
+<b class="nc">&nbsp;            try (FileOutputStream ksos = (FileOutputStream) ServiceManager.getFileService().write(myPfad.toURI());</b>
+&nbsp;                    // TODO: Rename parameters to something more meaningful,
+&nbsp;                    // this is quite specific for the GDZ
+<b class="nc">&nbsp;                    FileInputStream cacertFile = new FileInputStream(ldapServer.getRootCertificate());</b>
+<b class="nc">&nbsp;                    FileInputStream certFile2 = new FileInputStream(ldapServer.getPdcCertificate())) {</b>
+&nbsp;
+<b class="nc">&nbsp;                CertificateFactory cf = CertificateFactory.getInstance(&quot;X.509&quot;);</b>
+<b class="nc">&nbsp;                X509Certificate cacert = (X509Certificate) cf.generateCertificate(cacertFile);</b>
+<b class="nc">&nbsp;                X509Certificate servercert = (X509Certificate) cf.generateCertificate(certFile2);</b>
+&nbsp;
+<b class="nc">&nbsp;                KeyStore ks = KeyStore.getInstance(&quot;jks&quot;);</b>
+<b class="nc">&nbsp;                char[] password = passwd.toCharArray();</b>
+&nbsp;
+&nbsp;                // TODO: Let this method really load a keystore if configured
+&nbsp;                // initialize the keystore, if file is available, load the
+&nbsp;                // keystore
+<b class="nc">&nbsp;                ks.load(null);</b>
+&nbsp;
+<b class="nc">&nbsp;                ks.setCertificateEntry(&quot;ROOTCERT&quot;, cacert);</b>
+<b class="nc">&nbsp;                ks.setCertificateEntry(&quot;PDC&quot;, servercert);</b>
+<b class="nc">&nbsp;                ks.store(ksos, password);</b>
+<b class="nc">&nbsp;            } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException</b>
+&nbsp;                    | RuntimeException e) {
+<b class="nc">&nbsp;                logger.error(e.getMessage(), e);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

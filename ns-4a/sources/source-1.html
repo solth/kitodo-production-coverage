@@ -1,0 +1,673 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > EmptyTask</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.production.helper.tasks</a>
+</div>
+
+<h1>Coverage Summary for Class: EmptyTask (org.kitodo.production.helper.tasks)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EmptyTask</td>
+<td class="coverageStat">
+  <span class="percent">
+    64%
+  </span>
+  <span class="absValue">
+    (16/25)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,5%
+  </span>
+  <span class="absValue">
+    (45/106)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">EmptyTask$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EmptyTask$Behaviour</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (18/27)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45,5%
+  </span>
+  <span class="absValue">
+    (51/112)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.production.helper.tasks;
+&nbsp;
+&nbsp;import java.time.Duration;
+&nbsp;import java.time.temporal.ChronoUnit;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.concurrent.ExecutionException;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.exception.ExceptionUtils;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.Logger;
+&nbsp;import org.kitodo.production.helper.Helper;
+&nbsp;
+&nbsp;/**
+&nbsp; * The class EmptyTask is the base class for worker threads that operate
+&nbsp; * independently to do the work in the background. The name empty task points
+&nbsp; * out that the task doesn’t do anything sensible yet. It is here to be
+&nbsp; * extended.
+&nbsp; */
+&nbsp;public class EmptyTask extends Thread {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LogManager.getLogger(EmptyTask.class);</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The enum Actions lists the available instructions to the housekeeper what
+&nbsp;     * to do with a terminated thread. These are:
+&nbsp;     *
+&nbsp;     * &lt;dl&gt;
+&nbsp;     * &lt;dt&gt;{@code DELETE_IMMEDIATELY}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The thread shall be disposed of as soon as is has gracefully stopped.
+&nbsp;     * &lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code KEEP_FOR_A_WHILE}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The default behavior: A thread that terminated either normally or
+&nbsp;     * abnormally is kept around in memory for a while and then removed
+&nbsp;     * automatically. Numeric and temporary limits can be configured.&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code PREPARE_FOR_RESTART}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;If the thread was interrupted by a user, replace it by a new one,
+&nbsp;     * passing in the state of the old one to be able to continue work.&lt;/dd&gt;
+&nbsp;     * &lt;/dl&gt;
+&nbsp;     */
+<b class="fc">&nbsp;    public enum Behaviour {</b>
+<b class="fc">&nbsp;        DELETE_IMMEDIATELY,</b>
+<b class="fc">&nbsp;        KEEP_FOR_A_WHILE,</b>
+<b class="fc">&nbsp;        PREPARE_FOR_RESTART</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The constant CATCH_ALL holds an UncaughtExceptionHandler implementation
+&nbsp;     * which will automatically be attached to all task threads. Otherwise
+&nbsp;     * exceptions might get lost or even bring the runtime to crash.
+&nbsp;     */
+<b class="fc">&nbsp;    public static final Thread.UncaughtExceptionHandler CATCH_ALL = (origin, exception) -&gt; {</b>
+<b class="nc">&nbsp;        if (origin instanceof EmptyTask) {</b>
+<b class="nc">&nbsp;            EmptyTask task = (EmptyTask) origin;</b>
+<b class="nc">&nbsp;            task.setException(exception);</b>
+&nbsp;        }
+&nbsp;    };
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The constant DEFAULT_BEHAVIOUR defines the default behavior of the
+&nbsp;     * TaskKeeper towards a task that terminated. The default behavior is that
+&nbsp;     * it will be kept in the front end as configured in the global
+&nbsp;     * configuration file and then will be deleted.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Behaviour DEFAULT_BEHAVIOUR = Behaviour.KEEP_FOR_A_WHILE;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field behavior defines the behavior of the TaskKeeper towards the
+&nbsp;     * task if it has terminated. Setting this field to DELETE_IMMEDIATELY will
+&nbsp;     * also result in the desired behavior if the task has not yet been started
+&nbsp;     * at all.
+&nbsp;     */
+&nbsp;    private Behaviour behaviour;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field detail holds a string giving some details about what the thread
+&nbsp;     * is doing that do not require translation, i.e. which file is currently
+&nbsp;     * processed.
+&nbsp;     */
+<b class="fc">&nbsp;    private String detail = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field exception is designated to take an exception if one occurred.
+&nbsp;     */
+<b class="fc">&nbsp;    private Exception exception = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field passedAway will be initialised with a time stamp as the thread
+&nbsp;     * dies to be able to remove it a defined timespan after it died.
+&nbsp;     */
+<b class="fc">&nbsp;    private Long passedAway = null;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The field progress holds one out of 101 values, ranging from 0 to 100 to
+&nbsp;     * indicate the progress of the work. This will be shown as a progress bar
+&nbsp;     * in the front end.
+&nbsp;     */
+<b class="fc">&nbsp;    private int progress = 0;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Default constructor. Creates an empty thread.
+&nbsp;     *
+&nbsp;     * @param nameDetail
+&nbsp;     *            a detail that is helpful when being shown, may be null
+&nbsp;     */
+<b class="fc">&nbsp;    public EmptyTask(String nameDetail) {</b>
+<b class="fc">&nbsp;        setDaemon(true);</b>
+<b class="fc">&nbsp;        setNameDetail(nameDetail);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copy constructor. Required for cloning tasks. Cloning is required to be
+&nbsp;     * able to restart a task.
+&nbsp;     *
+&nbsp;     * @param master
+&nbsp;     *            instance to make a copy from
+&nbsp;     */
+<b class="nc">&nbsp;    protected EmptyTask(EmptyTask master) {</b>
+<b class="nc">&nbsp;        setDaemon(true);</b>
+<b class="nc">&nbsp;        setName(master.getName());</b>
+<b class="nc">&nbsp;        this.behaviour = master.behaviour;</b>
+<b class="nc">&nbsp;        this.detail = master.detail;</b>
+<b class="nc">&nbsp;        this.exception = master.exception;</b>
+<b class="nc">&nbsp;        this.passedAway = master.passedAway;</b>
+<b class="nc">&nbsp;        this.progress = master.progress;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calls the copy constructor to create a not-yet-executed replacement copy
+&nbsp;     * of that thread object. Every subclass must provide its own copy
+&nbsp;     * constructor—which must call super(objectToCopy)—and overload this method
+&nbsp;     * to call its own copy constructor.
+&nbsp;     *
+&nbsp;     * @return a not-yet-executed replacement of this thread
+&nbsp;     */
+&nbsp;    public EmptyTask replace() {
+<b class="nc">&nbsp;        return new EmptyTask(this);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the instruction how the TaskSitter
+&nbsp;     * shall behave towards this task. Usually, the behavior isn’t set while
+&nbsp;     * the task is under normal execution. It can be set by calling
+&nbsp;     * {@link #interrupt(Behaviour)}. It may also be set this way if the task is
+&nbsp;     * still new and wasn’t even started. The following instructions are
+&nbsp;     * available:
+&nbsp;     *
+&nbsp;     * &lt;dl&gt;
+&nbsp;     * &lt;dt&gt;{@code DELETE_IMMEDIATELY}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The thread shall be disposed of as soon as is has gracefully stopped.
+&nbsp;     * &lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code KEEP_FOR_A_WHILE}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The default behavior: A thread that terminated either normally or
+&nbsp;     * abnormally is kept around in memory for a while and then removed
+&nbsp;     * automatically. Numeric and temporary limits can be configured.&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code PREPARE_FOR_RESTART}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;If the thread was interrupted by a user, replace it by a new one,
+&nbsp;     * passing in the state of the old one to be able to continue work.&lt;/dd&gt;
+&nbsp;     * &lt;/dl&gt;
+&nbsp;     *
+&nbsp;     * @return how the TaskSitter shall behave towards this task
+&nbsp;     */
+&nbsp;    Behaviour getBehaviour() {
+<b class="fc">&nbsp;        return behaviour;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the display name of the task to show to the user.
+&nbsp;     */
+&nbsp;    public String getDisplayName() {
+<b class="fc">&nbsp;        StringBuilder title = new StringBuilder(getClass().getSimpleName());</b>
+<b class="fc">&nbsp;        title.setCharAt(0, (char) (title.charAt(0) | 32));</b>
+<b class="fc">&nbsp;        return Helper.getTranslation(title.toString());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the duration the task is dead. If
+&nbsp;     * a time of death has not yet been recorded, null is returned.
+&nbsp;     *
+&nbsp;     * @return the duration since the task died
+&nbsp;     */
+&nbsp;    Duration getDurationDead() {
+<b class="fc">&nbsp;        if (Objects.isNull(passedAway)) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        long elapsed = System.nanoTime() - passedAway;</b>
+<b class="fc">&nbsp;        return Duration.of(elapsed, ChronoUnit.NANOS);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Provides access to the exception that
+&nbsp;     * occurred if the thread died abnormally. If no exception has occurred yet
+&nbsp;     * or it wasn’t properly recorded, null is returned.
+&nbsp;     *
+&nbsp;     * @return the exception occurred, or null if no exception occurred yet
+&nbsp;     */
+&nbsp;    public Exception getException() {
+<b class="fc">&nbsp;        return exception;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the progress of the task in percent,
+&nbsp;     * i.e. in a range from 0 to 100.
+&nbsp;     *
+&nbsp;     * @return the progress of the task
+&nbsp;     */
+&nbsp;    public int getProgress() {
+<b class="fc">&nbsp;        return progress;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a text string representing the
+&nbsp;     * state of the current task as read-only property &quot;stateDescription&quot;.
+&nbsp;     *
+&nbsp;     * @return a string representing the state of the task
+&nbsp;     */
+&nbsp;    public String getStateDescription() {
+<b class="nc">&nbsp;        TaskState state = getTaskState();</b>
+<b class="nc">&nbsp;        String label = Helper.getTranslation(state.toString().toLowerCase());</b>
+<b class="pc">&nbsp;        switch (state) {</b>
+&nbsp;            case WORKING:
+<b class="nc">&nbsp;                if (Objects.nonNull(detail)) {</b>
+<b class="nc">&nbsp;                    return label + &quot; (&quot; + detail + &quot;)&quot;;</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    return label;</b>
+&nbsp;                }
+&nbsp;            case CRASHED:
+<b class="nc">&nbsp;                Throwable rootCause = exception;</b>
+<b class="nc">&nbsp;                while (Objects.nonNull(rootCause.getCause())) {</b>
+<b class="nc">&nbsp;                    rootCause = rootCause.getCause();</b>
+&nbsp;                }
+<b class="nc">&nbsp;                StringBuilder stateDescription = new StringBuilder(255);</b>
+<b class="nc">&nbsp;                stateDescription.append(label);</b>
+<b class="nc">&nbsp;                stateDescription.append(&quot; (&quot;);</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(detail)) {</b>
+<b class="nc">&nbsp;                    stateDescription.append(detail);</b>
+<b class="nc">&nbsp;                    stateDescription.append(&quot;: &quot;);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                stateDescription.append(rootCause.getClass().getSimpleName());</b>
+<b class="nc">&nbsp;                if (Objects.nonNull(rootCause.getLocalizedMessage())) {</b>
+<b class="nc">&nbsp;                    stateDescription.append(&quot;: &quot;);</b>
+<b class="nc">&nbsp;                    stateDescription.append(rootCause.getLocalizedMessage());</b>
+&nbsp;                }
+<b class="nc">&nbsp;                stateDescription.append(&#39;)&#39;);</b>
+<b class="nc">&nbsp;                return stateDescription.toString();</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                return label;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the task state. It can be one of
+&nbsp;     * the following:
+&nbsp;     *
+&nbsp;     * &lt;dl&gt;
+&nbsp;     * &lt;dt&gt;{@code CRASHED}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The thread has terminated abnormally. The field “exception” is
+&nbsp;     * holding the exception that has occurred.&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code FINISHED}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The thread has finished its work without errors and is available for
+&nbsp;     * clean-up.&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code NEW}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The thread has not yet been started.&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code STOPPED}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The thread was stopped by a front end user—resulting in a call to its
+&nbsp;     * {@link #interrupt(Behaviour)} method with {@link Behaviour}
+&nbsp;     * .PREPARE_FOR_RESTART— and is able to restart after cloning and replacing
+&nbsp;     * it.&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code STOPPING}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The thread has received a request to interrupt but did not stop
+&nbsp;     * yet.&lt;/dd&gt;
+&nbsp;     * &lt;dt&gt;{@code WORKING}&lt;/dt&gt;
+&nbsp;     * &lt;dd&gt;The thread is in operation.&lt;/dd&gt;
+&nbsp;     * &lt;/dl&gt;
+&nbsp;     *
+&nbsp;     * @return the task state
+&nbsp;     */
+&nbsp;    public TaskState getTaskState() {
+<b class="fc">&nbsp;        switch (getState()) {</b>
+&nbsp;            case NEW:
+<b class="fc">&nbsp;                return TaskState.NEW;</b>
+&nbsp;            case TERMINATED:
+<b class="fc">&nbsp;                if (Objects.isNull(behaviour)) {</b>
+<b class="fc">&nbsp;                    behaviour = DEFAULT_BEHAVIOUR;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                if (Objects.nonNull(exception)) {</b>
+<b class="nc">&nbsp;                    return TaskState.CRASHED;</b>
+&nbsp;                }
+<b class="fc">&nbsp;                if (Behaviour.PREPARE_FOR_RESTART.equals(behaviour)) {</b>
+<b class="nc">&nbsp;                    return TaskState.STOPPED;</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    return TaskState.FINISHED;</b>
+&nbsp;                }
+&nbsp;            default:
+<b class="fc">&nbsp;                if (isInterrupted()) {</b>
+<b class="nc">&nbsp;                    return TaskState.STOPPING;</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    return TaskState.WORKING;</b>
+&nbsp;                }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the read-only field &quot;longMessage&quot;
+&nbsp;     * which will be shown in a pop-up window.
+&nbsp;     *
+&nbsp;     * @return the stack trace of the exception, if any
+&nbsp;     */
+&nbsp;    public String getLongMessage() {
+<b class="nc">&nbsp;        if (Objects.isNull(exception)) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return ExceptionUtils.getStackTrace(exception);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Interrupts this thread and allows to set a
+&nbsp;     * behavior after interruption.
+&nbsp;     *
+&nbsp;     * @param mode
+&nbsp;     *            how to behave after interruption
+&nbsp;     */
+&nbsp;    public void interrupt(Behaviour mode) {
+<b class="nc">&nbsp;        behaviour = mode;</b>
+<b class="nc">&nbsp;        interrupt();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns wether the start button shall be shown
+&nbsp;     * as read-only property &quot;startable&quot;. A thread can be started as long as it
+&nbsp;     * has not yet been started.
+&nbsp;     *
+&nbsp;     * @return whether the start button shall show
+&nbsp;     */
+&nbsp;    public boolean isStartable() {
+<b class="fc">&nbsp;        return getState().equals(State.NEW);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns wether the stop button shall be shown
+&nbsp;     * as read-only property &quot;stopable&quot;. A thread can be stopped if it is
+&nbsp;     * working.
+&nbsp;     *
+&nbsp;     * @return whether the stop button shall show
+&nbsp;     */
+&nbsp;    public boolean isStoppable() {
+<b class="fc">&nbsp;        return getTaskState().equals(TaskState.WORKING);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether the delete button shall be
+&nbsp;     * shown as read-only property &quot;deleteable&quot;. In our interpretation, a thread
+&nbsp;     * is deleteable if it is either new or has terminated and is still lounging
+&nbsp;     * around.
+&nbsp;     *
+&nbsp;     * @return whether the delete button shall show
+&nbsp;     */
+&nbsp;    public boolean isDeleteable() {
+<b class="nc">&nbsp;        switch (getState()) {</b>
+&nbsp;            case NEW:
+&nbsp;            case TERMINATED:
+<b class="nc">&nbsp;                return !Behaviour.DELETE_IMMEDIATELY.equals(behaviour);</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This is a sample implementation of run() which simulates a “long running
+&nbsp;     * task” but does nothing and just fills up the percentage gauge. It isn’t
+&nbsp;     * useful for anything but testing or demonstration purposes.
+&nbsp;     *
+&nbsp;     * @see java.lang.Thread#run()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void run() {
+<b class="nc">&nbsp;        for (int i = progress + 1; i &lt;= 100; i++) {</b>
+&nbsp;
+&nbsp;            // tell user some details what you are currently working on
+<b class="nc">&nbsp;            setWorkDetail(Integer.toString(i));</b>
+&nbsp;
+&nbsp;            // do something …
+&nbsp;            try {
+<b class="nc">&nbsp;                sleep(1024);</b>
+<b class="nc">&nbsp;            } catch (InterruptedException e) {</b>
+<b class="nc">&nbsp;                this.interrupt();</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+&nbsp;            // set progress
+<b class="nc">&nbsp;            setProgress(i);</b>
+&nbsp;
+&nbsp;            // The thread may have been signaled to stop. If so, leave
+<b class="nc">&nbsp;            if (isInterrupted()) {</b>
+&nbsp;                return;
+&nbsp;            }
+&nbsp;        }
+&nbsp;        // We’re done. There is nothing more to do.
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The procedure setException can be used to save an exception that occurred
+&nbsp;     * and show it in the front end. It will only record the first exception
+&nbsp;     * (which is likely to be the source of all the misery) and it will not
+&nbsp;     * record an InterruptedException if the thread has already been
+&nbsp;     * interrupted.
+&nbsp;     *
+&nbsp;     * @param exception
+&nbsp;     *            exception to save
+&nbsp;     */
+&nbsp;    public void setException(Throwable exception) {
+<b class="nc">&nbsp;        if (exception instanceof InterruptedException) {</b>
+<b class="nc">&nbsp;            Thread.currentThread().interrupt();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        logger.error(exception.getLocalizedMessage(), exception);</b>
+<b class="nc">&nbsp;        if (Objects.isNull(this.exception) &amp;&amp; (!isInterrupted() || !(exception instanceof InterruptedException))) {</b>
+<b class="nc">&nbsp;            if (exception instanceof Exception) {</b>
+<b class="nc">&nbsp;                this.exception = (Exception) exception;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                this.exception = new ExecutionException(exception.getMessage(), exception);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * May be used to set the task’s name along
+&nbsp;     * with a detail that doesn’t require translation and is helpful when being
+&nbsp;     * shown in the front end (such as the name of the entity the task is based
+&nbsp;     * on). The name detail should be set once (in the constructor). You may
+&nbsp;     * pass in null to reset the name and remove the detail.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * I.e., if your task is about creation of OCR for a process, the detail
+&nbsp;     * here could be the process title.
+&nbsp;     *
+&nbsp;     * @param detail
+&nbsp;     *            a name detail, may be null
+&nbsp;     */
+&nbsp;    protected void setNameDetail(String detail) {
+<b class="fc">&nbsp;        StringBuilder composer = new StringBuilder(119);</b>
+<b class="fc">&nbsp;        composer.append(this.getDisplayName());</b>
+<b class="fc">&nbsp;        if (Objects.nonNull(detail)) {</b>
+<b class="fc">&nbsp;            composer.append(&quot;: &quot;);</b>
+<b class="fc">&nbsp;            composer.append(detail);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        super.setName(composer.toString());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * May be used to set the task’s progress in
+&nbsp;     * percent (i.e., from 0 to 100).
+&nbsp;     *
+&nbsp;     * @param progress
+&nbsp;     *            the tasks progress
+&nbsp;     */
+&nbsp;    public void setProgress(int progress) {
+<b class="fc">&nbsp;        if (progress &lt; 0 || progress &gt; 100) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Progress out of range: &quot; + progress);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        this.progress = progress;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * May be used to set the task’s progress in
+&nbsp;     * percent (i.e., from 0 to 100).
+&nbsp;     *
+&nbsp;     * @param statusProgress
+&nbsp;     *            the tasks progress
+&nbsp;     */
+&nbsp;    public void setProgress(double statusProgress) {
+<b class="fc">&nbsp;        setProgress((int) Math.ceil(statusProgress));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the time of death of the task now.
+&nbsp;     */
+&nbsp;    void setTimeOfDeath() {
+<b class="fc">&nbsp;        passedAway = System.nanoTime();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * May be used to set some detail information
+&nbsp;     * that don’t require translation and are helpful when being shown in the
+&nbsp;     * front end (such as the name of the entity that is currently being
+&nbsp;     * processed by the task). The name detail should be set every time the
+&nbsp;     * progress is determined. You may pass in null to remove the detail.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * I.e., if your task is about creation of OCR for a process, the detail
+&nbsp;     * here could be the image file being processed right now.
+&nbsp;     *
+&nbsp;     * @param detail
+&nbsp;     *            a work detail, may be null
+&nbsp;     */
+&nbsp;    public void setWorkDetail(String detail) {
+<b class="fc">&nbsp;        this.detail = detail;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Causes this thread to begin execution; the Java Virtual Machine will
+&nbsp;     * create a standalone thread and call the run method of this class. The
+&nbsp;     * result is that two threads are running concurrently: the current thread
+&nbsp;     * which returns from the call to the start method, and the other thread
+&nbsp;     * which executes its run method. In addition, this method override ensures
+&nbsp;     * that the thread is properly registered in the task manager and that its
+&nbsp;     * uncaught exception handler has been properly set.
+&nbsp;     *
+&nbsp;     * @see java.lang.Thread#start()
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void start() {
+<b class="fc">&nbsp;        TaskManager.addTaskIfMissing(this);</b>
+<b class="fc">&nbsp;        setUncaughtExceptionHandler(CATCH_ALL);</b>
+<b class="fc">&nbsp;        super.start();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,218 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ExportDocket</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.docket</a>
+</div>
+
+<h1>Coverage Summary for Class: ExportDocket (org.kitodo.docket)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ExportDocket</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (24/28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.docket;
+&nbsp;
+&nbsp;import java.io.ByteArrayInputStream;
+&nbsp;import java.io.ByteArrayOutputStream;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;
+&nbsp;import javax.xml.transform.Result;
+&nbsp;import javax.xml.transform.Transformer;
+&nbsp;import javax.xml.transform.TransformerException;
+&nbsp;import javax.xml.transform.TransformerFactory;
+&nbsp;import javax.xml.transform.sax.SAXResult;
+&nbsp;import javax.xml.transform.stream.StreamSource;
+&nbsp;
+&nbsp;import org.apache.fop.apps.FOPException;
+&nbsp;import org.apache.fop.apps.Fop;
+&nbsp;import org.apache.fop.apps.FopFactory;
+&nbsp;import org.apache.fop.apps.FopFactoryBuilder;
+&nbsp;import org.apache.fop.apps.MimeConstants;
+&nbsp;import org.kitodo.api.docket.DocketData;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class provides generating a run note based on the generated xml log.
+&nbsp; *
+&nbsp; * @author Steffen Hankiewicz
+&nbsp; */
+&nbsp;public class ExportDocket {
+&nbsp;
+&nbsp;    File xsltFile;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Makes the class polymorphic.
+&nbsp;     * 
+&nbsp;     * @param xsltFile
+&nbsp;     *            XSLT file
+&nbsp;     */
+<b class="fc">&nbsp;    ExportDocket(File xsltFile) {</b>
+<b class="fc">&nbsp;        this.xsltFile = xsltFile;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method exports the production metadata as run note to a given
+&nbsp;     * stream. the docket.xsl has to be in the config-folder.
+&nbsp;     *
+&nbsp;     * @param docketData
+&nbsp;     *            the docketData to export
+&nbsp;     * @throws IOException
+&nbsp;     *             Throws IOException, when pdfGeneration fails
+&nbsp;     */
+&nbsp;    void startExport(DocketData docketData, OutputStream outputStream) throws IOException {
+<b class="fc">&nbsp;        ByteArrayOutputStream out = new ByteArrayOutputStream();</b>
+<b class="fc">&nbsp;        new ExportXmlLog(docketData).accept(out);</b>
+&nbsp;
+<b class="fc">&nbsp;        byte[] pdfBytes = generatePdfBytes(out);</b>
+&nbsp;
+<b class="fc">&nbsp;        outputStream.write(pdfBytes);</b>
+<b class="fc">&nbsp;        outputStream.flush();</b>
+<b class="fc">&nbsp;        outputStream.close();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method exports the production metadata as run note to a given
+&nbsp;     * stream. the docket.xsl has to be in the config-folder.
+&nbsp;     *
+&nbsp;     * @param docketDataList
+&nbsp;     *            the docketData to export for several processes
+&nbsp;     * @throws IOException
+&nbsp;     *             Throws IOException, when pdfGeneration fails.
+&nbsp;     */
+&nbsp;    void startExport(Iterable&lt;DocketData&gt; docketDataList, OutputStream os) throws IOException {
+<b class="fc">&nbsp;        ByteArrayOutputStream out = new ByteArrayOutputStream();</b>
+<b class="fc">&nbsp;        new ExportXmlLog(docketDataList).accept(out);</b>
+&nbsp;
+<b class="fc">&nbsp;        byte[] pdfBytes = generatePdfBytes(out);</b>
+&nbsp;
+<b class="fc">&nbsp;        os.write(pdfBytes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private byte[] generatePdfBytes(ByteArrayOutputStream out) throws IOException {
+&nbsp;        // generate pdf file
+<b class="fc">&nbsp;        StreamSource source = new StreamSource(new ByteArrayInputStream(out.toByteArray()));</b>
+<b class="fc">&nbsp;        StreamSource transformSource = new StreamSource(xsltFile);</b>
+<b class="fc">&nbsp;        FopFactoryBuilder builder = new FopFactoryBuilder(new File(&quot;.&quot;).toURI());</b>
+<b class="fc">&nbsp;        builder.setStrictFOValidation(false);</b>
+<b class="fc">&nbsp;        FopFactory fopFactory = builder.build();</b>
+<b class="fc">&nbsp;        ByteArrayOutputStream outStream = new ByteArrayOutputStream();</b>
+&nbsp;        // transform xml
+&nbsp;        try {
+<b class="fc">&nbsp;            Transformer xslTransformer = TransformerFactory.newInstance().newTransformer(transformSource);</b>
+<b class="fc">&nbsp;            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, outStream);</b>
+<b class="fc">&nbsp;            Result res = new SAXResult(fop.getDefaultHandler());</b>
+<b class="fc">&nbsp;            xslTransformer.transform(source, res);</b>
+<b class="nc">&nbsp;        } catch (FOPException e) {</b>
+<b class="nc">&nbsp;            throw new IOException(&quot;FOPException occurred&quot;, e);</b>
+<b class="nc">&nbsp;        } catch (TransformerException e) {</b>
+<b class="nc">&nbsp;            throw new IOException(&quot;TransformerException occurred&quot;, e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // write the content to output stream
+<b class="fc">&nbsp;        return outStream.toByteArray();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>

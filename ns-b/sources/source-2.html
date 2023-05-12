@@ -1,0 +1,148 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ImageManagementInterface</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.kitodo.api.imagemanagement</a>
+</div>
+
+<h1>Coverage Summary for Class: ImageManagementInterface (org.kitodo.api.imagemanagement)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ImageManagementInterface</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * (c) Kitodo. Key to digital objects e. V. &lt;contact@kitodo.org&gt;
+&nbsp; *
+&nbsp; * This file is part of the Kitodo project.
+&nbsp; *
+&nbsp; * It is licensed under GNU General Public License version 3 or later.
+&nbsp; *
+&nbsp; * For the full copyright and license information, please read the
+&nbsp; * GPL3-License.txt file that was distributed with this source code.
+&nbsp; */
+&nbsp;
+&nbsp;package org.kitodo.api.imagemanagement;
+&nbsp;
+&nbsp;import java.awt.Image;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URI;
+&nbsp;
+&nbsp;public interface ImageManagementInterface {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Changes the DPI of an image at a given URI.
+&nbsp;     *
+&nbsp;     * @param imageFileUri
+&nbsp;     *            the URI of the image
+&nbsp;     * @param dpi
+&nbsp;     *            the new DPI
+&nbsp;     * @return the image with the new DPI
+&nbsp;     * @throws IOException
+&nbsp;     *             if the plug-in is configured incorrectly, the image is
+&nbsp;     *             missing or corrupted, etc.
+&nbsp;     */
+&nbsp;    Image changeDpi(URI imageFileUri, int dpi) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a derivative for an image at a given path.
+&nbsp;     *
+&nbsp;     * @param imageFileUri
+&nbsp;     *            the URI to the image
+&nbsp;     * @param percent
+&nbsp;     *            the percentage of scaling for the derivative
+&nbsp;     * @param resultFileUri
+&nbsp;     *            the URI to save the derivative to
+&nbsp;     * @param resultFileFormat
+&nbsp;     *            the format for the derivative
+&nbsp;     * @return true, if creation was successful, false otherwise
+&nbsp;     * @throws IOException
+&nbsp;     *             if the plug-in is configured incorrectly, the image is
+&nbsp;     *             missing or corrupted, etc.
+&nbsp;     */
+&nbsp;    boolean createDerivative(URI imageFileUri, double percent, URI resultFileUri, ImageFileFormat resultFileFormat)
+&nbsp;            throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Scales an image at a given path and returns it.
+&nbsp;     *
+&nbsp;     * @param imageFileUri
+&nbsp;     *            the URI to the image which should be scaled
+&nbsp;     * @param percent
+&nbsp;     *            the percentage for scaling
+&nbsp;     * @return the scaled image
+&nbsp;     * @throws IOException
+&nbsp;     *             if the plug-in is configured incorrectly, the image is
+&nbsp;     *             missing or corrupted, etc.
+&nbsp;     */
+&nbsp;    Image getScaledWebImage(URI imageFileUri, double percent) throws IOException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Changes the size (in pixel) of the image.
+&nbsp;     *
+&nbsp;     * @param imageFileUri
+&nbsp;     *            the URI of the image to size
+&nbsp;     * @param pixelWidth
+&nbsp;     *            the new width in pixels
+&nbsp;     * @return the new sized image
+&nbsp;     * @throws IOException
+&nbsp;     *             if the plug-in is configured incorrectly, the image is
+&nbsp;     *             missing or corrupted, etc.
+&nbsp;     */
+&nbsp;    Image getSizedWebImage(URI imageFileUri, int pixelWidth) throws IOException;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-12 13:55</div>
+</div>
+</body>
+</html>
